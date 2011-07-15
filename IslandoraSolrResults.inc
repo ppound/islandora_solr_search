@@ -30,9 +30,9 @@ class IslandoraSolrResults {
    */
   function displayResults($solrQueryProcessor, $title = "Search Results", $output = '') {
 
-    $apacheSolrResult = $solrQueryProcessor->solrResult;
+    $solrResult = $solrQueryProcessor->solrResult;
 
-    $total = (int) $apacheSolrResult->response->numFound;
+    $total = (int) $solrResult->response->numFound;
     $end = min(($solrQueryProcessor->solrLimit + $solrQueryProcessor->solrStart), $total);
 
     // Check for empty resultset
@@ -112,7 +112,10 @@ class IslandoraSolrResults {
      * Also, perhaps there's no difference between primary and secondary profiles?
      */
 
-    $output .= $this->printResults($solrQueryProcessor->solrResult);
+    $output .= $this->printResults($solrResult);
+    if (variable_get('islandora_solr_search_debug_mode', 0)) {
+        $output .= $this->printDebugOutput($solrResult);
+    }
 
     // Render Drupal pager (bottom of search results)
     $output .= theme('pager',null,$solrQueryProcessor->solrLimit,0,null,5);
@@ -173,7 +176,12 @@ class IslandoraSolrResults {
       $items[] = theme_table(null, $rows, array('class' => 'islandora_solr_search_results_object'));
     }
     $output .= theme_item_list($items, $title, $type, array('class' => 'stuff', 'start' => ($recordStart + 1)));
-    if (variable_get('islandora_solr_search_debug_mode', 0)) { // debug dump
+    return $output;
+  }
+  
+  function printDebugOutput($results)
+  {
+      // debug dump
       $results_r .= "<pre>Results: " . print_r($results, true) . "</pre>";
       $fieldset_r = array(
         '#title' => t("Raw Results"),
@@ -181,9 +189,7 @@ class IslandoraSolrResults {
         '#collapsed' => TRUE,
         '#value' => $results_r,
       );
-      $output .= theme('fieldset', $fieldset_r);
-    }
-    return $output;
+      return theme('fieldset', $fieldset_r);
   }
 
 
