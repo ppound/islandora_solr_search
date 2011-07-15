@@ -127,7 +127,7 @@ class IslandoraSolrQueryProcessor {
     }
     if( !empty( $this->solrQuery ) && strcmp( $this->solrQuery, ' ' )) {
       $cutlink = "islandora/solr/search/ /" . $islandora_fq . "/dismax";
-      $queryval = trim(substr($this->solrQuery,strpos($this->solrQuery,":")+1),")(");
+      $queryval = trim($this->solrQuery,")(");
       $breadcrumb[] = l($queryval,$queryurl."/-",array('attributes'=>array('title'=>$this->solrQuery))) . 
                       " <span class='islandora_solr_search_breadcrumb_super'>(".l("x",$cutlink,array('attributes'=>array('title'=>"Remove ".$facet))).")</span>";
     }
