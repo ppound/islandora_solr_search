@@ -35,13 +35,6 @@ class IslandoraSolrResults {
     $total = (int) $solrResult->response->numFound;
     $end = min(($solrQueryProcessor->solrLimit + $solrQueryProcessor->solrStart), $total);
 
-    // Check for empty resultset
-    if( $total === 0 ) {
-      $output  = "<h2>Search Results</h2>";
-      $output .= "<div>Sorry, but your search returned no results.</div>";
-      return $output;
-    }
-
     // Initialize drupal-style pager
     islandora_solr_search_pager_init($total, $solrQueryProcessor->solrLimit);
 
@@ -98,7 +91,7 @@ class IslandoraSolrResults {
     }
 
     $output .= '<h2>'.$title.'</h2>';
-    $output .= '<div id="islandora_solr_result_count">(' . ($solrQueryProcessor->solrStart + 1) . ' - ' . $end . ' of ' . $total . ')</div>';
+    $output .= '<div id="islandora_solr_result_count">(' . ($solrQueryProcessor->solrStart + ($total > 0?1:0)) . ' - ' . $end . ' of ' . $total . ')</div>';
     $output .= '<div class="content">';
 
 //    drupal_set_message(print_r($secondary_display_profiles,1));
@@ -134,6 +127,13 @@ class IslandoraSolrResults {
    * @param Apache_Solr_Object $results
    */
   function printResults($results) {
+    // Check for empty resultset
+    if( (int)$solrResult->response->numFound === 0 ) {
+      $output  = "<h2>Search Results</h2>";
+      $output .= "<div>Sorry, but your search returned no results.</div>";
+      return $output;
+    }
+    
     $items = array();
     $type = "ol";
     $title = null;
@@ -225,7 +225,7 @@ class IslandoraSolrResults {
       // and allow one part to be removed at a time.
       $query_list_items[] .= l(
         '<img class="islandora_solr_add_remove_link" src="'.$base_url.'/'.drupal_get_path('module', 'islandora_solr_search').'/images/delete.png" alt="Remove search term">',
-        'islandora/solr/search/'." ".'/'.replaceSlashes($islandora_fq).'/dismax',
+        'islandora/solr/search/'." ".'/'.replaceSlashes($islandora_fq) . '/' . $solrQueryProcessor->solrDefType,
         array('html' => true)
       ).' ' . stripslashes($solrQueryProcessor->solrQuery);
 

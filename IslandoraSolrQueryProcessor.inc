@@ -129,7 +129,7 @@ class IslandoraSolrQueryProcessor {
       $cutlink = "islandora/solr/search/ /" . $islandora_fq . "/dismax";
       $queryval = trim($this->solrQuery,")(");
       $breadcrumb[] = l($queryval,$queryurl."/-",array('attributes'=>array('title'=>$this->solrQuery))) . 
-                      " <span class='islandora_solr_search_breadcrumb_super'>(".l("x",$cutlink,array('attributes'=>array('title'=>"Remove ".$facet))).")</span>";
+                      " <span class='islandora_solr_search_breadcrumb_super'>"/*(".l("x",$cutlink,array('attributes'=>array('title'=>"Remove ".$facet))).")*/ . "</span>";
     }
     $breadcrumb[] = l(t('Home'),NULL);
     if( !empty( $breadcrumb )) $breadcrumb = array_reverse($breadcrumb);
