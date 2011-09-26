@@ -152,6 +152,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#description' => t("Indicate which fields will appear in the <strong>Islandora Facet Block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong> "),
     '#wysiwyg' => FALSE,
+    '#default_value' => variable_get('islandora_solr_search_block_facets', t('dc.subject ~ Subject,dc.type ~ Type'))
   );
 
   $form['islandora_solr_search_result_fields'] = array(
