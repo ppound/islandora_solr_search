@@ -35,7 +35,10 @@ class IslandoraSolrResults {
    * @param type $output
    * @return string 
    */
-  function displayResults($solrQueryProcessor, $title = "Search Results", $output = '') {
+  function displayResults($solrQueryProcessor, $title = NULL, $output = '') {
+      if (is_null($title)) { //Needed to move this, as default parameters cannot be function calls
+          $title = t("Search Results");
+      }
     $solrResult = $solrQueryProcessor->solrResult;
 
     $total = (int) $solrResult->response->numFound;
