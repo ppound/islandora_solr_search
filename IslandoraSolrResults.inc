@@ -132,8 +132,7 @@ class IslandoraSolrResults {
   function printResults($results) {
     // Check for empty resultset
     if( (int)$solrResult->response->numFound === 0 ) {
-      $output  = "<h2>Search Results</h2>";
-      $output .= "<div>Sorry, but your search returned no results.</div>";
+      $output .= "<p>Sorry, but your search returned no results.</p>";
       return $output;
     }
     
