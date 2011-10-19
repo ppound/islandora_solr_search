@@ -41,7 +41,7 @@ class IslandoraSolrQueryProcessor {
    * @param type $dismax
    * @return type 
    */
-  function buildAndExecuteQuery($query, $fq=null, $dismax=null) {
+  function buildAndExecuteQuery($query, $fq=NULL, $dismax=NULL) {
 
     if (variable_get('islandora_solr_search_block_request_handler', NULL) == 'standard') {
       $namespace = trim(variable_get('solr_namespace_restriction', NULL));
@@ -50,6 +50,9 @@ class IslandoraSolrQueryProcessor {
       }
 
       if ($namespace) {
+        if ($fq == '-') {
+          $fq = '';
+        }
         if (strpos($fq, "PID:$namespace") === FALSE) {
           if ($fq) {
             $fq .= $this->facetSeparator;
@@ -66,7 +69,7 @@ class IslandoraSolrQueryProcessor {
    * Default implementation for solr search.  You can configure others in the block config settings
    * @todo Get rid of the global $facetArray?  It is the only global yet relied upon.
    */
-  function buildQuery($query, $fq=null, $dismax=null) {
+  function buildQuery($query, $fq=NULL, $dismax=NULL) {
     // Get pager variable
     $startPage = isset($_GET['page']) ? $_GET['page'] : 0;
     $this->solrLimit = variable_get('islandora_solr_search_num_of_results', 20);
@@ -101,27 +104,34 @@ class IslandoraSolrQueryProcessor {
     $rawFacetVals = variable_get("islandora_solr_search_block_facets", 'dc.subject,dc.type');
     $facetArray = islandora_build_substitution_list($rawFacetVals);
     $facetFields = implode(",", array_keys($facetArray));
-
+    $keys = array('');
+    $snippetArray = islandora_build_substitution_list(variable_get("islandora_solr_snippet_field", ""));
+    if (is_array($snippetArray)) {
+      $keys = array_keys($snippetArray);
+    }
 
     $facetlimit = variable_get('islandora_solr_search_block_facet_limit', '12');
     $facetMinCount = variable_get('islandora_solr_search_block_facet_min_count', '2');
     $requestHandler = variable_get("islandora_solr_search_block_request_handler", "standard");
+    $highlight_field = variable_get("islandora_solr_snippet_field", "");
     $this->solrParams = array(
       'facet' => 'true',
       'facet.mincount' => $facetMinCount,
       'facet.limit' => $facetlimit,
       'qt' => $requestHandler,
+      'hl' => 'true',
+      'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,
+      'hl.fragsize' => 400,
       'facet.field' => explode(',', $facetFields), //comma separated list configured in the block config
     );
 
 
-    $debugQuery = (variable_get('islandora_solr_search_debug_mode', 0) ? "true" : null ); //any val incl. 'false' is treated as true by Solr
-    $fq = preg_replace('/PID:.*\*/', '', $fq);
+    $debugQuery = (variable_get('islandora_solr_search_debug_mode', 0) ? "TRUE" : NULL ); //any val incl. 'FALSE' is treated as TRUE by Solr
 
     if ($fq != NULL && $fq != '-') {
       $fq = restoreSlashes($fq); //put the slash back
 
-      $fqs = csv_explode(IslandoraSolrQueryProcessor::$facetSeparator, $fq, '"', true); //to filter by more then one facet we will separate them by~ for nowseparate them by~ for now
+      $fqs = csv_explode(IslandoraSolrQueryProcessor::$facetSeparator, $fq, '"', TRUE); //to filter by more then one facet we will separate them by~ for nowseparate them by~ for now
       $this->solrParams['fq'] = $fqs;
       $islandora_fq = replaceSlashes($fq); //remove the slash here as we will be using this in url's
     }
@@ -137,11 +147,12 @@ class IslandoraSolrQueryProcessor {
     // The breadcrumb should go in the display class
     $queryurl = "islandora/solr/search/" . replaceSlashes($this->solrQuery);
     $breadcrumb_fq = $islandora_fq;
+    $facet = NULL; // Nigelb, This is being used outside of the for loop where it is being created this is probably incorrect.
     if (strcmp($islandora_fq, "-")) {
-      foreach (csv_explode(IslandoraSolrQueryProcessor::$facetSeparator, $islandora_fq, '"', true) as $facet) {
+      foreach (csv_explode(IslandoraSolrQueryProcessor::$facetSeparator, $islandora_fq, '"', TRUE) as $facet) {
         $field = substr($facet, 0, strpos($facet, ":"));
         $value = restoreSlashes(trim(substr($facet, strpos($facet, ":") + 1), '"'));
-        $options = array('html' => true);
+        $options = array('html' => TRUE);
         $options['attributes']['title'] = $facet;
         $crumblink = $queryurl . "/" . $breadcrumb_fq . (empty($this->solrDefType) ? '' : '/' . $this->solrDefType);
         $cut_fq = $this->delete_filter($islandora_fq, $facet);
@@ -161,7 +172,9 @@ class IslandoraSolrQueryProcessor {
       $tokens = explode(" ", $queryval);
       foreach ($tokens as $token) {
         preg_match("/^.*:/", $token, $matches);
-        $queryval = str_replace($matches[0], "", $queryval);
+        if (isset($matches[0])) {
+          $queryval = str_replace($matches[0], "", $queryval);
+        }
       }
       if ($queryval != '%252F') {
         $breadcrumb[] = l($queryval, $queryurl . "/-", array('attributes' => array('title' => $this->solrQuery))) .

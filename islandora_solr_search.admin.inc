@@ -122,9 +122,10 @@ function islandora_solr_admin_settings(&$form_state) {
     );
   }
 
+  //Notice: Undefined index: #options in expand_checkboxes() (line 1930 of /Applications/MAMP/htdocs/drupal-6.22/includes/form.inc).
   $form['dismax_allowed'] = array(
-    '#type' => 'checkboxes',
-    '#value' => $dismax_allowed
+    '#type' => 'hidden',
+    '#value' => $dismax_allowed,
   );
 
   $form['islandora_solr_search_block_repeat'] = array(
@@ -145,12 +146,21 @@ function islandora_solr_admin_settings(&$form_state) {
     '#default_value' => variable_get('islandora_solr_searchterms', 'dc.title ~ Title'),
     '#wysiwyg' => FALSE,
   );
-
+  $form['islandora_solr_snippet_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Snippet Field'),
+    '#default_value' => variable_get('islandora_solr_snippet_field', ''),
+    '#description' => t("If a match is found on this field, a snippet of text will be returned, with the search term highlighted.<br />
+      An optional friendly label may inserted using the following pattern <strong>dsm.Text ~ Full Text</strong><br />
+      <strong>Note:</strong><em> This feature is not supported by all display profiles.</em> "),
+    '#wysiwyg' => FALSE,
+  );
   $form['islandora_solr_search_block_facets'] = array(
     '#type' => 'textarea',
     '#title' => t('Facet Fields'),
     '#description' => t("Indicate which fields will appear in the <strong>Islandora Facet Block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong> "),
+    '#default_value' => variable_get('islandora_solr_search_block_facets', 'dc.subject ~ Subject,dc.type ~ Type'),
     '#wysiwyg' => FALSE,
     '#default_value' => variable_get('islandora_solr_search_block_facets', t('dc.subject ~ Subject,dc.type ~ Type'))
   );
@@ -229,9 +239,9 @@ function solr_available($solr_url) {
   $path = 'http://' . $pathParts['host'] . ':' . $pathParts['port'] . $pathParts['path'] . '/admin/file';
   $test = @fopen($path, "r");
   if ($test) {
-    return true;
+    return TRUE;
   }
-  return false;
+  return FALSE;
 }
 
 /**
@@ -258,7 +268,7 @@ function get_handlers($solr_url) {
 }
 
 function check_dismax($solr_url, $selected_handler) {
-  $dismax = false;
+  $dismax = FALSE;
   $url = $solr_url . '/admin/file/?file=solrconfig.xml';
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
@@ -270,7 +280,7 @@ function check_dismax($solr_url, $selected_handler) {
         foreach ($handler->lst as $first) {
           foreach ($first->str as $str) {
             if ($str['name'] == 'qf') {
-              $dismax= true;
+              $dismax= TRUE;
             }
           }
         }
@@ -318,7 +328,7 @@ function callback_prep() {
  * Solr settings from submin
  * @param array $form
  * @param array $form_state
- * @return null
+ * @return NULL
  */
 function solr_settings_form_submit($form, &$form_state) {
 
