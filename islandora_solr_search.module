@@ -462,7 +462,7 @@ function islandora_solr_search_boot() {
             'islandora_solr_searchterms'
         );
 
-        $conf['i18n_variables'] = is_array($conf['i18n_variables']) ? 
+        $conf['i18n_variables'] = (isset($conf['i18n_variables']) && is_array($conf['i18n_variables'])) ? 
             array_merge($vars, $conf['i18n_variables']):
             $vars;
     }
