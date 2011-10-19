@@ -116,7 +116,7 @@ class IslandoraSolrResults {
      * Also, perhaps there's no difference between primary and secondary profiles?
      */
 
-    $output .= $this->printResults($solrResult);
+    $output .= $this->printResults($apacheSolrResult);
     if (variable_get('islandora_solr_search_debug_mode', 0)) {
         $output .= $this->printDebugOutput($solrResult);
     }

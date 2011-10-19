@@ -1,9 +1,5 @@
 <?php
 
-module_load_include('inc', 'islandora_solr_search', 'islandora_solr_search.admin');
-module_load_include('inc', 'islandora_solr_search', 'includes/common');
-module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrQueryProcessor');
-
 //$islandora_query;
 $queryClass;
 
@@ -438,6 +434,9 @@ function islandora_solr_search_help($path, $arg) {
  * @staticvar boolean $islandora_solr_search_init 
  */
 function islandora_solr_search_init() {
+    module_load_include('inc', 'islandora_solr_search', 'islandora_solr_search.admin');
+    module_load_include('inc', 'islandora_solr_search', 'includes/common');
+    module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrQueryProcessor');
   static $islandora_solr_search_init = FALSE;
   if (!$islandora_solr_search_init) {
     drupal_add_css(drupal_get_path('module', 'islandora_solr_search') . '/islandora_solr_search.css');
