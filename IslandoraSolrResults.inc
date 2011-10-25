@@ -17,6 +17,16 @@ class IslandoraSolrResults {
   public $searchFieldArray = array();
   public $resultFieldArray = array();
   public $allSubsArray = array();
+  
+  static function makeArray($in) {
+    return is_array($in)?
+        $in:
+        (isset($in)?
+            array($in):
+            array()
+        )
+    ;
+  }
 
   /**
    * Constructor
@@ -48,6 +58,39 @@ class IslandoraSolrResults {
     // Initialize drupal-style pager
     islandora_solr_search_pager_init($total, $solrQueryProcessor->solrLimit);
 
+    $output .= $this->addSecondaries();
+
+    $output .= '<h2>'.$title.'</h2>';
+    $output .= '<div id="islandora_solr_result_count">(' . ($solrQueryProcessor->solrStart + ($total > 0?1:0)) . ' - ' . $end . ' of ' . $total . ')</div>';
+    $output .= '<div class="content">';
+
+//    drupal_set_message(print_r($secondary_display_profiles,1));
+    // Render Drupal pager (top of search results)
+    $output .= theme('pager', NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5);
+
+    /*
+     * Then, here, we need to build links to the current query under the secondary query display
+     * profile for each such profile which uses the hook.
+     *
+     * The link should basically be $theCurrentURL with &proile=<profile_name> tacked on.
+     *
+     * Also, perhaps there's no difference between primary and secondary profiles?
+     */
+    $output .= $this->printResults($apacheSolrResult);
+    if (variable_get('islandora_solr_search_debug_mode', FALSE)) {
+        $output .= $this->printDebugOutput($solrResult);
+    }
+
+    // Render Drupal pager (bottom of search results)
+    $output .= theme('pager', NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5);
+
+
+    $output .= "</div>"; // class = "content"
+    return $output;
+  }
+  
+  function addSecondaries() {
+    $output = '';
     // Get secondary display profiles
     $secondary_display_profiles = module_invoke_all('islandora_solr_secondary_display');
     // How about this for an expected return?
@@ -97,31 +140,6 @@ class IslandoraSolrResults {
 
       $output .= "</div>";
     }
-
-    $output .= '<h2>'.$title.'</h2>';
-    $output .= '<div id="islandora_solr_result_count">(' . ($solrQueryProcessor->solrStart + ($total > 0?1:0)) . ' - ' . $end . ' of ' . $total . ')</div>';
-    $output .= '<div class="content">';
-
-//    drupal_set_message(print_r($secondary_display_profiles,1));
-
-    /*
-     * Then, here, we need to build links to the current query under the secondary query display
-     * profile for each such profile which uses the hook.
-     *
-     * The link should basically be $theCurrentURL with &proile=<profile_name> tacked on.
-     *
-     * Also, perhaps there's no difference between primary and secondary profiles?
-     */
-    $output .= $this->printResults($apacheSolrResult);
-    if (variable_get('islandora_solr_search_debug_mode', FALSE)) {
-        $output .= $this->printDebugOutput($solrResult);
-    }
-
-    // Render Drupal pager (bottom of search results)
-    $output .= theme('pager', NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5);
-
-
-    $output .= "</div>"; // class = "content"
     return $output;
   }
 
@@ -315,6 +333,60 @@ class IslandoraSolrResults {
 
     $this->allSubsArray = array_merge($this->facetFieldArray, $this->searchFieldArray, $this->resultFieldArray);
   }
+  
+  function _addFacets(&$key, &$name, &$number, &$solrQueryProcessor, &$facet_count, &$list) {
+    $islandora_fq = $solrQueryProcessor->solrFilters;
+    //FIXME:  This isn't quite right...  It can make sense to facet on 
+    //  the same field multiple times, provided it is multi-valued...
+    $fq = $this::makeArray($solrQueryProcessor->solrParams['fq']);
+    //FIXME:  This instance of 't' should be changed to format_string for Drupal 7 (not really translateable)
+    $filter = t('!key:"!name"', array(
+      '!key' => $key,
+      '!name' => replaceSlashes($name)
+    ));
+    
+    $disable_link = (array_search($filter, $fq) !== FALSE);
+    
+    //$disable_link = strpos($islandora_fq, $key . ':"' .  . '"') !== FALSE; //we don't want a link for this facet as we already used it
+    if ($islandora_fq && $islandora_fq != '-') {//there are existing facets in the query
+      if ($disable_link) {
+        //don't show link to this facet but include a link to remove it
+      }
+      else {
+        //FIXME:  This instance of 't' should be changed to format_string for Drupal 7 (not really translateable)
+        $filter_include = t('!filter!sep!remaining', array(
+          '!filter' => $filter,
+          '!sep' => IslandoraSolrResults::$facetSeparator,
+          '!remaining' => $islandora_fq
+        ));
+        $filter_exclude = "-$filter_include";
+      }
+    }
+    else { //no existing facets chosen
+      $filter_include = $filter;
+      $filter_exclude = "-$filter_include";
+    }
+
+    $filter_include = replaceSlashes($filter_include); //replace the slash so url does not break
+    $filter_exclude = replaceSlashes($filter_exclude); //replace the slash so url does not break
+    if ($disable_link) {
+      // we don't want to create a link, because we're already filtering on this value.
+      // Links to remove enabled facet filters are created down below.
+    }
+    else {//normal link
+      //Doesn't seem to be used...
+      //$evenodd = ( $facet_count % 2 ? 'odd' : 'even' );
+      $lplus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_include . '/' . $solrQueryProcessor->solrDefType;
+      $lminus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_exclude . '/' . $solrQueryProcessor->solrDefType;
+      $text = $name;
+      $attrs = array();
+      $list[] = l($text, $lplus, $attrs) . ' (' . $number . ')' .
+          '<span class="plusminus">' .
+          l('+', $lplus, array('attributes' => array('class' => 'plus'))) . ' ' .
+          l('-', $lminus, array('attributes' => array('class' => 'minus'))) .
+          '</span>';
+    }
+  }
 
   /**
    * Function: displayFacets
@@ -329,7 +401,6 @@ class IslandoraSolrResults {
   function displayFacets($solrQueryProcessor) {
     global $base_url;
     $facet_output = $output = '';
-    $islandora_fq = $solrQueryProcessor->solrFilters;
     $islandora_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_fields) ? $solrQueryProcessor->solrResult->facet_counts->facet_fields : array();
 
     if (empty($islandora_facets)) {
@@ -342,57 +413,55 @@ class IslandoraSolrResults {
 
       $test = get_object_vars($field); //get the number of fields if there aren't any don't show the key
       if (count($test) > 0) {
-        $facet_count = 0;
-        unset($normal_facet_output);
-        $filter_include = NULL;
-        $filter_exclude = NULL;
-        $disable_link = FALSE;
+        $primary = array();
+        $hidden = array();
         foreach ($field as $name => $number) {
-          if ($islandora_fq && $islandora_fq != '-') {//there are existing facets in the query
-            $disable_link = strstr($islandora_fq, $key . ':"' . replaceSlashes($name) . '"'); //we don't want a link for this facet as we already used it
-            if ($disable_link) {
-              //don't show link to this facet but include a link to remove it
-            }
-            else {
-              $filter_include = $key . ':' . '"' . $name . '"' . IslandoraSolrResults::$facetSeparator . $islandora_fq;
-              $filter_exclude = '-' . $key . ':' . '"' . $name . '"' . IslandoraSolrResults::$facetSeparator . $islandora_fq;
-            }
+          if (count($primary) < variable_get('islandora_solr_search_block_facet_shown_limit', 5)) {
+            $this->_addFacets($key, $name, $number, $solrQueryProcessor, $facet_count, $primary);
           }
-          else { //no existing facets chosen
-            $filter_include = $key . ':' . '"' . $name . '"';
-            $filter_exclude = '-' . $key . ':' . '"' . $name . '"';
-          }
-
-          $filter_include = replaceSlashes($filter_include); //replace the slash so url does not break
-          $filter_exclude = replaceSlashes($filter_exclude); //replace the slash so url does not break
-          if ($disable_link) {
-            // we don't want to create a link, because we're already filtering on this value.
-            // Links to remove enabled facet filters are created down below.
-          }
-          else {//normal link
-            $evenodd = ( $facet_count % 2 ? 'odd' : 'even' );
-            $lplus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_include . '/' . $solrQueryProcessor->solrDefType;
-            $lminus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_exclude . '/' . $solrQueryProcessor->solrDefType;
-            $text = $name;
-            $attrs = array();
-            $list_items[] = l($text, $lplus, $attrs) . ' (' . $number . ')' .
-                '<span class="plusminus">' .
-                l('+', $lplus, array('attributes' => array('class' => 'plus'))) . ' ' .
-                l('-', $lminus, array('attributes' => array('class' => 'minus'))) .
-                '</span>';
-            $facet_count++;
+          else {
+            $this->_addFacets($key, $name, $number, $solrQueryProcessor, $facet_count, $hidden);
           }
         }
-        if ($facet_count >= 2) {
+        if (count($primary) > 1) {
           $facet_output .='<div class="islandora_solr_search_facet">';
           $list_title = $this->facetFieldArray[$key];
           $list_type = "ul";
-          $list_attributes = array('class' => 'islandora_solr_search_facet_list facet_list');
-          $facet_output .= theme_item_list($list_items, $list_title, $list_type, $list_attributes);
+          $list_attributes = array(
+            'class' => implode(' ', array('islandora_solr_search_facet_list', 'facet_list'))
+          );
+          $facet_output .= theme_item_list($primary, $list_title, $list_type, $list_attributes);
+          if (count($hidden) > 0) {
+            $list_attributes['class'] = implode(' ', array('islandora_solr_search_facet_list', 'facet_list'));
+            
+            $facet_output .= t("<h7 class='islandora_solr_facet_subheader islandora_solr_more_facets'>Show more</h7>");
+
+            $facet_output .= "<div style='display:none;'>";
+            $facet_output .= t("<h7 class='islandora_solr_facet_subheader islandora_solr_less_facets'>Show less</h7>");
+            $facet_output .=  theme_item_list($hidden, '', $list_type, $list_attributes);
+            $facet_output .= "</div>";
+          }
           $facet_output .='</div>';
         }
+        
       }
     }
+    
+    //Use jquery to toggle visibility of the block containing the 'rest' of the facets
+    $facet_output .= <<<EOT
+<script type="text/javascript">
+  $(".islandora_solr_more_facets").click(function() {
+    $(this).next("div").toggle();
+    $(this).toggle();
+    return false;
+  });
+  $(".islandora_solr_less_facets").click(function() {
+    $(this).parent().prev().toggle();
+    $(this).parent().toggle();
+    return false;
+  });
+</script>
+EOT;
 
 
     //////////////////////////////////////////////////////////////////////////////////////

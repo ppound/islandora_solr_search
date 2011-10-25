@@ -80,7 +80,7 @@ table.islandora_solr_search_results_table tr td
 #islandora_solr_secondary_display_profiles {
   float:right;
 }
-
+ß
 img.islandora_solr_secondary_display_icon {
   vertical-align: bottom;
 }
@@ -91,4 +91,10 @@ html.js .refresh-button {
 
 .strikethrough {
   text-decoration: line-through !important;
+}
+
+h7.islandora_solr_facet_subheader {
+  display: block;
+  text-align: right;
+  width: 100%;
 }
