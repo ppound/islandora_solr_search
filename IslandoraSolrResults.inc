@@ -478,6 +478,40 @@ EOT;
 
     return $output;
   }
+  
+  function _add_field(&$form, &$i, &$unprocessed_contents, &$types) {
+    $type = NULL;
+    $temp = preg_split('/:/', trim($unprocessed_contents, '()'), 2);
+
+    if (!isset($type)) {
+      if (trim($temp[0]) === '_query_') {
+        //We're using a subquery--let's assume dismax
+        //get the 'qf'..., dump the rest into 'terms'
+        $temp[1] = trim($temp[1]);
+        $qf = strpos($temp[1], 'qf=');
+        $end = strpos($temp[1], '}');
+        $type = substr($temp[1], $qf + 3, $end - $qf - 3);
+        $terms = trim(substr($temp[1], $end + 1, -1));
+      }
+      else {
+        $type = $temp[0];
+        $terms = trim($temp[1]);
+      } 
+    }
+    
+    $form['search_type']["type$i"] = array(
+      '#title' => '',
+      '#type' => 'select',
+      '#options' => $types,
+      '#default_value' => trim($type)
+    );
+    $form["fedora_terms$i"] = array(
+      '#size' => '24',
+      '#type' => 'textfield',
+      '#title' => '',
+      '#default_value' => stripslashes($terms),
+    );
+  }
 
   /**
    * Build solr search form
@@ -487,7 +521,6 @@ EOT;
    * @return string 
    */
   function build_solr_search_form($repeat = NULL, $pathToSearchTerms = NULL, $query = NULL) {
-
     $types = array();
     $terms = trim(variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject'));
     $termsArray = preg_split('/[\n]/', $terms);
@@ -498,11 +531,19 @@ EOT;
       }
       $types[trim($vals[0])] = trim($vals[1]);
     }
+    
     $queryArray = NULL;
     if (isset($query)) {
-      $queryArray = preg_split('/( OR | AND )/', $query, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+      //A regex like '\\) (OR|AND) \\(' should work, right?  Nope.  Seems that 
+      //  preg_split (when given PREG_SPLIT_DELIM_CAPTURE) returns each explicit 
+      //  capture group, so for that regex, you'd get only the 'AND' or 'OR'.
+      //  If you tried something like '('/(\\) (OR|AND) \\()/')', you'd get the 
+      //  'proper' ') AND (' or ') OR (', but also the 'AND' or 'OR' from the 
+      //  inner group...  RAGE!...  This turns out to be unused...  Anyway.
+      $bool_re = '/(OR|AND)/';
+      $queryArray = preg_split($bool_re, $query, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
       foreach ($queryArray as $key => $val) {
-        if ($val === ' OR ' || $val === ' AND ') {
+        if (preg_match($bool_re, $val)) {
           $andOrs[] = trim($val); // that is, just 'OR' or 'AND'
           unset($queryArray[$key]); //remove that from the array
         }
@@ -519,44 +560,23 @@ EOT;
     if (!isset($repeat)) {
       $repeat = variable_get('islandora_solr_search_block_repeat', '3');
     }
-    $var0 = explode(':', $queryArray[0]);
-    $form['search_type']['type1'] = array(
-      '#title' => '',
-      '#type' => 'select',
-      '#options' => $types,
-      '#default_value' => trim($var0[0])
-    );
-    $form['fedora_terms1'] = array(
-      '#size' => '24',
-      '#type' => 'textfield',
-      '#title' => '',
-      '#default_value' => (count($var0) >= 2 ? restoreSlashes(trim($var0[1], '()')) : ''),
-    );
+    $i = 1;
+    $this->_add_field($form, $i, $queryArray[0], $types);
+
     if ($repeat > 1 && $repeat < 9) { //don't want less then 2 or more then 9
       for ($i = 2; $i < $repeat + 1; $i++) {
         $t = $i - 1;
         $j = $i - 2;
         $andorj = ( isset($andOrs[$j]) ? $andOrs[$j] : 'AND' );
 
-        $field_and_term = isset($queryArray[$t]) ? explode(':', $queryArray[$t]) : array('', '');
+        //$field_and_term = isset($queryArray[$t]) ? explode(':', $queryArray[$t]) : array('', '');
         $form["andor$t"] = array(
           '#title' => '',
           '#type' => 'select',
           '#default_value' => $andorj,
           '#options' => $andOrArray
         );
-        $form['search_type']["type$i"] = array(
-          '#title' => '',
-          '#type' => 'select',
-          '#options' => $types,
-          '#default_value' => trim($field_and_term[0])
-        );
-        $form["fedora_terms$i"] = array(
-          '#size' => '24',
-          '#type' => 'textfield',
-          '#title' => '',
-          '#default_value' => (count($field_and_term) >= 2 ? trim($field_and_term[1], '()') : ''),
-        );
+        $this->_add_field($form, $i, $queryArray[$t], $types);
       }
     }
 
