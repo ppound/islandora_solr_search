@@ -338,7 +338,7 @@ class IslandoraSolrResults {
     $islandora_fq = $solrQueryProcessor->solrFilters;
     //FIXME:  This isn't quite right...  It can make sense to facet on 
     //  the same field multiple times, provided it is multi-valued...
-    $fq = $this::makeArray($solrQueryProcessor->solrParams['fq']);
+    $fq = IslandoraSolrResults::makeArray($solrQueryProcessor->solrParams['fq']);
     //FIXME:  This instance of 't' should be changed to format_string for Drupal 7 (not really translateable)
     $filter = t('!key:"!name"', array(
       '!key' => $key,
@@ -434,10 +434,10 @@ class IslandoraSolrResults {
           if (count($hidden) > 0) {
             $list_attributes['class'] = implode(' ', array('islandora_solr_search_facet_list', 'facet_list'));
             
-            $facet_output .= t("<h7 class='islandora_solr_facet_subheader islandora_solr_more_facets'>Show more</h7>");
+            $facet_output .= "<a class='islandora_solr_facet_subheader islandora_solr_more_facets' href='#'><h7>" . t("Show more") . "</h7></a>";
 
             $facet_output .= "<div style='display:none;'>";
-            $facet_output .= t("<h7 class='islandora_solr_facet_subheader islandora_solr_less_facets'>Show less</h7>");
+            $facet_output .= "<a class='islandora_solr_facet_subheader islandora_solr_less_facets' href='#'><h7>" . t("Show less") . "</h7></a>";
             $facet_output .=  theme_item_list($hidden, '', $list_type, $list_attributes);
             $facet_output .= "</div>";
           }

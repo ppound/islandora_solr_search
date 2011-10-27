@@ -93,7 +93,7 @@ html.js .refresh-button {
   text-decoration: line-through !important;
 }
 
-h7.islandora_solr_facet_subheader {
+a.islandora_solr_facet_subheader {
   display: block;
   text-align: right;
   width: 100%;
