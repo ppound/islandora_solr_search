@@ -423,7 +423,7 @@ class IslandoraSolrResults {
             $this->_addFacets($key, $name, $number, $solrQueryProcessor, $facet_count, $hidden);
           }
         }
-        if (count($primary) > 1) {
+        if (count($primary) > 0) {
           $facet_output .='<div class="islandora_solr_search_facet">';
           $list_title = $this->facetFieldArray[$key];
           $list_type = "ul";
