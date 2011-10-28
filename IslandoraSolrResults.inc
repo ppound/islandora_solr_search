@@ -256,11 +256,17 @@ class IslandoraSolrResults {
       // OK, so it's a list of one.
       // In the future, we could reasonably break the query on boolean operators
       // and allow one part to be removed at a time.
-      $query_list_items[] .= l(
-        '<img class="islandora_solr_add_remove_link" src="'.$base_url.'/'.drupal_get_path('module', 'islandora_solr_search').'/images/delete.png" alt="Remove search term">',
-        'islandora/solr/search/'." ".'/'.replaceSlashes($islandora_fq) . '/' . $solrQueryProcessor->solrDefType,
-        array('html' => true)
-      ).' ' . stripslashes($solrQueryProcessor->solrQuery);
+      // 
+      // Image loc: $base_url.'/'.drupal_get_path('module', 'islandora_solr_search').'/images/delete.png
+      $query = " ";
+      $fq = replaceSlashes($islandora_fq);
+      $defType = $solrQueryProcessor->solrDefType;
+      $query_list_items[] .= l('-', "islandora/solr/search/$query/$fq/$defType",
+        array(
+          'html' => true, 
+          'attributes' => array(
+            'class' => 'islandora_solr_add_remove_link'))
+      ) . ' ' . stripslashes($solrQueryProcessor->solrQuery);
 
 
       $output .= '<div class="islandora_solr_search_query_wrap">';
@@ -299,8 +305,17 @@ class IslandoraSolrResults {
           $exclude = TRUE;
           $filter_name = substr($filter_name, 1);
         }
+        //Image path: $base_url . '/' . drupal_get_path('module', 'islandora_solr_search') . '/images/delete.png
+        $query = replaceSlashes($solrQueryProcessor->solrQuery); 
+        $fq = replaceSlashes($filter_disable);
+        $defType = $solrQueryProcessor->solrDefType;
         $filter_list_items[] = l(
-                '<img class="islandora_solr_add_remove_link" src="' . $base_url . '/' . drupal_get_path('module', 'islandora_solr_search') . '/images/delete.png" alt="Remove this filter">', 'islandora/solr/search/' . replaceSlashes($solrQueryProcessor->solrQuery) . '/' . replaceSlashes($filter_disable) . '/' . $solrQueryProcessor->solrDefType, array('html' => TRUE)
+          '-', 
+         "islandora/solr/search/$query/$fq/$defType", 
+          array(
+            'html' => TRUE, 
+            'attributes' => array(
+                'class' => 'islandora_solr_add_remove_link'))
             ) . ' ' . $this->facetFieldArray[$filter_name] . ($exclude ? ' != ' : ' = ') . $filter_value;
       }
     }
