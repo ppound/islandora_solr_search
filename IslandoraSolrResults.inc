@@ -345,7 +345,7 @@ class IslandoraSolrResults {
       '!name' => replaceSlashes($name)
     ));
     
-    $disable_link = (array_search($filter, $fq) !== FALSE);
+    $disable_link = (array_search($filter, $fq) !== FALSE) || $number == $solrQueryProcessor->solrResult->response->numFound;
     
     //$disable_link = strpos($islandora_fq, $key . ':"' .  . '"') !== FALSE; //we don't want a link for this facet as we already used it
     if ($islandora_fq && $islandora_fq != '-') {//there are existing facets in the query
