@@ -446,9 +446,20 @@ class IslandoraSolrResults {
         
       }
     }
-    
-    //Use jquery to toggle visibility of the block containing the 'rest' of the facets
-    $facet_output .= <<<EOT
+
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    // as we add additional facets, we're repeatedly URL-encoding old facet             //
+    // strings. when we double-encode quotation marks they're incomprehensible to solr. //
+    // This is a quick workaround:                                                      //
+    //////////////////////////////////////////////////////////////////////////////////////
+    $facet_output = str_replace('%2B', '%252B', $facet_output);
+    if(!empty($facet_output)) {
+      $output .='<div class="islandora_solr_search_facet_wrap">';
+      $output .= $facet_output;
+      
+      //Use jquery to toggle visibility of the block containing the 'rest' of the facets
+      $output .= <<<EOT
 <script type="text/javascript">
   $(".islandora_solr_more_facets").click(function() {
     $(this).next("div").toggle();
@@ -462,17 +473,6 @@ class IslandoraSolrResults {
   });
 </script>
 EOT;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    // as we add additional facets, we're repeatedly URL-encoding old facet             //
-    // strings. when we double-encode quotation marks they're incomprehensible to solr. //
-    // This is a quick workaround:                                                      //
-    //////////////////////////////////////////////////////////////////////////////////////
-    $facet_output = str_replace('%2B', '%252B', $facet_output);
-    if(!empty($facet_output)) {
-      $output .='<div class="islandora_solr_search_facet_wrap">';
-      $output .= $facet_output;
       $output .= '</div>';
     }
 
