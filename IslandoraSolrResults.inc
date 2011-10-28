@@ -481,7 +481,7 @@ EOT;
   
   function _add_field(&$form, &$i, &$unprocessed_contents, &$types) {
     $type = NULL;
-    $temp = preg_split('/:/', trim($unprocessed_contents, '()'), 2);
+    $temp = preg_split('/:/', $unprocessed_contents, 2);
 
     if (!isset($type)) {
       if (trim($temp[0]) === '_query_') {
@@ -495,7 +495,7 @@ EOT;
       }
       else {
         $type = $temp[0];
-        $terms = trim($temp[1]);
+        $terms = trim($temp[1], '()');
       } 
     }
     

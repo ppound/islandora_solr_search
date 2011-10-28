@@ -385,7 +385,13 @@ function islandora_solr_search_block_form_submit($form, &$form_state) {
   }
 
   for ($iteration = 0; $iteration < count($fedora_terms); $iteration++) {
-    $searchString .= "_query_:\"{!dismax qf=" . $types[$iteration] . "}" . addcslashes($fedora_terms[$iteration], "\"'") . "\" " . $booleans[$iteration] . " ";
+    //FIXME (minor): t() should be changed to format_string() in this instance, in Drupal 7
+    //  The string isn't really translatable, just templated.
+    $searchString .= t("!field:(!query) !bool ", array(
+        '!field' => $types[$iteration], 
+        '!query' => $fedora_terms[$iteration],
+        '!bool' => $booleans[$iteration]
+    ));
   }
   $searchString = trim($searchString);
   $searchString = drupal_urlencode($searchString);
