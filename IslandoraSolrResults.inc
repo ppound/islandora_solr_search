@@ -248,7 +248,7 @@ class IslandoraSolrResults {
     if (strlen(trim($solrQueryProcessor->solrQuery))) {
 
       // Variables to build a drupal-ish unordered list
-      $query_list_title = "Query";
+      $query_list_title = t('Query');
       $query_list_items = array();
       $query_list_type = "ul";
       $query_list_attributes = array('class' => 'islandora_solr_search_query_list query_list');
@@ -284,7 +284,7 @@ class IslandoraSolrResults {
 //      $filter_output = NULL;
       // Variables to build a drupal-ish unordered list, which will be rendered
       // a little bit farther down
-      $filter_list_title = "Enabled Filters";
+      $filter_list_title = t("Enabled Filters");
       $filter_list_items = array();
       $filter_list_type = "ul";
       $filter_list_attributes = array('class' => 'islandora_solr_search_filter_list filter_list');
