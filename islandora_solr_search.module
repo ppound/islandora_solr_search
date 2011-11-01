@@ -190,7 +190,7 @@ function islandora_solr_search_islandora_solr_query_blocks() {
       'form' => 'islandora_solr_simple_search_form',
     ),
     'basic_facets' => array(
-      'name' => t('Islandora Facet Block'),
+      'name' => t('Filters'),
       'module' => 'islandora_solr_search',
       'file' => 'IslandoraSolrResults.inc',
       'class' => 'IslandoraSolrResults',
