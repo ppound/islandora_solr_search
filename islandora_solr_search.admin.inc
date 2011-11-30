@@ -91,13 +91,7 @@ function islandora_solr_admin_settings(&$form_state) {
     );
   }
 
-  $form['islandora_solr_sortfield'] = array(
-    '#type' => 'textfield',
-    '#title' => t("Field on which to sort results"),
-    '#description' => t("If this field is left blank results will be sorted by relevance to the query. <br />
-      Only fields defined in the schema as both <strong>stored</strong> and <strong>not multivalued</strong> may be used for sorting.<br />"),
-    '#default_value' => variable_get('islandora_solr_sortfield', ''),
-  );
+
 
 
   $profiles = module_invoke_all("islandora_solr_primary_display");
