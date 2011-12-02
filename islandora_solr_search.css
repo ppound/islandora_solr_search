@@ -31,6 +31,7 @@ form#islandora-solr-simple-search-form input#edit-islandora-simple-search-query
 {
   font-size:90%;
   line-height:1.3em;
+  clear: both;
 }
 
 img.islandora_solr_add_remove_link

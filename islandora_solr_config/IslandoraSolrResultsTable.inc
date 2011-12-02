@@ -113,7 +113,7 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
       unset($rowclass);
       $result_num = $recordStart + $num + 1;
       $rows[$row][] = array(
-        'data' => (isset($val_array['PID']) ? l($result_num,'fedora/repository/'.$val_array['PID']) : $result_num),
+        'data' => (isset($val_array['PID']) ? l($result_num,'fedora/repository/'. $val_array['PID']) : $result_num),
         'header' => TRUE,
       );
       foreach ($fields as $field) {
@@ -131,7 +131,7 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
     if( variable_get('islandora_solr_search_debug_mode', 0) ) { // debug dump
       $results_r .= "<pre>Results: ".print_r($results,TRUE)."</pre>";
       $fieldset_r = array(
-        '#title' => t("Raw Results"),                                                                                                                                             
+        '#title' => t("Raw Results"),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
         '#value' => $results_r,
