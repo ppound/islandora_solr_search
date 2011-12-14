@@ -225,6 +225,30 @@ class IslandoraSolrResults {
     );
     return theme('fieldset', $fieldset_r);
   }
+  
+  const FIELD_ALL = 0, FIELD_SEARCH = 1, FIELD_FACET = 2, FIELD_RESULT = 3;
+  
+  function _make_pattern($string) {
+    return "/^". preg_quote($string, '/') ."/";
+  }
+  function getSubstitutedFields($string_in, $type = FIELD_SEARCH) {
+    $replacements = NULL;
+    switch($type) {
+      case FIELD_SEARCH:
+        $replacements = $this->searchFieldArray;
+      break;
+      case FIELD_FACET:
+        $replacements = $this->facetFieldArray;
+      break;
+      case FIELD_RESULT:
+        $replacements = $this->resultFieldArray;
+      break;
+      case FIELD_ALL:
+      default:
+        $replacements = $this->allSubsArray;
+    }
+    return preg_replace(array_map(array($this, '_make_pattern'), array_keys($replacements)), array_values($replacements), $string_in);
+  }
 
   /**
    * Function: currentQuery
@@ -258,7 +282,7 @@ class IslandoraSolrResults {
       // and allow one part to be removed at a time.
       // 
       // Image loc: $base_url.'/'.drupal_get_path('module', 'islandora_solr_search').'/images/delete.png
-      $query = " ";
+      $query = "*:*";
       $fq = replaceSlashes($islandora_fq);
       $defType = $solrQueryProcessor->solrDefType;
       $query_list_items[] .= l('-', "islandora/solr/search/$query/$fq/$defType",
@@ -266,7 +290,7 @@ class IslandoraSolrResults {
           'html' => true, 
           'attributes' => array(
             'class' => 'islandora_solr_add_remove_link'))
-      ) . ' ' . stripslashes($solrQueryProcessor->solrQuery);
+      ) . ' ' . $this->getSubstitutedFields(stripslashes($solrQueryProcessor->solrQuery), FIELD_SEARCH);
 
 
       $output .= '<div class="islandora_solr_search_query_wrap">';
