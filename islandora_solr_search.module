@@ -103,7 +103,8 @@ function islandora_solr_search_block($op = 'list', $delta = 0, $edit = array()) 
           $displayClass = new IslandoraSolrResults();
           $block_function = $solr_blocks[$delta]['function'];
           if (method_exists($displayClass, $block_function)) {
-            $block['content'] = $displayClass->$block_function($queryClass);
+            $content = $displayClass->$block_function($queryClass);
+            $block['content'] = !empty($content) ? $content : NULL;
           }
 
           // Otherwise, simply load the form.
@@ -251,7 +252,7 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
   $searchString = htmlspecialchars(drupal_urlencode($searchString), ENT_QUOTES, 'utf-8', FALSE);
   $searchString = str_replace('/', '~slsh~', $searchString); //replace the slash so url doesn't break
   $dismax = '';
-  if (variable_get('dismax_allowed', FALSE)) {
+  if (variable_get('dismax_allowed', TRUE)) {
     $dismax = 'dismax';
   }
   drupal_goto("islandora/solr/search/$searchString/-/$dismax");
@@ -442,7 +443,7 @@ function islandora_solr_search_help($path, $arg) {
 function islandora_solr_search_init() {
   static $islandora_solr_search_init = FALSE;
   if (!$islandora_solr_search_init) {
-    drupal_add_css(drupal_get_path('module', 'islandora_solr_search') . '/islandora_solr_search.css');
+    drupal_add_css(drupal_get_path('module', 'islandora_solr_search') . '/css/islandora_solr_search.css');
     global $queryClass;
     if (empty($queryClass)) {
       $queryClass = new IslandoraSolrQueryProcessor();
