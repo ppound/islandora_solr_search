@@ -41,7 +41,7 @@ class IslandoraSolrQueryProcessor {
    * @param type $dismax
    * @return type 
    */
-  function buildAndExecuteQuery($query, $fq=NULL, $dismax=NULL) {
+  function buildAndExecuteQuery($query, $fq=NULL, $dismax=NULL, $params = NULL) {
 
     if (variable_get('islandora_solr_search_block_request_handler', NULL) == 'standard') {
       $namespace = trim(variable_get('solr_namespace_restriction', NULL));
@@ -61,7 +61,8 @@ class IslandoraSolrQueryProcessor {
         }
       }
     }
-    $this->buildQuery($query, $fq, $dismax);
+    $this->buildQuery($query, $fq, $dismax, $params);
+
     return $this->executeQuery();
   }
 
@@ -69,11 +70,12 @@ class IslandoraSolrQueryProcessor {
    * Default implementation for solr search.  You can configure others in the block config settings
    * @todo Get rid of the global $facetArray?  It is the only global yet relied upon.
    */
-  function buildQuery($query, $fq=NULL, $dismax=NULL) {
+  function buildQuery($query, $fq=NULL, $dismax=NULL, $params = array()) {
     // Get pager variable
     $startPage = isset($_GET['page']) ? $_GET['page'] : 0;
     $this->solrLimit = variable_get('islandora_solr_search_num_of_results', 20);
     global $base_url, $facetArray; //used by facet block as well
+
     // -- cut here --
     // Get display profile
     $islandora_solr_primary_display = variable_get('islandora_solr_primary_display', 'default');
@@ -83,7 +85,11 @@ class IslandoraSolrQueryProcessor {
       return "";
     }
     $profile = $profiles[$islandora_solr_primary_display];
-
+    if ($profile['params']) {
+      foreach ($profile['params'] as $param) {
+        $params[] = $param;
+      }
+    }
     // Include the file for the display profile
     require_once(drupal_get_path('module', $profile['module']) . '/' . $profile['file']);
 
@@ -126,6 +132,9 @@ class IslandoraSolrQueryProcessor {
     );
 
 
+    if (is_array($params)) {
+      $this->solrParams = array_merge($this->solrParams, $params);
+    }
     $debugQuery = (variable_get('islandora_solr_search_debug_mode', 0) ? "TRUE" : NULL ); //any val incl. 'FALSE' is treated as TRUE by Solr
 
     if ($fq != NULL && $fq != '-') {
