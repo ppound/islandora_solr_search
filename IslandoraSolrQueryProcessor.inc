@@ -154,7 +154,13 @@ class IslandoraSolrQueryProcessor {
     $this->solrStart = max(0, $startPage) * $this->solrLimit;
 
     // look for the current display
-    $display = isset($_GET['display']) ? $_GET['display'] : '';
+    // it seems like this function is happening before we even look which display
+    // to use, so we'll have to check again using hook_invoke_all and checking
+    // the variable.
+    $primary_profiles = module_invoke_all("islandora_solr_primary_display");
+    $islandora_solr_primary_display = ((isset($_GET['display']) AND array_key_exists($_GET['display'], $primary_profiles)) ? $_GET['display'] : variable_get('islandora_solr_primary_display', 'default'));
+    //global $current_display;
+    $display = isset($_GET['display']) ? $islandora_solr_primary_display : '';
     $query = '';
     if ($display) {
       $query = array('display' => $display);

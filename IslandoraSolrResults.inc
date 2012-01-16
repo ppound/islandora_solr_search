@@ -239,7 +239,8 @@ class IslandoraSolrResults {
     //dsm($islandora_facets);
     
     // look for the current display
-    $display = isset($_GET['display']) ? $_GET['display'] : '';
+    global $current_display;
+    $display = isset($_GET['display']) ? $current_display : '';
     $query = '';
     if ($display) {
       $query = array('display' => $display);
@@ -402,7 +403,8 @@ class IslandoraSolrResults {
             
 
             // look for the current display
-            $display = isset($_GET['display']) ? $_GET['display'] : '';
+            global $current_display;
+            $display = isset($_GET['display']) ? $current_display : '';
             $query = '';
             if ($display) {
               $query = array('display' => $display);

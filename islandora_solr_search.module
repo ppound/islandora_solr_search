@@ -6,6 +6,8 @@ module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrQueryProcessor
 
 //$islandora_query;
 $queryClass;
+// set current display
+$current_display;
 
 /**
  * @file
@@ -313,6 +315,9 @@ function islandora_solr_search($query, $fq=NULL, $dismax=NULL) {
   $islandora_solr_primary_display = ((isset($_GET['display']) AND array_key_exists($_GET['display'], $primary_profiles)) ? $_GET['display'] : variable_get('islandora_solr_primary_display', 'default'));
   $islandora_solr_selected_display = isset($_GET['solr_profile']) ? $_GET['solr_profile'] : NULL;
 
+  // set global variable
+  global $current_display;
+  $current_display = $islandora_solr_primary_display;
 
   // TODO: Also filter secondary displays against those checked in the configuration options.
   if (isset($secondary_profiles[$islandora_solr_selected_display])) {
