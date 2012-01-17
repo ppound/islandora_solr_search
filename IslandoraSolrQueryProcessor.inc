@@ -192,7 +192,7 @@ class IslandoraSolrQueryProcessor {
       $cutlink = "islandora/solr/search/ /". $islandora_fq ."/dismax";
 
       $queryval = $this->solrQuery;
-      $tokens = explode(" ", $queryval);
+      $tokens = explode(' ', $queryval);
       foreach ($tokens as $token) {
         preg_match("/^.*:/", $token, $matches);
         if (isset($matches[0])) {

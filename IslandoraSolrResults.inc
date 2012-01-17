@@ -353,7 +353,6 @@ class IslandoraSolrResults {
           $exclude = TRUE;
           $filter_name = substr($filter_name, 1);
         }
-
         
         $query = replaceSlashes($solrQueryProcessor->solrQuery); 
         $fq = replaceSlashes($filter_disable);
@@ -437,8 +436,11 @@ class IslandoraSolrResults {
       // Links to remove enabled facet filters are created down below.
     }
     else {//normal link
-      $lplus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_include . '/' . $solrQueryProcessor->solrDefType;
-      $lminus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_exclude . '/' . $solrQueryProcessor->solrDefType;
+      $dt = $solrQueryProcessor->solrDefType;
+      $q = $solrQueryProcessor->solrQuery;
+      
+      $lplus = "islandora/solr/search/$q/$filter_include/$dt";
+      $lminus = "islandora/solr/search/$q/$filter_exclude/$dt";
       $text = $name;
       $attrs = array();
       
@@ -450,9 +452,9 @@ class IslandoraSolrResults {
       
       $list[] = l($text, $lplus, $attrs) . ' (' . $number . ')' .
           '<span class="plusminus">'. 
-            l('+', $lplus, $attrs + array('attributes' => array('class' => 'plus'))) 
+            l('+', $lplus, array_merge($attrs, array('attributes' => array('class' => 'plus')))) 
               .' '.
-            l('-', $lminus, $attrs + array('attributes' => array('class' => 'minus'))) 
+            l('-', $lminus, array_merge($attrs, array('attributes' => array('class' => 'minus')))) 
           .'</span>';
       $facet_count += 1;
     }
@@ -551,22 +553,6 @@ class IslandoraSolrResults {
     if(!empty($facet_output)) {
       $output .='<div class="islandora_solr_search_facet_wrap">';
       $output .= $facet_output;
-      
-      //Use jquery to toggle visibility of the block containing the 'rest' of the facets
-      $output .= <<<EOT
-<script type="text/javascript">
-  $(".islandora_solr_more_facets").click(function() {
-    $(this).next("div").toggle();
-    $(this).toggle();
-    return false;
-  });
-  $(".islandora_solr_less_facets").click(function() {
-    $(this).parent().prev().toggle();
-    $(this).parent().toggle();
-    return false;
-  });
-</script>
-EOT;
       $output .= '</div>';
     }
 
