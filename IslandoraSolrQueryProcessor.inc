@@ -101,11 +101,9 @@ class IslandoraSolrQueryProcessor {
 
     $facetArray = array();
     $facetFields = '';
-    $rawFacetVals = variable_get("islandora_solr_search_block_facets", 'dc.subject,dc.type');
-    $facetArray = islandora_build_substitution_list($rawFacetVals);
-    $facetFields = implode(",", array_keys($facetArray));
+    $facetFields = implode(",", variable_get("islandora_solr_search_block_facets", array('dc.subject', 'dc.type')));
     $keys = array('');
-    $snippetArray = islandora_build_substitution_list(variable_get("islandora_solr_snippet_field", ""));
+    $snippetArray = variable_get("islandora_solr_snippet_field", "");
     if (is_array($snippetArray)) {
       $keys = array_keys($snippetArray);
     }
@@ -122,7 +120,7 @@ class IslandoraSolrQueryProcessor {
       'hl' => 'true',
       'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,
       'hl.fragsize' => 400,
-      'facet.field' => explode(',', $facetFields), //comma separated list configured in the block config
+      'facet.field' => array_keys($facetFields), //comma separated list configured in the block config
     );
 
 
