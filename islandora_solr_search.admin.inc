@@ -187,6 +187,7 @@ function islandora_solr_admin_settings(&$form_state) {
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong> "),
     '#default_value' => variable_get('islandora_solr_search_block_facets', 'dc.subject ~ Subject,dc.type ~ Type'),
     '#wysiwyg' => FALSE,
+    '#default_value' => variable_get('islandora_solr_search_block_facets', t('dc.subject ~ Subject,dc.type ~ Type'))
   );
 
   $form['islandora_solr_search_result_fields'] = array(
@@ -226,7 +227,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#size' => 5,
     '#description' => t('Set the maximum number of terms that should be returned to the user.<br />
       For example, if there are 100 possible subjects in a faceted result, you may wish to return only the top 10.'),
-    '#default_value' => variable_get('islandora_solr_search_block_facet_limit', '10'),
+    '#default_value' => variable_get('islandora_solr_search_block_facet_limit', '20'),
   );
   $form['islandora_solr_search_num_of_results'] = array(
     '#type' => 'textfield',
@@ -271,7 +272,7 @@ function solr_available($solr_url) {
   $response = curl_exec($handle);
   $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
   $retval = TRUE;
-  if ($httpCode % 100 == 4) {
+  if ($httpCode % 100 == 4) { //FIXME:  Should probably deal with 500 errors as well?
     $retval = FALSE;
   }
   curl_close($handle);
@@ -308,7 +309,7 @@ function check_dismax($solr_url, $selected_handler) {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
   curl_setopt($ch, CURLOPT_URL, $url);
   $xml = simplexml_load_string(curl_exec($ch));
-  foreach ($xml->requestHandler as $handler) {
+  foreach ((array)$xml->requestHandler as $handler) {
     if ($handler['class'] == 'solr.SearchHandler') {
       if ((string) $handler['name'] == $selected_handler) {
         foreach ($handler->lst as $first) {

@@ -65,7 +65,7 @@ function islandora_solr_search_block($op = 'list', $delta = 0, $edit = array()) 
 
       foreach ($solr_blocks as $name => $block) {
         $blocks[$name] = array(
-          'info' => t($block['name']),
+          'info' => $block['name'],
         );
       }
 
@@ -89,7 +89,7 @@ function islandora_solr_search_block($op = 'list', $delta = 0, $edit = array()) 
       if (!empty($solr_blocks[$delta])) {
 
         // First we'll set the block title.
-        $block['subject'] = t($solr_blocks[$delta]['name']);
+        $block['subject'] = $solr_blocks[$delta]['name'];
 
         // Include the file from which the block originates.
         require_once( drupal_get_path('module', $solr_blocks[$delta]['module']) . '/' . $solr_blocks[$delta]['file'] );
@@ -160,7 +160,7 @@ function islandora_solr_search_islandora_solr_primary_display() {
  * Implements hook_islandora_solr_query_blocks()
  */
 function islandora_solr_search_islandora_solr_query_blocks() {
-  return array(
+    return array(
     // 'macine_name' => array(
     //   'name' => 'Human Readable Name',
     //   'module' => 'module_name',
@@ -176,7 +176,7 @@ function islandora_solr_search_islandora_solr_query_blocks() {
     //
 
     'advanced' => array(
-      'name' => 'Islandora Solr Advanced Search',
+      'name' => t('Advanced Search'),
       'module' => 'islandora_solr_search',
       'file' => 'islandora_solr_search.module',
       'class' => NULL,
@@ -184,7 +184,7 @@ function islandora_solr_search_islandora_solr_query_blocks() {
       'form' => 'islandora_solr_search_block_form',
     ),
     'simple' => array(
-      'name' => 'Islandora Solr Simple Search',
+      'name' => t('Simple Search'),
       'module' => 'islandora_solr_search',
       'file' => 'islandora_solr_search.module',
       'class' => NULL,
@@ -192,7 +192,7 @@ function islandora_solr_search_islandora_solr_query_blocks() {
       'form' => 'islandora_solr_simple_search_form',
     ),
     'basic_facets' => array(
-      'name' => 'Islandora Facet Block',
+      'name' => t('Filters'),
       'module' => 'islandora_solr_search',
       'file' => 'IslandoraSolrResults.inc',
       'class' => 'IslandoraSolrResults',
@@ -200,7 +200,7 @@ function islandora_solr_search_islandora_solr_query_blocks() {
       'form' => NULL,
     ),
     'current_query' => array(
-      'name' => 'Islandora Current Query',
+      'name' => t('Current Query'),
       'module' => 'islandora_solr_search',
       'file' => 'IslandoraSolrResults.inc',
       'class' => 'IslandoraSolrResults',
@@ -395,10 +395,16 @@ function islandora_solr_search_block_form_submit($form, &$form_state) {
   }
 
   for ($iteration = 0; $iteration < count($fedora_terms); $iteration++) {
-    $searchString .= $types[$iteration] . ":" . $fedora_terms[$iteration] . " " . $booleans[$iteration] . " ";
+    //FIXME (minor): t() should be changed to format_string() in this instance, in Drupal 7
+    //  The string isn't really translatable, just templated.
+    $searchString .= t("!field:(!query) !bool ", array(
+        '!field' => $types[$iteration], 
+        '!query' => $fedora_terms[$iteration],
+        '!bool' => $booleans[$iteration]
+    ));
   }
   $searchString = trim($searchString);
-  $searchString = htmlspecialchars(drupal_urlencode($searchString), ENT_QUOTES, 'utf-8', FALSE);
+  $searchString = drupal_urlencode($searchString);
   $searchString = str_replace('/', '~slsh~', $searchString); //replace the slash so url doesn't break
   drupal_goto("islandora/solr/search/$searchString/-");
 }
@@ -444,16 +450,39 @@ function islandora_solr_search_help($path, $arg) {
  * @staticvar boolean $islandora_solr_search_init 
  */
 function islandora_solr_search_init() {
-    module_load_include('inc', 'islandora_solr_search', 'islandora_solr_search.admin');
-    module_load_include('inc', 'islandora_solr_search', 'includes/common');
-    module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrQueryProcessor');
-  static $islandora_solr_search_init = FALSE;
+  module_load_include('inc', 'islandora_solr_search', 'islandora_solr_search.admin');
+  module_load_include('inc', 'islandora_solr_search', 'includes/common');
+  module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrQueryProcessor');
+    
+  static $islandora_solr_search_init = false;
   if (!$islandora_solr_search_init) {
     drupal_add_css(drupal_get_path('module', 'islandora_solr_search') . '/css/islandora_solr_search.css');
     global $queryClass;
     if (empty($queryClass)) {
       $queryClass = new IslandoraSolrQueryProcessor();
     }
-    $islandora_solr_search_init = TRUE;
+    $islandora_solr_search_init = true;
+  }
+}
+
+/**
+ * 
+ * @global type $conf 
+ */
+function islandora_solr_search_boot() {
+  global $conf;
+
+  //Allow Internationalization, by using multilingual variables...  if i18n is 
+  //  installed, that is.
+  if (module_exists('i18n')) {
+    $vars = array(
+      'islandora_solr_search_block_facets',
+      'islandora_solr_search_result_fields',
+      'islandora_solr_searchterms'
+    );
+
+    $conf['i18n_variables'] = (isset($conf['i18n_variables']) && is_array($conf['i18n_variables'])) ? 
+      array_merge($vars, $conf['i18n_variables']):
+      $vars;
   }
 }

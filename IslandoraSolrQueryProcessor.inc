@@ -189,7 +189,7 @@ class IslandoraSolrQueryProcessor {
       }
     }
     if (!empty($this->solrQuery) && strcmp($this->solrQuery, ' ')) {
-      $cutlink = "islandora/solr/search/ /" . $islandora_fq . "/dismax";
+      $cutlink = "islandora/solr/search/ /". $islandora_fq ."/dismax";
 
       $queryval = $this->solrQuery;
       $tokens = explode(" ", $queryval);
