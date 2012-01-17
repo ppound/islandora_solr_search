@@ -214,7 +214,7 @@ class IslandoraSolrQueryProcessor {
     // At this point let's invoke a hook for third-party modules to mess about
     // with the query parameters if they need to.  Third party modules may alter
     // this object's query parameters if they wish.
-    module_invoke_all("islandora_solr_search_query_processor", &$this);
+    module_invoke_all("islandora_solr_search_query_processor", $this);
     return;
   }
 
