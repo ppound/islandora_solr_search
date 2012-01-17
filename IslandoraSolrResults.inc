@@ -18,19 +18,14 @@ class IslandoraSolrResults {
   public $resultFieldArray = array();
   public $allSubsArray = array();
   
-  /**
-   * @deprecated
-   * This should be factored out in the near future...
-   */
-  static function makeArray(&$in) {
-    /*return is_array($in)?
+  static function makeArray($in) {
+    return is_array($in)?
         $in:
         (isset($in)?
             array($in):
             array()
         )
-    ;*/
-    return (array)$in;
+    ;
   }
 
   /**
@@ -366,17 +361,14 @@ class IslandoraSolrResults {
    *   arrays for output substitution
    */
   function prepFieldSubstitutions() {
-    $this->facetFieldArray = variable_get("islandora_solr_search_block_facets", array(
-        'dc.subject' => 'Subject',
-        'dc.type' => 'Type'
-    ));
-    $this->searchFieldArray = variable_get('islandora_solr_searchterms', array(
-        'dc.title' => 'Title'
-    ));
-    $this->resultFieldArray = variable_get('islandora_solr_search_result_fields', array(
-        'dc.subject' => 'Subject',
-        'dc.type' => 'Type'
-    ));
+    $rawFacetVals = variable_get("islandora_solr_search_block_facets", 'dc.subject ~ Subject,dc.type ~ Type');
+    $this->facetFieldArray = islandora_build_substitution_list($rawFacetVals);
+
+    $rawSearchTerms = variable_get('islandora_solr_searchterms', 'dc.title ~ Title');
+    $this->searchFieldArray = islandora_build_substitution_list($rawSearchTerms);
+
+    $rawResultFields = variable_get('islandora_solr_search_result_fields', 'dc.subject ~ Subject,dc.type ~ Type');
+    $this->resultFieldArray = islandora_build_substitution_list($rawResultFields);
 
     $this->allSubsArray = array_merge($this->facetFieldArray, $this->searchFieldArray, $this->resultFieldArray);
   }
@@ -394,8 +386,12 @@ class IslandoraSolrResults {
     
     $disable_link = (array_search($filter, $fq) !== FALSE) || $number == $solrQueryProcessor->solrResult->response->numFound;
     
+    //$disable_link = strpos($islandora_fq, $key . ':"' .  . '"') !== FALSE; //we don't want a link for this facet as we already used it
     if ($islandora_fq && $islandora_fq != '-') {//there are existing facets in the query
-      if (!$disable_link) {
+      if ($disable_link) {
+        //don't show link to this facet but include a link to remove it
+      }
+      else {
         //FIXME:  This instance of 't' should be changed to format_string for Drupal 7 (not really translateable)
         $filter_include = t('!filter!sep!remaining', array(
           '!filter' => $filter,
@@ -412,10 +408,13 @@ class IslandoraSolrResults {
 
     $filter_include = replaceSlashes($filter_include); //replace the slash so url does not break
     $filter_exclude = replaceSlashes($filter_exclude); //replace the slash so url does not break
-    
-    if (!$disable_link) {//normal link
-      //$evenodd = ( $facet_count % 2 ? 'odd' : 'even' ); //Doesn't seem to be used...
-      
+    if ($disable_link) {
+      // we don't want to create a link, because we're already filtering on this value.
+      // Links to remove enabled facet filters are created down below.
+    }
+    else {//normal link
+      //Doesn't seem to be used...
+      //$evenodd = ( $facet_count % 2 ? 'odd' : 'even' );
       $lplus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_include . '/' . $solrQueryProcessor->solrDefType;
       $lminus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_exclude . '/' . $solrQueryProcessor->solrDefType;
       $text = $name;
@@ -455,17 +454,14 @@ class IslandoraSolrResults {
       if (count($test) > 0) {
         $primary = array();
         $hidden = array();
-        $shown_limit = variable_get('islandora_solr_search_block_facet_shown_limit', 5);
         foreach ($field as $name => $number) {
-          if (count($primary) < $shown_limit) {
+          if (count($primary) < variable_get('islandora_solr_search_block_facet_shown_limit', 5)) {
             $this->_addFacets($key, $name, $number, $solrQueryProcessor, $facet_count, $primary);
           }
           else {
             $this->_addFacets($key, $name, $number, $solrQueryProcessor, $facet_count, $hidden);
           }
         }
-        
-        
         if (count($primary) > 0) {
           $facet_output .='<div class="islandora_solr_search_facet">';
           $list_title = $this->facetFieldArray[$key];
@@ -477,10 +473,10 @@ class IslandoraSolrResults {
           if (count($hidden) > 0) {
             $list_attributes['class'] = implode(' ', array('islandora_solr_search_facet_list', 'facet_list'));
             
-            $facet_output .= "<a class='islandora_solr_facet_subheader islandora_solr_more_facets' href='#'>" . t("Show more") . "</a>";
+            $facet_output .= "<a class='islandora_solr_facet_subheader islandora_solr_more_facets' href='#'><h7>" . t("Show more") . "</h7></a>";
 
             $facet_output .= "<div style='display:none;'>";
-            $facet_output .= "<a class='islandora_solr_facet_subheader islandora_solr_less_facets' href='#'>" . t("Show less") . "</a>";
+            $facet_output .= "<a class='islandora_solr_facet_subheader islandora_solr_less_facets' href='#'><h7>" . t("Show less") . "</h7></a>";
             $facet_output .=  theme_item_list($hidden, '', $list_type, $list_attributes);
             $facet_output .= "</div>";
           }
@@ -564,6 +560,17 @@ EOT;
    * @return string 
    */
   function build_solr_search_form($repeat = NULL, $pathToSearchTerms = NULL, $query = NULL) {
+    $types = array();
+    $terms = trim(variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject'));
+    $termsArray = preg_split('/[\n]/', $terms);
+    foreach ($termsArray as $term) {
+      $vals = split('~', $term);
+      if (!$vals[1]) {
+        $vals[1] = $vals[0];
+      }
+      $types[trim($vals[0])] = trim($vals[1]);
+    }
+    
     $queryArray = NULL;
     if (isset($query)) {
       //A regex like '\\) (OR|AND) \\(' should work, right?  Nope.  Seems that 
@@ -593,7 +600,7 @@ EOT;
       $repeat = variable_get('islandora_solr_search_block_repeat', '3');
     }
     $i = 1;
-    $this->_add_field($form, $i, $queryArray[0], $this->searchFieldArray);
+    $this->_add_field($form, $i, $queryArray[0], $types);
 
     if ($repeat > 1 && $repeat < 9) { //don't want less then 2 or more then 9
       for ($i = 2; $i < $repeat + 1; $i++) {
@@ -608,7 +615,7 @@ EOT;
           '#default_value' => $andorj,
           '#options' => $andOrArray
         );
-        $this->_add_field($form, $i, $queryArray[$t], $this->searchFieldArray);
+        $this->_add_field($form, $i, $queryArray[$t], $types);
       }
     }
 

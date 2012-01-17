@@ -143,26 +143,26 @@ function islandora_solr_admin_settings(&$form_state) {
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
       Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
       module is available in Islandora's online documentation."),
-    '#default_value' => islandora_stringify_substitutions(variable_get('islandora_solr_searchterms', array('dc.title' => 'Title'))),
+    '#default_value' => variable_get('islandora_solr_searchterms', 'dc.title ~ Title'),
     '#wysiwyg' => FALSE,
   );
   $form['islandora_solr_snippet_field'] = array(
     '#type' => 'textfield',
     '#title' => t('Snippet Field'),
-    '#default_value' => islandora_stringify_substitutions(variable_get('islandora_solr_snippet_field', array())),
+    '#default_value' => variable_get('islandora_solr_snippet_field', ''),
     '#description' => t("If a match is found on this field, a snippet of text will be returned, with the search term highlighted.<br />
       An optional friendly label may inserted using the following pattern <strong>dsm.Text ~ Full Text</strong><br />
       <strong>Note:</strong><em> This feature is not supported by all display profiles.</em> "),
     '#wysiwyg' => FALSE,
   );
-
   $form['islandora_solr_search_block_facets'] = array(
     '#type' => 'textarea',
     '#title' => t('Facet Fields'),
     '#description' => t("Indicate which fields will appear in the <strong>Islandora Facet Block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong> "),
-    '#default_value' => islandora_stringify_substitutions(variable_get('islandora_solr_search_block_facets', array('dc.subject' => 'Subject', 'dc.type' => 'Type'))),
+    '#default_value' => variable_get('islandora_solr_search_block_facets', 'dc.subject ~ Subject,dc.type ~ Type'),
     '#wysiwyg' => FALSE,
+    '#default_value' => variable_get('islandora_solr_search_block_facets', t('dc.subject ~ Subject,dc.type ~ Type'))
   );
 
   $form['islandora_solr_search_result_fields'] = array(
@@ -170,7 +170,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#title' => t('Labels for Returned Fields'),
     '#description' => t('Set labels for fields returned from query.
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong>'),
-    '#default_value' => islandora_stringify_substitutions(variable_get('islandora_solr_search_result_fields', array('dc.subject' => 'Subject', 'dc.type' => 'Type'))),
+    '#default_value' => variable_get('islandora_solr_search_result_fields', 'dc.subject ~ Subject,dc.type ~ Type'),
     '#wysiwyg' => FALSE,
   );
 
@@ -350,14 +350,6 @@ function solr_settings_form_submit($form, &$form_state) {
   // Exclude unnecessary elements.
   unset($form_state['values']['submit'], $form_state['values']['reset'], $form_state['values']['form_id'], $form_state['values']['op'], $form_state['values']['form_token'], $form_state['values']['form_build_id']);
 
-  $toBlowUp = array(
-    'islandora_solr_search_result_fields',
-    'islandora_solr_search_block_facets',
-    'islandora_solr_searchterms',
-    'islandora_solr_search_sort',
-    "islandora_solr_snippet_field"
-  );
-  
   foreach ($form_state['values'] as $key => $value) {
     if ($op == t('Reset to defaults')) {
       variable_del($key);
@@ -365,9 +357,6 @@ function solr_settings_form_submit($form, &$form_state) {
     else {
       if (is_array($value) && isset($form_state['values']['array_filter'])) {
         $value = array_keys(array_filter($value));
-      }
-      elseif (array_search($key, $toBlowUp) !== FALSE) {
-        $value = islandora_build_substitution_list($value);
       }
       variable_set($key, $value);
     }
@@ -379,7 +368,6 @@ function solr_settings_form_submit($form, &$form_state) {
     drupal_set_message(t('The solr configuration options have been saved.'));
   }
 
-  //This cache clearing and rebuilding really necessary? -avessey
   cache_clear_all();
   drupal_rebuild_theme_registry();
 }

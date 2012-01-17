@@ -290,7 +290,7 @@ function theme_islandora_solr_search_block_form($form) {
  * @param type $dismax
  * @return type 
  */
-function islandora_solr_search($query='', $fq=NULL, $dismax=NULL) {
+function islandora_solr_search($query, $fq=NULL, $dismax=NULL) {
   global $queryClass;
   islandora_solr_search_init();
 

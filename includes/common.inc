@@ -121,39 +121,23 @@ function get_search_terms_array($path = NULL, $file = NULL) {
 }
 
 function islandora_build_substitution_list($rawFieldList) {
-  $fieldArray = array();
+  $facetArray = array();
+  $facetFields = '';
   $lines = preg_split('/[,|\n|\r]/', $rawFieldList);
   foreach ($lines as $line) {
-    if ($line) {
+    if( $line ) {
       $lineArray = explode('~', $line);
-      $field = trim($lineArray[0]);
-      $human_readable_name = trim($lineArray[1]);
-      if (!$human_readable_name) {
-        $human_readable_name = $field;
+      $key = trim($lineArray[0]);
+      $value = trim($lineArray[1]);
+      if (!$value) {
+        $value = $key;
       }
-      $fieldArray[$field] = $human_readable_name;
+      $facetArray[$key] = $value;
+      if ($facetFields) {
+        $facetFields .= ",";
+      }
+      $facetFields .= $key;
     }
   }
-  return $fieldArray;
-}
-
-function islandora_stringify_substitutions($subs) {
-  if (is_array($subs)) {
-    $parts = array();
-    foreach ($subs as $field => $name) {
-      if ($field !== $name) {
-        $parts[] = $field .' ~ '. $name;
-      }
-      else {
-        $parts[] = $field;
-      }
-    }  
-    
-    //Implode with a newline...  \n doesn't work?
-    return implode('
-', $parts);
-  }
-  else { //This might be gotten rid of in the future, when string versions are extremely unlikely to be encountered (and therefore clobbered)
-    return $subs;
-  }
+  return $facetArray;
 }
