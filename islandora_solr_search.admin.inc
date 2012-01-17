@@ -247,6 +247,7 @@ function solr_available($solr_url) {
   $path = 'http://' . $pathParts['host'] . ':' . $pathParts['port'] . $pathParts['path'] . '/admin/file';
   $test = @fopen($path, "r");
   if ($test) {
+    fclose($test);
     return TRUE;
   }
   return FALSE;
@@ -282,7 +283,7 @@ function check_dismax($solr_url, $selected_handler) {
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
   curl_setopt($ch, CURLOPT_URL, $url);
   $xml = simplexml_load_string(curl_exec($ch));
-  foreach ($xml->requestHandler as $handler) {
+  foreach ((array)$xml->requestHandler as $handler) {
     if ($handler['class'] == 'solr.SearchHandler') {
       if ((string) $handler['name'] == $selected_handler) {
         foreach ($handler->lst as $first) {
