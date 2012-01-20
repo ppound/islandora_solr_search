@@ -322,7 +322,26 @@ function islandora_solr_search($query, $fq=NULL, $dismax=NULL) {
   // Order: First choice is what's in the ?profile query var
   //        Second choice is the primary display profile
   //        Third choice is the default IslandoraSolrResults
-  $islandora_solr_primary_display = ((isset($_GET['display']) AND array_key_exists($_GET['display'], $primary_profiles)) ? $_GET['display'] : variable_get('islandora_solr_primary_display', 'default'));
+  
+    
+  $enabled_profiles = array();
+  // get enabled displays
+  $primary_display_array = variable_get('islandora_solr_primary_display_array', array());
+  // if it's set, we take these values
+  if(isset($primary_display_array['enabled'])) {
+    foreach($primary_display_array['enabled'] as $key => $value) {
+      if($key === $value) {
+        $enabled_profiles[] = $key;
+      }
+    }
+  }
+  // if not, we use the default
+  else {
+    $enabled_profiles = array(variable_get('islandora_solr_primary_display', 'default'));
+  }
+
+  // set primary display
+  $islandora_solr_primary_display = ((isset($_GET['display']) AND in_array($_GET['display'], $enabled_profiles)) ? $_GET['display'] : variable_get('islandora_solr_primary_display', 'default'));
   $islandora_solr_selected_display = isset($_GET['solr_profile']) ? $_GET['solr_profile'] : NULL;
 
   // set global variable
