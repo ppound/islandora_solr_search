@@ -105,20 +105,37 @@ function islandora_solr_admin_settings(&$form_state) {
   $profiles = module_invoke_all("islandora_solr_primary_display");
   
   if (!empty($profiles)) {
-    
+        
     $profiles_sorted = array();
     // if the table settings are set (weight), we change the order of the table rows.
     if(isset($primary_display_array['weight'])) {
-      asort($primary_display_array['weight']);
-      foreach($primary_display_array['weight'] as $key => $value) {
-        $profiles_sorted[$key] = $profiles[$key];
+      // new variable
+      $weight = $primary_display_array['weight'];
+      
+      // check if all values are unique
+      if(count(array_unique($weight)) == 1) {
+        // sort alphabetically with default on top
+        uksort($profiles, "sort_default_first");
+        $profiles_sorted = $profiles;
+      }
+      else{
+        // First sort by value and then sort equal values by key: http://stackoverflow.com/a/6611077/477949
+        array_multisort(array_values($weight), SORT_ASC, array_keys($weight), SORT_ASC, $weight);
+
+        // re-order the array
+        foreach($weight as $key => $value) {
+          $profiles_sorted[$key] = $profiles[$key];
+        }
       }
     }
     // or else use the default
     else {
+      // sort alphabetically with default on top
       uksort($profiles, "sort_default_first"); // only apply when there's no sort variable available.
       $profiles_sorted = $profiles;
     }
+    
+    
     
     // table loop
     foreach ($profiles_sorted as $machine_name => $profile) {
