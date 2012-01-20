@@ -301,7 +301,7 @@ function islandora_solr_search($query, $fq=NULL, $dismax=NULL) {
 
 
   // Build and execute Apache Solr query
-  $queryResult = $queryClass->buildAndExecuteQuery("$query $addition_string", $fq, $dismax);
+  $queryResult = $queryClass->buildAndExecuteQuery($query, $fq, $dismax);
 
   // Get the preferred display profile
   // Order: First choice is what's in the ?profile query var
