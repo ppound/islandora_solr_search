@@ -56,10 +56,9 @@ function islandora_solr_search_install() {
 */
  
 function islandora_solr_search_uninstall() {
-
-  drupal_uninstall_schema('islandora_solr_search');
   
   // removing variables
+  // @TODO: update the latest additions
   $variables = array(
     'islandora_solr_primary_display',
     'islandora_solr_secondary_display',
