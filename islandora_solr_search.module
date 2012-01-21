@@ -326,7 +326,7 @@ function islandora_solr_search($query, $fq=NULL, $dismax=NULL) {
     
   $enabled_profiles = array();
   // get enabled displays
-  $primary_display_array = variable_get('islandora_solr_primary_display_array', array());
+  $primary_display_array = variable_get('islandora_solr_primary_display_table', array());
   // if it's set, we take these values
   if(isset($primary_display_array['enabled'])) {
     foreach($primary_display_array['enabled'] as $key => $value) {
