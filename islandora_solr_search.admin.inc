@@ -350,12 +350,12 @@ function theme_islandora_solr_search_admin_settings($form){
   // Individual table headers.
   // default | enabled | name | Machine readable name |  weight | configuration
   $header = array();
-  $header[] = t('default');
-  $header[] = t('enabled');
-  $header[] = t('name');
-  $header[] = t('machine readable name');
-  $header[] = t('weight');
-  $header[] = t('configuration');
+  $header[] = t('Default');
+  $header[] = t('Enabled');
+  $header[] = t('Name');
+  $header[] = t('Machine readable name');
+  $header[] = t('Weight');
+  $header[] = t('Configuration');
   
   // put the rendered table in another fieldset.
   $form['islandora_solr_primary_display_array']['#type'] = 'item';
