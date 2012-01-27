@@ -240,10 +240,10 @@ class IslandoraSolrResults {
     
     // look for the current display
     global $current_display;
-    $display = isset($_GET['display']) ? $current_display : '';
-    $query = '';
-    if ($display) {
-      $query = array('display' => $display);
+    // set display variable
+    $display = '';
+    if ($current_display != variable_get('islandora_solr_primary_display', 'default')) {
+      $display = $current_display;
     }
     
     if (strlen(trim($solrQueryProcessor->solrQuery))) {
@@ -260,9 +260,9 @@ class IslandoraSolrResults {
       
       // set link properties
       $image = '<img class="islandora_solr_add_remove_link" src="' . $base_url . '/' . drupal_get_path('module', 'islandora_solr_search') . '/images/delete.png" alt="Remove search term">';
-      $link = 'islandora/solr/search/' . " " . '/' . replaceSlashes($islandora_fq) . '/dismax';
+      $link = 'islandora/solr/search/' . " " . '/' . replaceSlashes($islandora_fq) . '/dismax/' . $display;
       
-      $query_list_items[] .= l($image, $link, array('html' => TRUE, 'query' => $query )) . ' ' . stripslashes($solrQueryProcessor->solrQuery);
+      $query_list_items[] .= l($image, $link, array('html' => TRUE)) . ' ' . stripslashes($solrQueryProcessor->solrQuery);
 
       $output .= '<div class="islandora_solr_search_query_wrap">';
 
@@ -303,9 +303,9 @@ class IslandoraSolrResults {
         
         // set link properties
         $image = '<img class="islandora_solr_add_remove_link" src="' . $base_url . '/' . drupal_get_path('module', 'islandora_solr_search') . '/images/delete.png" alt="Remove this filter">';
-        $link = 'islandora/solr/search/' . replaceSlashes($solrQueryProcessor->solrQuery) . '/' . replaceSlashes($filter_disable) . '/' . $solrQueryProcessor->solrDefType;
+        $link = 'islandora/solr/search/' . replaceSlashes($solrQueryProcessor->solrQuery) . '/' . replaceSlashes($filter_disable) . '/' . $solrQueryProcessor->solrDefType . '/' . $display;
         
-        $filter_list_items[] = l($image, $link,  array('html' => TRUE, 'query' => $query )) . ' ' . $this->facetFieldArray[$filter_name] . ($exclude ? ' != ' : ' = ') . $filter_value;
+        $filter_list_items[] = l($image, $link,  array('html' => TRUE)) . ' ' . $this->facetFieldArray[$filter_name] . ($exclude ? ' != ' : ' = ') . $filter_value;
       }
     }
 
@@ -350,6 +350,7 @@ class IslandoraSolrResults {
    */
   function displayFacets($solrQueryProcessor) {
     global $base_url;
+    $default_display = variable_get('islandora_solr_primary_display', 'default');
     $facet_output = $output = '';
     $islandora_fq = $solrQueryProcessor->solrFilters;
     $islandora_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_fields) ? $solrQueryProcessor->solrResult->facet_counts->facet_fields : array();
@@ -375,6 +376,15 @@ class IslandoraSolrResults {
         $disable_link = FALSE;
 //        dsm($field);
         foreach ($field as $name => $number) {
+          
+          // look for the current display
+          global $current_display;
+          // set display variable
+          $display = '';
+          if ($current_display != $default_display) {
+            $display = $current_display;
+          }
+          
           if ($islandora_fq && $islandora_fq != '-') {//there are existing facets in the query
             $disable_link = strstr($islandora_fq, $key . ':"' . replaceSlashes($name) . '"'); //we don't want a link for this facet as we already used it
             if ($disable_link) {
@@ -398,23 +408,14 @@ class IslandoraSolrResults {
           }
           else {//normal link
             $evenodd = ( $facet_count % 2 ? 'odd' : 'even' );
-            $lplus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_include . '/' . $solrQueryProcessor->solrDefType;
-            $lminus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_exclude . '/' . $solrQueryProcessor->solrDefType;
-            
-
-            // look for the current display
-            global $current_display;
-            $display = isset($_GET['display']) ? $current_display : '';
-            $query = '';
-            if ($display) {
-              $query = array('display' => $display);
-            }
+            $lplus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_include . '/' . $solrQueryProcessor->solrDefType . '/' . $display;
+            $lminus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_exclude . '/' . $solrQueryProcessor->solrDefType . '/' . $display;
                         
             $text = $name;
-            $list_items[] = l($text, $lplus, array('query' => $query)) . ' (' . $number . ')' .
+            $list_items[] = l($text, $lplus) . ' (' . $number . ')' .
                 '<span class="plusminus">' .
-                l('+', $lplus, array('attributes' => array('class' => 'plus'), 'query' => $query )) . ' ' .
-                l('-', $lminus, array('attributes' => array('class' => 'minus'), 'query' => $query )) .
+                l('+', $lplus, array('attributes' => array('class' => 'plus'))) . ' ' .
+                l('-', $lminus, array('attributes' => array('class' => 'minus'))) .
                 '</span>';
             $facet_count++;
           }

@@ -157,15 +157,14 @@ class IslandoraSolrQueryProcessor {
     // it seems like this function is happening before we even look which display
     // to use, so we'll have to check again using hook_invoke_all and checking
     // the variable.
-    $primary_profiles = module_invoke_all("islandora_solr_primary_display");
-    $islandora_solr_primary_display = ((isset($_GET['display']) AND array_key_exists($_GET['display'], $primary_profiles)) ? $_GET['display'] : variable_get('islandora_solr_primary_display', 'default'));
-    //global $current_display;
-    $display = isset($_GET['display']) ? $islandora_solr_primary_display : '';
-    $query = '';
-    if ($display) {
-      $query = array('display' => $display);
-    }
 
+    $display_arr = explode('/', $_GET['q']);
+    $primary_profiles = module_invoke_all("islandora_solr_primary_display");
+    $display = ((isset($display_arr[6]) AND array_key_exists($display_arr[6], $primary_profiles)) ? $display_arr[6] : variable_get('islandora_solr_primary_display', 'default'));
+    if ($display == variable_get('islandora_solr_primary_display', 'default')) {
+      $display = '';
+    }
+    
     // The breadcrumb should go in the display class
     $queryurl = "islandora/solr/search/" . replaceSlashes($this->solrQuery);
     $breadcrumb_fq = $islandora_fq;
@@ -176,20 +175,19 @@ class IslandoraSolrQueryProcessor {
         $value = restoreSlashes(trim(substr($facet, strpos($facet, ":") + 1), '"'));
         $options = array('html' => TRUE);
         $options['attributes']['title'] = $facet;
-        $options['query'] = $query; // query for display
-        $crumblink = $queryurl . "/" . $breadcrumb_fq . (empty($this->solrDefType) ? '' : '/' . $this->solrDefType);
+        $crumblink = $queryurl . "/" . $breadcrumb_fq . (empty($this->solrDefType) ? '/-' : '/' . $this->solrDefType) . '/' . $display;
         $cut_fq = $this->delete_filter($islandora_fq, $facet);
-        $cutlink = $queryurl . "/" . $cut_fq . (empty($this->solrDefType) ? '' : '/' . $this->solrDefType);
+        $cutlink = $queryurl . "/" . $cut_fq . (empty($this->solrDefType) ? '/-' : '/' . $this->solrDefType) . '/' . $display;
         if (!strncmp("-", $facet, 1)) {
           $options['attributes']['class'] = "strikethrough";
         }
         $breadcrumb[] = l($value, $crumblink, $options) .
-            " <span class='islandora_solr_search_breadcrumb_super'>(" . l("x", $cutlink, array('attributes' => array('title' => "Remove " . $facet), 'query' => $query)) . ")</span>";
+            " <span class='islandora_solr_search_breadcrumb_super'>(" . l("x", $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
         $breadcrumb_fq = $this->delete_filter($breadcrumb_fq, $facet);
       }
     }
     if (!empty($this->solrQuery) && strcmp($this->solrQuery, ' ')) {
-      $cutlink = "islandora/solr/search/ /" . $islandora_fq . "/dismax";
+      $cutlink = "islandora/solr/search/ /" . $islandora_fq . "/dismax/" . $display;
       $queryval = $this->solrQuery;
       $tokens = explode(" ", $queryval);
       foreach ($tokens as $token) {
@@ -199,8 +197,8 @@ class IslandoraSolrQueryProcessor {
         }
       }
       if ($queryval != '%252F') {
-        $breadcrumb[] = l($queryval, $queryurl . "/-", array('attributes' => array('title' => $this->solrQuery), 'query' => $query)) .
-            " <span class='islandora_solr_search_breadcrumb_super'>(" . l("x", $cutlink, array('attributes' => array('title' => "Remove " . $facet), 'query' => $query)) . ")</span>";
+        $breadcrumb[] = l($queryval, $queryurl . "/-/" . $display, array('attributes' => array('title' => $this->solrQuery))) .
+            " <span class='islandora_solr_search_breadcrumb_super'>(" . l("x", $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
       }
     }
     $breadcrumb[] = l(t('Home'), NULL);
