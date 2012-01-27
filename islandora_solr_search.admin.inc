@@ -382,7 +382,7 @@ function theme_islandora_solr_search_admin_settings($form) {
   $header = array(t('Default'), t('Enabled'), t('Name'), t('Machine readable name'), t('Weight'), t('Configuration'));
 
   // add tabledrag features
-  drupal_add_tabledrag('solr_config_table', 'order', 'sibling', 'solr_weight');
+  //drupal_add_tabledrag('solr_config_table', 'order', 'sibling', 'solr_weight');
 
   // put the rendered table in another fieldset.
   $form['islandora_solr_primary_display_table']['#type'] = 'item';
