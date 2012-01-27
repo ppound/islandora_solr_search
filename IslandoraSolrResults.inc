@@ -240,7 +240,15 @@ class IslandoraSolrResults {
 
     // set display variable
     $display = $solrQueryProcessor->display;
-
+    
+    if ($display == variable_get('islandora_solr_primary_display', 'default')) {
+      $display_param = '';
+    }
+    else {
+      $display_param = $display;
+    }
+    
+    
     if (drupal_strlen(trim($solrQueryProcessor->solrQuery))) {
 
       // Variables to build a drupal-ish unordered list
@@ -255,7 +263,7 @@ class IslandoraSolrResults {
 
       // set link properties
       $image = '<img class="islandora_solr_add_remove_link" src="' . $base_url . '/' . drupal_get_path('module', 'islandora_solr_search') . '/images/delete.png" alt="Remove search term">';
-      $link = 'islandora/solr/search/' . " " . '/' . replaceSlashes($islandora_fq) . '/dismax/' . $display;
+      $link = 'islandora/solr/search/' . " " . '/' . replaceSlashes($islandora_fq) . '/dismax/' . $display_param;
 
       $query_list_items[] .= l($image, $link, array('html' => TRUE)) . ' ' . stripslashes($solrQueryProcessor->solrQuery);
 
@@ -299,7 +307,7 @@ class IslandoraSolrResults {
         // set link properties
         $image = '<img class="islandora_solr_add_remove_link" src="' . $base_url . '/' . drupal_get_path('module', 'islandora_solr_search') . '/images/delete.png" alt="Remove this filter">';
 
-        $link = 'islandora/solr/search/' . replaceSlashes($solrQueryProcessor->solrQuery) . '/' . replaceSlashes($filter_disable) . '/' . $solrQueryProcessor->solrDefType . '/' . $display;
+        $link = 'islandora/solr/search/' . replaceSlashes($solrQueryProcessor->solrQuery) . '/' . replaceSlashes($filter_disable) . '/' . $solrQueryProcessor->solrDefType . '/' . $display_param;
 
         $filter_list_items[] = l($image, $link,  array('html' => TRUE)) . ' ' . $this->facetFieldArray[$filter_name] . ($exclude ? ' != ' : ' = ') . $filter_value;
 
@@ -358,7 +366,14 @@ class IslandoraSolrResults {
 
     // set display
     $display = $solrQueryProcessor->display;
-
+    
+    if ($display == $default_display) {
+      $display_param = '';
+    }
+    else {
+      $display_param = $display;
+    }
+    
     // set counter to include javascript later
     $i = 0;
 
@@ -401,8 +416,8 @@ class IslandoraSolrResults {
           else {//normal link
             $evenodd = ( $facet_count % 2 ? 'odd' : 'even' );
 
-            $lplus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_include . '/' . $solrQueryProcessor->solrDefType . '/' . $display;
-            $lminus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_exclude . '/' . $solrQueryProcessor->solrDefType . '/' . $display;
+            $lplus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_include . '/' . $solrQueryProcessor->solrDefType . '/' . $display_param;
+            $lminus = 'islandora/solr/search/' . $solrQueryProcessor->solrQuery . '/' . $filter_exclude . '/' . $solrQueryProcessor->solrDefType . '/' . $display_param;
 
             $text = $name;
             $list_items[] = l($text, $lplus) . ' (' . $number . ')' .

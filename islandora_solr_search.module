@@ -425,8 +425,9 @@ function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NU
   $islandora_solr_primary_display = ((isset($display) AND in_array($display, $enabled_profiles)) ? $display : variable_get('islandora_solr_primary_display', 'default'));
   $islandora_solr_selected_display = isset($_GET['solr_profile']) ? $_GET['solr_profile'] : NULL;
 
+  // don't add a display name to links set in the default display
   $display = $islandora_solr_primary_display;
-
+  
   // Build and execute Apache Solr query
   $queryResult = $queryClass->buildAndExecuteQuery($query, $fq, $dismax, $display);
 
