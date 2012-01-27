@@ -43,21 +43,9 @@ class IslandoraSolrQueryProcessor {
    */
   function buildAndExecuteQuery($query, $fq=NULL, $dismax=NULL, $display = NULL, $params = NULL) {
     if (variable_get('islandora_solr_search_block_request_handler', NULL) == 'standard') {
-      $namespace = trim(variable_get('solr_namespace_restriction', NULL));
+
       if (!$query || $query == ' ') {
         $query = '%252F';
-      }
-
-      if ($namespace) {
-        if ($fq == '-') {
-          $fq = '';
-        }
-        if (strpos($fq, "PID:$namespace") === FALSE) {
-          if ($fq) {
-            $fq .= $this->facetSeparator;
-          }
-          $fq .= "PID:$namespace*";
-        }
       }
     }
     $this->buildQuery($query, $fq, $dismax, $display, $params);
@@ -74,7 +62,6 @@ class IslandoraSolrQueryProcessor {
     $startPage = isset($_GET['page']) ? $_GET['page'] : 0;
     $this->solrLimit = variable_get('islandora_solr_search_num_of_results', 20);
     global $base_url, $facetArray; //used by facet block as well
-
     // -- cut here --
     // Get display profile
     $islandora_solr_primary_display = variable_get('islandora_solr_primary_display', 'default');
@@ -193,15 +180,28 @@ class IslandoraSolrQueryProcessor {
     if (!empty($breadcrumb))
       $breadcrumb = array_reverse($breadcrumb);
     drupal_set_breadcrumb($breadcrumb);
-
     $this->solrFilters = $islandora_fq;
 
+    // restrict results based on specified namespace
+    $namespace = variable_get('solr_namespace_restriction', 'null');
+    if ($namespace) {
+      $this->solrParams['fq'][] = "PID:$namespace\:*";
+    }
+
+    // if no qf fields are specified in rthe requestHandler a default list is supplied here for dismax searches
+    if (!variable_get('dismax_allowed', 0) && $dismax == "dismax") {
+      $this->solrParams['qf'] = 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type';
+    }
+
+    // add display to $this object
     $this->display = $display;
-    
+
     // At this point let's invoke a hook for third-party modules to mess about
     // with the query parameters if they need to.  Third party modules may alter
     // this object's query parameters if they wish.
     module_invoke_all("islandora_solr_search_query_processor", &$this);
+    $processor->solrParams['fq'][] = $fq;
+
     return;
   }
 
