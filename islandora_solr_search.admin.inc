@@ -266,14 +266,14 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'textfield',
     '#title' => t('Minimum Results to Display Facet'),
     '#size' => 5,
-    '#description' => t('Minimum facet count required for display'),
+    '#description' => t('Minimum results required to display a facet'),
     '#default_value' => variable_get('islandora_solr_search_block_facet_min_count', '2'),
   );
   $form['islandora_solr_search_block_facet_shown_limit'] = array(
     '#type' => 'textfield',
     '#title' => t('Initially shown facets'),
     '#size' => 5,
-    '#description' => t('The number which should be shown initially. <br />If there are more, then the a "Show more" <br />button will allow the rest up to the value below to be shown.<br/> Use 0 to disable.'),
+    '#description' => t('The number which should be shown initially. If there are more, then the a "Show more" button will allow the rest up to the value below to be shown. Use 0 to disable.'),
     '#default_value' => variable_get('islandora_solr_search_block_facet_shown_limit', '0'),
   );
   $form['islandora_facet_display_table'] = array();
@@ -281,8 +281,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'textfield',
     '#title' => t('Maximum Facets returned'),
     '#size' => 5,
-    '#description' => t('Set the maximum number of terms that should be returned to the user.<br />
-      For example, if there are 100 possible subjects in a faceted result, <br />you may wish to return only the top 10.'),
+    '#description' => t('Set the maximum number of terms that should be returned to the user. For example, if there are 100 possible subjects in a faceted result, you may wish to return only the top 10.'),
     '#default_value' => variable_get('islandora_solr_search_block_facet_limit', '10'),
   );
   $form['islandora_solr_search_num_of_results'] = array(
@@ -326,20 +325,30 @@ function theme_islandora_solr_search_admin_settings($form) {
   $rows = array();
     //clean up facet params
 
+  // render facet display table
+  $facet_header = array();
+  $facet_header[] = $form['islandora_solr_search_block_facet_min_count']['#title'];
+  $form['islandora_solr_search_block_facet_min_count']['#title'] = NULL;
+  $facet_header[] = $form['islandora_solr_search_block_facet_shown_limit']['#title'];
+  $form['islandora_solr_search_block_facet_shown_limit']['#title'] = NULL;
+  $facet_header[] = $form['islandora_solr_search_block_facet_limit']['#title'];
+  $form['islandora_solr_search_block_facet_limit']['#title'] = NULL;
+  
   $facet_rows = array();
   $facet_row = array();
-  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_min_count']), 'style' => 'vertical-align:top');
-  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_shown_limit']), 'style' => 'vertical-align:top');
-  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_limit']), 'style' => 'vertical-align:top');
+  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_min_count']));
+  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_shown_limit']));
+  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_limit']));
   $facet_rows[] = array('data' => $facet_row);
 
   // put the rendered table in another fieldset.
   $form['islandora_facet_display_table']['#type'] = 'item';
   $form['islandora_facet_display_table']['#title'] = t('Facet Display Settings');
   $form['islandora_facet_display_table']['#description'] = t('Configure how facets will be diplayed in your environment.');
-  $form['islandora_facet_display_table']['#value'] = theme('table', null, $facet_rows, array('id' => 'solr_facet_table'));
+  $form['islandora_facet_display_table']['#value'] = theme('table', $facet_header, $facet_rows, array('id' => 'solr_facet_table'));
 
-
+  
+  // render islandora_solr_primary_display_table
   foreach ($form['islandora_solr_primary_display_table']['machine_name'] as $key => $element) {
     $row = array();
     // check if $key is really the array we need. we shouldn't select the #parent array for example.
@@ -363,30 +372,16 @@ function theme_islandora_solr_search_admin_settings($form) {
 
   // Individual table headers.
   // default | enabled | name | Machine readable name |  weight | configuration
-  $header = array();
-  $header[] = t('Default');
-  $header[] = t('Enabled');
-  $header[] = t('Name');
-  $header[] = t('Machine readable name');
-  $header[] = t('Weight');
-  $header[] = t('Configuration');
-
+  $header = array(t('Default'), t('Enabled'), t('Name'), t('Machine readable name'), t('Weight'), t('Configuration'));
 
   // add tabledrag features
-
   drupal_add_tabledrag('solr_config_table', 'order', 'sibling', 'solr_weight');
-
-
 
   // put the rendered table in another fieldset.
   $form['islandora_solr_primary_display_table']['#type'] = 'item';
   $form['islandora_solr_primary_display_table']['#title'] = t('Primary Display Profile');
   $form['islandora_solr_primary_display_table']['#description'] = t('Preferred normal display profile for search results.  These may be provided by third-party modules.');
   $form['islandora_solr_primary_display_table']['#value'] = theme('table', $header, $rows, array('id' => 'solr_config_table'));
-
-
-
-
 
   //dsm($form);
   // render form
