@@ -9,7 +9,7 @@
 
 /**
  * Function to return admin setting form
- * @return array 
+ * @return array
  */
 function islandora_solr_admin_settings(&$form_state) {
 
@@ -340,7 +340,7 @@ function theme_islandora_solr_search_admin_settings($form) {
   $form['islandora_solr_search_block_facet_shown_limit']['#title'] = NULL;
   $facet_header[] = $form['islandora_solr_search_block_facet_limit']['#title'];
   $form['islandora_solr_search_block_facet_limit']['#title'] = NULL;
-  
+
   $facet_rows = array();
   $facet_row = array();
   $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_min_count']));
@@ -354,7 +354,7 @@ function theme_islandora_solr_search_admin_settings($form) {
   $form['islandora_facet_display_table']['#description'] = t('Configure how facets will be diplayed in your environment.');
   $form['islandora_facet_display_table']['#value'] = theme('table', $facet_header, $facet_rows, array('id' => 'solr_facet_table'));
 
-  
+
   // render islandora_solr_primary_display_table
   foreach ($form['islandora_solr_primary_display_table']['machine_name'] as $key => $element) {
     $row = array();
@@ -410,9 +410,9 @@ function solr_available($solr_url) {
   $handle = curl_init($solr_url);
   curl_setopt($handle, CURLOPT_RETURNTRANSFER, TRUE);
   $response = curl_exec($handle);
-  $http_code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+  $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
   $retval = TRUE;
-  if ($http_code % 100 == 4) {
+  if ($httpCode % 100 == 4) {
     $retval = FALSE;
   }
   curl_close($handle);
@@ -432,10 +432,10 @@ function get_handlers($solr_url) {
   $xml = simplexml_load_string(curl_exec($ch));
   foreach ($xml->requestHandler as $handler) {
     if ($handler['class'] == 'solr.SearchHandler') {
-      $handler_name = (string) $handler['name'];
-      $slashed = preg_match('/^\//', $handler_name);
-      if ($handler_name != 'dismax' && $handler_name != 'partitioned' & !$slashed) {
-        $handlers[$handler_name] = $handler_name;
+      $handlerName = (string) $handler['name'];
+      $slashed = preg_match('/^\//', $handlerName);
+      if ($handlerName != 'dismax' && $handlerName != 'partitioned' & !$slashed) {
+        $handlers[$handlerName] = $handlerName;
       }
     }
   }
@@ -463,7 +463,7 @@ function update_solr_url_div() {
  */
 function callback_prep() {
   $form_state = array('storage' => NULL, 'submitted' => FALSE);
-  $form_build_id = $_POST['form_build_id'];
+  $form_build_id = check_plain($_POST['form_build_id']);
   $form = form_get_cache($form_build_id, $form_state);
   $args = $form['#parameters'];
   $form_id = array_shift($args);
@@ -479,7 +479,7 @@ function callback_prep() {
 /**
  * Form validator
  * @param array $form
- * @param array $form_state 
+ * @param array $form_state
  */
 function islandora_solr_admin_settings_validate($form, &$form_state) {
   $form_state['values']['solr_namespace_restriction'] = preg_replace('/:$/', '', $form_state['values']['solr_namespace_restriction']);
@@ -536,7 +536,7 @@ function solr_settings_form_submit($form, &$form_state) {
 /**
  * Solr admin refresh
  * @param type $form
- * @param array $form_state 
+ * @param array $form_state
  */
 function solr_admin_refresh($form, &$form_state) {
   $values = $form_state['values'];
@@ -547,13 +547,13 @@ function solr_admin_refresh($form, &$form_state) {
 
 /**
  * Function sort_default_first
- * 
- * Description: sorts two values by strcasecmp, with the special begaviour that 
+ *
+ * Description: sorts two values by strcasecmp, with the special begaviour that
  * the value "default" sorts before any other value.
- * 
+ *
  * @param <string> $a
  * @param <string> $b
- * @return <int> 
+ * @return <int>
  */
 function sort_default_first($a, $b) {
   if (!strcasecmp($a, 'default'))

@@ -237,11 +237,11 @@ class IslandoraSolrResults {
         $solrQueryProcessor->solrResult->facet_counts->facet_fields :
         NULL;
     //dsm($islandora_facets);
-    
+
     // set display variable
     $display = $solrQueryProcessor->display;
 
-    if (strlen(trim($solrQueryProcessor->solrQuery))) {
+    if (drupal_strlen(trim($solrQueryProcessor->solrQuery))) {
 
       // Variables to build a drupal-ish unordered list
       $query_list_title = "Query";
@@ -256,7 +256,7 @@ class IslandoraSolrResults {
       // set link properties
       $image = '<img class="islandora_solr_add_remove_link" src="' . $base_url . '/' . drupal_get_path('module', 'islandora_solr_search') . '/images/delete.png" alt="Remove search term">';
       $link = 'islandora/solr/search/' . " " . '/' . replaceSlashes($islandora_fq) . '/dismax/' . $display;
-      
+
       $query_list_items[] .= l($image, $link, array('html' => TRUE)) . ' ' . stripslashes($solrQueryProcessor->solrQuery);
 
       $output .= '<div class="islandora_solr_search_query_wrap">';
@@ -293,14 +293,14 @@ class IslandoraSolrResults {
           $exclude = FALSE;
         else {
           $exclude = TRUE;
-          $filter_name = substr($filter_name, 1);
+          $filter_name = drupal_substr($filter_name, 1);
         }
 
         // set link properties
         $image = '<img class="islandora_solr_add_remove_link" src="' . $base_url . '/' . drupal_get_path('module', 'islandora_solr_search') . '/images/delete.png" alt="Remove this filter">';
 
         $link = 'islandora/solr/search/' . replaceSlashes($solrQueryProcessor->solrQuery) . '/' . replaceSlashes($filter_disable) . '/' . $solrQueryProcessor->solrDefType . '/' . $display;
-        
+
         $filter_list_items[] = l($image, $link,  array('html' => TRUE)) . ' ' . $this->facetFieldArray[$filter_name] . ($exclude ? ' != ' : ' = ') . $filter_value;
 
       }
@@ -355,10 +355,10 @@ class IslandoraSolrResults {
     if (empty($islandora_facets)) {
       return $output; //no facets to show
     }
-    
+
     // set display
     $display = $solrQueryProcessor->display;
-    
+
     // set counter to include javascript later
     $i = 0;
 
@@ -376,7 +376,7 @@ class IslandoraSolrResults {
         $disable_link = FALSE;
 //        dsm($field);
         foreach ($field as $name => $number) {
-          
+
           if ($islandora_fq && $islandora_fq != '-') {//there are existing facets in the query
             $disable_link = strstr($islandora_fq, $key . ':"' . replaceSlashes($name) . '"'); //we don't want a link for this facet as we already used it
             if ($disable_link) {

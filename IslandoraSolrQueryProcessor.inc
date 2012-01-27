@@ -39,7 +39,7 @@ class IslandoraSolrQueryProcessor {
    * @param type $query
    * @param type $fq
    * @param type $dismax
-   * @return type 
+   * @return type
    */
   function buildAndExecuteQuery($query, $fq=NULL, $dismax=NULL, $display = NULL, $params = NULL) {
     if (variable_get('islandora_solr_search_block_request_handler', NULL) == 'standard') {
@@ -145,8 +145,8 @@ class IslandoraSolrQueryProcessor {
     $facet = NULL; // Nigelb, This is being used outside of the for loop where it is being created this is probably incorrect.
     if (strcmp($islandora_fq, "-")) {
       foreach (csv_explode(IslandoraSolrQueryProcessor::$facetSeparator, $islandora_fq, '"', TRUE) as $facet) {
-        $field = substr($facet, 0, strpos($facet, ":"));
-        $value = restoreSlashes(trim(substr($facet, strpos($facet, ":") + 1), '"'));
+        $field = drupal_substr($facet, 0, strpos($facet, ":"));
+        $value = restoreSlashes(trim(drupal_substr($facet, strpos($facet, ":") + 1), '"'));
         $options = array('html' => TRUE);
         $options['attributes']['title'] = $facet;
         $crumblink = $queryurl . "/" . $breadcrumb_fq . (empty($this->solrDefType) ? '/-' : '/' . $this->solrDefType) . '/' . $display;
@@ -214,7 +214,7 @@ class IslandoraSolrQueryProcessor {
 
   /**
    * Execute the query
-   * @return type 
+   * @return type
    */
   function executeQuery() {
 

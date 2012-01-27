@@ -132,7 +132,7 @@ function islandora_solr_search_block($op = 'list', $delta = 0, $edit = array()) 
 function islandora_solr_search_theme() {
   // set path
   $path = drupal_get_path('module', 'islandora_solr_search');
-  
+
   return array(
     'islandora_solr_search_block_form' => array(
       'arguments' => array(
@@ -240,7 +240,7 @@ function islandora_solr_search_islandora_solr_query_blocks() {
 
 /**
  * islandora solr simple search form
- * @return type 
+ * @return type
  */
 function islandora_solr_simple_search_form() {
   module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrResults');
@@ -251,7 +251,7 @@ function islandora_solr_simple_search_form() {
 /**
  * islandora solr search block form validate
  * @param type $form
- * @param type $form_state 
+ * @param type $form_state
  */
 function islandora_solr_search_block_form_validate($form, &$form_state) {
 
@@ -270,21 +270,21 @@ function islandora_solr_search_block_form_validate($form, &$form_state) {
 /**
  * islandora solr simple search form submit
  * @param type $form
- * @param type $form_state 
+ * @param type $form_state
  */
 function islandora_solr_simple_search_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $searchString = $form_state['values']['islandora_simple_search_query'];
   $searchString = htmlspecialchars(drupal_urlencode($searchString), ENT_QUOTES, 'utf-8', FALSE);
   $searchString = str_replace('/', '~slsh~', $searchString); //replace the slash so url doesn't break
- 
+
   drupal_goto("islandora/solr/search/$searchString/-/dismax");
 }
 
 /**
  * islandora solr search block form
  * @global type $queryClass
- * @return type 
+ * @return type
  */
 function islandora_solr_search_block_form() {
   global $queryClass;
@@ -299,7 +299,7 @@ function islandora_solr_search_block_form() {
  * theme islandora solr search block form
  * @global type $queryClass
  * @param type $form
- * @return type 
+ * @return type
  */
 function theme_islandora_solr_search_block_form($form) {
   global $queryClass;
@@ -315,7 +315,7 @@ function theme_islandora_solr_search_block_form($form) {
  */
 function islandora_solr_search_display() {
   $output = '';
-  
+
   // check if the page is dealing with search results
   if (class_exists('IslandoraSolrResults')) {
     // get profiles
@@ -328,7 +328,7 @@ function islandora_solr_search_display() {
       $weight = $primary_display_array['weight'];
       $enabled = $primary_display_array['enabled'];
       $default = $primary_display_array['default'];
-    
+
       // sort by weight
       array_multisort(array_values($weight), SORT_ASC, array_keys($weight), SORT_ASC, $weight);
 
@@ -342,7 +342,7 @@ function islandora_solr_search_display() {
       $q_arr = explode('/', $_GET['q']);
       $q_arr = array_slice($q_arr, 0, 6);
       $q_str = implode('/', $q_arr);
-      
+
       foreach ($weight as $key => $value) {
         if ($enabled[$key] !== 0) {
 
@@ -350,14 +350,14 @@ function islandora_solr_search_display() {
           $title = $profiles[$key]['name'];
 
           // create class name based on solr field name
-          $class = 'display-' . strtolower(preg_replace('/[^A-Za-z0-9]/', '-', $key));
-          
+          $class = 'display-' . drupal_strtolower(preg_replace('/[^A-Za-z0-9]/', '-', $key));
+
           // check if the link will link to the current display
           if ($key == $current_display) {
             // if so make it active and don't append a query (
             $class .= ' active';
           }
-          
+
           // don't add a value when it's the default.
           if ($key == $default) {
             $url = $q_str;
@@ -365,12 +365,12 @@ function islandora_solr_search_display() {
           else {
             $url = $q_str . '/' . $key;
           }
-          
+
           // create link
           $item = l($title, $url, array('attributes' => array('class' => $class, 'title' => $title)));
-          
+
           $list_items[] = $item;
-        }  
+        }
       }
       // theme item list
       $output = theme('item_list', $list_items, $list_title, $list_type, $list_attributes);
@@ -386,14 +386,14 @@ function islandora_solr_search_display() {
  * @param type $query
  * @param type $fq
  * @param type $dismax
- * @return type 
+ * @return type
  */
 function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NULL) {
   global $queryClass;
   islandora_solr_search_init();
 
   if ($dismax == '-') {
-    $dismax = NULL; 
+    $dismax = NULL;
   }
 
   // get profiles
@@ -403,7 +403,7 @@ function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NU
   // Order: First choice is what's in the ?profile query var
   //        Second choice is the primary display profile
   //        Third choice is the default IslandoraSolrResults
-  
+
   $enabled_profiles = array();
   // get enabled displays
   $primary_display_array = variable_get('islandora_solr_primary_display_table', array());
@@ -426,7 +426,7 @@ function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NU
   $islandora_solr_selected_display = isset($_GET['solr_profile']) ? $_GET['solr_profile'] : NULL;
 
   $display = $islandora_solr_primary_display;
-  
+
   // Build and execute Apache Solr query
   $queryResult = $queryClass->buildAndExecuteQuery($query, $fq, $dismax, $display);
 
@@ -484,7 +484,7 @@ function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NU
  * islandora solr search block form submit
  * @global type $queryClass
  * @param type $form
- * @param type $form_state 
+ * @param type $form_state
  */
 function islandora_solr_search_block_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
@@ -555,7 +555,7 @@ function islandora_solr_search_help($path, $arg) {
 /**
  * islandora solr search init
  * @global IslandoraSolrQueryProcessor $queryClass
- * @staticvar boolean $islandora_solr_search_init 
+ * @staticvar boolean $islandora_solr_search_init
  */
 function islandora_solr_search_init() {
   static $islandora_solr_search_init = FALSE;

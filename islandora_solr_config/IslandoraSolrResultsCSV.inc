@@ -172,7 +172,7 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
     drupal_set_message(check_plain(t('Exported !count records from index to CSV', array('!count' => $count+1))));
 
     fclose($docfile);
-    
+
     exit;
 
   }
