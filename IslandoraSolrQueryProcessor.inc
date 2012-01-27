@@ -67,7 +67,7 @@ class IslandoraSolrQueryProcessor {
     $islandora_solr_primary_display = variable_get('islandora_solr_primary_display', 'default');
     $profiles = module_invoke_all("islandora_solr_primary_display");
     if (!isset($profiles[$islandora_solr_primary_display])) {
-      drupal_set_message("There is an error in the solr search configuration: the display profile is not found.", 'error');
+      drupal_set_message(t('There is an error in the solr search configuration: the display profile is not found.'), 'error');
       return "";
     }
     $profile = $profiles[$islandora_solr_primary_display];
@@ -156,7 +156,7 @@ class IslandoraSolrQueryProcessor {
           $options['attributes']['class'] = "strikethrough";
         }
         $breadcrumb[] = l($value, $crumblink, $options) .
-            " <span class='islandora_solr_search_breadcrumb_super'>(" . l("x", $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
+            " <span class='islandora_solr_search_breadcrumb_super'>(" . l(t('x'), $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
         $breadcrumb_fq = $this->delete_filter($breadcrumb_fq, $facet);
       }
     }
@@ -173,7 +173,7 @@ class IslandoraSolrQueryProcessor {
       if ($queryval != '%252F') {
         $queryurl = $queryurl . '/-/' . $this->solrDefType . '/' . $display;
         $breadcrumb[] = l($queryval, $queryurl, array('attributes' => array('title' => $this->solrQuery))) .
-            " <span class='islandora_solr_search_breadcrumb_super'>(" . l("x", $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
+            " <span class='islandora_solr_search_breadcrumb_super'>(" . l(t('x'), $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
       }
     }
     $breadcrumb[] = l(t('Home'), NULL);
@@ -233,7 +233,7 @@ class IslandoraSolrQueryProcessor {
     try {
       $results = $solr->search($this->solrQuery, $this->solrStart, $this->solrLimit, $this->solrParams);
     } catch (Exception $e) {
-      drupal_set_message(t('error searching ') . $e->getMessage());
+      drupal_set_message(check_plain(t('error searching')) . ' ' . $e->getMessage());
     }
     $this->solrResult = $results;
     if (empty($results)) {

@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * @file
+ * Admin functionality
+ *
+ * Contains all admin related functionality
+ */
+
+/**
  * Function to return admin setting form
  * @return array 
  */
@@ -9,8 +16,8 @@ function islandora_solr_admin_settings(&$form_state) {
   //checks for existence of PHP Solr client.
   module_load_include('php', 'islandora_solr_search', 'SolrPhpClient/Apache/Solr/Service');
   if (!class_exists('Apache_Solr_Service')) {
-    drupal_set_message("This module requires the " . l('Apache Solr php client', 'http://code.google.com/p/solr-php-client') . '.
-      Please install the client directory in the root directory of this module before continuing.');
+    $message = t('This module requires the !url. Please install the client directory in the root directory of this module before continuing.', array('!url' => l(t('Apache Solr php client'), 'http://code.google.com/p/solr-php-client')));
+    drupal_set_message(check_plain($message));
     return;
   }
   $handlers['standard'] = 'standard';
@@ -67,7 +74,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'select',
     '#title' => t('Request Handler'),
     '#options' => $handlers,
-    '#description' => t('Request handlers as defined by !config', array('!config' => l('solrconfig.xml', 'http://wiki.apache.org/solr/SolrConfigXml'))),
+    '#description' => t('Request handlers as defined by !config', array('!config' => l(t('solrconfig.xml'), 'http://wiki.apache.org/solr/SolrConfigXml'))),
     '#default_value' => $handler,
     '#ahah' => array(
       'path' => 'islandora/solr/process',
@@ -204,7 +211,7 @@ function islandora_solr_admin_settings(&$form_state) {
   $form['sort_fields']['islandora_solr_search_sort_field'] = array(
     '#type' => 'textfield', '#title' => t('Sort field'),
     '#size' => 20,
-    '#description' => t('Results will be sorted on this field.  If left blank will default to <em>score</em> '),
+    '#description' => t('Results will be sorted on this field. If left blank will default to <em>score</em>.'),
     '#default_value' => variable_get('islandora_solr_search_sort_field', ''),
   );
 
@@ -288,7 +295,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'textfield',
     '#title' => t('Results per page'),
     '#size' => 5,
-    '#description' => t('The number of results to show per page. '),
+    '#description' => t('The number of results to show per page.'),
     '#default_value' => variable_get('islandora_solr_search_num_of_results', '20'),
   );
   $form['islandora_solr_search_debug_mode'] = array(
@@ -302,7 +309,7 @@ function islandora_solr_admin_settings(&$form_state) {
   $form['buttons']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save Solr Configuration'),
-    '#weight'=> 50,
+    '#weight' => 50,
     );
   $form['buttons']['reset'] = array('#type' => 'submit', '#value' => t('Reset to defaults'));
 
@@ -403,9 +410,9 @@ function solr_available($solr_url) {
   $handle = curl_init($solr_url);
   curl_setopt($handle, CURLOPT_RETURNTRANSFER, TRUE);
   $response = curl_exec($handle);
-  $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+  $http_code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
   $retval = TRUE;
-  if ($httpCode % 100 == 4) {
+  if ($http_code % 100 == 4) {
     $retval = FALSE;
   }
   curl_close($handle);
@@ -425,10 +432,10 @@ function get_handlers($solr_url) {
   $xml = simplexml_load_string(curl_exec($ch));
   foreach ($xml->requestHandler as $handler) {
     if ($handler['class'] == 'solr.SearchHandler') {
-      $handlerName = (string) $handler['name'];
-      $slashed = preg_match('/^\//', $handlerName);
-      if ($handlerName != 'dismax' && $handlerName != 'partitioned' & !$slashed) {
-        $handlers[$handlerName] = $handlerName;
+      $handler_name = (string) $handler['name'];
+      $slashed = preg_match('/^\//', $handler_name);
+      if ($handler_name != 'dismax' && $handler_name != 'partitioned' & !$slashed) {
+        $handlers[$handler_name] = $handler_name;
       }
     }
   }

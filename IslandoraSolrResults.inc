@@ -141,7 +141,7 @@ class IslandoraSolrResults {
     $recordStart = $results->response->start;
     $limitResults = variable_get('islandora_solr_search_limit_result_fields', 0);
     $rawResponse = $results->getRawResponse();
-    $responseArray = json_decode($rawResponse, true);
+    $responseArray = json_decode($rawResponse, TRUE);
     $docs = $responseArray['response']['docs'];
     //retrieve 'highlighing' from resultset.
     $highlightResults = $responseArray['highlighting'];
@@ -166,7 +166,7 @@ class IslandoraSolrResults {
     foreach ($results->response->docs as $doc) {
       $rows = array();
       $row = 0;
-      $snippet = null;
+      $snippet = NULL;
       foreach ($doc as $field => $value) {
 
         if ($limitResults && empty($this->resultFieldArray[$field])) {
@@ -407,8 +407,8 @@ class IslandoraSolrResults {
             $text = $name;
             $list_items[] = l($text, $lplus) . ' (' . $number . ')' .
                 '<span class="plusminus">' .
-                l('+', $lplus, array('attributes' => array('class' => 'plus'))) . ' ' .
-                l('-', $lminus, array('attributes' => array('class' => 'minus'))) .
+                l(t('+'), $lplus, array('attributes' => array('class' => 'plus'))) . ' ' .
+                l(t('-'), $lminus, array('attributes' => array('class' => 'minus'))) .
                 '</span>';
             $facet_count++;
           }
@@ -623,11 +623,11 @@ class IslandoraSolrResults {
 
   function prep_results($results) {
     $rawResponse = $results->getRawResponse();
-    $responseArray = json_decode($rawResponse, true);
+    $responseArray = json_decode($rawResponse, TRUE);
     $highlights = $responseArray['highlighting'];
     $docs = $responseArray['response']['docs'];
     $label = variable_get("islandora_solr_snippet_field", "");
-    if ($label){
+    if ($label) {
       $label_parts = explode('~', $label);
       $field_label = $label_parts[1];
       $field_text = $label_parts[0];
