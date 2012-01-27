@@ -383,7 +383,7 @@ function islandora_solr_search_display() {
             $url = $q_str . $key;
           }
           
-          $item = l($title, $url, array('attributes' => array('class' => $class)));
+          $item = l($title, $url, array('attributes' => array('class' => $class, 'title' => $title)));
           
           $list_items[] = $item;
         }  
