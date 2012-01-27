@@ -238,14 +238,9 @@ class IslandoraSolrResults {
         NULL;
     //dsm($islandora_facets);
     
-    // look for the current display
-    global $current_display;
     // set display variable
-    $display = '';
-    if ($current_display != variable_get('islandora_solr_primary_display', 'default')) {
-      $display = $current_display;
-    }
-    
+    $display = $solrQueryProcessor->display;
+
     if (strlen(trim($solrQueryProcessor->solrQuery))) {
 
       // Variables to build a drupal-ish unordered list
@@ -257,7 +252,7 @@ class IslandoraSolrResults {
       // OK, so it's a list of one.
       // In the future, we could reasonably break the query on boolean operators
       // and allow one part to be removed at a time.
-      
+
       // set link properties
       $image = '<img class="islandora_solr_add_remove_link" src="' . $base_url . '/' . drupal_get_path('module', 'islandora_solr_search') . '/images/delete.png" alt="Remove search term">';
       $link = 'islandora/solr/search/' . " " . '/' . replaceSlashes($islandora_fq) . '/dismax/' . $display;
@@ -358,7 +353,10 @@ class IslandoraSolrResults {
     if (empty($islandora_facets)) {
       return $output; //no facets to show
     }
-
+    
+    // set display
+    $display = $solrQueryProcessor->display;
+    
     // set counter to include javascript later
     $i = 0;
 
@@ -376,14 +374,6 @@ class IslandoraSolrResults {
         $disable_link = FALSE;
 //        dsm($field);
         foreach ($field as $name => $number) {
-          
-          // look for the current display
-          global $current_display;
-          // set display variable
-          $display = '';
-          if ($current_display != $default_display) {
-            $display = $current_display;
-          }
           
           if ($islandora_fq && $islandora_fq != '-') {//there are existing facets in the query
             $disable_link = strstr($islandora_fq, $key . ':"' . replaceSlashes($name) . '"'); //we don't want a link for this facet as we already used it

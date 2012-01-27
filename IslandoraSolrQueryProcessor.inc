@@ -41,8 +41,7 @@ class IslandoraSolrQueryProcessor {
    * @param type $dismax
    * @return type 
    */
-  function buildAndExecuteQuery($query, $fq=NULL, $dismax=NULL, $params = NULL) {
-
+  function buildAndExecuteQuery($query, $fq=NULL, $dismax=NULL, $display = NULL, $params = NULL) {
     if (variable_get('islandora_solr_search_block_request_handler', NULL) == 'standard') {
       $namespace = trim(variable_get('solr_namespace_restriction', NULL));
       if (!$query || $query == ' ') {
@@ -61,7 +60,7 @@ class IslandoraSolrQueryProcessor {
         }
       }
     }
-    $this->buildQuery($query, $fq, $dismax, $params);
+    $this->buildQuery($query, $fq, $dismax, $display, $params);
 
     return $this->executeQuery();
   }
@@ -70,7 +69,7 @@ class IslandoraSolrQueryProcessor {
    * Default implementation for solr search.  You can configure others in the block config settings
    * @todo Get rid of the global $facetArray?  It is the only global yet relied upon.
    */
-  function buildQuery($query, $fq=NULL, $dismax=NULL, $params = array()) {
+  function buildQuery($query, $fq = NULL, $dismax = NULL, $display = NULL, $params = array() ) {
     // Get pager variable
     $startPage = isset($_GET['page']) ? $_GET['page'] : 0;
     $this->solrLimit = variable_get('islandora_solr_search_num_of_results', 20);
@@ -153,18 +152,6 @@ class IslandoraSolrQueryProcessor {
     }
     $this->solrStart = max(0, $startPage) * $this->solrLimit;
 
-    // look for the current display
-    // it seems like this function is happening before we even look which display
-    // to use, so we'll have to check again using hook_invoke_all and checking
-    // the variable.
-
-    $display_arr = explode('/', $_GET['q']);
-    $primary_profiles = module_invoke_all("islandora_solr_primary_display");
-    $display = ((isset($display_arr[6]) AND array_key_exists($display_arr[6], $primary_profiles)) ? $display_arr[6] : variable_get('islandora_solr_primary_display', 'default'));
-    if ($display == variable_get('islandora_solr_primary_display', 'default')) {
-      $display = '';
-    }
-    
     // The breadcrumb should go in the display class
     $queryurl = "islandora/solr/search/" . replaceSlashes($this->solrQuery);
     $breadcrumb_fq = $islandora_fq;
@@ -197,7 +184,8 @@ class IslandoraSolrQueryProcessor {
         }
       }
       if ($queryval != '%252F') {
-        $breadcrumb[] = l($queryval, $queryurl . "/-/" . $display, array('attributes' => array('title' => $this->solrQuery))) .
+        $queryurl = $queryurl . '/-/' . $this->solrDefType . '/' . $display;
+        $breadcrumb[] = l($queryval, $queryurl, array('attributes' => array('title' => $this->solrQuery))) .
             " <span class='islandora_solr_search_breadcrumb_super'>(" . l("x", $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
       }
     }
@@ -208,6 +196,8 @@ class IslandoraSolrQueryProcessor {
 
     $this->solrFilters = $islandora_fq;
 
+    $this->display = $display;
+    
     // At this point let's invoke a hook for third-party modules to mess about
     // with the query parameters if they need to.  Third party modules may alter
     // this object's query parameters if they wish.
