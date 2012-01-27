@@ -334,7 +334,7 @@ function islandora_solr_search_display() {
       $weight = $primary_display_array['weight'];
       $enabled = $primary_display_array['enabled'];
       $default = $primary_display_array['default'];
-      
+    
       // sort by weight
       array_multisort(array_values($weight), SORT_ASC, array_keys($weight), SORT_ASC, $weight);
 
@@ -344,25 +344,17 @@ function islandora_solr_search_display() {
       $list_type = 'ul';
       $list_attributes = array('class' => 'islandora-solr-search-display');
 
+      // limit q by first 6 parameters
       $q_arr = explode('/', $_GET['q']);
-      $q_str = '';
-      for ($i = 0; $i < 6 ; $i++ ) {
-        $q_str .= $q_arr[$i] . '/';
-      }
+      $q_arr = array_slice($q_arr, 0, 6);
+      $q_str = implode('/', $q_arr) . '/';
       
       foreach ($weight as $key => $value) {
         if ($enabled[$key] !== 0) {
 
+          // title
           $title = $profiles[$key]['name'];
 
-          // this approach is the most elegant, but sets every link as 'active'
-          //$item = l($title, $_GET['q'], array('attributes' => array('class' => $class), 'query' => array('display' => $key)));
-          // that's why I created this workaround based on pieces of the url() function
-          
-          // I have two choices:
-          // 1. if I want to add an extra query to the l() function, I have to use an absolute url
-          // 2. if I don't use an absolute url, and set the query in the l() function, all links are set to .active
-          
           // create class name based on solr field name
           $class = 'display-' . strtolower(preg_replace('/[^A-Za-z0-9]/', '-', $key));
           
@@ -371,11 +363,8 @@ function islandora_solr_search_display() {
             // if so make it active and don't append a query (
             $class .= ' active';
           }
-
-          // set (absolute) url
-          // note: i can't leave the query empty on the default display or else the l() function will set it to .active
-//          $url = $base_url . url($_GET['q'], array('query' => array('display' => $key)));
           
+          // don't add a value when it's the default.
           if ($key == $default) {
             $url = $q_str;
           }
@@ -383,6 +372,7 @@ function islandora_solr_search_display() {
             $url = $q_str . $key;
           }
           
+          // create link
           $item = l($title, $url, array('attributes' => array('class' => $class, 'title' => $title)));
           
           $list_items[] = $item;
