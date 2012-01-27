@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Implementation of Solr search for the Islandora fedora_search module.
+ */
+
 module_load_include('inc', 'islandora_solr_search', 'islandora_solr_search.admin');
 module_load_include('inc', 'islandora_solr_search', 'includes/common');
 module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrQueryProcessor');
@@ -8,11 +13,6 @@ module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrQueryProcessor
 $queryClass;
 // set current display
 $current_display;
-
-/**
- * @file
- * Implementation of Solr search for the Islandora fedora_search module.
- */
 
 /**
  * Implementation of hook_menu().
@@ -314,9 +314,6 @@ function theme_islandora_solr_search_block_form($form) {
  * @return display switch
  */
 function islandora_solr_search_display() {
-  global $base_path;
-  global $base_url;
-  global $current_display;
   $output = '';
   
   // check if the page is dealing with search results
@@ -411,9 +408,9 @@ function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NU
   // get enabled displays
   $primary_display_array = variable_get('islandora_solr_primary_display_table', array());
   // if it's set, we take these values
-  if(isset($primary_display_array['enabled'])) {
-    foreach($primary_display_array['enabled'] as $key => $value) {
-      if($key === $value) {
+  if (isset($primary_display_array['enabled'])) {
+    foreach ($primary_display_array['enabled'] as $key => $value) {
+      if ($key === $value) {
         $enabled_profiles[] = $key;
       }
     }
@@ -441,7 +438,7 @@ function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NU
     $profile = $primary_profiles[$islandora_solr_primary_display];
   }
   else {
-    drupal_set_message("There is an error in the solr search configuration: the display profile is not found.", 'error');
+    drupal_set_message(check_plain(t('There is an error in the solr search configuration: the display profile is not found.')), 'error');
     $profile = $primary_profiles['default'];
   }
   // Include the file for the display profile
@@ -474,7 +471,7 @@ function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NU
   }
 
   if (variable_get('islandora_solr_search_debug_mode', 0)) { // debug dump
-    drupal_set_message('Params: <br/><pre>' . print_r($queryClass->solrParams, TRUE) . '</pre>', 'status');
+    drupal_set_message(t('Params: <br/><pre>!debug</pre>', array('!debug' => print_r($queryClass->solrParams, TRUE))), 'status');
   }
 
   return $output;
