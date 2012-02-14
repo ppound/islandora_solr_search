@@ -1,16 +1,23 @@
 <?php
 
 /**
+ * @file
+ * Admin functionality
+ *
+ * Contains all admin related functionality
+ */
+
+/**
  * Function to return admin setting form
- * @return array 
+ * @return array
  */
 function islandora_solr_admin_settings(&$form_state) {
 
   //checks for existence of PHP Solr client.
   module_load_include('php', 'islandora_solr_search', 'SolrPhpClient/Apache/Solr/Service');
   if (!class_exists('Apache_Solr_Service')) {
-    drupal_set_message("This module requires the " . l('Apache Solr php client', 'http://code.google.com/p/solr-php-client') . '.
-      Please install the client directory in the root directory of this module before continuing.');
+    $message = t('This module requires the !url. Please install the client directory in the root directory of this module before continuing.', array('!url' => l(t('Apache Solr php client'), 'http://code.google.com/p/solr-php-client')));
+    drupal_set_message(check_plain($message));
     return;
   }
 
@@ -69,7 +76,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'select',
     '#title' => t('Request Handler'),
     '#options' => $handlers,
-    '#description' => t('Request handlers as defined by !config', array('!config' => l('solrconfig.xml', 'http://wiki.apache.org/solr/SolrConfigXml'))),
+    '#description' => t('Request handlers as defined by !config', array('!config' => l(t('solrconfig.xml'), 'http://wiki.apache.org/solr/SolrConfigXml'))),
     '#default_value' => $handler,
     '#ahah' => array(
       'path' => 'islandora/solr/process',
@@ -97,7 +104,6 @@ function islandora_solr_admin_settings(&$form_state) {
 
   // get the table settings
   $primary_display_array = variable_get('islandora_solr_primary_display_table', array());
-
   $enabled = array();
 
   // set the table form items
@@ -115,26 +121,18 @@ function islandora_solr_admin_settings(&$form_state) {
       // new variable
       $weight = $primary_display_array['weight'];
 
-      // check if all values are unique
-      if (count(array_unique($weight)) == 1) {
-        // sort alphabetically with default on top
-        uksort($profiles, "sort_default_first");
-        $profiles_sorted = $profiles;
-      }
-      else {
-        // First sort by value and then sort equal values by key: http://stackoverflow.com/a/6611077/477949
-        array_multisort(array_values($weight), SORT_ASC, array_keys($weight), SORT_ASC, $weight);
+      // First sort by value and then sort equal values by key: http://stackoverflow.com/a/6611077/477949
+      array_multisort(array_values($weight), SORT_ASC, array_keys($weight), SORT_ASC, $weight);
 
-        // re-order the array
-        foreach ($weight as $key => $value) {
-          $profiles_sorted[$key] = $profiles[$key];
-        }
+      // re-order the array
+      foreach ($weight as $key => $value) {
+        $profiles_sorted[$key] = $profiles[$key];
       }
     }
     // or else use the default
     else {
       // sort alphabetically with default on top
-      uksort($profiles, "sort_default_first"); // only apply when there's no sort variable available.
+      ksort($profiles); // only apply when there's no sort variable available.
       $profiles_sorted = $profiles;
     }
 
@@ -154,7 +152,7 @@ function islandora_solr_admin_settings(&$form_state) {
       $form['islandora_solr_primary_display_table']['weight'][$machine_name] = array(
         '#type' => 'weight',
         '#default_value' => ($primary_display_array['weight'][$machine_name]) ? $primary_display_array['weight'][$machine_name] : 0,
-        '#attributes' => array('class' => 'solr_weight'),
+        '#attributes' => array('class' => 'solr-weight'),
       );
       $form['islandora_solr_primary_display_table']['configuration'][$machine_name] = array(
         '#value' => (isset($profile['configuration']) AND $profile['configuration'] != '') ? l(t('configure'), $profile['configuration']) : '',
@@ -174,7 +172,7 @@ function islandora_solr_admin_settings(&$form_state) {
   }
 
   $profiles = module_invoke_all("islandora_solr_secondary_display");
-  uksort($profiles, "sort_default_first");
+  ksort($profiles);
   foreach ($profiles as $machine_name => $profile) {
     $islandora_solr_secondary_display_options[$machine_name] = $profile['name'];
   }
@@ -211,7 +209,7 @@ function islandora_solr_admin_settings(&$form_state) {
   $form['sort_fields']['islandora_solr_search_sort_field'] = array(
     '#type' => 'textfield', '#title' => t('Sort field'),
     '#size' => 20,
-    '#description' => t('Results will be sorted on this field.  If left blank will default to <em>score</em> '),
+    '#description' => t('Results will be sorted on this field. If left blank will default to <em>score</em>.'),
     '#default_value' => variable_get('islandora_solr_search_sort_field', ''),
   );
 
@@ -273,14 +271,14 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'textfield',
     '#title' => t('Minimum Results to Display Facet'),
     '#size' => 5,
-    '#description' => t('Minimum facet count required for display'),
+    '#description' => t('Minimum results required to display a facet'),
     '#default_value' => variable_get('islandora_solr_search_block_facet_min_count', '2'),
   );
   $form['islandora_solr_search_block_facet_shown_limit'] = array(
     '#type' => 'textfield',
     '#title' => t('Initially shown facets'),
     '#size' => 5,
-    '#description' => t('The number which should be shown initially. <br />If there are more, then the a "Show more" <br />button will allow the rest up to the value below to be shown.<br/> Use 0 to disable.'),
+    '#description' => t('The number which should be shown initially. If there are more, then the a "Show more" button will allow the rest up to the value below to be shown. Use 0 to disable.'),
     '#default_value' => variable_get('islandora_solr_search_block_facet_shown_limit', '0'),
   );
   $form['islandora_facet_display_table'] = array();
@@ -288,15 +286,14 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'textfield',
     '#title' => t('Maximum Facets returned'),
     '#size' => 5,
-    '#description' => t('Set the maximum number of terms that should be returned to the user.<br />
-      For example, if there are 100 possible subjects in a faceted result, <br />you may wish to return only the top 10.'),
+    '#description' => t('Set the maximum number of terms that should be returned to the user. For example, if there are 100 possible subjects in a faceted result, you may wish to return only the top 10.'),
     '#default_value' => variable_get('islandora_solr_search_block_facet_limit', '10'),
   );
   $form['islandora_solr_search_num_of_results'] = array(
     '#type' => 'textfield',
     '#title' => t('Results per page'),
     '#size' => 5,
-    '#description' => t('The number of results to show per page. '),
+    '#description' => t('The number of results to show per page.'),
     '#default_value' => variable_get('islandora_solr_search_num_of_results', '20'),
   );
   $form['islandora_solr_search_debug_mode'] = array(
@@ -328,25 +325,34 @@ function islandora_solr_admin_settings(&$form_state) {
  * theme_islandora_solr_search_admin_settings()
  */
 function theme_islandora_solr_search_admin_settings($form) {
-  //dsm($form);
   $default = variable_get('islandora_solr_primary_display', 'default');
   $rows = array();
   //clean up facet params
 
+  // render facet display table
+  $facet_header = array();
+  $facet_header[] = $form['islandora_solr_search_block_facet_min_count']['#title'];
+  $form['islandora_solr_search_block_facet_min_count']['#title'] = NULL;
+  $facet_header[] = $form['islandora_solr_search_block_facet_shown_limit']['#title'];
+  $form['islandora_solr_search_block_facet_shown_limit']['#title'] = NULL;
+  $facet_header[] = $form['islandora_solr_search_block_facet_limit']['#title'];
+  $form['islandora_solr_search_block_facet_limit']['#title'] = NULL;
+
   $facet_rows = array();
   $facet_row = array();
-  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_min_count']), 'style' => 'vertical-align:top');
-  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_shown_limit']), 'style' => 'vertical-align:top');
-  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_limit']), 'style' => 'vertical-align:top');
+  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_min_count']));
+  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_shown_limit']));
+  $facet_row[] = array('data' => drupal_render($form['islandora_solr_search_block_facet_limit']));
   $facet_rows[] = array('data' => $facet_row);
 
   // put the rendered table in another fieldset.
   $form['islandora_facet_display_table']['#type'] = 'item';
   $form['islandora_facet_display_table']['#title'] = t('Facet Display Settings');
   $form['islandora_facet_display_table']['#description'] = t('Configure how facets will be diplayed in your environment.');
-  $form['islandora_facet_display_table']['#value'] = theme('table', null, $facet_rows, array('id' => 'solr_facet_table'));
+  $form['islandora_facet_display_table']['#value'] = theme('table', $facet_header, $facet_rows, array('id' => 'solr_facet_table'));
 
 
+  // render islandora_solr_primary_display_table
   foreach ($form['islandora_solr_primary_display_table']['machine_name'] as $key => $element) {
     $row = array();
     // check if $key is really the array we need. we shouldn't select the #parent array for example.
@@ -384,22 +390,19 @@ function theme_islandora_solr_search_admin_settings($form) {
   drupal_add_tabledrag('solr_config_table', 'order', 'sibling', 'solr_weight');
 
 
-
   // put the rendered table in another fieldset.
   $form['islandora_solr_primary_display_table']['#type'] = 'item';
   $form['islandora_solr_primary_display_table']['#title'] = t('Primary Display Profile');
   $form['islandora_solr_primary_display_table']['#description'] = t('Preferred normal display profile for search results.  These may be provided by third-party modules.');
-  $form['islandora_solr_primary_display_table']['#value'] = theme('table', $header, $rows, array('id' => 'solr_config_table'));
+  $form['islandora_solr_primary_display_table']['#value'] = theme('table', $header, $rows, array('id' => 'solr-primary-display-table'));
 
-
-
-
-
-  //dsm($form);
   // render form
   $output = '';
   $output .= drupal_render($form);
-  //dsm($form);
+  
+  // add tabledrag features
+  drupal_add_tabledrag('solr-primary-display-table', 'order', 'sibling', 'solr-weight');
+  
   return $output;
 }
 
@@ -468,7 +471,7 @@ function update_solr_url_div() {
  */
 function callback_prep() {
   $form_state = array('storage' => NULL, 'submitted' => FALSE);
-  $form_build_id = $_POST['form_build_id'];
+  $form_build_id = check_plain($_POST['form_build_id']);
   $form = form_get_cache($form_build_id, $form_state);
   $args = $form['#parameters'];
   $form_id = array_shift($args);
@@ -484,7 +487,7 @@ function callback_prep() {
 /**
  * Form validator
  * @param array $form
- * @param array $form_state 
+ * @param array $form_state
  */
 function islandora_solr_admin_settings_validate($form, &$form_state) {
   $form_state['values']['solr_namespace_restriction'] = preg_replace('/:$/', '', $form_state['values']['solr_namespace_restriction']);
@@ -497,7 +500,6 @@ function islandora_solr_admin_settings_validate($form, &$form_state) {
  * @return NULL
  */
 function solr_settings_form_submit($form, &$form_state) {
-  //dsm($form_state);
   // old_default variable
   $old_default = variable_get('islandora_solr_primary_display', 'default');
   // new_default variable
@@ -541,7 +543,7 @@ function solr_settings_form_submit($form, &$form_state) {
 /**
  * Solr admin refresh
  * @param type $form
- * @param array $form_state 
+ * @param array $form_state
  */
 function solr_admin_refresh($form, &$form_state) {
   $values = $form_state['values'];
@@ -550,24 +552,13 @@ function solr_admin_refresh($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
-/**
- * Function sort_default_first
- * 
- * Description: sorts two values by strcasecmp, with the special begaviour that 
- * the value "default" sorts before any other value.
- * 
- * @param <string> $a
- * @param <string> $b
- * @return <int> 
- */
-function sort_default_first($a, $b) {
-  if (!strcasecmp($a, 'default'))
-    return -1;
-  if (!strcasecmp($b, 'default'))
-    return 1;
-  return strcasecmp($a, $b);
-}
 
+/**
+ * Checks for dismax
+ * @param type $solr_url
+ * @param type $selected_handler
+ * @return boolean 
+ */
 function check_dismax($solr_url, $selected_handler) {
   $dismax = FALSE;
   $url = $solr_url . '/admin/file/?file=solrconfig.xml';
