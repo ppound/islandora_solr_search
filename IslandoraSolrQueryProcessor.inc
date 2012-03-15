@@ -169,7 +169,7 @@ class IslandoraSolrQueryProcessor {
       }
     }
     if (!empty($this->solrQuery) && strcmp($this->solrQuery, ' ')) {
-      $cutlink = "islandora/solr/search/ /" . $islandora_fq . "/dismax/" . $display_param;
+      $cutlink = "islandora/solr/search/ /$islandora_fq/dismax/$display_param";
       $queryval = $this->solrQuery;
       $tokens = explode(' ', $queryval);
       foreach ($tokens as $token) {
@@ -179,7 +179,7 @@ class IslandoraSolrQueryProcessor {
         }
       }
       if ($queryval != '%252F') {
-        $queryurl = $queryurl . '/-/' . $this->solrDefType . '/' . $display_param;
+        $queryurl = "$queryurl/-/{$this->solrDefType}/$display_param";
         $breadcrumb[] = l($queryval, $queryurl, array('attributes' => array('title' => $this->solrQuery))) .
             " <span class='islandora_solr_search_breadcrumb_super'>(" . l(t('x'), $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
       }
