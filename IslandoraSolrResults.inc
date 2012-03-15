@@ -17,16 +17,6 @@ class IslandoraSolrResults {
   public $searchFieldArray = array();
   public $resultFieldArray = array();
   public $allSubsArray = array();
-  
-  static function makeArray($in) {
-    return is_array($in)?
-        $in:
-        (isset($in)?
-            array($in):
-            array()
-        )
-    ;
-  }
 
   /**
    * Constructor
@@ -403,7 +393,7 @@ class IslandoraSolrResults {
     $islandora_fq = $solrQueryProcessor->solrFilters;
     //FIXME:  This isn't quite right...  It can make sense to facet on 
     //  the same field multiple times, provided it is multi-valued...
-    $fq = IslandoraSolrResults::makeArray($solrQueryProcessor->solrParams['fq']);
+    $fq = (array)$solrQueryProcessor->solrParams['fq'];
     //FIXME:  This instance of 't' should be changed to format_string for Drupal 7 (not really translateable)
     $filter = t('!key:"!name"', array(
       '!key' => $key,
