@@ -11,7 +11,7 @@ $queryClass;
 $current_display;
 
 /**
- * islandora solr search init
+ * islandora solr search implentation of hook_init()
  * @global IslandoraSolrQueryProcessor $queryClass
  * @staticvar boolean $islandora_solr_search_init
  */
@@ -92,7 +92,6 @@ function islandora_solr_search_menu() {
  */
 function islandora_solr_search_block($op = 'list', $delta = 0, $edit = array()) {
   global $queryClass;
-  islandora_solr_search_init();
 
   /*
    * Here I need to call a hook which will return module/file/class/method/name/description
@@ -533,7 +532,6 @@ function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NU
 function islandora_solr_search_block_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   global $queryClass;
-  islandora_solr_search_init();
 
   $type_id = trim($form_state['values']['type']);
   $repeat = variable_get('islandora_solr_search_block_repeat', '3');
