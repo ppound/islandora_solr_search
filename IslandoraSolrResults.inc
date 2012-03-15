@@ -163,7 +163,7 @@ class IslandoraSolrResults {
     $recordStart = $results->response->start;
     $limitResults = variable_get('islandora_solr_search_limit_result_fields', 0);
     $rawResponse = $results->getRawResponse();
-    $responseArray = json_decode($rawResponse, true);
+    $responseArray = json_decode($rawResponse, TRUE);
     $docs = $responseArray['response']['docs'];
     //retrieve 'highlighing' from resultset.
     $highlightResults = $responseArray['highlighting'];
@@ -188,7 +188,7 @@ class IslandoraSolrResults {
     foreach ($results->response->docs as $doc) {
       $rows = array();
       $row = 0;
-      $snippet = null;
+      $snippet = NULL;
       foreach ($doc as $field => $value) {
 
         if ($limitResults && empty($this->resultFieldArray[$field])) {
@@ -286,16 +286,19 @@ class IslandoraSolrResults {
         $solrQueryProcessor->solrResult->facet_counts->facet_fields :
         NULL;
     //dsm($islandora_facets);
+
+    // set display variable
+    $display = $solrQueryProcessor->display;
     
-    // look for the current display
-    global $current_display;
-    $display = isset($_GET['display']) ? $current_display : '';
-    $query = '';
-    if ($display) {
-      $query = array('display' => $display);
+    if ($display == variable_get('islandora_solr_primary_display', 'default')) {
+      $display_param = '';
+    }
+    else {
+      $display_param = $display;
     }
     
-    if (strlen(trim($solrQueryProcessor->solrQuery))) {
+    
+    if (drupal_strlen(trim($solrQueryProcessor->solrQuery))) {
 
       // Variables to build a drupal-ish unordered list
       $query_list_title = t('Query');
@@ -306,11 +309,11 @@ class IslandoraSolrResults {
       // OK, so it's a list of one.
       // In the future, we could reasonably break the query on boolean operators
       // and allow one part to be removed at a time.
-      $query = "*:*";
+      $query = " ";
       $fq = replaceSlashes($islandora_fq);
       $defType = $solrQueryProcessor->solrDefType;
-      $repr = '-';
-      $link = "islandora/solr/search/$query/$fq/$defType";
+      $repr = '-'; //Again, don't explicitly specify an image...
+      $link = "islandora/solr/search/$query/$fq/$defType/$display_param";
       $query_list_items[] .= l($repr, $link,
         array(
           'attributes' => array(
@@ -351,14 +354,14 @@ class IslandoraSolrResults {
           $exclude = FALSE;
         else {
           $exclude = TRUE;
-          $filter_name = substr($filter_name, 1);
+          $filter_name = drupal_substr($filter_name, 1);
         }
         
         $query = replaceSlashes($solrQueryProcessor->solrQuery); 
         $fq = replaceSlashes($filter_disable);
         $defType = $solrQueryProcessor->solrDefType;
-        $repr = '-';
-        $link = "islandora/solr/search/$query/$fq/$defType";
+        $repr = '-'; //I know that Kris has complained about the remove image before...  This should allow it to be changed.
+        $link = "islandora/solr/search/$query/$fq/$defType/$display_param";
         $filter_list_items[] = l($repr, $link, 
           array(
             'attributes' => array(
@@ -396,7 +399,7 @@ class IslandoraSolrResults {
     $this->allSubsArray = array_merge($this->facetFieldArray, $this->searchFieldArray, $this->resultFieldArray);
   }
   
-  function _addFacets(&$key, &$name, &$number, &$solrQueryProcessor, &$facet_count, &$list) {
+  function _addFacets(&$key, &$name, &$number, &$solrQueryProcessor, &$facet_count, &$list, $display_param) {
     $islandora_fq = $solrQueryProcessor->solrFilters;
     //FIXME:  This isn't quite right...  It can make sense to facet on 
     //  the same field multiple times, provided it is multi-valued...
@@ -439,8 +442,8 @@ class IslandoraSolrResults {
       $dt = $solrQueryProcessor->solrDefType;
       $q = $solrQueryProcessor->solrQuery;
       
-      $lplus = "islandora/solr/search/$q/$filter_include/$dt";
-      $lminus = "islandora/solr/search/$q/$filter_exclude/$dt";
+      $lplus = "islandora/solr/search/$q/$filter_include/$dt/$display_param";
+      $lminus = "islandora/solr/search/$q/$filter_exclude/$dt/$display_param";
       $text = $name;
       $attrs = array();
       
@@ -472,6 +475,7 @@ class IslandoraSolrResults {
    */
   function displayFacets($solrQueryProcessor) {
     global $base_url;
+    $default_display = variable_get('islandora_solr_primary_display', 'default');
     $facet_output = $output = '';
     $islandora_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_fields) ? $solrQueryProcessor->solrResult->facet_counts->facet_fields : array();
 
@@ -481,6 +485,16 @@ class IslandoraSolrResults {
 
     // set show more variable
     $show_more = FALSE;
+
+    // set display
+    $display = $solrQueryProcessor->display;
+    
+    if ($display == $default_display) {
+      $display_param = '';
+    }
+    else {
+      $display_param = $display;
+    }
 
     foreach ($islandora_facets as $key => $field) {
       $list_items = array();
@@ -493,7 +507,7 @@ class IslandoraSolrResults {
         unset($normal_facet_output);
 
         foreach ($field as $name => $number) {
-          $this->_addFacets($key, $name, $number, $solrQueryProcessor, $facet_count, $list_items);
+          $this->_addFacets($key, $name, $number, $solrQueryProcessor, $facet_count, $list_items, $display_param);
         }
         
         if (count($list_items) > 0) {
@@ -550,7 +564,7 @@ class IslandoraSolrResults {
     // This is a quick workaround:                                                      //
     //////////////////////////////////////////////////////////////////////////////////////
     $facet_output = str_replace('%2B', '%252B', $facet_output);
-    if(!empty($facet_output)) {
+    if (!empty($facet_output)) {
       $output .='<div class="islandora_solr_search_facet_wrap">';
       $output .= $facet_output;
       $output .= '</div>';
@@ -721,6 +735,34 @@ class IslandoraSolrResults {
     $output .= drupal_render($form['submit']);
     $output .= drupal_render($form);
     return $output;
+  }
+
+  /**
+   * Merges snippet fields with the rest of the solr results
+   * @param Apache Solr Object $results
+   * @return array
+   */
+
+  function prep_results($results) {
+    $rawResponse = $results->getRawResponse();
+    $responseArray = json_decode($rawResponse, TRUE);
+    $highlights = $responseArray['highlighting'];
+    $docs = $responseArray['response']['docs'];
+    $label = variable_get("islandora_solr_snippet_field", "");
+    if ($label) {
+      $label_parts = explode('~', $label);
+      $field_label = $label_parts[1];
+      $field_text = $label_parts[0];
+
+    }
+    foreach ($docs as &$doc) {
+      $snippet = $highlights[$doc['PID']];
+      foreach ($snippet as $key => $value) {
+      $identifier = ($key==$field_text)?$field_label:$key;
+        $doc[$identifier] = implode('<br />', $value);
+      }
+    }
+    return $docs;
   }
 
 }
