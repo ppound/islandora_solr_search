@@ -124,7 +124,7 @@ class IslandoraSolrQueryProcessor {
       'facet.mincount' => $facetMinCount,
       'facet.limit' => $facetlimit,
       'qt' => $requestHandler,
-      'hl' => 'true',
+      'hl' => isset($keys[0]) ? 'true' : NULL,
       'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,
       'hl.fragsize' => 400,
       'facet.field' => explode(',', $facetFields), //comma separated list configured in the block config

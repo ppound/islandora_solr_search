@@ -236,6 +236,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#default_value' => variable_get('islandora_solr_snippet_field', ''),
     '#description' => t("If a match is found on this field, a snippet of text will be returned, with the search term highlighted.<br />
       An optional friendly label may inserted using the following pattern <strong>dsm.Text ~ Full Text</strong><br />
+      Use an asterisk (<strong>*</strong>) for all fields, leave blank to disable highlighting.<br />
       <strong>Note:</strong><em> This feature is not supported by all display profiles.</em> "),
     '#wysiwyg' => FALSE,
   );
