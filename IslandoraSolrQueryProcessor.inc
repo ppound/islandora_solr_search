@@ -6,6 +6,9 @@
  * Depends on Apache_Solr_Php client.
  */
 
+DEFINE('SOLR_SEARCH_PATH','islandora/solr/search');
+DEFINE('SOLR_BASE_QUERY','timestamp:[* TO NOW]');
+
 /**
  * Islandora Solr Query Processor
  * @todo Stop using global vars, start using this object's vars.
@@ -25,6 +28,8 @@ class IslandoraSolrQueryProcessor {
   public $solrDefType;
   public $solrFilters;
   public $solrResult;
+
+  public $different_kinds_of_nothing = array( ' ', '%20', '%252F', '%2F', '%252F-', '' );
 
   /**
    * Constructor
