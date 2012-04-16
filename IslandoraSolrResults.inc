@@ -716,6 +716,12 @@ class IslandoraSolrResults {
     $responseArray = json_decode($rawResponse, TRUE);
     $highlights = $responseArray['highlighting'];
     $docs = $responseArray['response']['docs'];
+
+    if (!is_array($highlights)) {
+       return $docs;
+    }
+
+   // if highights exist, inetegrate them back into the doc array
     $label = variable_get("islandora_solr_snippet_field", "");
     if ($label) {
       $label_parts = explode('~', $label);
