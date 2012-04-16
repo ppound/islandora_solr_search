@@ -3,5 +3,5 @@ dependencies[] = fedora_repository
 dependencies[] = xml_forms
 description = searches a solr index
 package = Islandora Search
-version = 11.3.1
+version = 6.x-dev
 core = 6.x
