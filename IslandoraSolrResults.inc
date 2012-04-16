@@ -145,37 +145,19 @@ class IslandoraSolrResults {
       $output .= "<p>Sorry, but your search returned no results.</p>";
       return $output;
     }
-
+    $docs = $this->prep_results($results);
     $items = array();
     $type = "ol";
     $title = NULL;
     $recordStart = $results->response->start;
     $limitResults = variable_get('islandora_solr_search_limit_result_fields', 0);
-    $rawResponse = $results->getRawResponse();
-    $responseArray = json_decode($rawResponse, TRUE);
-    $docs = $responseArray['response']['docs'];
-    //retrieve 'highlighing' from resultset.
-    $highlightResults = $responseArray['highlighting'];
-    $highlights = $results->highlighting;
-    if ($highlight) {
-      foreach ($highlights as $highlight) {
-        $fields = get_object_vars($highlight);
-        $keys = array_keys($fields);
-        if (count($keys) > 0) {
-          foreach ($highlight->$keys[0] as $body) {
-            //drupal_set_message("$keys[0]  $body");
-          }
-        }
-        //drupal_set_message($highlight->$keys[0]);
-      }
-    }
 
     global $base_url;
     if (empty($results)) {
       return "no results";
     }
 
-    foreach ($results->response->docs as $doc) {
+    foreach ($docs as $doc) {
       $rows = array();
       $row = 0;
       $snippet = NULL;
@@ -198,9 +180,6 @@ class IslandoraSolrResults {
           $pid = $value;
           $l = l($value, 'fedora/repository/' . htmlspecialchars($value, ENT_QUOTES, 'utf-8'));
           $rows[$row][] = $l;
-          if (is_array($keys)) {
-            $snippet = $highlightResults[$value][$keys[0]];
-          }
         }
         else {
           $rows[$row][] = $value;
@@ -216,6 +195,7 @@ class IslandoraSolrResults {
       }
       $items[] = theme_table(NULL, $rows, array('class' => 'islandora_solr_search_results_object'));
     }
+
     $output .= theme_item_list($items, $title, $type, array('class' => 'stuff', 'start' => ($recordStart + 1)));
     return $output;
   }
@@ -739,14 +719,15 @@ class IslandoraSolrResults {
     $label = variable_get("islandora_solr_snippet_field", "");
     if ($label) {
       $label_parts = explode('~', $label);
-      $field_label = $label_parts[1];
-      $field_text = $label_parts[0];
+      $field_label = trim($label_parts[1]);
+      $field_text = trim($label_parts[0]);
     }
     foreach ($docs as &$doc) {
+      $pid = $doc['PID'];
+      unset($doc[$field_text]);
       $snippet = $highlights[$doc['PID']];
       foreach ($snippet as $key => $value) {
-        $identifier = ($key == $field_text) ? $field_label : $key;
-        $doc[$identifier] = implode('<br />', $value);
+        $doc[$field_text] = implode('<br />', $value);
       }
     }
     return $docs;
