@@ -3,5 +3,5 @@ dependencies[] = islandora_solr_search
 dependencies[] = xml_form_elements
 description = An improved 'Advanced Search' form.
 package = Islandora Search
-version = 6.x-1.x-dev
+version = 6.x-dev
 core = 6.x
