@@ -332,7 +332,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#title' => t('Debug Mode?'),
     '#return_value' => 1,
     '#default_value' => variable_get('islandora_solr_search_debug_mode', 0),
-    '#description' => t('Dumps solr query to the screen for testing'),
+    '#description' => t('Dumps solr query to the screen for testing. Warning: if you have the Drupal Apache Solr module enabled alongside this one then the debug function will not work.'),
   );
 
   $form['buttons']['submit'] = array(
