@@ -96,7 +96,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'textfield',
     '#title' => t('Limit results to namespace'),
     '#size' => 5,
-    '#default_value' => variable_get('solr_namespace_restriction', ''),
+    '#default_value' => variable_get('islandora_solr_namespace_restriction', ''),
     '#description' => t("Enter a namespace ie 'demo' to restrict results to PIDs within that namespace."),
   );
 
