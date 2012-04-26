@@ -72,6 +72,8 @@ function islandora_solr_search_uninstall() {
     'islandora_solr_primary_display_table',
     'islandora_solr_secondary_display',
     'islandora_solr_searchterms',
+    'islandora_solr_search_base_filter',
+    'islandora_solr_search_base_query',
     'islandora_solr_search_block_facets',
     'islandora_solr_search_block_facet_limit',
     'islandora_solr_search_block_facet_min_count',
