@@ -92,7 +92,7 @@ function islandora_solr_admin_settings(&$form_state) {
   );
 
 
-  $form['solr_namespace_restriction'] = array(
+  $form['islandora_solr_namespace_restriction'] = array(
     '#type' => 'textfield',
     '#title' => t('Limit results to namespace'),
     '#size' => 5,
@@ -521,7 +521,7 @@ function callback_prep() {
  * @param array $form_state
  */
 function islandora_solr_admin_settings_validate($form, &$form_state) {
-  $form_state['values']['solr_namespace_restriction'] = preg_replace('/:$/', '', $form_state['values']['solr_namespace_restriction']);
+  $form_state['values']['islandora_solr_namespace_restriction'] = preg_replace('/:$/', '', $form_state['values']['islandora_solr_namespace_restriction']);
 }
 
 /**
@@ -549,6 +549,7 @@ function solr_settings_form_submit($form, &$form_state) {
   // Exclude unnecessary elements.
   unset($form_state['values']['submit'], $form_state['values']['reset'], $form_state['values']['form_id'], $form_state['values']['op'], $form_state['values']['form_token'], $form_state['values']['form_build_id']);
 
+  dsm($form_state['values']);
   foreach ($form_state['values'] as $key => $value) {
     if ($op == t('Reset to defaults')) {
       variable_del($key);
