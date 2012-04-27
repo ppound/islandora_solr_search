@@ -94,3 +94,21 @@ function islandora_solr_search_uninstall() {
     variable_del($variable);
   }
 }
+
+/**
+ * Variable name change. Catch old value.
+ */
+function islandora_solr_search_update_6000() {
+  $ret = array();
+  // check for old variable. Return FALSE if it does not exist.
+  if ($old_val = variable_get('solr_namespace_restriction', FALSE)) {
+    // set new value
+    variable_set('islandora_solr_namespace_restriction', $old_val);
+    // remove old variable
+    variable_del('solr_namespace_restriction');
+    // set messages
+      $ret[] = array('success' => TRUE, 'query' => 'variable_set("islandora_solr_namespace_restriction")');
+      $ret[] = array('success' => TRUE, 'query' => 'variable_del("solr_namespace_restriction")');
+  }
+  return $ret;
+}
