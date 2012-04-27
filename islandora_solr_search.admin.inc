@@ -26,7 +26,6 @@ function islandora_solr_admin_settings(&$form_state) {
     return;
   }
 
-  drupal_add_js(drupal_get_path('module', 'islandora_solr_search') . '/js/solr_table.js');
   $handlers['standard'] = 'standard';
 
   $handler = !empty($form_state['values']['islandora_solr_search_block_request_handler']) ? $form_state['values']['islandora_solr_search_block_request_handler'] : variable_get('islandora_solr_search_block_request_handler', 'standard');
@@ -97,11 +96,6 @@ function islandora_solr_admin_settings(&$form_state) {
     '#title' => t('Display profiles'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
-  );
-  $form['display_profiles']['advanced_button'] = array(
-    '#type' => 'button',
-    '#value' => 'Show Full Table',
-    '#attributes' => array('class' => 'show_table_button', 'id' => 'table_button_id'),
   );
   // set the table form items
   $form['display_profiles']['islandora_solr_primary_display_table'] = array(
@@ -449,15 +443,14 @@ function theme_islandora_solr_search_admin_settings($form) {
   // default | enabled | name | Machine readable name |  weight | configuration
   $header = array();
   $header[] = array('data' => t('Default'));
-  $header[] = array('data' => t('Enabled'), 'class' => 'advanced');
+  $header[] = array('data' => t('Enabled'));
   $header[] = array('data' => t('Name'));
-  $header[] = array('data' => t('Machine readable name'), 'class' => 'advanced');
+  $header[] = array('data' => t('Machine readable name'));
   $header[] = array('data' => t('Weight'));
-  $header[] = array('data' => t('Configuration'), 'class' => 'advanced');
+  $header[] = array('data' => t('Configuration'));
 
 
   // add tabledrag features
-
   drupal_add_tabledrag('solr_config_table', 'order', 'sibling', 'solr_weight');
 
 
