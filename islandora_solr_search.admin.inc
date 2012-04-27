@@ -14,13 +14,13 @@
 function islandora_solr_admin_settings(&$form_state) {
 
   //checks for existence of PHP Solr client.
-    if (module_exists('apachesolr')) {
-      module_load_include('php', 'apachesolr', 'SolrPhpClient/Apache/Solr/Service');
-    }
-    else {
-      module_load_include('php', 'islandora_solr_search', 'SolrPhpClient/Apache/Solr/Service');
-    }
-    if (!class_exists('Apache_Solr_Service')) {
+  if (module_exists('apachesolr')) {
+    module_load_include('php', 'apachesolr', 'SolrPhpClient/Apache/Solr/Service');
+  }
+  else {
+    module_load_include('php', 'islandora_solr_search', 'SolrPhpClient/Apache/Solr/Service');
+  }
+  if (!class_exists('Apache_Solr_Service')) {
     $message = t('This module requires the !url. Please install the client directory in the root directory of this module before continuing.', array('!url' => l(t('Apache Solr php client'), 'http://code.google.com/p/solr-php-client')));
     drupal_set_message(check_plain($message));
     return;
@@ -342,6 +342,7 @@ function islandora_solr_admin_settings(&$form_state) {
   $form['query_defaults']['sort_fields'] = array(
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
 
   $form['query_defaults']['sort_fields']['islandora_solr_search_sort_field'] = array(
@@ -456,7 +457,7 @@ function theme_islandora_solr_search_admin_settings($form) {
 
   // put the rendered table in another fieldset.
   $form['display_profiles']['islandora_solr_primary_display_table']['#type'] = 'item';
-  $form['display_profiles']['islandora_solr_primary_display_table']['#title'] = t('Primary Display Profile');
+  $form['display_profiles']['islandora_solr_primary_display_table']['#title'] = t('Primary Display Profiles');
   $form['display_profiles']['islandora_solr_primary_display_table']['#description'] = t('Preferred normal display profile for search results.  These may be provided by third-party modules.');
   $form['display_profiles']['islandora_solr_primary_display_table']['#value'] = theme('table', $header, $rows, array('id' => 'solr-primary-display-table'));
 
