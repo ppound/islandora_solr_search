@@ -312,7 +312,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Query defaults'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
   );
   $form['query_defaults']['islandora_solr_search_namespace_restriction'] = array(
     '#type' => 'textfield',
@@ -341,8 +341,8 @@ function islandora_solr_admin_settings(&$form_state) {
   );
   $form['query_defaults']['sort_fields'] = array(
     '#type' => 'fieldset',
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
   );
 
   $form['query_defaults']['sort_fields']['islandora_solr_search_sort_field'] = array(
