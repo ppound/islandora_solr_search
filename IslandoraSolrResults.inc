@@ -42,7 +42,9 @@ class IslandoraSolrResults {
    */
   function displayResults($solrQueryProcessor, $title = NULL, $output = '') {
     
-    // set variable to collect returned data.
+    // set variables to collect returned data.
+    $results = NULL;
+    $secondary_profiles = NULL;
     $elements = array();
 
     // title
@@ -73,13 +75,13 @@ class IslandoraSolrResults {
       $elements['solr_debug'] = $this->printDebugOutput($solrResult);
     }
 
-    // secondary display profiles
+    // rendered secondary display profiles
     $secondary_profiles = $this->addSecondaries();
     
-    // results
+    // rendered results
     $results = $this->printResults($apacheSolrResult);
         
-    // theme layout
+    // return themed layout
     return theme('islandora_solr_search', $results, $secondary_profiles, $elements);
   }
 
@@ -145,53 +147,59 @@ class IslandoraSolrResults {
    * @param Apache_Solr_Object $results
    */
   function printResults($results) {
-    // Check for empty resultset
-    if ((int) $results->response->numFound === 0) {
-      $output .= "<p>Sorry, but your search returned no results.</p>";
-      return $output;
-    }
+    // set variables
+    $results_array = array();
+    $elements = array();
+    $output = '';
+    
+    // set base_url
+    global $base_url;
+    
+    // total
+    $elements['solr_total'] = $results->response->numFound;
+
+    // start
+    $elements['solr_start'] = $results->response->start;
+    
+    // get prepared search results
     $docs = $this->prep_results($results);
 
-    $items = array();
-    $type = "ol";
-    $title = NULL;
-    $recordStart = $results->response->start;
+    // optionally limit results to values given
     $limitResults = variable_get('islandora_solr_search_limit_result_fields', 0);
 
-    global $base_url;
-    if (empty($results)) {
-      return "no results";
-    }
-
+    // loop over results array
     foreach ($docs as $doc) {
       $rows = array();
-      $row = 0;
-      $snippet = NULL;
+      $row = 0; // keeping $row in there for now until the snippet issue is cleared out
+      $snippet = NULL; // @TODO: how is this suposed to work if the $snippet always is set to NULL ?
+
+      // loop over individual results to process fields
       foreach ($doc as $field => $value) {
 
+        // check if this field should be included
         if ($limitResults && empty($this->resultFieldArray[$field])) {
           continue;
         }
 
+        // check for field label substitutions
         $translated_field_name = isset($this->allSubsArray[$field]) ? $this->allSubsArray[$field] : $field;
-        $rows[$row][] = array(
-          'data' => $translated_field_name,
-          'header' => TRUE,
-        );
+
+        // add label
+        $rows[$field]['label'] = $translated_field_name;
+
+        // add class: render solr field name to string that can be used as class name
+        $rows[$field]['class'] = strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
+
+        // split value if the result value is an array
         if (is_array($value)) {
           $value = implode(", ", $value);
         }
+        // add value
+        $rows[$field]['value'] = $value;
 
-        if ($field == 'PID') {
-          $pid = $value;
-          $l = l($value, 'fedora/repository/' . htmlspecialchars($value, ENT_QUOTES, 'utf-8'));
-          $rows[$row][] = $l;
-        }
-        else {
-          $rows[$row][] = $value;
-        }
-        $row++;
+        $row++; // keeping $row in there for now until the snippet issue is cleared out
       }
+      // @TODO: how is this suposed to work if the $snippet always is set to NULL ?
       if ($snippet) {
         $rows[$row][] = array(
           'data' => 'Full Text',
@@ -199,11 +207,12 @@ class IslandoraSolrResults {
         );
         $rows[$row][] = $snippet[0];
       }
-      $items[] = theme_table(NULL, $rows, array('class' => 'islandora_solr_search_results_object'));
+      // append array to results array
+      $results_array[] = $rows;
     }
 
-    $output .= theme_item_list($items, $title, $type, array('class' => 'stuff', 'start' => ($recordStart + 1)));
-    return $output;
+    // return themed search results
+    return theme('islandora_solr_search_default', $results_array, $elements);
   }
   
   

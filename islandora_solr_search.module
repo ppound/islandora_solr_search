@@ -112,14 +112,14 @@ function islandora_solr_search_theme() {
       'path' => $path . '/theme',
       'file' => $file,
       'template' => 'islandora-solr-search',
-      'arguments' => array('results' => NULL, 'secondary_profiles' => NULL,  'elements' => NULL),
+      'arguments' => array('results' => NULL, 'secondary_profiles' => NULL,  'elements' => array()),
     ),
     // default results display
     'islandora_solr_search_default' => array(
       'path' => $path . '/theme',
       'file' => $file,
       'template' => 'islandora-solr-search-default',
-      'arguments' => array('results' => NULL),
+      'arguments' => array('results' => NULL, 'elements' => array()),
     ),
   );
 }

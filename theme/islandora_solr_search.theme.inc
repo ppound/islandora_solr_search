@@ -53,9 +53,12 @@ function islandora_solr_search_preprocess_islandora_solr_search_default(&$variab
   global $base_url;
   $variables['base_url'] = $base_url;
   
+  // elements
+  $elements = $variables['elements'];
   
-  
-  
-  
+  // make all variables in 'elements' available as variables in the template file
+  foreach ($variables['elements'] as $key => $value) {
+    $variables[$key] = $value;
+  }
   
 }
