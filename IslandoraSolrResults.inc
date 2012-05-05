@@ -41,46 +41,46 @@ class IslandoraSolrResults {
    * @return string
    */
   function displayResults($solrQueryProcessor, $title = NULL, $output = '') {
-    if (is_null($title)) { //Needed to move this, as default parameters cannot be function calls
-      $title = t("Search Results");
-    }
+    
+    // set variable to collect returned data.
+    $elements = array();
+
+    // title
+    $elements['solr_title'] = $title;
+    
+    // raw solr results
     $apacheSolrResult = $solrQueryProcessor->solrResult;
+    
+    // solr results count
+    // total solr results
     $total = (int) $apacheSolrResult->response->numFound;
+    $elements['solr_total'] = $total;
 
+    // solr start
+    // to display: $solrQueryProcessor->solrStart + ($total > 0 ? 1 : 0)
+    $elements['solr_start'] = $solrQueryProcessor->solrStart;
+
+    // solr results end
     $end = min(($solrQueryProcessor->solrLimit + $solrQueryProcessor->solrStart), $total);
+    $elements['solr_end'] = $end;
 
-    // Initialize drupal-style pager
+    // pager
     islandora_solr_search_pager_init($total, $solrQueryProcessor->solrLimit);
+    $elements['solr_pager'] = theme('pager', NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5);
 
-    $output .= $this->addSecondaries();
-
-    $output .= '<h2>' . $title . '</h2>';
-    $output .= '<div id="islandora_solr_result_count">(' . ($solrQueryProcessor->solrStart + ($total > 0 ? 1 : 0)) . ' - ' . $end . ' of ' . $total . ')</div>';
-    $output .= '<div class="content">';
-
-//    drupal_set_message(print_r($secondary_display_profiles,1));
-    // Render Drupal pager (top of search results)
-    $output .= theme('pager', NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5);
-
-    /*
-     * Then, here, we need to build links to the current query under the secondary query display
-     * profile for each such profile which uses the hook.
-     *
-     * The link should basically be $theCurrentURL with &proile=<profile_name> tacked on.
-     *
-     * Also, perhaps there's no difference between primary and secondary profiles?
-     */
-    $output .= $this->printResults($apacheSolrResult);
+    // debug (will be removed)
     if (variable_get('islandora_solr_search_debug_mode', FALSE)) {
-      $output .= $this->printDebugOutput($solrResult);
+      $elements['solr_debug'] = $this->printDebugOutput($solrResult);
     }
 
-    // Render Drupal pager (bottom of search results)
-    $output .= theme('pager', NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5);
-
-
-    $output .= "</div>"; // class = "content"
-    return $output;
+    // secondary display profiles
+    $secondary_profiles = $this->addSecondaries();
+    
+    // results
+    $results = $this->printResults($apacheSolrResult);
+        
+    // theme layout
+    return theme('islandora_solr_search', $results, $secondary_profiles, $elements);
   }
 
   function addSecondaries() {
@@ -205,6 +205,10 @@ class IslandoraSolrResults {
     $output .= theme_item_list($items, $title, $type, array('class' => 'stuff', 'start' => ($recordStart + 1)));
     return $output;
   }
+  
+  
+  
+  
 
   function printDebugOutput($results) {
     // debug dump
