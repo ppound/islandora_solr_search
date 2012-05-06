@@ -150,10 +150,6 @@ class IslandoraSolrResults {
     // set variables
     $results_array = array();
     $elements = array();
-    $output = '';
-    
-    // set base_url
-    global $base_url;
     
     // total
     $elements['solr_total'] = $results->response->numFound;
