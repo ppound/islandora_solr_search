@@ -14,7 +14,7 @@
 /**
  * hook_preprocess function for islandora_solr_search
  */
-function islandora_solr_search_preprocess_islandora_solr_search(&$variables) {
+function islandora_solr_search_preprocess_islandora_solr_wrapper(&$variables) {
   // base url
   global $base_url;
   $variables['base_url'] = $base_url;
@@ -48,7 +48,7 @@ function islandora_solr_search_preprocess_islandora_solr_search(&$variables) {
 /**
  * hook_preprocess function for islandora_solr_search_default
  */
-function islandora_solr_search_preprocess_islandora_solr_search_default(&$variables) {
+function islandora_solr_search_preprocess_islandora_solr_search(&$variables) {
   // base url
   global $base_url;
   $variables['base_url'] = $base_url;

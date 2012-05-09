@@ -82,7 +82,7 @@ class IslandoraSolrResults {
     $results = $this->printResults($apacheSolrResult);
         
     // return themed layout
-    return theme('islandora_solr_search', $results, $secondary_profiles, $elements);
+    return theme('islandora_solr_wrapper', $results, $secondary_profiles, $elements);
   }
 
   function addSecondaries() {
@@ -208,7 +208,7 @@ class IslandoraSolrResults {
     }
 
     // return themed search results
-    return theme('islandora_solr_search_default', $results_array, $elements);
+    return theme('islandora_solr_search', $results_array, $elements);
   }
   
   
