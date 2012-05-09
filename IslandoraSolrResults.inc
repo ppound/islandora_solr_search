@@ -47,8 +47,10 @@ class IslandoraSolrResults {
     $secondary_profiles = NULL;
     $elements = array();
 
-    // title
-    $elements['solr_title'] = $title;
+    // set title
+    if (!is_null($title)) {
+      drupal_set_title($title);
+    }
     
     // raw solr results
     $apacheSolrResult = $solrQueryProcessor->solrResult;

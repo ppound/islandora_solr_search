@@ -27,11 +27,6 @@ function islandora_solr_search_preprocess_islandora_solr_wrapper(&$variables) {
     $variables[$key] = $value;
   }
   
-  // title
-  if (is_null($variables['solr_title'])) { //Needed to move this, as default parameters cannot be function calls
-    $variables['solr_title'] = t("Search Results");
-  }
-  
   // results count
   $total = $elements['solr_total'];
   $end = $elements['solr_end'];

@@ -491,6 +491,9 @@ function islandora_solr_search_display() {
 function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NULL) {
   global $queryClass;
 
+  // set title
+  drupal_set_title(t('Search Results'));
+  
   if ($dismax == '-') {
     $dismax = NULL;
   }
