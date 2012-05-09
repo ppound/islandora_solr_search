@@ -119,8 +119,6 @@ class IslandoraSolrResults {
     // this means that there are no displays enabled.
     if ($array_count != $i) {
 
-      $output .= "<div id='islandora_solr_secondary_display_profiles'>";
-
       foreach ($secondary_array as $name => $status) {
         if ($status === $name) {
 
@@ -134,7 +132,6 @@ class IslandoraSolrResults {
         }
       }
 
-      $output .= "</div>";
     }
     return $output;
   }

@@ -18,7 +18,7 @@
 */
 ?>
 
-<?php print $secondary_profiles; ?>
+<div id='islandora_solr_secondary_display_profiles'><?php print $secondary_profiles; ?></div>
 <h2 class="title"><?php print $solr_title; ?></h2>
 <div id="islandora-solr-result-count"><?php print $islandora_solr_result_count; ?></div>
 <div class="islandora-solr-content">
