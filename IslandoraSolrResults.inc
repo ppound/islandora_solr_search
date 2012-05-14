@@ -52,6 +52,8 @@ class IslandoraSolrResults {
       drupal_set_title($title);
     }
     
+    // set breadcrumbs
+    
     // raw solr results
     $apacheSolrResult = $solrQueryProcessor->solrResult;
     

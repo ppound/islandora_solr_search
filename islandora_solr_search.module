@@ -312,7 +312,10 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
   $searchString = $form_state['values']['islandora_simple_search_query'];
   $searchString = str_replace('/', '~slsh~', $searchString); //replace the slash so url doesn't break
   
-  drupal_goto("islandora/solr/search/$searchString/-/dismax");
+  // set query
+  $query = array('type' => 'dismax');
+  
+  drupal_goto("islandora/solr/search/$searchString", $query);
 }
 
 /**
@@ -405,7 +408,7 @@ function islandora_solr_search_block_form_submit($form, &$form_state) {
   }
   $searchString = trim($searchString);
   $searchString = str_replace('/', '~slsh~', $searchString); //replace the slash so url doesn't break
-  drupal_goto("islandora/solr/search/$searchString/-/-");
+  drupal_goto("islandora/solr/search/$searchString");
 }
 
 /**
@@ -486,16 +489,18 @@ function islandora_solr_search_display() {
  * @param type $dismax
  * @return type
  */
-function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NULL) {
+function islandora_solr_search($query) {
   global $queryClass;
 
+  dsm($_GET);
+  
   // set title
   drupal_set_title(t('Search Results'));
   
-  if ($dismax == '-') {
-    $dismax = NULL;
-  }
-
+  // get the solr parameters except for Drupal's q parameter
+  unset($_GET['q']);
+  $params = $_GET;
+    
   // get profiles
   $primary_profiles = module_invoke_all('islandora_solr_primary_display');
   $secondary_profiles = module_invoke_all('islandora_solr_secondary_display');
@@ -520,16 +525,22 @@ function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NU
     $enabled_profiles = array(variable_get('islandora_solr_primary_display', 'default'));
   }
 
-  // set primary display
-  //$islandora_solr_primary_display = ((isset($_GET['display']) AND in_array($_GET['display'], $enabled_profiles)) ? $_GET['display'] : variable_get('islandora_solr_primary_display', 'default'));
-  $islandora_solr_primary_display = ((isset($display) AND in_array($display, $enabled_profiles)) ? $display : variable_get('islandora_solr_primary_display', 'default'));
+  // Set primary display
+  // check if display param is an valid, enabled profile. Else show default.
+  if (isset($params['display']) AND in_array($params['display'], $enabled_profiles)) {
+    $islandora_solr_primary_display = $params['display'];
+  }
+  else {
+    $islandora_solr_primary_display = variable_get('islandora_solr_primary_display', 'default');
+    // unset invalid parameter
+    unset($params['display']);
+  }
+  
+  // check if secondary display profile is viewed
   $islandora_solr_selected_display = isset($_GET['solr_profile']) ? $_GET['solr_profile'] : NULL;
 
-  // don't add a display name to links set in the default display
-  $display = $islandora_solr_primary_display;
-  
   // Build and execute Apache Solr query
-  $queryResult = $queryClass->buildAndExecuteQuery($query, $fq, $dismax, $display);
+  $queryResult = $queryClass->buildAndExecuteQuery($query, $params);
 
   // TODO: Also filter secondary displays against those checked in the configuration options.
   if (isset($secondary_profiles[$islandora_solr_selected_display])) {
@@ -576,9 +587,6 @@ function islandora_solr_search($query, $fq = NULL, $dismax = NULL, $display = NU
   }
 
   return $output;
-
-
-//  return $queryResult;
 }
 
 /**

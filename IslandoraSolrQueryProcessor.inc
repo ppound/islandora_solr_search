@@ -48,18 +48,17 @@ class IslandoraSolrQueryProcessor {
   /**
    * Build and execute a query
    * @param type $query
-   * @param type $fq
-   * @param type $dismax
+   * @param type $params
    * @return type
    */
-  function buildAndExecuteQuery($query, $fq=NULL, $dismax=NULL, $display = NULL, $params = NULL) {
+  function buildAndExecuteQuery($query, $params = NULL) {
     if (variable_get('islandora_solr_search_block_request_handler', NULL) == 'standard') {
 
       if (!$query || $query == ' ') {
         $query = '%252F';
       }
     }
-    $this->buildQuery($query, $fq, $dismax, $display, $params);
+    $this->buildQuery($query, $params);
 
     return $this->executeQuery();
   }
@@ -68,55 +67,63 @@ class IslandoraSolrQueryProcessor {
    * Default implementation for solr search.  You can configure others in the block config settings
    * @todo Get rid of the global $facetArray?  It is the only global yet relied upon.
    */
-  function buildQuery($query, $fq = NULL, $dismax = NULL, $display = NULL, $params = array() ) {
+  function buildQuery($query, $params = array() ) {
+    // set global variables
+    global $base_url, $facetArray; //used by facet block as well
+    
     // Get pager variable
     $startPage = isset($_GET['page']) ? $_GET['page'] : 0;
-    $this->solrLimit = variable_get('islandora_solr_search_num_of_results', 20);
-    global $base_url, $facetArray; //used by facet block as well
-    // -- cut here --
-    // Get display profile
-    $islandora_solr_primary_display = variable_get('islandora_solr_primary_display', 'default');
-    $profiles = module_invoke_all("islandora_solr_primary_display");
-    if (!isset($profiles[$islandora_solr_primary_display])) {
-      drupal_set_message(t('There is an error in the solr search configuration: the display profile is not found.'), 'error');
-      return "";
-    }
-    $profile = $profiles[$islandora_solr_primary_display];
-    if ($profile['params']) {
-      foreach ($profile['params'] as $param) {
-        $params[] = $param;
-      }
-    }
     
-    if ($display == variable_get('islandora_solr_primary_display', 'default')) {
-      $display_param = '';
+    // set results limit
+    $this->solrLimit = variable_get('islandora_solr_search_num_of_results', 20);
+
+    // Set display
+    if (!isset($params['display'])) {
+      $display = variable_get('islandora_solr_primary_display', 'default');
+      unset($params['display']);
     }
     else {
-      $display_param = $display;
+      $display = $params['display'];  
     }
     
+    // if current display is default, unset display key.
+    if($display == variable_get('islandora_solr_primary_display', 'default') ) {
+
+    }
+   
+    // display profiles can contain parameters. // @TODO: document that this is possible.
+    $profiles = module_invoke_all("islandora_solr_primary_display");
+    $profile = $profiles[$display];
+    if ($profile['params']) {
+      foreach ($profile['params'] as $param) {
+        $profile_params[] = $param;
+      }
+    }
+
     // Include the file for the display profile
     require_once(drupal_get_path('module', $profile['module']) . '/' . $profile['file']);
 
-    // Set display class and function vars
+    // Set display class and function vars // @TODO: these two variables aren't used anywhere. Remove them?
     $solrClass = $profile['class'];
     $solrFunction = $profile['function'];
 
-    // -- end cut here --
+    
+    // Set query
     //fix the query as some characters will break the search : and / slash are examples
     $this->solrQuery = urldecode(restoreSlashes($query));
 
-    if (empty($this->solrQuery) || in_array($this->solrQuery,$this->different_kinds_of_nothing)) {
+    if (empty($this->solrQuery) || in_array($this->solrQuery, $this->different_kinds_of_nothing)) {
       $this->solrQuery = ' '; //so we can allow empty queries to dismax
     }
 
+    // Set parameters
     $facetArray = array();
     $facetFields = '';
     $rawFacetVals = variable_get("islandora_solr_search_block_facets", 'dc.subject,dc.type');
     $facetArray = islandora_build_substitution_list($rawFacetVals);
     $facetFields = implode(",", array_keys($facetArray));
     $keys = array('');
-    $snippetArray = islandora_build_substitution_list(variable_get("islandora_solr_snippet_field", ""));
+    $snippetArray = islandora_build_substitution_list(variable_get("islandora_solr_snippet_field", ''));
     if (is_array($snippetArray)) {
       $keys = array_keys($snippetArray);
     }
@@ -136,14 +143,16 @@ class IslandoraSolrQueryProcessor {
       'facet.field' => explode(',', $facetFields), //comma separated list configured in the block config
     );
 
-
-    if (is_array($params)) {
-      $this->solrParams = array_merge($this->solrParams, $params);
+    // if the display has parameters defined, add them to the solr parameters array
+    if (is_array($profile_params)) {
+      $this->solrParams = array_merge($this->solrParams, $profile_params);
     }
-    $debugQuery = (variable_get('islandora_solr_search_debug_mode', 0) ? "TRUE" : NULL ); //any val incl. 'FALSE' is treated as TRUE by Solr
+    $debugQuery = (variable_get('islandora_solr_search_debug_mode', 0) ? "TRUE" : NULL ); //any val incl. 'FALSE' is treated as TRUE by Solr // @TODO: this variable isn't used anywhere - remove?
 
+    // Set base filters
     $base_filters = preg_split("/\\r\\n|\\n|\\r/", variable_get('islandora_solr_search_base_filter', ''), -1, PREG_SPLIT_NO_EMPTY);
 
+    // Set Solr Filters
     if ($fq != NULL && $fq != '-') {
       $fq = restoreSlashes($fq); //put the slash back
 
@@ -157,12 +166,16 @@ class IslandoraSolrQueryProcessor {
     if (empty($islandora_fq)) {
       $islandora_fq = '-';
     }
-    if ($dismax != NULL) {
-      $this->solrDefType = $dismax;
-      $this->solrParams['defType'] = $dismax;
+
+    // Set Solr type (dismax)
+    if ($params['type'] != NULL) {
+      $this->solrDefType = $params['type'];
+      $this->solrParams['defType'] = $params['type'];
     }
     $this->solrStart = max(0, $startPage) * $this->solrLimit;
 
+    
+    // Breadcrumbs
     // The breadcrumb should go in the display class
     $queryurl = SOLR_SEARCH_PATH . "/" . replaceSlashes($this->solrQuery);
     $breadcrumb_fq = $islandora_fq;
@@ -218,6 +231,7 @@ class IslandoraSolrQueryProcessor {
       // append the catch-all query to any queries which lack it?
       // No, not under normal circumstances, and it would break dismax.
     }
+    
     // restrict results based on specified namespace
     $namespace = trim(variable_get('islandora_solr_search_namespace_restriction', NULL));
     if ($namespace) {
@@ -226,12 +240,9 @@ class IslandoraSolrQueryProcessor {
 
 
     // if no qf fields are specified in rthe requestHandler a default list is supplied here for dismax searches
-    if (!variable_get('dismax_allowed', 0) && $dismax == "dismax") {
+    if (!variable_get('dismax_allowed', 0) && $params['type'] == "dismax") {
       $this->solrParams['qf'] = 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type';
     }
-
-    // add display to $this object
-    $this->display = $display;
 
     // At this point let's invoke a hook for third-party modules to mess about
     // with the query parameters if they need to.  Third party modules may alter
@@ -253,7 +264,7 @@ class IslandoraSolrQueryProcessor {
    * @return type
    */
   function executeQuery() {
-
+    
     // //////////////////////////////////////////////////////////////////////////// //
     // Right here the function should be split.  One function to execute the query, //
     // another to set up pager variables and generate display.                      //
