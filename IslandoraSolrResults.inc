@@ -53,6 +53,7 @@ class IslandoraSolrResults {
     }
     
     // set breadcrumbs
+    $this->setBreadcrumbs($solrQueryProcessor);
     
     // raw solr results
     $apacheSolrResult = $solrQueryProcessor->solrResult;
@@ -365,6 +366,63 @@ class IslandoraSolrResults {
     return $output;
   }
 
+  /**
+   * Function: setBreadcrumbs
+   * 
+   * Description: sets the drupal breadcrumbs based on the current query and filters. 
+   */
+  function setBreadcrumbs($solrQueryProcessor) {
+    dsm($solrQueryProcessor);
+    
+    // set url
+    $queryurl = SOLR_SEARCH_PATH . "/" . replaceSlashes($solrQueryProcessor->solrQuery);
+    
+    $breadcrumb_fq = $islandora_fq;
+    $facet = NULL; // Nigelb, This is being used outside of the for loop where it is being created this is probably incorrect.
+    if (strcmp($islandora_fq, "-")) {
+      foreach (csv_explode(IslandoraSolrQueryProcessor::$facetSeparator, $islandora_fq, '"', TRUE) as $facet) {
+        $field = drupal_substr($facet, 0, strpos($facet, ":"));
+        $value = restoreSlashes(trim(drupal_substr($facet, strpos($facet, ":") + 1), '"'));
+        $options = array('html' => TRUE);
+        $options['attributes']['title'] = $facet;
+        $crumblink = $queryurl . "/" . $breadcrumb_fq . (empty($this->solrDefType) ? '/-' : '/' . $solrQueryProcessor->solrDefType) . '/' . $display_param;
+        $cut_fq = $solrQueryProcessor->delete_filter($islandora_fq, $facet);
+        $cutlink = $queryurl . "/" . $cut_fq . (empty($solrQueryProcessor->solrDefType) ? '/-' : '/' . $solrQueryProcessor->solrDefType) . '/' . $display_param;
+        if (!strncmp("-", $facet, 1)) {
+          $options['attributes']['class'] = "strikethrough";
+        }
+        $breadcrumb[] = l($value, $crumblink, $options) .
+            " <span class='islandora_solr_search_breadcrumb_super'>(" . l(t('x'), $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
+        $breadcrumb_fq = $solrQueryProcessor->delete_filter($breadcrumb_fq, $facet);
+      }
+    }
+    
+    
+    if (!in_array($solrQueryProcessor->solrQuery, $solrQueryProcessor->different_kinds_of_nothing)) {
+      $cutlink = SOLR_SEARCH_PATH . "/ /" . $islandora_fq . '/-/' . $display_param;
+      $queryval = $solrQueryProcessor->solrQuery;
+      $tokens = explode(' ', $queryval);
+      foreach ($tokens as $token) {
+        preg_match("/^.*:/", $token, $matches);
+        if (isset($matches[0])) {
+          $queryval = str_replace($matches[0], "", $queryval);
+        }
+      }
+      if ($queryval != '%252F') {
+        $queryurl = "$queryurl/-/{$solrQueryProcessor->solrDefType}/$display_param";
+        $breadcrumb[] = l($queryval, $queryurl, array('attributes' => array('title' => $solrQueryProcessor->solrQuery))) .
+            " <span class='islandora_solr_search_breadcrumb_super'>(" . l(t('x'), $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
+      }
+    }
+    
+    
+    $breadcrumb[] = l(t('Home'), NULL);
+    if (!empty($breadcrumb))
+      $breadcrumb = array_reverse($breadcrumb);
+    drupal_set_breadcrumb($breadcrumb);
+    
+  }
+  
   /**
    * Function: prepFieldSubstitutions
    *
