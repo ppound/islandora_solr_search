@@ -24,12 +24,11 @@ class IslandoraSolrQueryProcessor {
   
   public $solrQuery;
   public $internalSolrQuery; // query alternative set if solrQuery is empty
-  public $solrParams;
+  public $solrParams = array();
   public $internalSolrParams; // parameters from url
   public $solrStart;
   public $solrLimit;
   public $solrDefType;
-  public $solrFilters;
 
   public $solrResult;
 
@@ -68,21 +67,18 @@ class IslandoraSolrQueryProcessor {
 
   /**
    * Default implementation for solr search.  You can configure others in the block config settings
-   * @todo Get rid of the global $facetArray?  It is the only global yet relied upon.
    */
   function buildQuery($query, $params = array() ) {
-    // set global variables
-    global $facetArray; //used by facet block as well
     
     // set internal parameters gathered from the url
     $this->internalSolrParams = $params;
     
     // Set Solr type (dismax)
-    if ($this->internalSolrParams['type'] != NULL) {
+    if ($this->internalSolrParams['type'] == 'dismax') {
       $this->solrDefType = $this->internalSolrParams['type'];
       $this->solrParams['defType'] = $this->internalSolrParams['type'];
     }
-    
+
     // Set query
     // fix the query as some characters will break the search : and / slash are examples
     $this->solrQuery = urldecode(restoreSlashes($query));
@@ -97,19 +93,17 @@ class IslandoraSolrQueryProcessor {
       $this->solrDefType = NULL;
       $this->solrParams['defType'] = NULL;
     }
-
     
-    // Set display
-    if (!isset($this->internalSolrParams['display'])) {
-      $display = variable_get('islandora_solr_primary_display', 'default');
-      unset($this->internalSolrParams['display']);
+    // Set display variable
+    if (isset($this->internalSolrParams['display'])) {
+      $display = $this->internalSolrParams['display'];
+      // if current display is default, unset display key.
+      if ($display == variable_get('islandora_solr_primary_display', 'default') ) {
+        unset($this->internalSolrParams['display']);
+      }
     }
     else {
-      $display = $this->internalSolrParams['display'];  
-    }
-    
-    // if current display is default, unset display key.
-    if ($display == variable_get('islandora_solr_primary_display', 'default') ) {
+      $display = variable_get('islandora_solr_primary_display', 'default');
       unset($this->internalSolrParams['display']);
     }
    
@@ -148,58 +142,47 @@ class IslandoraSolrQueryProcessor {
 
 
     
-    
-    // Set parameters
-    $facetArray = array(); 
-    $facetFields = '';
-    $rawFacetVals = variable_get("islandora_solr_search_block_facets", 'dc.subject ~ Subject,dc.type ~ Type');
-    $facetArray = islandora_build_substitution_list($rawFacetVals);
-    $facetFields = implode(",", array_keys($facetArray));
-    $keys = array('');
-    $snippetArray = islandora_build_substitution_list(variable_get("islandora_solr_snippet_field", ''));
-    if (is_array($snippetArray)) {
-      $keys = array_keys($snippetArray);
+    // set facet parameters
+    // set variables
+    $raw_facet_vals = variable_get("islandora_solr_search_block_facets", 'dc.subject ~ Subject,dc.type ~ Type');
+    $facet_array = islandora_build_substitution_list($raw_facet_vals);
+    $facet_fields = implode(",", array_keys($facet_array));
+    $keys = array();
+    $snippet_array = islandora_build_substitution_list(variable_get("islandora_solr_snippet_field", ''));
+    if (is_array($snippet_array)) {
+      $keys = array_keys($snippet_array);
     }
-
-    $facetlimit = variable_get('islandora_solr_search_block_facet_limit', '12');
-    $facetMinCount = variable_get('islandora_solr_search_block_facet_min_count', '2');
-    $requestHandler = variable_get("islandora_solr_search_block_request_handler", "standard");
-    $this->solrParams = array(
+    // set params
+    $params_array = array(
       'facet' => 'true',
-      'facet.mincount' => $facetMinCount,
-      'facet.limit' => $facetlimit,
-      'qt' => $requestHandler,
+      'facet.mincount' => variable_get('islandora_solr_search_block_facet_min_count', '2'),
+      'facet.limit' => variable_get('islandora_solr_search_block_facet_limit', '12'),
+      'qt' => variable_get("islandora_solr_search_block_request_handler", "standard"),
       'hl' => isset($keys[0]) ? 'true' : NULL,
       'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,
       'hl.fragsize' => 400,
-      'facet.field' => explode(',', $facetFields), //comma separated list configured in the block config
+      'facet.field' => explode(',', $facet_fields), //comma separated list configured in the block config
     );
+    // add parameters
+    $this->solrParams = array_merge($this->solrParams, $params_array);
 
     // set debug query
     $debugQuery = (variable_get('islandora_solr_search_debug_mode', 0) ? "TRUE" : NULL ); //any val incl. 'FALSE' is treated as TRUE by Solr // @TODO: this variable isn't used anywhere - remove?
 
-    // Set base filters
+    // set base filters
     $base_filters = preg_split("/\\r\\n|\\n|\\r/", variable_get('islandora_solr_search_base_filter', ''), -1, PREG_SPLIT_NO_EMPTY);
-
-    // Set Solr Filters
-    if ($fq != NULL && $fq != '-') {
-      $fq = restoreSlashes($fq); //put the slash back
-
-      $fqs = csv_explode(IslandoraSolrQueryProcessor::$facetSeparator, $fq, '"', TRUE); //to filter by more then one facet we will separate them by~ for nowseparate them by~ for now
-      $fqs = array_merge($fqs,$base_filters);
-      $this->solrParams['fq'] = $fqs;
-      $islandora_fq = replaceSlashes($fq); //remove the slash here as we will be using this in url's
-    } elseif (!empty($base_filters)) {
+    
+    // set filter parameters - both from url and admin settings.
+    if (is_array($this->internalSolrParams['f'])) {
+      $this->solrParams['fq'] = $this->internalSolrParams['f'];
+      if (!empty($base_filters)) {
+        $this->solrParams['fq'] = array_merge($this->internalSolrParams['f'], $base_filters);
+      }
+    }
+    elseif (!empty($base_filters)) {
       $this->solrParams['fq'] = $base_filters;
     }
-    if (empty($islandora_fq)) {
-      $islandora_fq = '-';
-    }
-
-
-    // set solr filters
-    $this->solrFilters = $islandora_fq;
-
+    
     
     // restrict results based on specified namespace
     $namespace = trim(variable_get('islandora_solr_search_namespace_restriction', NULL));
@@ -212,9 +195,7 @@ class IslandoraSolrQueryProcessor {
       $this->solrParams['qf'] = 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type';
     }
 
-    // At this point let's invoke a hook for third-party modules to mess about
-    // with the query parameters if they need to.  Third party modules may alter
-    // this object's query parameters if they wish.
+    // Invoke a hook for third-party modules to alter the parameters.
     module_invoke_all('islandora_solr_search_query_processor', $this); //The hook implementation needs to specify that it takes a reference, not be passed one
     $processor->solrParams['fq'][] = $fq; // @TODO figure out where $processor is set - what does it do?
     return;
