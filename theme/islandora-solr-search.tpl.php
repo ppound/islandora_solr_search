@@ -6,7 +6,7 @@
 *
 * Variables available:
 * - $variables: all array elements of $variables can be used as a variable. e.g. $base_url equals $variables['base_url']
-* - $base_url: The base url of the current website. eg: http://example.com .
+* - $base_url: The base url of the current website. eg: http://example.com/drupal .
 * - $user: The user object.
 *
 * - $results: Primary profile results array
@@ -15,7 +15,7 @@
 ?>
 
 <?php if (empty($results)): ?>
-  <p><?php print t('Sorry, but your search returned no results.'); ?></p>
+  <p class="no-results"><?php print t('Sorry, but your search returned no results.'); ?></p>
 <?php else: ?>
   <!-- Ordered list -->
   <ol class="islandora-solr-search-results" start="<?php print $solr_start + 1 ?>">

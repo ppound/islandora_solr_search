@@ -354,8 +354,7 @@ class IslandoraSolrResults {
    * Description: sets the drupal breadcrumbs based on the current query and filters. 
    */
   function setBreadcrumbs($solrQueryProcessor) {
-    dsm($solrQueryProcessor);
-    
+
     // set url
     $queryurl = SOLR_SEARCH_PATH . "/" . replaceSlashes($solrQueryProcessor->solrQuery);
     
@@ -552,61 +551,62 @@ class IslandoraSolrResults {
     $fq = (array) $solrQueryProcessor->solrParams['fq'];
     
     // @TODO: Should be changed to format_string for Drupal 7
+    // @TODO: does this check for exclude filters? -PID:"foo"
     $filter = $key . ':"' . replaceSlashes($value) . '"'; // PID:"foo"
 
     // check if item should show up
     $disable_link = (array_search($filter, $fq) !== FALSE) || $number == $solrQueryProcessor->solrResult->response->numFound;
 
-
-    
     // if link isn't disabled
     if (!$disable_link) {
 
       // set variables
       $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
-      // get parameters set in the url
-      $params = $solrQueryProcessor->internalSolrParams;
+
+      $query_plus = array();
+      $query_minus = array();
       
-      if (empty($params)) {
-        $params = array();
+      // parameters set in url
+      $params = $solrQueryProcessor->internalSolrParams;
+      // set filter key if there are no filters included
+      if (empty($params['f'])) {
+        $params['f'] = array();
       }
       
-     
-      $query_plus = $params;
-      $query_minus = $params;
-     
-      // include string
-      $query_plus['f'][] = $filter;
-   
-      // exclude string
-      $query_minus['f'][] = '-' . $filter;
-      //$query_minus['f'][] = '-' . $filter;
-      
-      // set basic attributes
-      $attributes = array('rel' => 'nofollow');
+      // array_merge only seems to merge the first level of keys.
+      // $a['f'][0] = 'a' would not merge correctly with $b['f'][0] = 'b'
+      // and $params['f'][] = 'a' would modify the global variable
+      // thus, we merge the filter key ['f'] individually
+      $f_plus['f'] = array_merge($params['f'], array($filter));
+      $f_minus['f'] = array_merge($params['f'], array('-' . $filter));
+      // merge individually merged filter array
+      $query_plus = array_merge($params, $f_plus);
+      $query_minus = array_merge($params, $f_minus);
 
-      $attributes_value = $attributes_plus = $attributes_minus = $attributes;
+      // set basic attributes
+      $attr = array('rel' => 'nofollow');
+
+      $attr_plus = $attr_minus = $attr;
       
-      $attributes_value['href'] = url($path, array('query' => $query_plus));
-      $attributes_plus['href'] = url($path, array('query' => $query_plus));
-      $attributes_minus['href'] = url($path, array('query' => $query_minus));
+      // add url
+      $attr['href'] = url($path, array('query' => $query_plus));
+      $attr_plus['href'] = url($path, array('query' => $query_plus));
+      $attr_minus['href'] = url($path, array('query' => $query_minus));
       
-      $attributes_plus['class'] = 'plus';
-      $attributes_minus['class'] = 'minus';
+      // add classes
+      $attr_plus['class'] = 'plus';
+      $attr_minus['class'] = 'minus';
       
       // create links
       // we're not using l() because of active classes: http://drupal.org/node/41595
-      $list[] = '<a' . drupal_attributes($attributes_value) . '>' . $value . '</a>' . ' (' . $number . ')' .
+      $list[] = '<a' . drupal_attributes($attr) . '>' . $value . '</a>' . ' (' . $number . ')' .
           '<span class="plusminus">' .
-          '<a' . drupal_attributes($attributes_plus) . '>+</a>'
+          '<a' . drupal_attributes($attr_plus) . '>+</a>'
           . ' ' .
-          '<a' . drupal_attributes($attributes_minus) . '>-</a>'
+          '<a' . drupal_attributes($attr_minus) . '>-</a>'
           . '</span>';
       
       $facet_count++;
-      
-
-      
     }
   }
   
