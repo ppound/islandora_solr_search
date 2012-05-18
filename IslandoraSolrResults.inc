@@ -10,8 +10,6 @@
  */
 class IslandoraSolrResults {
 
-  static $facetSeparator = '~'; //used to separate facets in url
-  static $slashReplacement = '~slsh~'; // a pattern used to replace / in url's the slash breaks drupal clean url's
   public static $SEARCH_CLASS_ADVANCED_SEARCH_NUMBER_FIELDS = 5;
   public $facetFieldArray = array();
   public $searchFieldArray = array();
@@ -354,50 +352,146 @@ class IslandoraSolrResults {
    * Description: sets the drupal breadcrumbs based on the current query and filters. 
    */
   function setBreadcrumbs($solrQueryProcessor) {
-
-    // set url
-    $queryurl = SOLR_SEARCH_PATH . "/" . replaceSlashes($solrQueryProcessor->solrQuery);
     
-    $breadcrumb_fq = $islandora_fq;
-    $facet = NULL; // Nigelb, This is being used outside of the for loop where it is being created this is probably incorrect.
-    if (strcmp($islandora_fq, "-")) {
-      foreach (csv_explode(IslandoraSolrQueryProcessor::$facetSeparator, $islandora_fq, '"', TRUE) as $facet) {
-        $field = drupal_substr($facet, 0, strpos($facet, ":"));
-        $value = restoreSlashes(trim(drupal_substr($facet, strpos($facet, ":") + 1), '"'));
-        $options = array('html' => TRUE);
-        $options['attributes']['title'] = $facet;
-        $crumblink = $queryurl . "/" . $breadcrumb_fq . (empty($this->solrDefType) ? '/-' : '/' . $solrQueryProcessor->solrDefType) . '/' . $display_param;
-        $cut_fq = $solrQueryProcessor->delete_filter($islandora_fq, $facet);
-        $cutlink = $queryurl . "/" . $cut_fq . (empty($solrQueryProcessor->solrDefType) ? '/-' : '/' . $solrQueryProcessor->solrDefType) . '/' . $display_param;
-        if (!strncmp("-", $facet, 1)) {
-          $options['attributes']['class'] = "strikethrough";
-        }
-        $breadcrumb[] = l($value, $crumblink, $options) .
-            " <span class='islandora_solr_search_breadcrumb_super'>(" . l(t('x'), $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
-        $breadcrumb_fq = $solrQueryProcessor->delete_filter($breadcrumb_fq, $facet);
-      }
+    // set path
+    $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
+    
+    // set breadcrumb variable
+    $breadcrumb = array();
+    
+    // get user provided filter parameters
+    $fq = $solrQueryProcessor->internalSolrParams['f'];
+    
+    // parameters set in url
+    $params = $solrQueryProcessor->internalSolrParams;
+    // set filter key if there are no filters included
+    if (empty($params['f'])) {
+      $params['f'] = array();
     }
     
+    // loop to create filter breadcrumbs if available
+    if (!empty($fq)) {
+      // set var
+      $f['f'] = array();
+      foreach ($fq as $key => $filter) {
+
+        // check for exclude filter
+        $exclude = FALSE;
+        if ($filter[0] == '-') {
+          $exclude = TRUE;
+        }
+
+        // split the filter into field and value
+        $filter_split = explode(':', $filter, 2);
+        // trim brackets
+        $filter_split[1] = trim($filter_split[1], "\"");
+
+       
+        // increment filter array with current filter (for breadcrumb link)
+        $query = array();
+        $query_diff = array_diff($params, array('f' => array()));
+        $f = array_merge_recursive($f, array('f' => array($filter)));
+        $query = array_merge($query_diff, $f);
+
+        // pull out filter (for x link)
+        $query_x = array();
+        $f_x['f'] = array_diff($params['f'], array($filter));
+        $query_x = array_merge($params, $f_x);
+        // resetting the filter key's order // @TODO find a cleaner way to do this.
+        if ($query_x['f']) {
+          $query_x['f'] = array_merge(array(), $query_x['f']);
+        }
+
+        // set attributes variable
+        $attr = array();
+        // set title
+        $attr['title'] = $filter;
+        // set rel
+        $attr['rel'] = 'nofollow';
+        // exclude filter: add class "strikethrough"
+        if ($exclude) {
+          $attr['class'] = 'strikethrough';
+        }
+        // set url
+        $attr['href'] = url($path, array('query' => $query));
+
+        // set attributes variable for remove link
+        $attr_x = array();
+        // set title
+        $attr_x['title'] = t('Remove') . ' ' . $filter;
+        // set rel
+        $attr_x['rel'] = 'nofollow';      
+        // set url
+        $attr_x['href'] = url($path, array('query' => $query_x));
+
+        // create links
+        // we're not using l() because of active classes: http://drupal.org/node/41595
+        $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $filter_split[1] . '</a>'
+              . '<span class="islandora_solr_search_breadcrumb_super">(<a' . drupal_attributes($attr_x) . '>' . t('x') . '</a>)</span>';
+
+      }
+
+      // at this point reverse the breadcrumbs array (only contains filters)
+      $breadcrumb = array_reverse($breadcrumb);
+    }
     
     if (!in_array($solrQueryProcessor->solrQuery, $solrQueryProcessor->different_kinds_of_nothing)) {
-      $cutlink = SOLR_SEARCH_PATH . "/ /" . $islandora_fq . '/-/' . $display_param;
-      $queryval = $solrQueryProcessor->solrQuery;
-      $tokens = explode(' ', $queryval);
-      foreach ($tokens as $token) {
-        preg_match("/^.*:/", $token, $matches);
-        if (isset($matches[0])) {
-          $queryval = str_replace($matches[0], "", $queryval);
+      // get query value
+      $query_value = $solrQueryProcessor->solrQuery;
+      
+      // remove all filters for this breadcrumb
+      $query = array();
+      $query = array_diff($params, array('f' => array()));
+      
+      // remove button keeps all parameters (query gets removed instead)
+      $query_x = array();
+      $query_x = $params;
+
+      // remove query from path
+      $path_x = implode('/', explode('/', $path, -1)) . '/ ';
+      
+      // set attributes variable
+      $attr = array();
+      // set title
+      $attr['title'] = $query_value;
+      // set rel
+      $attr['rel'] = 'nofollow';
+      // set url
+      $attr['href'] = url($path, array('query' => $query));
+
+      // set attributes variable for remove link
+      $attr_x = array();
+      // set title
+      $attr_x['title'] = t('Remove') . ' ' . $query_value;
+      // set rel
+      $attr_x['rel'] = 'nofollow';      
+      // set url
+      $attr_x['href'] = url($path_x, array('query' => $query_x));
+
+      // remove solr fields from breadcrumb value
+      $query_explode = explode(' ', $query_value);
+      $query_implode = array();
+      foreach ($query_explode as $value) {
+        // check for first colon to split the string
+        if (strpos($value, ':') != FALSE) {
+          // split the filter into field and value
+          $value_split = explode(':', $value, 2);
+          // trim whitespace, brackets and then quotes
+          $value_split[1] = trim($value_split[1]);
+          $value_split[1] = ltrim($value_split[1], "(");
+          $value_split[1] = rtrim($value_split[1], ")");
+          $value = trim($value_split[1], "\"");
         }
+        $query_implode[] = $value;
       }
-      if ($queryval != '%252F') {
-        $queryurl = "$queryurl/-/{$solrQueryProcessor->solrDefType}/$display_param";
-        $breadcrumb[] = l($queryval, $queryurl, array('attributes' => array('title' => $solrQueryProcessor->solrQuery))) .
-            " <span class='islandora_solr_search_breadcrumb_super'>(" . l(t('x'), $cutlink, array('attributes' => array('title' => "Remove " . $facet))) . ")</span>";
-      }
+      $query_value = implode(" ", $query_implode);
+      // create links
+      // we're not using l() because of active classes: http://drupal.org/node/41595
+      $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $query_value . '</a>'
+            . '<span class="islandora_solr_search_breadcrumb_super">(<a' . drupal_attributes($attr_x) . '>' . t('x') . '</a>)</span>';
     }
     
-    
-    $breadcrumb[] = l(t('Home'), NULL);
+    $breadcrumb[] = l(t('Home'), '<front>', array('attributes' => array('title' => t('Home'))));
     if (!empty($breadcrumb))
       $breadcrumb = array_reverse($breadcrumb);
     drupal_set_breadcrumb($breadcrumb);
@@ -573,15 +667,9 @@ class IslandoraSolrResults {
         $params['f'] = array();
       }
       
-      // array_merge only seems to merge the first level of keys.
-      // $a['f'][0] = 'a' would not merge correctly with $b['f'][0] = 'b'
-      // and $params['f'][] = 'a' would modify the global variable
-      // thus, we merge the filter key ['f'] individually
-      $f_plus['f'] = array_merge($params['f'], array($filter));
-      $f_minus['f'] = array_merge($params['f'], array('-' . $filter));
-      // merge individually merged filter array
-      $query_plus = array_merge($params, $f_plus);
-      $query_minus = array_merge($params, $f_minus);
+      // merge recursively to add new filter parameter
+      $query_plus = array_merge_recursive($params, array('f' => array($filter)));
+      $query_minus = array_merge_recursive($params, array('f' => array('-' . $filter)));
 
       // set basic attributes
       $attr = array('rel' => 'nofollow');

@@ -251,20 +251,5 @@ class IslandoraSolrQueryProcessor {
     return;
   }
 
-  /**
-   * Function delete_filter
-   *
-   * Deletes one filter from a multi-filter string
-   *
-   * @param <string> $facets
-   * @param <string> $facet
-   */
-  function delete_filter($filters, $filter) {
-    $filters = str_replace($filter, "", $filters);
-    $filters = str_replace("~~", "~", $filters);
-    $filters = trim($filters, "~");
-    return $filters;
-  }
-
 }
 
