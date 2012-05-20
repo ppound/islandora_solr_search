@@ -218,15 +218,13 @@ class IslandoraSolrQueryProcessor {
    */
   function executeQuery() {
     
-    // //////////////////////////////////////////////////////////////////////////// //
-    // Right here the function should be split.  One function to execute the query, //
-    // another to set up pager variables and generate display.                      //
-    // //////////////////////////////////////////////////////////////////////////// //
+    // @TODO: add possibility to alter the query right before it gets excecuted.
 
     // set variables
     $url = variable_get('islandora_solr_search_block_url', 'http://localhost:8080/solr');
     $pathParts = parse_url($url);
 
+    // call solr
     $solr = new Apache_Solr_Service($pathParts['host'], $pathParts['port'], $pathParts['path'] . '/');
     $solr->setCreateDocuments(0);
 
@@ -239,12 +237,15 @@ class IslandoraSolrQueryProcessor {
     } catch (Exception $e) {
       drupal_set_message(check_plain(t('error searching')) . ' ' . $e->getMessage());
     }
+    // save results in class property
     $this->solrResult = $results;
+    // set error
     if (empty($results)) {
       drupal_set_message(t('Error searching solr index. Is the solr search block configured properly?'), 'error');
       return;
     }
 
+    // unset variables
     unset($results);
     unset($solr);
 

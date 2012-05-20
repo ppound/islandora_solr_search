@@ -263,86 +263,110 @@ class IslandoraSolrResults {
    * @param IslandoraSolrQueryProcessor $solrQueryProcessor
    */
   function currentQuery($solrQueryProcessor) {
-    // set variables
-    $output = '';
-    // get filtered fields passed through url
-    $fq = $solrQueryProcessor->internalSolrParams['f'];
-    $islandora_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_fields) ? $solrQueryProcessor->solrResult->facet_counts->facet_fields : NULL;
     
-    if (drupal_strlen(trim($solrQueryProcessor->solrQuery))) {
+    // set path
+    $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
+    
+    // set output variable
+    $output = '';
+    
+    // get user provided filter parameters
+    $fq = $solrQueryProcessor->internalSolrParams['f'];
+    
+    // parameters set in url
+    $params = $solrQueryProcessor->internalSolrParams;
+    // set filter key if there are no filters included
+    if (empty($params['f'])) {
+      $params['f'] = array();
+    }
+    
+    // Get Query values
+    if (!in_array($solrQueryProcessor->solrQuery, $solrQueryProcessor->different_kinds_of_nothing)) {
+      // get query value
+      $query_value = $solrQueryProcessor->solrQuery;
+      
+      // set list variables
+      $query_list = array();
+      
+      // remove link keeps all parameters (query gets removed instead)
+      $query_minus = array();
+      $query_minus = $params;
 
-      // Variables to build a drupal-ish unordered list
-      $query_list_title = t('Query');
-      $query_list_items = array();
-      $query_list_type = "ul";
-      $query_list_attributes = array('class' => 'islandora_solr_search_query_list query_list');
-
-      // OK, so it's a list of one.
-      // In the future, we could reasonably break the query on boolean operators
-      // and allow one part to be removed at a time.
-      $query = " ";
-      $repr = '-'; //Again, don't explicitly specify an image...
-      $link = 'islandora/solr/search/' . $query;
-      $query_list_items[] .= l($repr, $link, array('attributes' => array('class' => 'islandora_solr_add_remove_link'), 'query' => $solrQueryProcessor->internalSolrParams))
-              . ' '
-              . $this->getSubstitutedFields(stripslashes($solrQueryProcessor->solrQuery), FIELD_SEARCH);
-
+      // remove query from path
+      $path_minus = implode('/', explode('/', $path, -1)) . '/ ';
+      
+      // set attributes variable for remove link
+      $attr_minus = array();
+      // set title
+      $attr_minus['title'] = t('Remove') . ' ' . $query_value;
+      // set rel
+      $attr_minus['rel'] = 'nofollow';      
+      // set url
+      $attr_minus['href'] = url($path_minus, array('query' => $query_minus));
+      
+      // create link
+      // we're not using l() because of active classes: http://drupal.org/node/41595
+      $query_list[] = '[<a' . drupal_attributes($attr_minus) . '>-</a>] ' . $query_value;
+      
+      // add wrap and list
       $output .= '<div class="islandora_solr_search_query_wrap">';
-      $output .= theme_item_list($query_list_items, $query_list_title, $query_list_type, $query_list_attributes);
+      $output .= theme_item_list($query_list, t('Query'), "ul", array('class' => 'islandora_solr_search_query_list query_list'));
       $output .= '</div>'; // 'islandora_solr_search_query_wrap'
+      
     }
+    
+    
+    // Get Filter values
+    if (!empty($fq)) {
+      
+      // set list variables
+      $filter_list = array();
+      
+      // loop over filters
+      foreach ($fq as $key => $filter) {
 
-    //////////////////////////////////////////////////////////////////////////////
-    // Here we will build links to remove currently enforced facet filters ...  //
-    //////////////////////////////////////////////////////////////////////////////
-    $filters = empty($islandora_fq) ? NULL : explode(IslandoraSolrResults::$facetSeparator, $islandora_fq);
-
-    if (!empty($filters) && $islandora_fq != '-') {
-//      $filter_output = NULL;
-      // Variables to build a drupal-ish unordered list, which will be rendered
-      // a little bit farther down
-      $filter_list_title = t("Enabled Filters");
-      $filter_list_items = array();
-      $filter_list_type = "ul";
-      $filter_list_attributes = array('class' => 'islandora_solr_search_filter_list filter_list');
-
-      foreach ($filters as $key => $filter) {
-        $edit_filters = $filters;
-        unset($edit_filters[$key]);
-        $filter_disable = implode(IslandoraSolrResults::$facetSeparator, $edit_filters);
-        if (empty($filter_disable)) {
-          $filter_disable = '-';
+        // check for exclude filter
+        if ($filter[0] == '-') {
+//          $symbol = '&#2260;';
+          $symbol = '&ne;';
         }
-        $filter_name_and_value = explode(":", $filter, 2);
-        $filter_name = $filter_name_and_value[0];
-        $filter_value = $filter_name_and_value[1];
-        if (strncmp($filter_name, '-', 1))
-          $exclude = FALSE;
         else {
-          $exclude = TRUE;
-          $filter_name = drupal_substr($filter_name, 1);
+          $symbol = '=';
         }
 
-        $query = replaceSlashes($solrQueryProcessor->solrQuery);
-        $fq = replaceSlashes($filter_disable);
-        $defType = $solrQueryProcessor->solrDefType;
-        $repr = '-'; //I know that Kris has complained about the remove image before...  This should allow it to be changed.
-        $link = "islandora/solr/search/$query/$fq/$defType/$display_param";
-        $filter_list_items[] = l($repr, $link,
-                array(
-                  'attributes' => array(
-                    'class' => 'islandora_solr_add_remove_link'))
-            ) . ' ' . $this->facetFieldArray[$filter_name] . ($exclude ? ' != ' : ' = ') . $filter_value;
-      }
-    }
+        // split the filter into field and value
+        $filter_split = explode(':', $filter, 2);
+        // trim brackets
+        $filter_split[1] = trim($filter_split[1], "\"");
 
-    if (!empty($filter_list_items)) {
-//      $filter_output = str_replace('%2B','%252B',$filter_output);
+        // pull out filter (for exclude link)
+        $query_minus = array();
+        $f_x['f'] = array_diff($params['f'], array($filter));
+        $query_minus = array_merge($params, $f_x);
+        // resetting the filter key's order // @TODO find a cleaner way to do this.
+        if ($query_minus['f']) {
+          $query_minus['f'] = array_merge(array(), $query_minus['f']);
+        }
+
+        // set attributes variable for remove link
+        $attr_minus = array();
+        // set title
+        $attr_minus['title'] = t('Remove') . ' ' . $filter;
+        // set rel
+        $attr_minus['rel'] = 'nofollow';      
+        // set url
+        $attr_minus['href'] = url($path, array('query' => $query_minus));
+
+        // create link
+        // we're not using l() because of active classes: http://drupal.org/node/41595
+        $filter_list[] = '[<a' . drupal_attributes($attr_minus) . '>-</a>] ' . $symbol . ' ' . $filter_split[1];
+      }
+      // return filter list
       $output .= '<div class="islandora_solr_search_filter_wrap">';
-      $output .= theme_item_list($filter_list_items, $filter_list_title, $filter_list_type, $filter_list_attributes);
+      $output .= theme_item_list($filter_list, t("Enabled Filters"), "ul", array('class' => 'islandora_solr_search_filter_list filter_list'));
       $output .= '</div>'; // 'islandora_solr_search_filter_wrap'
     }
-
+    
     return $output;
   }
 
@@ -435,6 +459,7 @@ class IslandoraSolrResults {
       $breadcrumb = array_reverse($breadcrumb);
     }
     
+    // create Query breadcrumb
     if (!in_array($solrQueryProcessor->solrQuery, $solrQueryProcessor->different_kinds_of_nothing)) {
       // get query value
       $query_value = $solrQueryProcessor->solrQuery;
