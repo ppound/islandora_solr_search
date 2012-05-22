@@ -131,20 +131,20 @@ html.js .refresh-button {
  * Thumbnails float optionally to the left or right of descriptive lists.
  */
 
-.islandora-solr-search-thumb img {
+.solr-thumb img {
   max-width: 100%;
   *width: 100%;
   border: 1px solid #ccc;
 }
 
-dl.islandora-solr-search-thumb {
+dl.solr-thumb {
   float: left;
   width: 15%;
   margin: 1.5em auto;
 }
 
-.islandora-solr-search-thumb dt,
-.islandora-solr-search-thumb dd {
+.solr-thumb dt,
+.solr-thumb dd {
   margin: 0;
 }
 
@@ -154,7 +154,7 @@ dl.islandora-solr-search-thumb {
  * The three last declarations are meant to kill white space between DTs/DDs 
  * (result of inline-block styling)
  */
-dl.islandora-solr-search-result {
+dl.solr-fields {
   float: right;
   width:83%;
   margin: 1.5em auto;
@@ -167,21 +167,21 @@ dl.islandora-solr-search-result {
 /*
  * The width + left/right padding of DTs/DDs equals 88% when compensating for an image
  */
-.islandora-solr-search-result dt {
+.solr-fields dt {
   margin-right:-1px;
   width:22.5%;
   font-weight: bold;
 }
 
-.islandora-solr-search-result dd {
+.solr-fields dd {
   width:67%;
 }
 
 /* 
  * In this rule, we reset the white-space (see hack above)
  */
-.islandora-solr-search-result dt,
-.islandora-solr-search-result dd {
+.solr-fields dt,
+.solr-fields dd {
   display:inline-block;
   *display:inline;
   zoom:1;
@@ -199,7 +199,7 @@ dl.islandora-solr-search-result {
         hyphens: auto;
 }
 
-.islandora-solr-search-result dt.first,
-.islandora-solr-search-result dd.first {
+.solr-fields dt.first,
+.solr-fields dd.first {
   border-top: 0;
 }
