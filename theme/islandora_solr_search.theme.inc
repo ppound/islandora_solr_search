@@ -18,7 +18,7 @@ function islandora_solr_search_preprocess_islandora_solr_wrapper(&$variables) {
   // base url
   global $base_url;
   $variables['base_url'] = $base_url;
-  
+
   // elements
   $elements = $variables['elements'];
   
@@ -26,7 +26,7 @@ function islandora_solr_search_preprocess_islandora_solr_wrapper(&$variables) {
   foreach ($variables['elements'] as $key => $value) {
     $variables[$key] = $value;
   }
-  
+
   // results count
   $total = $elements['solr_total'];
   $end = $elements['solr_end'];
@@ -46,11 +46,16 @@ function islandora_solr_search_preprocess_islandora_solr_wrapper(&$variables) {
 function islandora_solr_search_preprocess_islandora_solr_search(&$variables) {
   // base url
   global $base_url;
+  $path = $base_path . drupal_get_path('module', 'islandora_solr_search');
   $variables['base_url'] = $base_url;
   
   // elements
   $elements = $variables['elements'];
   
+  // Placeholder Image
+  $solr_default_img = '/' . $path . '/images/defaultimg.png';
+  $variables['elements']['solr_default_img'] = $solr_default_img;
+
   // make all variables in 'elements' available as variables in the template file
   foreach ($variables['elements'] as $key => $value) {
     $variables[$key] = $value;
