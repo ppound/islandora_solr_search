@@ -72,7 +72,7 @@ function islandora_solr_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items['admin/settings/islandora_solr'] = array(
+  $items['admin/islandora/search/islandora_solr'] = array(
     'title' => 'Islandora Solr Client',
     'description' => 'Managing Islandora Solr Searching',
     'page callback' => 'drupal_get_form',
