@@ -18,7 +18,7 @@ function islandora_solr_admin_settings(&$form_state) {
     module_load_include('php', 'apachesolr', 'SolrPhpClient/Apache/Solr/Service');
   }
   else {
-    module_load_include('php', 'islandora_solr_search', 'SolrPhpClient/Apache/Solr/Service');
+    module_load_include('php', 'islandora_solr', 'SolrPhpClient/Apache/Solr/Service');
   }
   if (!class_exists('Apache_Solr_Service')) {
     $message = t('This module requires the !url. Please install the client directory in the root directory of this module before continuing.', array('!url' => l(t('Apache Solr php client'), 'http://code.google.com/p/solr-php-client')));
@@ -28,8 +28,8 @@ function islandora_solr_admin_settings(&$form_state) {
 
   $handlers['standard'] = 'standard';
 
-  $handler = !empty($form_state['values']['islandora_solr_search_block_request_handler']) ? $form_state['values']['islandora_solr_search_block_request_handler'] : variable_get('islandora_solr_search_block_request_handler', 'standard');
-  $solr_url = !empty($form_state['values']['islandora_solr_search_block_url']) ? $form_state['values']['islandora_solr_search_block_url'] : variable_get('islandora_solr_search_block_url', 'localhost:8080/solr');
+  $handler = !empty($form_state['values']['islandora_solr_block_request_handler']) ? $form_state['values']['islandora_solr_block_request_handler'] : variable_get('islandora_solr_block_request_handler', 'standard');
+  $solr_url = !empty($form_state['values']['islandora_solr_block_url']) ? $form_state['values']['islandora_solr_block_url'] : variable_get('islandora_solr_block_url', 'localhost:8080/solr');
   $solr_avail = solr_available($solr_url);
   if ($solr_avail) {
     $handlers = get_handlers($solr_url);
@@ -37,9 +37,9 @@ function islandora_solr_admin_settings(&$form_state) {
 
   $dismax_allowed = check_dismax($solr_url, $handler);
   $confirmation_message = ($solr_avail ? '<img src="' . url('misc/watchdog-ok.png') . '"/>'
-          . t('Successfully connected to Solr server at !islandora_solr_search_block_url', array('!islandora_solr_search_block_url' => $solr_url)) : '<img src="'
+          . t('Successfully connected to Solr server at !islandora_solr_block_url', array('!islandora_solr_block_url' => $solr_url)) : '<img src="'
           . url('misc/watchdog-error.png') . '"/> '
-          . t('Unable to connect to Solr server at !islandora_solr_search_block_url</p>', array('!islandora_solr_search_block_url' => $solr_url)));
+          . t('Unable to connect to Solr server at !islandora_solr_block_url</p>', array('!islandora_solr_block_url' => $solr_url)));
 
   $form = array();
 
@@ -49,7 +49,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'fieldset',
   );
 
-  $form['solr_ahah_wrapper']['islandora_solr_search_block_url'] = array(
+  $form['solr_ahah_wrapper']['islandora_solr_block_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Solr url'),
     '#size' => 40,
@@ -76,7 +76,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#value' => $confirmation_message,
   );
 
-  $form['solr_ahah_wrapper']['islandora_solr_search_block_request_handler'] = array(
+  $form['solr_ahah_wrapper']['islandora_solr_block_request_handler'] = array(
     '#type' => 'select',
     '#title' => t('Request Handler'),
     '#options' => $handlers,
@@ -201,19 +201,19 @@ function islandora_solr_admin_settings(&$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
-  $form['default_display_settings']['islandora_solr_search_result_fields'] = array(
+  $form['default_display_settings']['islandora_solr_result_fields'] = array(
     '#type' => 'textarea',
     '#title' => t('Labels for Returned Fields'),
     '#description' => t('Set labels for fields returned from query.
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong>'),
-    '#default_value' => variable_get('islandora_solr_search_result_fields', 'dc.subject ~ Subject,dc.type ~ Type'),
+    '#default_value' => variable_get('islandora_solr_result_fields', 'dc.subject ~ Subject,dc.type ~ Type'),
     '#wysiwyg' => FALSE,
   );
-  $form['default_display_settings']['islandora_solr_search_limit_result_fields'] = array(
+  $form['default_display_settings']['islandora_solr_limit_result_fields'] = array(
     '#type' => 'checkbox',
     '#title' => t('Limit results to fields listed above?'),
     '#return_value' => 1,
-    '#default_value' => variable_get('islandora_solr_search_limit_result_fields', 0),
+    '#default_value' => variable_get('islandora_solr_limit_result_fields', 0),
     '#description' => t('If checked, results displayed will be limited to the fields specified above.<br/><strong>Note:</strong> Some display profiles may not honour this value.'),
   );
   $form['default_display_settings']['islandora_solr_snippet_field'] = array(
@@ -226,12 +226,12 @@ function islandora_solr_admin_settings(&$form_state) {
       <strong>Note:</strong><em> This feature is not supported by all display profiles.</em> "),
     '#wysiwyg' => FALSE,
   );
-  $form['default_display_settings']['islandora_solr_search_num_of_results'] = array(
+  $form['default_display_settings']['islandora_solr_num_of_results'] = array(
     '#type' => 'textfield',
     '#title' => t('Results per page'),
     '#size' => 5,
     '#description' => t('The number of results to show per page.'),
-    '#default_value' => variable_get('islandora_solr_search_num_of_results', '20'),
+    '#default_value' => variable_get('islandora_solr_num_of_results', '20'),
   );
 
   
@@ -245,37 +245,37 @@ function islandora_solr_admin_settings(&$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
-  $form['facet_settings']['islandora_solr_search_block_facets'] = array(
+  $form['facet_settings']['islandora_solr_block_facets'] = array(
     '#type' => 'textarea',
     '#title' => t('Facet Fields'),
-    '#default_value' => variable_get('islandora_solr_search_block_facets', ''),
+    '#default_value' => variable_get('islandora_solr_block_facets', ''),
     '#description' => t("Indicate which fields will appear in the <strong>Islandora Facet Block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong> "),
-    '#default_value' => variable_get('islandora_solr_search_block_facets', 'dc.subject ~ Subject,dc.type ~ Type'),
+    '#default_value' => variable_get('islandora_solr_block_facets', 'dc.subject ~ Subject,dc.type ~ Type'),
     '#wysiwyg' => FALSE,
-    '#default_value' => variable_get('islandora_solr_search_block_facets', 'dc.subject ~ Subject,dc.type ~ Type')
+    '#default_value' => variable_get('islandora_solr_block_facets', 'dc.subject ~ Subject,dc.type ~ Type')
   );
-  $form['facet_settings']['islandora_solr_search_block_facet_min_count'] = array(
+  $form['facet_settings']['islandora_solr_block_facet_min_count'] = array(
     '#type' => 'textfield',
     '#title' => t('Minimum Results to Display Facet'),
     '#size' => 5,
     '#description' => t('Minimum results required to display a facet'),
-    '#default_value' => variable_get('islandora_solr_search_block_facet_min_count', '2'),
+    '#default_value' => variable_get('islandora_solr_block_facet_min_count', '2'),
   );
-  $form['facet_settings']['islandora_solr_search_block_facet_shown_limit'] = array(
+  $form['facet_settings']['islandora_solr_block_facet_shown_limit'] = array(
     '#type' => 'textfield',
     '#title' => t('Initially shown facets'),
     '#size' => 5,
     '#description' => t('The number which should be shown initially. If there are more, then the a "Show more" button will allow the rest up to the value below to be shown. Use 0 to disable.'),
-    '#default_value' => variable_get('islandora_solr_search_block_facet_shown_limit', '0'),
+    '#default_value' => variable_get('islandora_solr_block_facet_shown_limit', '0'),
   );
-  $form['facet_settings']['islandora_solr_search_block_facet_limit'] = array(
+  $form['facet_settings']['islandora_solr_block_facet_limit'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum Facets returned'),
     '#size' => 5,
     '#description' => t('Set the maximum number of terms that should be returned to the user.<br />
       For example, if there are 100 possible subjects in a faceted result, you may wish to return only the top 10.'),
-    '#default_value' => variable_get('islandora_solr_search_block_facet_limit', '20'),
+    '#default_value' => variable_get('islandora_solr_block_facet_limit', '20'),
   );
   $form['facet_settings']['islandora_facet_display_table'] = array();  
   
@@ -297,12 +297,12 @@ function islandora_solr_admin_settings(&$form_state) {
     '#default_value' => variable_get('islandora_solr_searchterms', 'dc.title ~ Title'),
     '#wysiwyg' => FALSE,
   );
-  $form['advanced_search_block']['islandora_solr_search_block_repeat'] = array(
+  $form['advanced_search_block']['islandora_solr_block_repeat'] = array(
     '#type' => 'textfield',
     '#title' => t('Search Field Repetition'),
     '#size' => 5,
     '#description' => t('The number of fields you would like to have appear in the <strong>Solr Advanced Search Block</strong>'),
-    '#default_value' => variable_get('islandora_solr_search_block_repeat', '3'),
+    '#default_value' => variable_get('islandora_solr_block_repeat', '3'),
   );
 
 
@@ -314,14 +314,14 @@ function islandora_solr_admin_settings(&$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  $form['query_defaults']['islandora_solr_search_namespace_restriction'] = array(
+  $form['query_defaults']['islandora_solr_namespace_restriction'] = array(
     '#type' => 'textfield',
     '#title' => t('Limit results to namespace'),
     '#size' => 5,
-    '#default_value' => variable_get('islandora_solr_search_namespace_restriction', ''),
+    '#default_value' => variable_get('islandora_solr_namespace_restriction', ''),
     '#description' => t("Enter a namespace ie 'demo' to restrict results to PIDs within that namespace."),
   );
-  $form['query_defaults']['islandora_solr_search_base_query'] = array(
+  $form['query_defaults']['islandora_solr_base_query'] = array(
     '#type' => 'textfield',
     '#title' => t('Solr Default Query'),
     '#size' => 30,
@@ -329,14 +329,14 @@ function islandora_solr_admin_settings(&$form_state) {
       Setting a useful default query allows users to use solr to browse, without entering a query themselves.
       May be used in conjunction with a background filter, below.<br>
       Consider <strong><em>timestamp:[* TO NOW]</em></strong> or <strong><em>*:*</em></strong><br/>'),
-    '#default_value' => variable_get('islandora_solr_search_base_query', 'timestamp:[* TO NOW]'),
+    '#default_value' => variable_get('islandora_solr_base_query', 'timestamp:[* TO NOW]'),
   );
-  $form['query_defaults']['islandora_solr_search_base_filter'] = array(
+  $form['query_defaults']['islandora_solr_base_filter'] = array(
     '#type' => 'textarea',
     '#title' => t('Solr Base Filter'),
     '#description' => t('Some base filters to append to all user queries -- may be used to filter results and to facilitate null-query browsing. Enter one per line. <br/>
       These filters will be applied to all queries in addition to any user-selected facet filters'),
-    '#default_value' => variable_get('islandora_solr_search_base_filter', ''),
+    '#default_value' => variable_get('islandora_solr_base_filter', ''),
     '#wysiwyg' => FALSE,
   );
   $form['query_defaults']['sort_fields'] = array(
@@ -345,14 +345,14 @@ function islandora_solr_admin_settings(&$form_state) {
     '#collapsed' => FALSE,
   );
 
-  $form['query_defaults']['sort_fields']['islandora_solr_search_sort_field'] = array(
+  $form['query_defaults']['sort_fields']['islandora_solr_sort_field'] = array(
     '#type' => 'textfield', '#title' => t('Sort field'),
     '#size' => 20,
     '#description' => t('Results will be sorted on this field. If left blank will default to <em>score</em>.'),
-    '#default_value' => variable_get('islandora_solr_search_sort_field', ''),
+    '#default_value' => variable_get('islandora_solr_sort_field', ''),
   );
 
-  $form['query_defaults']['sort_fields']['islandora_solr_search_sort_order'] = array(
+  $form['query_defaults']['sort_fields']['islandora_solr_sort_order'] = array(
     '#type' => 'radios',
     '#title' => t('Sort Order'),
     '#options' => array('asc' => t('Ascending'), 'desc' => t('Decending')),
@@ -361,11 +361,11 @@ function islandora_solr_admin_settings(&$form_state) {
   
   
   
-  $form['islandora_solr_search_debug_mode'] = array(
+  $form['islandora_solr_debug_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Debug Mode?'),
     '#return_value' => 1,
-    '#default_value' => variable_get('islandora_solr_search_debug_mode', 0),
+    '#default_value' => variable_get('islandora_solr_debug_mode', 0),
     '#description' => t('Dumps solr query to the screen for testing. Warning: if you have the Drupal Apache Solr module enabled alongside this one then the debug function will not work.'),
   );
   
@@ -386,33 +386,33 @@ function islandora_solr_admin_settings(&$form_state) {
   }
   $form['#submit'][] = 'solr_settings_form_submit';
   //$form['#theme'] = 'system_settings_form';
-  $form['#theme'] = 'islandora_solr_search_admin_settings';
+  $form['#theme'] = 'islandora_solr_admin_settings';
 
   return ($form);
 }
 
 /**
- * theme_islandora_solr_search_admin_settings()
+ * theme_islandora_solr_admin_settings()
  */
-function theme_islandora_solr_search_admin_settings($form) {
+function theme_islandora_solr_admin_settings($form) {
   $default = variable_get('islandora_solr_primary_display', 'default');
   $rows = array();
   //clean up facet params
 
   // render facet display table
   $facet_header = array();
-  $facet_header[] = $form['facet_settings']['islandora_solr_search_block_facet_min_count']['#title'];
-  $form['facet_settings']['islandora_solr_search_block_facet_min_count']['#title'] = NULL;
-  $facet_header[] = $form['facet_settings']['islandora_solr_search_block_facet_shown_limit']['#title'];
-  $form['facet_settings']['islandora_solr_search_block_facet_shown_limit']['#title'] = NULL;
-  $facet_header[] = $form['facet_settings']['islandora_solr_search_block_facet_limit']['#title'];
-  $form['facet_settings']['islandora_solr_search_block_facet_limit']['#title'] = NULL;
+  $facet_header[] = $form['facet_settings']['islandora_solr_block_facet_min_count']['#title'];
+  $form['facet_settings']['islandora_solr_block_facet_min_count']['#title'] = NULL;
+  $facet_header[] = $form['facet_settings']['islandora_solr_block_facet_shown_limit']['#title'];
+  $form['facet_settings']['islandora_solr_block_facet_shown_limit']['#title'] = NULL;
+  $facet_header[] = $form['facet_settings']['islandora_solr_block_facet_limit']['#title'];
+  $form['facet_settings']['islandora_solr_block_facet_limit']['#title'] = NULL;
 
   $facet_rows = array();
   $facet_row = array();
-  $facet_row[] = array('data' => drupal_render($form['facet_settings']['islandora_solr_search_block_facet_min_count']));
-  $facet_row[] = array('data' => drupal_render($form['facet_settings']['islandora_solr_search_block_facet_shown_limit']));
-  $facet_row[] = array('data' => drupal_render($form['facet_settings']['islandora_solr_search_block_facet_limit']));
+  $facet_row[] = array('data' => drupal_render($form['facet_settings']['islandora_solr_block_facet_min_count']));
+  $facet_row[] = array('data' => drupal_render($form['facet_settings']['islandora_solr_block_facet_shown_limit']));
+  $facet_row[] = array('data' => drupal_render($form['facet_settings']['islandora_solr_block_facet_limit']));
   $facet_rows[] = array('data' => $facet_row);
 
   // put the rendered table in another fieldset.
@@ -559,7 +559,7 @@ function callback_prep() {
  * @param array $form_state
  */
 function islandora_solr_admin_settings_validate($form, &$form_state) {
-  $form_state['values']['islandora_solr_search_namespace_restriction'] = preg_replace('/:$/', '', $form_state['values']['islandora_solr_search_namespace_restriction']);
+  $form_state['values']['islandora_solr_namespace_restriction'] = preg_replace('/:$/', '', $form_state['values']['islandora_solr_namespace_restriction']);
 }
 
 /**

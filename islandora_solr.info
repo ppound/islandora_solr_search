@@ -1,0 +1,16 @@
+name = Islandora Solr
+dependencies[] = islandora
+description = Searches an islandora solr index
+package = Islandora Search
+configure = admin/config/islandora_solr
+version = 7.x-dev
+core = 7.x
+
+files[] IslandoraSolrQueryProcessor.inc
+files[] IslandoraSolrResults.inc
+files[] islandora_solr.admin.inc
+files[] islandora_solr.module
+files[] islandora_solr.install
+files[] islandora_solr.block.inc
+files[] theme/islandora_solr.theme.inc
+files[] includes/common.inc

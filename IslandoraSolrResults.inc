@@ -24,9 +24,9 @@ class IslandoraSolrResults {
       module_load_include('php', 'apachesolr', 'SolrPhpClient/Apache/Solr/Service');
     }
     else {
-      module_load_include('php', 'islandora_solr_search', 'SolrPhpClient/Apache/Solr/Service');
+      module_load_include('php', 'islandora_solr', 'SolrPhpClient/Apache/Solr/Service');
     }
-    module_load_include('inc', 'islandora_solr_search', 'includes/common');
+    module_load_include('inc', 'islandora_solr', 'includes/common');
     $this->prepFieldSubstitutions();
   }
 
@@ -70,11 +70,11 @@ class IslandoraSolrResults {
     $elements['solr_end'] = $end;
 
     // pager
-    islandora_solr_search_pager_init($total, $solrQueryProcessor->solrLimit);
+    islandora_solr_pager_init($total, $solrQueryProcessor->solrLimit);
     $elements['solr_pager'] = theme('pager', NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5);
 
     // debug (will be removed)
-    if (variable_get('islandora_solr_search_debug_mode', FALSE)) {
+    if (variable_get('islandora_solr_debug_mode', FALSE)) {
       $elements['solr_debug'] = $this->printDebugOutput($solrResult);
     }
 
@@ -160,7 +160,7 @@ class IslandoraSolrResults {
     $docs = $this->prep_results($results);
 
     // optionally limit results to values given
-    $limitResults = variable_get('islandora_solr_search_limit_result_fields', 0);
+    $limitResults = variable_get('islandora_solr_limit_result_fields', 0);
 
     // loop over results array
     foreach ($docs as $doc) {
@@ -207,7 +207,7 @@ class IslandoraSolrResults {
     }
 
     // return themed search results
-    return theme('islandora_solr_search', $results_array, $elements);
+    return theme('islandora_solr', $results_array, $elements);
   }
   
   
@@ -308,9 +308,9 @@ class IslandoraSolrResults {
       $query_list[] = '[<a' . drupal_attributes($attr_minus) . '>-</a>] ' . $query_value;
       
       // add wrap and list
-      $output .= '<div class="islandora_solr_search_query_wrap">';
-      $output .= theme_item_list($query_list, t('Query'), "ul", array('class' => 'islandora_solr_search_query_list query_list'));
-      $output .= '</div>'; // 'islandora_solr_search_query_wrap'
+      $output .= '<div class="islandora_solr_query_wrap">';
+      $output .= theme_item_list($query_list, t('Query'), "ul", array('class' => 'islandora_solr_query_list query_list'));
+      $output .= '</div>'; // 'islandora_solr_query_wrap'
       
     }
     
@@ -361,9 +361,9 @@ class IslandoraSolrResults {
         $filter_list[] = '[<a' . drupal_attributes($attr_minus) . '>-</a>] ' . $symbol . ' ' . $filter_split[1];
       }
       // return filter list
-      $output .= '<div class="islandora_solr_search_filter_wrap">';
-      $output .= theme_item_list($filter_list, t("Enabled Filters"), "ul", array('class' => 'islandora_solr_search_filter_list filter_list'));
-      $output .= '</div>'; // 'islandora_solr_search_filter_wrap'
+      $output .= '<div class="islandora_solr_filter_wrap">';
+      $output .= theme_item_list($filter_list, t("Enabled Filters"), "ul", array('class' => 'islandora_solr_filter_list filter_list'));
+      $output .= '</div>'; // 'islandora_solr_filter_wrap'
     }
     
     return $output;
@@ -450,7 +450,7 @@ class IslandoraSolrResults {
         // create links
         // we're not using l() because of active classes: http://drupal.org/node/41595
         $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $filter_split[1] . '</a>'
-              . '<span class="islandora_solr_search_breadcrumb_super">(<a' . drupal_attributes($attr_x) . '>' . t('x') . '</a>)</span>';
+              . '<span class="islandora_solr_breadcrumb_super">(<a' . drupal_attributes($attr_x) . '>' . t('x') . '</a>)</span>';
 
       }
 
@@ -512,7 +512,7 @@ class IslandoraSolrResults {
       // create links
       // we're not using l() because of active classes: http://drupal.org/node/41595
       $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $query_value . '</a>'
-            . '<span class="islandora_solr_search_breadcrumb_super">(<a' . drupal_attributes($attr_x) . '>' . t('x') . '</a>)</span>';
+            . '<span class="islandora_solr_breadcrumb_super">(<a' . drupal_attributes($attr_x) . '>' . t('x') . '</a>)</span>';
     }
     
     $breadcrumb[] = l(t('Home'), '<front>', array('attributes' => array('title' => t('Home'))));
@@ -529,13 +529,13 @@ class IslandoraSolrResults {
    *   arrays for output substitution
    */
   function prepFieldSubstitutions() {
-    $rawFacetVals = variable_get("islandora_solr_search_block_facets", 'dc.subject ~ Subject,dc.type ~ Type');
+    $rawFacetVals = variable_get("islandora_solr_block_facets", 'dc.subject ~ Subject,dc.type ~ Type');
     $this->facetFieldArray = islandora_build_substitution_list($rawFacetVals);
 
     $rawSearchTerms = variable_get('islandora_solr_searchterms', 'dc.title ~ Title');
     $this->searchFieldArray = islandora_build_substitution_list($rawSearchTerms);
 
-    $rawResultFields = variable_get('islandora_solr_search_result_fields', 'dc.subject ~ Subject,dc.type ~ Type');
+    $rawResultFields = variable_get('islandora_solr_result_fields', 'dc.subject ~ Subject,dc.type ~ Type');
     $this->resultFieldArray = islandora_build_substitution_list($rawResultFields);
 
     $this->allSubsArray = array_merge($this->facetFieldArray, $this->searchFieldArray, $this->resultFieldArray);
@@ -557,9 +557,9 @@ class IslandoraSolrResults {
     $facet_output = $output = '';
     
     // shown limit
-    $facet_min_count = variable_get('islandora_solr_search_block_facet_min_count', '2');
-    $initial_limit = variable_get('islandora_solr_search_block_facet_shown_limit', '0');
-    $facet_limit = variable_get('islandora_solr_search_block_facet_limit', '20');
+    $facet_min_count = variable_get('islandora_solr_block_facet_min_count', '2');
+    $initial_limit = variable_get('islandora_solr_block_facet_shown_limit', '0');
+    $facet_limit = variable_get('islandora_solr_block_facet_limit', '20');
     
     // get facet values returned from solr
     $facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_fields) ? $solrQueryProcessor->solrResult->facet_counts->facet_fields : array();
@@ -596,13 +596,13 @@ class IslandoraSolrResults {
         if (count($list_items) >= $facet_min_count) {
           
           // opening facet div // @TODO: this should go in theme function
-          $facet_output .='<div class="islandora_solr_search_facet">';
+          $facet_output .='<div class="islandora_solr_facet">';
           
           // set title
           $list_title = $this->facetFieldArray[$facet_key];
 
           // set attributes
-          $list_attributes = array('class' => 'islandora_solr_search_facet_list facet_list');
+          $list_attributes = array('class' => 'islandora_solr_facet_list facet_list');
 
           // check if facet value amount is larger than the initial limit
           $split_facet = $facet_count > $initial_limit AND
@@ -627,14 +627,14 @@ class IslandoraSolrResults {
             $facet_output .= '</div>';
           }
 
-          $facet_output .='</div>'; //div.islandora_solr_search_facet
+          $facet_output .='</div>'; //div.islandora_solr_facet
         }
       }
     }
 
     if ($show_more) {
       // if there is at least one occurence of a split array, we add js to the page.
-      drupal_add_js(drupal_get_path('module', 'islandora_solr_search') . '/js/islandora_solr_search_shown_limit.js');
+      drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_shown_limit.js');
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -644,7 +644,7 @@ class IslandoraSolrResults {
     //////////////////////////////////////////////////////////////////////////////////////
     $facet_output = str_replace('%2B', '%252B', $facet_output);
     if (!empty($facet_output)) {
-      $output .='<div class="islandora_solr_search_facet_wrap">';
+      $output .='<div class="islandora_solr_facet_wrap">';
       $output .= $facet_output;
       $output .= '</div>';
     }
@@ -803,7 +803,7 @@ class IslandoraSolrResults {
     $form = array();
 
     if (!isset($repeat)) {
-      $repeat = variable_get('islandora_solr_search_block_repeat', '3');
+      $repeat = variable_get('islandora_solr_block_repeat', '3');
     }
     $i = 1;
     $this->_add_field($form, $i, $queryArray[0], $types);
@@ -840,7 +840,7 @@ class IslandoraSolrResults {
   function build_simple_solr_form() {
     // FIXME:  This should actually be checking the settings in the request handler...  Not making assumptions based on name
     $required = FALSE;
-    if (variable_get('islandora_solr_search_block_request_handler', '') == 'standard') {
+    if (variable_get('islandora_solr_block_request_handler', '') == 'standard') {
       $required = TRUE;
     }
     global $islandora_query;
@@ -869,7 +869,7 @@ class IslandoraSolrResults {
    */
   function theme_solr_search_form($form) {
     if (!isset($repeat)) {
-      $repeat = variable_get('islandora_solr_search_block_repeat', '3');
+      $repeat = variable_get('islandora_solr_block_repeat', '3');
     }
 
     $output = drupal_render($form['search_type']['type1']);

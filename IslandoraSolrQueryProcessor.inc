@@ -42,9 +42,9 @@ class IslandoraSolrQueryProcessor {
       module_load_include('php', 'apachesolr', 'SolrPhpClient/Apache/Solr/Service');
     }
     else {
-      module_load_include('php', 'islandora_solr_search', 'SolrPhpClient/Apache/Solr/Service');
+      module_load_include('php', 'islandora_solr', 'SolrPhpClient/Apache/Solr/Service');
     }
-    module_load_include('inc', 'islandora_solr_search', 'includes/common');
+    module_load_include('inc', 'islandora_solr', 'includes/common');
   }
 
   /**
@@ -54,7 +54,7 @@ class IslandoraSolrQueryProcessor {
    * @return type
    */
   function buildAndExecuteQuery($query, $params = NULL) {
-    if (variable_get('islandora_solr_search_block_request_handler', NULL) == 'standard') {
+    if (variable_get('islandora_solr_block_request_handler', NULL) == 'standard') {
 
       if (!$query || $query == ' ') {
         $query = '%252F';
@@ -92,7 +92,7 @@ class IslandoraSolrQueryProcessor {
       $this->solrQuery = ' '; //so we can allow empty queries to dismax
       
       // set base query
-      $this->internalSolrQuery = variable_get('islandora_solr_search_base_query', SOLR_BASE_QUERY);
+      $this->internalSolrQuery = variable_get('islandora_solr_base_query', SOLR_BASE_QUERY);
       // we must also undo dismax if it's been set
       $this->solrDefType = NULL;
       $this->solrParams['defType'] = NULL;
@@ -131,7 +131,7 @@ class IslandoraSolrQueryProcessor {
     $startPage = isset($_GET['page']) ? $_GET['page'] : 0;
     
     // set results limit
-    $this->solrLimit = variable_get('islandora_solr_search_num_of_results', 20);
+    $this->solrLimit = variable_get('islandora_solr_num_of_results', 20);
 
     // set solr start
     $this->solrStart = max(0, $startPage) * $this->solrLimit;
@@ -148,7 +148,7 @@ class IslandoraSolrQueryProcessor {
     
     // set facet parameters
     // set variables
-    $raw_facet_vals = variable_get("islandora_solr_search_block_facets", 'dc.subject ~ Subject,dc.type ~ Type');
+    $raw_facet_vals = variable_get("islandora_solr_block_facets", 'dc.subject ~ Subject,dc.type ~ Type');
     $facet_array = islandora_build_substitution_list($raw_facet_vals);
     $facet_fields = implode(",", array_keys($facet_array));
     $keys = array();
@@ -159,9 +159,9 @@ class IslandoraSolrQueryProcessor {
     // set params
     $params_array = array(
       'facet' => 'true',
-      'facet.mincount' => variable_get('islandora_solr_search_block_facet_min_count', '2'),
-      'facet.limit' => variable_get('islandora_solr_search_block_facet_limit', '12'),
-      'qt' => variable_get("islandora_solr_search_block_request_handler", "standard"),
+      'facet.mincount' => variable_get('islandora_solr_block_facet_min_count', '2'),
+      'facet.limit' => variable_get('islandora_solr_block_facet_limit', '12'),
+      'qt' => variable_get("islandora_solr_block_request_handler", "standard"),
       'hl' => isset($keys[0]) ? 'true' : NULL,
       'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,
       'hl.fragsize' => 400,
@@ -171,10 +171,10 @@ class IslandoraSolrQueryProcessor {
     $this->solrParams = array_merge($this->solrParams, $params_array);
 
     // set debug query
-    $debugQuery = (variable_get('islandora_solr_search_debug_mode', 0) ? "TRUE" : NULL ); //any val incl. 'FALSE' is treated as TRUE by Solr // @TODO: this variable isn't used anywhere - remove?
+    $debugQuery = (variable_get('islandora_solr_debug_mode', 0) ? "TRUE" : NULL ); //any val incl. 'FALSE' is treated as TRUE by Solr // @TODO: this variable isn't used anywhere - remove?
 
     // set base filters
-    $base_filters = preg_split("/\\r\\n|\\n|\\r/", variable_get('islandora_solr_search_base_filter', ''), -1, PREG_SPLIT_NO_EMPTY);
+    $base_filters = preg_split("/\\r\\n|\\n|\\r/", variable_get('islandora_solr_base_filter', ''), -1, PREG_SPLIT_NO_EMPTY);
     
     // set filter parameters - both from url and admin settings.
     if (is_array($this->internalSolrParams['f'])) {
@@ -189,7 +189,7 @@ class IslandoraSolrQueryProcessor {
     
     
     // restrict results based on specified namespace
-    $namespace = trim(variable_get('islandora_solr_search_namespace_restriction', NULL));
+    $namespace = trim(variable_get('islandora_solr_namespace_restriction', NULL));
     if ($namespace) {
       $this->solrParams['fq'][] = "PID:$namespace\:*";
     }
@@ -200,7 +200,7 @@ class IslandoraSolrQueryProcessor {
     }
 
     // Invoke a hook for third-party modules to alter the parameters.
-    module_invoke_all('islandora_solr_search_query_processor', $this); //The hook implementation needs to specify that it takes a reference, not be passed one
+    module_invoke_all('islandora_solr_query_processor', $this); //The hook implementation needs to specify that it takes a reference, not be passed one
     $processor->solrParams['fq'][] = $fq; // @TODO figure out where $processor is set - what does it do?
     return;
   }
@@ -221,7 +221,7 @@ class IslandoraSolrQueryProcessor {
     // @TODO: add possibility to alter the query right before it gets excecuted.
 
     // set variables
-    $url = variable_get('islandora_solr_search_block_url', 'http://localhost:8080/solr');
+    $url = variable_get('islandora_solr_block_url', 'http://localhost:8080/solr');
     $pathParts = parse_url($url);
 
     // call solr
