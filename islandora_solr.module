@@ -97,7 +97,7 @@ function islandora_solr_theme() {
 
   return array(
     'islandora_solr_block_form' => array(
-      'arguments' => array(
+      'variables' => array(
         'form' => NULL,
       ),
     ),
@@ -105,21 +105,21 @@ function islandora_solr_theme() {
     'islandora_solr_admin_settings' => array(
       'path' => $path,
       'file' => 'islandora_solr.admin.inc',
-      'arguments' => array('form' => NULL),
+      'variables' => array('form' => NULL),
     ),
     // results page
     'islandora_solr_wrapper' => array(
       'path' => $path . '/theme',
       'file' => $file,
       'template' => 'islandora-solr-wrapper',
-      'arguments' => array('results' => NULL, 'secondary_profiles' => NULL,  'elements' => array()),
+      'variables' => array('results' => NULL, 'secondary_profiles' => NULL,  'elements' => array()),
     ),
     // default results display
     'islandora_solr' => array(
       'path' => $path . '/theme',
       'file' => $file,
       'template' => 'islandora-solr',
-      'arguments' => array('results' => NULL, 'elements' => array()),
+      'variables' => array('results' => NULL, 'elements' => array()),
     ),
   );
 }

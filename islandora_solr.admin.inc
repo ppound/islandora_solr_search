@@ -11,7 +11,7 @@
  * Function to return admin setting form
  * @return array
  */
-function islandora_solr_admin_settings(&$form_state) {
+function islandora_solr_admin_settings($form, &$form_state) {
 
   //checks for existence of PHP Solr client.
   if (module_exists('apachesolr')) {
