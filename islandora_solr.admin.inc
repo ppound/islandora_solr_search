@@ -43,50 +43,52 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
   $form = array();
 
-  $form['solr_ahah_wrapper'] = array(
+  $form['solr_ajax_wrapper'] = array(
     '#prefix' => '<div id="solr-url">',
     '#suffix' => '</div>',
     '#type' => 'fieldset',
   );
 
-  $form['solr_ahah_wrapper']['islandora_solr_block_url'] = array(
+  $form['solr_ajax_wrapper']['islandora_solr_block_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Solr url'),
     '#size' => 40,
     '#weight' => -1,
     '#description' => t('The url of the Solr installation.  Defaults to localhost:8080/solr.'),
     '#default_value' => $solr_url,
-    '#ahah' => array(
-      'path' => 'islandora/solr/process',
+    '#ajax' => array(
+      'callback' => 'update_solr_url_div',
       'wrapper' => 'solr-url',
       'effect' => 'fade',
       'event' => 'blur',
+      'progress' => array('type' => 'none'), // don't show progress throbber
     ),
   );
 
-  $form['solr_ahah_wrapper']['refresh_page'] = array(
+  $form['solr_ajax_wrapper']['refresh_page'] = array(
     '#type' => 'submit',
     '#value' => t('Test connection'),
-    '#attributes' => array('class' => 'refresh-button'),
+    '#attributes' => array('class' => array('refresh-button')),
     '#submit' => array('solr_admin_refresh'),
   );
 
-  $form['solr_ahah_wrapper']['infobox'] = array(
+  $form['solr_ajax_wrapper']['infobox'] = array(
     '#type' => 'item',
-    '#value' => $confirmation_message,
+    '#markup' => $confirmation_message,
   );
 
-  $form['solr_ahah_wrapper']['islandora_solr_block_request_handler'] = array(
+  $form['solr_ajax_wrapper']['islandora_solr_block_request_handler'] = array(
     '#type' => 'select',
     '#title' => t('Request Handler'),
     '#options' => $handlers,
     '#description' => t('Request handlers as defined by !config', array('!config' => l(t('solrconfig.xml'), 'http://wiki.apache.org/solr/SolrConfigXml'))),
     '#default_value' => $handler,
-    '#ahah' => array(
-      'path' => 'islandora/solr/process',
+    '#ajax' => array(
+      'callback' => 'update_solr_url_div',
       'wrapper' => 'solr-url',
       'effect' => 'fade',
       'event' => 'change',
+      'progress' => array('type' => 'none'), // don't show progress throbber
     ),
   );
 
@@ -99,7 +101,11 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   // set the table form items
   $form['display_profiles']['islandora_solr_primary_display_table'] = array(
+    '#type' => 'item',
+    '#title' => t('Primary Display Profiles'),
+    '#description' => t('Preferred normal display profile for search results.  These may be provided by third-party modules.'),
     '#tree' => TRUE, // this attribute is important to return the submitted values in a deeper nested arrays in
+    '#theme' => 'islandora_solr_admin_primary_display',
   );
   
   
@@ -152,7 +158,8 @@ function islandora_solr_admin_settings($form, &$form_state) {
       );
       $form['display_profiles']['islandora_solr_primary_display_table']['weight'][$machine_name] = array(
         '#type' => 'weight',
-        '#default_value' => ($primary_display_array['weight'][$machine_name]) ? $primary_display_array['weight'][$machine_name] : 0,
+//        '#default_value' => ($primary_display_array['weight'][$machine_name]) ? $primary_display_array['weight'][$machine_name] : 0,
+        '#default_value' => 0, // if no displays are set 'weight' is not set. Need fixing
         '#attributes' => array('class' => 'solr-weight'),
       );
       $form['display_profiles']['islandora_solr_primary_display_table']['configuration'][$machine_name] = array(
@@ -369,79 +376,60 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#description' => t('Dumps solr query to the screen for testing. Warning: if you have the Drupal Apache Solr module enabled alongside this one then the debug function will not work.'),
   );
   
-  
-  $form['buttons']['submit'] = array(
+  $form['actions'] = array(
+    '#type' => 'actions'
+  );
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save Solr Configuration'),
-    '#weight' => 50,
+    '#weight' => 0,
+    '#submit' => 'solr_settings_form_submit',
   );
-  $form['buttons']['reset'] = array(
+  $form['actions']['reset'] = array(
     '#type' => 'submit',
     '#value' => t('Reset to defaults'),
-    '#weight' => 51,
+    '#weight' => 1,
   );
 
   if (!empty($_POST) && form_get_errors()) {
     drupal_set_message(t('The settings have not been saved because of the errors.'), 'error');
   }
-  $form['#submit'][] = 'solr_settings_form_submit';
   //$form['#theme'] = 'system_settings_form';
-  $form['#theme'] = 'islandora_solr_admin_settings';
+  //$form['#theme'] = 'islandora_solr_admin_settings';
 
-  return ($form);
+  return $form;
 }
 
+
 /**
- * theme_islandora_solr_admin_settings()
+ * theme_islandora_solr_admin_primary_display()
  */
-function theme_islandora_solr_admin_settings($form) {
+function theme_islandora_solr_admin_primary_display($variables) {
+  // set form
+  $form = $variables['form'];
+  
   $default = variable_get('islandora_solr_primary_display', 'default');
   $rows = array();
-  //clean up facet params
-
-  // render facet display table
-  $facet_header = array();
-  $facet_header[] = $form['facet_settings']['islandora_solr_block_facet_min_count']['#title'];
-  $form['facet_settings']['islandora_solr_block_facet_min_count']['#title'] = NULL;
-  $facet_header[] = $form['facet_settings']['islandora_solr_block_facet_shown_limit']['#title'];
-  $form['facet_settings']['islandora_solr_block_facet_shown_limit']['#title'] = NULL;
-  $facet_header[] = $form['facet_settings']['islandora_solr_block_facet_limit']['#title'];
-  $form['facet_settings']['islandora_solr_block_facet_limit']['#title'] = NULL;
-
-  $facet_rows = array();
-  $facet_row = array();
-  $facet_row[] = array('data' => drupal_render($form['facet_settings']['islandora_solr_block_facet_min_count']));
-  $facet_row[] = array('data' => drupal_render($form['facet_settings']['islandora_solr_block_facet_shown_limit']));
-  $facet_row[] = array('data' => drupal_render($form['facet_settings']['islandora_solr_block_facet_limit']));
-  $facet_rows[] = array('data' => $facet_row);
-
-  // put the rendered table in another fieldset.
-  $form['facet_settings']['islandora_facet_display_table']['#type'] = 'item';
-  $form['facet_settings']['islandora_facet_display_table']['#title'] = t('Facet Display Settings');
-  $form['facet_settings']['islandora_facet_display_table']['#description'] = t('Configure how facets will be diplayed in your environment.');
-  $form['facet_settings']['islandora_facet_display_table']['#value'] = theme('table', $facet_header, $facet_rows, array('id' => 'solr_facet_table'));
-
-
-  // render islandora_solr_primary_display_table
-  foreach ($form['display_profiles']['islandora_solr_primary_display_table']['machine_name'] as $key => $element) {
-    $row = array();
-    // check if $key is really the array we need. we shouldn't select the #parent array for example.
+  
+  foreach ($form['name'] as $key => $element) {
+    // Do not take form control structures.
     if (is_array($element) && element_child($key)) {
-
+      // disable checkbox for the default display, because it cannot be disabled.
       if ($key == $default) {
-        $form['display_profiles']['islandora_solr_primary_display_table']['enabled'][$key]['#attributes']['disabled'] = 'disabled';
-        $form['display_profiles']['islandora_solr_primary_display_table']['enabled'][$key]['#value'] = TRUE;
+        $form['enabled'][$key]['#attributes']['disabled'] = 'disabled';
+        $form['enabled'][$key]['#value'] = TRUE;
       }
+      $row = array();
+      $row[] = array('data' => drupal_render($form['default'][$key]));
+      $row[] = array('data' => drupal_render($form['enabled'][$key]));
+      $row[] = array('data' => drupal_render($form['name'][$key]), 'title' => $key);
+      $row[] = array('data' => drupal_render($form['machine_name'][$key]));
+      $row[] = array('data' => drupal_render($form['weight'][$key]), 'class' => 'solr-weight');
+      $row[] = array('data' => drupal_render($form['configuration'][$key]));
 
-      $row[] = array('data' => drupal_render($form['display_profiles']['islandora_solr_primary_display_table']['default'][$key]));
-      $row[] = array('data' => drupal_render($form['display_profiles']['islandora_solr_primary_display_table']['enabled'][$key]), 'class' => 'advanced');
-      $row[] = array('data' => drupal_render($form['display_profiles']['islandora_solr_primary_display_table']['name'][$key]), 'title' => $key);
-      $row[] = array('data' => drupal_render($form['display_profiles']['islandora_solr_primary_display_table']['machine_name'][$key]), 'class' => 'advanced');
-      $row[] = array('data' => drupal_render($form['display_profiles']['islandora_solr_primary_display_table']['weight'][$key]));
-      $row[] = array('data' => drupal_render($form['display_profiles']['islandora_solr_primary_display_table']['configuration'][$key]), 'class' => 'advanced');
-
-      $rows[] = array('data' => $row, 'class' => 'draggable');
-    }
+      // add to rows
+      $rows[] = array('data' => $row, 'class' => array('draggable'));
+     }
   }
 
   // Individual table headers.
@@ -453,25 +441,15 @@ function theme_islandora_solr_admin_settings($form) {
   $header[] = array('data' => t('Machine readable name'));
   $header[] = array('data' => t('Weight'));
   $header[] = array('data' => t('Configuration'));
-
-
-  // add tabledrag features
-  drupal_add_tabledrag('solr_config_table', 'order', 'sibling', 'solr_weight');
-
-
-  // put the rendered table in another fieldset.
-  $form['display_profiles']['islandora_solr_primary_display_table']['#type'] = 'item';
-  $form['display_profiles']['islandora_solr_primary_display_table']['#title'] = t('Primary Display Profiles');
-  $form['display_profiles']['islandora_solr_primary_display_table']['#description'] = t('Preferred normal display profile for search results.  These may be provided by third-party modules.');
-  $form['display_profiles']['islandora_solr_primary_display_table']['#value'] = theme('table', $header, $rows, array('id' => 'solr-primary-display-table'));
-
+  
   // render form
   $output = '';
-  $output .= drupal_render($form);
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'solr-primary-display-table')));
+  $output .= drupal_render_children($form);
   
   // add tabledrag features
   drupal_add_tabledrag('solr-primary-display-table', 'order', 'sibling', 'solr-weight');
-  
+    
   return $output;
 }
 
@@ -522,35 +500,19 @@ function get_handlers($solr_url) {
 /**
  * Checks url validity and refreshes requestHandler dropdown list
  */
-function update_solr_url_div() {
-  $form = callback_prep();
-  $changed_elements = $form['solr_ahah_wrapper'];
-  unset($changed_elements['#prefix'], $changed_elements['#suffix']);
-  $output = theme('status_messages') . drupal_render($changed_elements);
-  drupal_json(array(
-    'status' => TRUE,
-    'data' => $output,
-  ));
+function update_solr_url_div($form, $form_state) {
+  return $form['solr_ajax_wrapper']; // man, this is easy :)
 }
 
 /**
- * callback prep ??
- * @return array
- * Utilty function to prep $form_state for ahah
+ * Solr admin refresh
+ * @param type $form
+ * @param array $form_state
  */
-function callback_prep() {
-  $form_state = array('storage' => NULL, 'submitted' => FALSE);
-  $form_build_id = check_plain($_POST['form_build_id']);
-  $form = form_get_cache($form_build_id, $form_state);
-  $args = $form['#parameters'];
-  $form_id = array_shift($args);
-  $form_state['post'] = $form['#post'] = $_POST;
-  // Enable the submit/validate handlers to determine whether AHAH-submittted.
-  $form_state['ahah_submission'] = TRUE;
-  $form['#programmed'] = $form['#redirect'] = FALSE;
-  drupal_process_form($form_id, $form, $form_state);
-  $form = drupal_rebuild_form($form_id, $form_state, $args, $form_build_id);
-  return $form;
+function solr_admin_refresh($form, &$form_state) {
+  unset($form_state['submit_handlers']);
+  form_execute_handlers('submit', $form, $form_state);
+  $form_state['rebuild'] = TRUE;
 }
 
 /**
@@ -606,20 +568,10 @@ function solr_settings_form_submit($form, &$form_state) {
   }
 
   cache_clear_all();
-  drupal_rebuild_theme_registry();
+  drupal_theme_rebuild();
 }
 
-/**
- * Solr admin refresh
- * @param type $form
- * @param array $form_state
- */
-function solr_admin_refresh($form, &$form_state) {
-  $values = $form_state['values'];
-  unset($form_state['submit_handlers']);
-  form_execute_handlers('submit', $form, $form_state);
-  $form_state['rebuild'] = TRUE;
-}
+
 
 
 /**

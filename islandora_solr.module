@@ -96,16 +96,17 @@ function islandora_solr_theme() {
   $file = 'islandora_solr.theme.inc';
 
   return array(
+    // advanced solr search form/block
     'islandora_solr_block_form' => array(
       'variables' => array(
         'form' => NULL,
       ),
     ),
     // theme admin form
-    'islandora_solr_admin_settings' => array(
+    'islandora_solr_admin_primary_display' => array(
       'path' => $path,
       'file' => 'islandora_solr.admin.inc',
-      'variables' => array('form' => NULL),
+      'render element' => 'form',
     ),
     // results page
     'islandora_solr_wrapper' => array(
