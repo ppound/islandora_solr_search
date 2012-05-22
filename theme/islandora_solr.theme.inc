@@ -12,9 +12,9 @@
 // islandora-solr-search-default.tpl.php
 
 /**
- * hook_preprocess function for islandora_solr_search
+ * hook_preprocess function for islandora_solr
  */
-function islandora_solr_search_preprocess_islandora_solr_wrapper(&$variables) {
+function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
   // base url
   global $base_url;
   $variables['base_url'] = $base_url;
@@ -41,9 +41,9 @@ function islandora_solr_search_preprocess_islandora_solr_wrapper(&$variables) {
 
 
 /**
- * hook_preprocess function for islandora_solr_search_default
+ * hook_preprocess function for islandora_solr_default
  */
-function islandora_solr_search_preprocess_islandora_solr_search(&$variables) {
+function islandora_solr_preprocess_islandora_solr(&$variables) {
   // base url
   global $base_url;
   // base path
@@ -56,7 +56,7 @@ function islandora_solr_search_preprocess_islandora_solr_search(&$variables) {
   $variables['base_path'] = $base_path;
   
   // get path
-  $path = $base_path . drupal_get_path('module', 'islandora_solr_search');
+  $path = $base_path . drupal_get_path('module', 'islandora_solr');
   
   // placeholder image
   $solr_default_img = $path . '/images/defaultimg.png';
