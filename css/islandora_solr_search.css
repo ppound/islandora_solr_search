@@ -125,6 +125,7 @@ html.js .refresh-button {
 .islandora-solr-search-thumb img {
   max-width: 100%;
   *width: 100%;
+  border: 1px solid #ccc;
 }
 
 dl.islandora-solr-search-thumb {
