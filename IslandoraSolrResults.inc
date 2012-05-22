@@ -79,7 +79,7 @@ class IslandoraSolrResults {
     }
 
     // rendered secondary display profiles
-    $secondary_profiles = $this->addSecondaries();
+    $secondary_profiles = $this->addSecondaries($solrQueryProcessor);
     
     // rendered results
     $results = $this->printResults($apacheSolrResult);
@@ -88,11 +88,19 @@ class IslandoraSolrResults {
     return theme('islandora_solr_wrapper', $results, $secondary_profiles, $elements);
   }
 
-  function addSecondaries() {
-    $output = '';
+  function addSecondaries($solrQueryProcessor) {
+    $query_list = array();
     // Get secondary display profiles
     $secondary_display_profiles = module_invoke_all('islandora_solr_secondary_display');
-    // How about this for an expected return?
+    
+    // set path
+    $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
+    
+    // parameters set in url
+    $params = $solrQueryProcessor->internalSolrParams;
+    
+    // Expected return:
+    // 
     // return array(
     // 'machine-name' = array(
     //   'name' => 'Human Readable Name',
@@ -103,40 +111,31 @@ class IslandoraSolrResults {
     //   'description' => 'A description of the display profile',
     //   'logo' => 'Some text, some <html>, an <img>, etc used to link to this output,
     // );
-    // check if
-    // if the islandora_solr_search admin form has never been saved, then
-    // the variable 'islandora_solr_secondary_display' won't be set yet.
+
     $secondary_array = variable_get('islandora_solr_secondary_display', array());
+    
+    foreach ($secondary_array as $name => $status) {
+      if ($status === $name) {
+        // generate url
+        $query_secondary = array_merge($params, array('solr_profile' => $name));
 
-    // count number of elements in array
-    $array_count = count($secondary_array);
-    // count number of disabled displays
-    $i = 0;
-    foreach ($secondary_array as $key => $value) {
-      if ($value === 0) {
-        $i++;
+        // set attributes variable for remove link
+        $attr = array();
+        // set title
+        $attr['title'] = $secondary_display_profiles[$name]['description'];
+        // set rel
+        $attr['rel'] = 'nofollow';      
+        // set url
+        $attr['href'] = url($path, array('query' => $query_secondary));
+        // logo
+        $logo = $secondary_display_profiles[$name]['logo'];
+        // create link
+        // we're not using l() because of active classes: http://drupal.org/node/41595
+        $query_list[] = '<a' . drupal_attributes($attr) . '>' . $logo . '</a>';
       }
     }
 
-    // if number of elements is the same as the number of disabled displays,
-    // this means that there are no displays enabled.
-    if ($array_count != $i) {
-
-      foreach ($secondary_array as $name => $status) {
-        if ($status === $name) {
-
-          $description = $secondary_display_profiles[$name]['description'];
-          $logo = $secondary_display_profiles[$name]['logo'];
-
-          $attributes = array('title' => $description);
-          $query = array();
-          $query[] = drupal_query_string_encode(array('solr_profile' => $name));
-          $output .= l($logo, $_GET['q'], array('attributes' => $attributes, 'html' => TRUE, 'query' => count($query) ? implode('&', $query) : NULL));
-        }
-      }
-
-    }
-    return $output;
+    return theme('item_list', $query_list, NULL, "ul", array('class' => 'islandora-solr-search-secondary'));
   }
 
   /**

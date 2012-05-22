@@ -85,6 +85,15 @@ img.islandora_solr_secondary_display_icon {
   vertical-align: bottom;
 }
 
+.item-list ul.islandora-solr-search-secondary li
+{
+  display: inline-block;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  background-image: none; 
+}
+
+
 html.js .refresh-button {
   display: none;
 }
