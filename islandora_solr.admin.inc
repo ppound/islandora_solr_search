@@ -151,10 +151,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
       $options[$machine_name] = '';
 
       $form['display_profiles']['islandora_solr_primary_display_table']['name'][$machine_name] = array(
-        '#value' => $profile['name'],
+        '#type' => 'item',
+        '#markup' => $profile['name'],
       );
       $form['display_profiles']['islandora_solr_primary_display_table']['machine_name'][$machine_name] = array(
-        '#value' => $machine_name,
+        '#type' => 'item',
+        '#markup' => $machine_name,
       );
       $form['display_profiles']['islandora_solr_primary_display_table']['weight'][$machine_name] = array(
         '#type' => 'weight',
@@ -163,7 +165,8 @@ function islandora_solr_admin_settings($form, &$form_state) {
         '#attributes' => array('class' => 'solr-weight'),
       );
       $form['display_profiles']['islandora_solr_primary_display_table']['configuration'][$machine_name] = array(
-        '#value' => (isset($profile['configuration']) AND $profile['configuration'] != '') ? l(t('configure'), $profile['configuration']) : '',
+        '#type' => 'item',
+        '#markup' => (isset($profile['configuration']) AND $profile['configuration'] != '') ? l(t('configure'), $profile['configuration']) : '',
       );
     }
 
