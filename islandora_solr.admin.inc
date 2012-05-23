@@ -26,10 +26,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
     return;
   }
 
+  // set default requesthandler
   $handlers['standard'] = 'standard';
 
-  $handler = !empty($form_state['values']['islandora_solr_block_request_handler']) ? $form_state['values']['islandora_solr_block_request_handler'] : variable_get('islandora_solr_block_request_handler', 'standard');
-  $solr_url = !empty($form_state['values']['islandora_solr_block_url']) ? $form_state['values']['islandora_solr_block_url'] : variable_get('islandora_solr_block_url', 'localhost:8080/solr');
+  // check for requesthandlers
+  $handler = !empty($form_state['values']['islandora_solr_requesthandler']) ? $form_state['values']['islandora_solr_requesthandler'] : variable_get('islandora_solr_requesthandler', 'standard');
+  $solr_url = !empty($form_state['values']['islandora_solr_url']) ? $form_state['values']['islandora_solr_url'] : variable_get('islandora_solr_url', 'localhost:8080/solr');
   $solr_avail = solr_available($solr_url);
   if ($solr_avail) {
     $handlers = get_handlers($solr_url);
@@ -37,9 +39,9 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
   $dismax_allowed = check_dismax($solr_url, $handler);
   $confirmation_message = ($solr_avail ? '<img src="' . url('misc/watchdog-ok.png') . '"/>'
-          . t('Successfully connected to Solr server at !islandora_solr_block_url', array('!islandora_solr_block_url' => $solr_url)) : '<img src="'
+          . t('Successfully connected to Solr server at !islandora_solr_url', array('!islandora_solr_url' => $solr_url)) : '<img src="'
           . url('misc/watchdog-error.png') . '"/> '
-          . t('Unable to connect to Solr server at !islandora_solr_block_url</p>', array('!islandora_solr_block_url' => $solr_url)));
+          . t('Unable to connect to Solr server at !islandora_solr_url</p>', array('!islandora_solr_url' => $solr_url)));
 
   $form = array();
 
@@ -49,7 +51,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'fieldset',
   );
 
-  $form['solr_ajax_wrapper']['islandora_solr_block_url'] = array(
+  $form['solr_ajax_wrapper']['islandora_solr_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Solr url'),
     '#size' => 40,
@@ -77,7 +79,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#markup' => $confirmation_message,
   );
 
-  $form['solr_ajax_wrapper']['islandora_solr_block_request_handler'] = array(
+  $form['solr_ajax_wrapper']['islandora_solr_requesthandler'] = array(
     '#type' => 'select',
     '#title' => t('Request Handler'),
     '#options' => $handlers,
@@ -112,10 +114,10 @@ function islandora_solr_admin_settings($form, &$form_state) {
   
   // get the table settings
   $primary_display_array = variable_get('islandora_solr_primary_display_table', array());
-  dsm(($primary_display_array));
+
   // get all defined primary displays
   $profiles = module_invoke_all("islandora_solr_primary_display");
-  dsm($profiles);
+
   if (!empty($profiles)) {
 
     $profiles_sorted = array();
@@ -273,7 +275,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#title' => t('Soft limit'),
     '#size' => 5,
     '#description' => t('The number which should be shown initially. If there are more, then the a "Show more" button will allow the rest up to the value below to be displayed. Use 0 to disable.'),
-    '#default_value' => variable_get('islandora_solr_facet_soft_limit', '0'),
+    '#default_value' => variable_get('islandora_solr_facet_soft_limit', '10'),
   );
   $form['facet_settings']['islandora_solr_facet_max_limit'] = array(
     '#type' => 'textfield',

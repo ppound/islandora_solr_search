@@ -840,7 +840,7 @@ class IslandoraSolrResults {
   function build_simple_solr_form() {
     // FIXME:  This should actually be checking the settings in the request handler...  Not making assumptions based on name
     $required = FALSE;
-    if (variable_get('islandora_solr_block_request_handler', '') == 'standard') {
+    if (variable_get('islandora_solr_requesthandler', '') == 'standard') {
       $required = TRUE;
     }
     global $islandora_query;

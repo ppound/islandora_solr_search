@@ -54,7 +54,7 @@ class IslandoraSolrQueryProcessor {
    * @return type
    */
   function buildAndExecuteQuery($query, $params = NULL) {
-    if (variable_get('islandora_solr_block_request_handler', NULL) == 'standard') {
+    if (variable_get('islandora_solr_requesthandler', NULL) == 'standard') {
 
       if (!$query || $query == ' ') {
         $query = '%252F';
@@ -161,7 +161,7 @@ class IslandoraSolrQueryProcessor {
       'facet' => 'true',
       'facet.mincount' => variable_get('islandora_solr_facet_min_limit', '2'),
       'facet.limit' => variable_get('islandora_solr_facet_max_limit', '12'),
-      'qt' => variable_get("islandora_solr_block_request_handler", "standard"),
+      'qt' => variable_get("islandora_solr_requesthandler", "standard"),
       'hl' => isset($keys[0]) ? 'true' : NULL,
       'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,
       'hl.fragsize' => 400,
@@ -221,7 +221,7 @@ class IslandoraSolrQueryProcessor {
     // @TODO: add possibility to alter the query right before it gets excecuted.
 
     // set variables
-    $url = variable_get('islandora_solr_block_url', 'http://localhost:8080/solr');
+    $url = variable_get('islandora_solr_url', 'http://localhost:8080/solr');
     $pathParts = parse_url($url);
 
     // call solr
