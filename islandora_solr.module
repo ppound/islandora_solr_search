@@ -23,7 +23,6 @@ function islandora_solr_init() {
     
   static $islandora_solr_init = FALSE;
   if (!$islandora_solr_init) {
-    drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.css');
     // single underscore followed by the module and another underscore
     global $_islandora_solr_queryclass;
     if (empty($_islandora_solr_queryclass)) {
