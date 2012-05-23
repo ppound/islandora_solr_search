@@ -1,7 +1,7 @@
 $(document).ready(function() {
   
   // show more  
-  $(".shown-toggle").click(function() {
+  $(".soft-limit").click(function() {
   
     $(this).siblings(".hidden, .toggle-wrapper").toggleClass('hidden');
     $(this).toggleClass('hidden');

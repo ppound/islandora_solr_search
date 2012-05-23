@@ -43,9 +43,9 @@ function islandora_solr_boot() {
   // Allow i18n, by using multilingual variables.
   if (module_exists('i18n')) {
     $vars = array(
-      'islandora_solr_block_facets',
+      'islandora_solr_facets',
       'islandora_solr_result_fields',
-      'islandora_solrterms'
+      'islandora_solr_searchterms'
     );
 
     $conf['i18n_variables'] = (isset($conf['i18n_variables']) && is_array($conf['i18n_variables'])) ? 
@@ -61,14 +61,6 @@ function islandora_solr_menu() {
   $items['islandora/solr/search'] = array(
     'page callback' => 'islandora_solr',
     'access arguments' => array('view fedora collection'), //depends of fedora_repository view
-    'type' => MENU_CALLBACK,
-  );
-
-
-  $items['islandora/solr/process'] = array(
-    'page callback' => 'update_solr_url_div',
-    'access arguments' => array('view fedora collection'),
-    'file' => 'islandora_solr.admin.inc',
     'type' => MENU_CALLBACK,
   );
 

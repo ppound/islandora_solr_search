@@ -529,7 +529,7 @@ class IslandoraSolrResults {
    *   arrays for output substitution
    */
   function prepFieldSubstitutions() {
-    $rawFacetVals = variable_get("islandora_solr_block_facets", 'dc.subject ~ Subject,dc.type ~ Type');
+    $rawFacetVals = variable_get("islandora_solr_facets", 'dc.subject ~ Subject,dc.type ~ Type');
     $this->facetFieldArray = islandora_build_substitution_list($rawFacetVals);
 
     $rawSearchTerms = variable_get('islandora_solr_searchterms', 'dc.title ~ Title');
@@ -556,10 +556,10 @@ class IslandoraSolrResults {
     // set variables
     $facet_output = $output = '';
     
-    // shown limit
-    $facet_min_count = variable_get('islandora_solr_block_facet_min_count', '2');
-    $initial_limit = variable_get('islandora_solr_block_facet_shown_limit', '0');
-    $facet_limit = variable_get('islandora_solr_block_facet_limit', '20');
+    // limits
+    $facet_min_count = variable_get('islandora_solr_facet_min_limit', '2');
+    $initial_limit = variable_get('islandora_solr_facet_soft_limit', '0');
+    $facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
     
     // get facet values returned from solr
     $facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_fields) ? $solrQueryProcessor->solrResult->facet_counts->facet_fields : array();
@@ -620,8 +620,8 @@ class IslandoraSolrResults {
 
           // render the hidden facets
           if ($split_facet) {
-            $facet_output .= '<a href="#" class="shown-toggle">' . t('Show more') . '</a>';
-            $facet_output .= '<a href="#" class="shown-toggle hidden">' . t('Show less') . '</a>';
+            $facet_output .= '<a href="#" class="soft-limit">' . t('Show more') . '</a>';
+            $facet_output .= '<a href="#" class="soft-limit hidden">' . t('Show less') . '</a>';
             $facet_output .= '<div class="toggle-wrapper hidden">';
             $facet_output .= theme('item_list', $list_items_hidden, NULL, $list_type, $list_attributes);
             $facet_output .= '</div>';
@@ -634,7 +634,7 @@ class IslandoraSolrResults {
 
     if ($show_more) {
       // if there is at least one occurence of a split array, we add js to the page.
-      drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_shown_limit.js');
+      drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_soft_limit.js');
     }
 
     //////////////////////////////////////////////////////////////////////////////////////

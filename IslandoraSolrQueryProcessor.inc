@@ -148,7 +148,7 @@ class IslandoraSolrQueryProcessor {
     
     // set facet parameters
     // set variables
-    $raw_facet_vals = variable_get("islandora_solr_block_facets", 'dc.subject ~ Subject,dc.type ~ Type');
+    $raw_facet_vals = variable_get("islandora_solr_facets", 'dc.subject ~ Subject,dc.type ~ Type');
     $facet_array = islandora_build_substitution_list($raw_facet_vals);
     $facet_fields = implode(",", array_keys($facet_array));
     $keys = array();
@@ -159,8 +159,8 @@ class IslandoraSolrQueryProcessor {
     // set params
     $params_array = array(
       'facet' => 'true',
-      'facet.mincount' => variable_get('islandora_solr_block_facet_min_count', '2'),
-      'facet.limit' => variable_get('islandora_solr_block_facet_limit', '12'),
+      'facet.mincount' => variable_get('islandora_solr_facet_min_limit', '2'),
+      'facet.limit' => variable_get('islandora_solr_facet_max_limit', '12'),
       'qt' => variable_get("islandora_solr_block_request_handler", "standard"),
       'hl' => isset($keys[0]) ? 'true' : NULL,
       'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,

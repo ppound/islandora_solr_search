@@ -93,13 +93,14 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
 
 
+  // display profiles
   $form['display_profiles'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display profiles'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
-  // set the table form items
+  // primary displays
   $form['display_profiles']['islandora_solr_primary_display_table'] = array(
     '#type' => 'item',
     '#title' => t('Primary Display Profiles'),
@@ -111,11 +112,10 @@ function islandora_solr_admin_settings($form, &$form_state) {
   
   // get the table settings
   $primary_display_array = variable_get('islandora_solr_primary_display_table', array());
-  $enabled = array();
-
+  dsm(($primary_display_array));
   // get all defined primary displays
   $profiles = module_invoke_all("islandora_solr_primary_display");
-
+  dsm($profiles);
   if (!empty($profiles)) {
 
     $profiles_sorted = array();
@@ -182,12 +182,14 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
   }
 
+  
+  // secondary profiles
   $profiles = module_invoke_all("islandora_solr_secondary_display");
   ksort($profiles);
   foreach ($profiles as $machine_name => $profile) {
     $islandora_solr_secondary_display_options[$machine_name] = $profile['name'];
   }
-
+  
   if (!empty($islandora_solr_secondary_display_options)) {
     $form['display_profiles']['islandora_solr_secondary_display'] = array(
       '#type' => 'checkboxes',
@@ -198,13 +200,9 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
   }
 
-  //Notice: Undefined index: #options in expand_checkboxes() (line 1930 of /Applications/MAMP/htdocs/drupal-6.22/includes/form.inc).
-  $form['dismax_allowed'] = array(
-    '#type' => 'hidden',
-    '#value' => $dismax_allowed,
-  );
 
 
+  // default display settings
   $form['default_display_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Default display settings'),
@@ -245,52 +243,50 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
 
   
-  
-  
 
-  
+  // facet settings
   $form['facet_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Facet settings'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
-  $form['facet_settings']['islandora_solr_block_facets'] = array(
+  $form['facet_settings']['islandora_solr_facets'] = array(
     '#type' => 'textarea',
     '#title' => t('Facet Fields'),
-    '#default_value' => variable_get('islandora_solr_block_facets', ''),
+    '#default_value' => variable_get('islandora_solr_facets', ''),
     '#description' => t("Indicate which fields will appear in the <strong>Islandora Facet Block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong> "),
-    '#default_value' => variable_get('islandora_solr_block_facets', 'dc.subject ~ Subject,dc.type ~ Type'),
+    '#default_value' => variable_get('islandora_solr_facets', 'dc.subject ~ Subject,dc.type ~ Type'),
     '#wysiwyg' => FALSE,
-    '#default_value' => variable_get('islandora_solr_block_facets', 'dc.subject ~ Subject,dc.type ~ Type')
+    '#default_value' => variable_get('islandora_solr_facets', 'dc.subject ~ Subject,dc.type ~ Type')
   );
-  $form['facet_settings']['islandora_solr_block_facet_min_count'] = array(
+  $form['facet_settings']['islandora_solr_facet_min_limit'] = array(
     '#type' => 'textfield',
-    '#title' => t('Minimum Results to Display Facet'),
+    '#title' => t('Minimum limit'),
     '#size' => 5,
     '#description' => t('Minimum results required to display a facet'),
-    '#default_value' => variable_get('islandora_solr_block_facet_min_count', '2'),
+    '#default_value' => variable_get('islandora_solr_facet_min_limit', '2'),
   );
-  $form['facet_settings']['islandora_solr_block_facet_shown_limit'] = array(
+  $form['facet_settings']['islandora_solr_facet_soft_limit'] = array(
     '#type' => 'textfield',
-    '#title' => t('Initially shown facets'),
+    '#title' => t('Soft limit'),
     '#size' => 5,
     '#description' => t('The number which should be shown initially. If there are more, then the a "Show more" button will allow the rest up to the value below to be shown. Use 0 to disable.'),
-    '#default_value' => variable_get('islandora_solr_block_facet_shown_limit', '0'),
+    '#default_value' => variable_get('islandora_solr_facet_soft_limit', '0'),
   );
-  $form['facet_settings']['islandora_solr_block_facet_limit'] = array(
+  $form['facet_settings']['islandora_solr_facet_hard_limit'] = array(
     '#type' => 'textfield',
-    '#title' => t('Maximum Facets returned'),
+    '#title' => t('Hard limit'),
     '#size' => 5,
     '#description' => t('Set the maximum number of terms that should be returned to the user.<br />
       For example, if there are 100 possible subjects in a faceted result, you may wish to return only the top 10.'),
-    '#default_value' => variable_get('islandora_solr_block_facet_limit', '20'),
+    '#default_value' => variable_get('islandora_solr_facet_hard_limit', '20'),
   );
   $form['facet_settings']['islandora_facet_display_table'] = array();  
   
   
-  
+  // advanced search block
   $form['advanced_search_block'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced search block'),
@@ -307,17 +303,17 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('islandora_solr_searchterms', 'dc.title ~ Title'),
     '#wysiwyg' => FALSE,
   );
-  $form['advanced_search_block']['islandora_solr_block_repeat'] = array(
+  $form['advanced_search_block']['islandora_solr_search_block_repeat'] = array(
     '#type' => 'textfield',
     '#title' => t('Search Field Repetition'),
     '#size' => 5,
     '#description' => t('The number of fields you would like to have appear in the <strong>Solr Advanced Search Block</strong>'),
-    '#default_value' => variable_get('islandora_solr_block_repeat', '3'),
+    '#default_value' => variable_get('islandora_solr_search_block_repeat', '3'),
   );
 
 
   
-  
+  // query defaults
   $form['query_defaults'] = array(
     '#type' => 'fieldset',
     '#title' => t('Query defaults'),
@@ -354,7 +350,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
-
   $form['query_defaults']['sort_fields']['islandora_solr_sort_field'] = array(
     '#type' => 'textfield', '#title' => t('Sort field'),
     '#size' => 20,
@@ -369,8 +364,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#default_value' => 'desc',
   );
   
-  
-  
+  // debug mode
   $form['islandora_solr_debug_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Debug Mode?'),
@@ -379,6 +373,15 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#description' => t('Dumps solr query to the screen for testing. Warning: if you have the Drupal Apache Solr module enabled alongside this one then the debug function will not work.'),
   );
   
+  
+  //Notice: Undefined index: #options in expand_checkboxes() (line 1930 of /Applications/MAMP/htdocs/drupal-6.22/includes/form.inc).
+  $form['dismax_allowed'] = array(
+    '#type' => 'hidden',
+    '#value' => $dismax_allowed,
+  );
+  
+  
+  // actions
   $form['actions'] = array(
     '#type' => 'actions'
   );
@@ -397,8 +400,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
   if (!empty($_POST) && form_get_errors()) {
     drupal_set_message(t('The settings have not been saved because of the errors.'), 'error');
   }
-  //$form['#theme'] = 'system_settings_form';
-  //$form['#theme'] = 'islandora_solr_admin_settings';
 
   return $form;
 }
@@ -410,7 +411,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
 function theme_islandora_solr_admin_primary_display($variables) {
   // set form
   $form = $variables['form'];
-  
+
   $default = variable_get('islandora_solr_primary_display', 'default');
   $rows = array();
   
@@ -420,8 +421,9 @@ function theme_islandora_solr_admin_primary_display($variables) {
       // disable checkbox for the default display, because it cannot be disabled.
       if ($key == $default) {
         $form['enabled'][$key]['#attributes']['disabled'] = 'disabled';
-        $form['enabled'][$key]['#value'] = TRUE;
+        $form['enabled'][$key]['#checked'] = TRUE;
       }
+
       $row = array();
       $row[] = array('data' => drupal_render($form['default'][$key]));
       $row[] = array('data' => drupal_render($form['enabled'][$key]));
