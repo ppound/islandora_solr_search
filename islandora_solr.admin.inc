@@ -141,8 +141,8 @@ function islandora_solr_admin_settings($form, &$form_state) {
   if (!empty($profiles)) {
 
     $profiles_sorted = array();
-    // if the table settings are set (weight), we change the order of the table rows.
-    if (isset($primary_display_array['weight'])) {
+    // if the table settings are set, we change the order of the table rows.
+    if (!empty($primary_display_array)) {
       // new variable
       $weight = $primary_display_array['weight'];
 
@@ -150,14 +150,17 @@ function islandora_solr_admin_settings($form, &$form_state) {
       array_multisort(array_values($weight), SORT_ASC, array_keys($weight), SORT_ASC, $weight);
 
       // Add all previously existing profiles with a weight...
-      foreach (array_intersect_assoc($profiles, $weight) as $key => $value) {
-        $profiles_sorted[$key] = $value;
+      foreach (array_intersect_key($weight, $profiles) as $key => $value) {
+        $profiles_sorted[$key] = $profiles[$key];
       }
-	  
-      //Account for new profiles.
+
+      // account for new profiles.
       foreach (array_diff_assoc($profiles, $profiles_sorted) as $key => $value) {
         $profiles_sorted[$key] = $value;
+        // add weight for new profile (heaviest +1)
+        $primary_display_array['weight'][$key] = end($weight) + 1;
       }
+ 
     }
     // or else use the default
     else {
@@ -165,7 +168,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
       ksort($profiles); // only apply when there's no sort variable available.
       $profiles_sorted = $profiles;
     }
-
 
     // table loop
     foreach ($profiles_sorted as $machine_name => $profile) {
@@ -186,8 +188,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       // weight
       $form['display_profiles']['islandora_solr_primary_display_table']['weight'][$machine_name] = array(
         '#type' => 'weight',
-//        '#default_value' => ($primary_display_array['weight'][$machine_name]) ? $primary_display_array['weight'][$machine_name] : 0, // @TODO: fixme
-        '#default_value' => 0, // if no displays are set 'weight' is not set. Need fixing
+        '#default_value' => (isset($primary_display_array['weight'][$machine_name])) ? $primary_display_array['weight'][$machine_name] : 0,
         '#attributes' => array('class' => array('solr-weight')),
       );
       // configuration url
@@ -196,6 +197,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
         '#markup' => (isset($profile['configuration']) AND $profile['configuration'] != '') ? l(t('configure'), $profile['configuration']) : '',
       );
     }
+    dsm(variable_get('islandora_solr_primary_display', 'default'));
     // default display
     $form['display_profiles']['islandora_solr_primary_display_table']['default'] = array(
       '#type' => 'radios',
@@ -506,20 +508,16 @@ function _islandora_solr_admin_settings_validate($form, &$form_state) {
  * @return NULL
  */
 function _islandora_solr_admin_settings_submit($form, &$form_state) {
+  dsm($form_state);
   
-  // old_default variable
-  $old_default = variable_get('islandora_solr_primary_display', 'default');
-  // new_default variable
-  $new_default = $form_state['values']['islandora_solr_primary_display_table']['default'];
-  // make default enabled
-  $form_state['values']['islandora_solr_primary_display_table']['enabled'][$new_default] = $new_default;
-  $form_state['values']['islandora_solr_primary_display_table']['enabled'][$old_default] = $old_default;
-  variable_set('islandora_solr_primary_display', $new_default);
-
-  if ($form_state['clicked_button']['#id'] != 'edit-submit') {
+  // if this function is called 
+  if ($form_state['clicked_button']['#id'] != 'edit-submit' AND $form_state['clicked_button']['#id'] != 'edit-reset') {
     $form_state['rebuild'] = TRUE;
     return;
   }
+
+  
+  // get operation
   $op = isset($form_state['values']['op']) ? $form_state['values']['op'] : '';
 
   // Exclude unnecessary elements.
@@ -530,24 +528,50 @@ function _islandora_solr_admin_settings_submit($form, &$form_state) {
         $form_state['values']['form_token'],
         $form_state['values']['form_build_id']);
 
-  foreach ($form_state['values'] as $key => $value) {
-    if ($op == t('Reset to defaults')) {
+
+  
+  // if the operation is 'Reset'
+  if ($op == t('Reset to defaults')) {
+    // loop over all submitted values
+    foreach ($form_state['values'] as $key => $value) {
+      // remove all values
       variable_del($key);
     }
-    else {
-      if (is_array($value) && isset($form_state['values']['array_filter'])) {
-        $value = array_keys(array_filter($value));
-      }
-      variable_set($key, $value);
-    }
-  }
-  if ($op == t('Reset to defaults')) {
+    // also remove the default display
+    variable_del('islandora_solr_primary_display');
+    // also remove the request handler variable. Form item isn't always loaded
+    variable_del('islandora_solr_request_handler');
+
+    // set reset message
     drupal_set_message(t('The configuration options have been reset to their default values.'));
   }
   else {
-    drupal_set_message(t('The solr configuration options have been saved.'));
-  }
 
+    // old_default variable
+    $old_default = variable_get('islandora_solr_primary_display', 'default');
+    // new_default variable
+    $new_default = $form_state['values']['islandora_solr_primary_display_table']['default'];
+    // make default enabled
+    $form_state['values']['islandora_solr_primary_display_table']['enabled'][$new_default] = $new_default;
+    $form_state['values']['islandora_solr_primary_display_table']['enabled'][$old_default] = $old_default;
+    variable_set('islandora_solr_primary_display', $new_default);
+
+    // loop over all submitted values
+    foreach ($form_state['values'] as $key => $value) {
+      // prepare variables in array
+      if (is_array($value) && isset($form_state['values']['array_filter'])) {
+        $value = array_keys(array_filter($value));
+      }
+      // set variables
+      variable_set($key, $value);
+    }
+
+    // set save message
+    drupal_set_message(t('The solr configuration options have been saved.'));
+    
+  }
+  
+  // clear caches
   cache_clear_all();
   drupal_theme_rebuild();
 }
