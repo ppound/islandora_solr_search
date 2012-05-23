@@ -272,16 +272,16 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Soft limit'),
     '#size' => 5,
-    '#description' => t('The number which should be shown initially. If there are more, then the a "Show more" button will allow the rest up to the value below to be shown. Use 0 to disable.'),
+    '#description' => t('The number which should be shown initially. If there are more, then the a "Show more" button will allow the rest up to the value below to be displayed. Use 0 to disable.'),
     '#default_value' => variable_get('islandora_solr_facet_soft_limit', '0'),
   );
-  $form['facet_settings']['islandora_solr_facet_hard_limit'] = array(
+  $form['facet_settings']['islandora_solr_facet_max_limit'] = array(
     '#type' => 'textfield',
-    '#title' => t('Hard limit'),
+    '#title' => t('Maximum limit'),
     '#size' => 5,
     '#description' => t('Set the maximum number of terms that should be returned to the user.<br />
       For example, if there are 100 possible subjects in a faceted result, you may wish to return only the top 10.'),
-    '#default_value' => variable_get('islandora_solr_facet_hard_limit', '20'),
+    '#default_value' => variable_get('islandora_solr_facet_max_limit', '20'),
   );
   $form['facet_settings']['islandora_facet_display_table'] = array();  
   

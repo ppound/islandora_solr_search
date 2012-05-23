@@ -77,7 +77,7 @@ function islandora_solr_uninstall() {
     'islandora_solr_facets',
     'islandora_solr_facet_min_limit',
     'islandora_solr_facet_soft_limit',
-    'islandora_solr_facet_hard_limit',
+    'islandora_solr_facet_max_limit',
     'islandora_solr_search_block_repeat',
     'islandora_solr_block_request_handler',
     'islandora_solr_block_url',
