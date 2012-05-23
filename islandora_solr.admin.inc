@@ -495,17 +495,7 @@ function theme_islandora_solr_admin_primary_display($variables) {
  * @param array $form_state
  */
 function _islandora_solr_admin_settings_validate($form, &$form_state) {
-  dsm($form_state);
-  watchdog('islandora solr', 'validate');
-  
-  $url = $form_state['values']['islandora_solr_url'];
-  
-  $ping = islandora_solr_ping($url);
-  if (!$ping) {
-    form_set_error('solr_ajax_wrapper', t('Unable to connect to Solr server at !islandora_solr_url', array('!islandora_solr_url' => $url)) );
-  }
 
-  
   $form_state['values']['islandora_solr_namespace_restriction'] = preg_replace('/:$/', '', $form_state['values']['islandora_solr_namespace_restriction']);
 }
 
@@ -516,10 +506,6 @@ function _islandora_solr_admin_settings_validate($form, &$form_state) {
  * @return NULL
  */
 function _islandora_solr_admin_settings_submit($form, &$form_state) {
-  dsm($form);
-  dsm($form_state);
-  print_r($form, TRUE);
-  watchdog('islandora solr', 'submit');
   
   // old_default variable
   $old_default = variable_get('islandora_solr_primary_display', 'default');
