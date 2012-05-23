@@ -539,7 +539,7 @@ function islandora_solr($query = NULL) {
   $queryResult = $_islandora_solr_queryclass->buildAndExecuteQuery($query, $params);
 
   // TODO: Also filter secondary displays against those checked in the configuration options.
-  if (isset($secondary_profiles[$_GET['solr_profile']])) {
+  if (isset($_GET['solr_profile']) AND isset($secondary_profiles[$_GET['solr_profile']])) {
     $profile = $secondary_profiles[$_GET['solr_profile']];
   }
   elseif (isset($primary_profiles[$islandora_solr_primary_display])) {
@@ -637,7 +637,7 @@ function islandora_solr_ping($solr_url) {
   $solr_url = islandora_solr_check_http($solr_url);
 
   // check for valid url string.
-  if(!filter_var($solr_url, FILTER_VALIDATE_URL)) {
+  if (!filter_var($solr_url, FILTER_VALIDATE_URL)) {
     return FALSE;
   }
 
@@ -671,7 +671,7 @@ function islandora_solr_ping($solr_url) {
 function islandora_solr_check_http($url) {
   
   // check for 'http://' or 'https://' prefix - if not found, add it.
-  if(strpos($url, "http://") === FALSE AND strpos($url, "https://") === false) {
+  if (strpos($url, "http://") === FALSE AND strpos($url, "https://") === FALSE) {
     $url = 'http://' . $url;
   }
   return $url;

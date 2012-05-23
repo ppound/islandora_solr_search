@@ -78,7 +78,7 @@ class IslandoraSolrQueryProcessor {
     unset($this->internalSolrParams['page']);
     
     // Set Solr type (dismax)
-    if ($this->internalSolrParams['type'] == 'dismax') {
+    if (isset($this->internalSolrParams['type']) AND $this->internalSolrParams['type'] == 'dismax') {
       $this->solrDefType = $this->internalSolrParams['type'];
       $this->solrParams['defType'] = $this->internalSolrParams['type'];
     }
@@ -116,7 +116,7 @@ class IslandoraSolrQueryProcessor {
     $profile = $profiles[$display];
     $profile_params = array();
     // if display has parameters defined
-    if ($profile['params']) {
+    if (isset($profile['params'])) {
       // loop over defined paramters
       foreach ($profile['params'] as $param) {
         $profile_params[] = $param;
@@ -177,7 +177,7 @@ class IslandoraSolrQueryProcessor {
     $base_filters = preg_split("/\\r\\n|\\n|\\r/", variable_get('islandora_solr_base_filter', ''), -1, PREG_SPLIT_NO_EMPTY);
     
     // set filter parameters - both from url and admin settings.
-    if (is_array($this->internalSolrParams['f'])) {
+    if (isset($this->internalSolrParams['f']) AND is_array($this->internalSolrParams['f'])) {
       $this->solrParams['fq'] = $this->internalSolrParams['f'];
       if (!empty($base_filters)) {
         $this->solrParams['fq'] = array_merge($this->internalSolrParams['f'], $base_filters);
@@ -195,13 +195,12 @@ class IslandoraSolrQueryProcessor {
     }
 
     // if no qf fields are specified in the requestHandler a default list is supplied here for dismax searches
-    if (!variable_get('islandora_solr_dismax_allowed', FALSE) && $this->internalSolrParams['type'] == "dismax") {
+    if (!variable_get('islandora_solr_dismax_allowed', FALSE) AND isset($this->internalSolrParams['type']) AND $this->internalSolrParams['type'] == "dismax") {
       $this->solrParams['qf'] = 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type';
     }
 
     // Invoke a hook for third-party modules to alter the parameters.
     module_invoke_all('islandora_solr_query_processor', $this); //The hook implementation needs to specify that it takes a reference, not be passed one
-    $processor->solrParams['fq'][] = $fq; // @TODO figure out where $processor is set - what does it do?
     return;
   }
 

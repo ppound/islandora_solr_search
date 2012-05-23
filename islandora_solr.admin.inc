@@ -560,7 +560,7 @@ function _islandora_solr_admin_settings_submit($form, &$form_state) {
     }
 
     // set save message
-    drupal_set_message(t('The solr configuration options have been saved.')); // @TODO: these don't seem to work anymore
+    drupal_set_message(t('The solr configuration options have been saved.'));
     
   }
   

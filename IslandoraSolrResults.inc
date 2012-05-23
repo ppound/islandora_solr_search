@@ -383,7 +383,12 @@ class IslandoraSolrResults {
     $breadcrumb = array();
     
     // get user provided filter parameters
-    $fq = $solrQueryProcessor->internalSolrParams['f'];
+    if (isset($solrQueryProcessor->internalSolrParams['f'])) {
+      $fq = $solrQueryProcessor->internalSolrParams['f'];
+    }
+    else {
+      $fq = array();
+    }
     
     // parameters set in url
     $params = $solrQueryProcessor->internalSolrParams;
