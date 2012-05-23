@@ -641,8 +641,16 @@ function islandora_solr_ping($solr_url) {
     return FALSE;
   }
 
+  
+  
   // split url in host/port/path
   $solr_url_parsed = parse_url($solr_url);
+  
+  // if it's not a correct url for solr to check, return false.
+  if (!isset($solr_url_parsed['host']) OR !isset($solr_url_parsed['port'])) {
+    return FALSE;
+  }
+  
   // call solr
   $solr_service = new Apache_Solr_Service($solr_url_parsed['host'], $solr_url_parsed['port'], $solr_url_parsed['path'] . '/');
   

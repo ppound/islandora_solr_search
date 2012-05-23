@@ -55,7 +55,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   }
   else {
     $confirmation_message = '<img src="' . url('misc/watchdog-error.png') . '"/> '
-      . t('Unable to connect to Solr server at !islandora_solr_url</p>', array('!islandora_solr_url' => $solr_url));
+      . t('Unable to connect to Solr server at !islandora_solr_url', array('!islandora_solr_url' => $solr_url));
   }
   
   // set form array
@@ -75,6 +75,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#weight' => -1,
     '#description' => t('The url of the Solr installation.  Defaults to localhost:8080/solr.'),
     '#default_value' => $solr_url,
+    '#required' => TRUE,
     '#ajax' => array(
       'callback' => 'update_solr_url_div',
       'wrapper' => 'solr-url',
@@ -185,7 +186,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       // weight
       $form['display_profiles']['islandora_solr_primary_display_table']['weight'][$machine_name] = array(
         '#type' => 'weight',
-//        '#default_value' => ($primary_display_array['weight'][$machine_name]) ? $primary_display_array['weight'][$machine_name] : 0,
+//        '#default_value' => ($primary_display_array['weight'][$machine_name]) ? $primary_display_array['weight'][$machine_name] : 0, // @TODO: fixme
         '#default_value' => 0, // if no displays are set 'weight' is not set. Need fixing
         '#attributes' => array('class' => array('solr-weight')),
       );
@@ -400,7 +401,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#description' => t('Dumps solr query to the screen for testing. Warning: if you have the Drupal Apache Solr module enabled alongside this one then the debug function will not work.'),
   );
   
-  
   //Notice: Undefined index: #options in expand_checkboxes() (line 1930 of /Applications/MAMP/htdocs/drupal-6.22/includes/form.inc).
   $form['islandora_solr_dismax_allowed'] = array(
     '#type' => 'hidden',
@@ -416,14 +416,16 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Save Solr Configuration'),
     '#weight' => 0,
-    '#submit' => 'islandora_solr_admin_settings_submit',
+    '#submit' => array('_islandora_solr_admin_settings_submit'),
+    '#validate' => array('_islandora_solr_admin_settings_validate'),
   );
   $form['actions']['reset'] = array(
     '#type' => 'submit',
     '#value' => t('Reset to defaults'),
     '#weight' => 1,
+    '#submit' => array('_islandora_solr_admin_settings_submit'),
   );
-
+  
   if (!empty($_POST) && form_get_errors()) {
     drupal_set_message(t('The settings have not been saved because of the errors.'), 'error');
   }
@@ -492,7 +494,18 @@ function theme_islandora_solr_admin_primary_display($variables) {
  * @param array $form
  * @param array $form_state
  */
-function islandora_solr_admin_settings_validate($form, &$form_state) {
+function _islandora_solr_admin_settings_validate($form, &$form_state) {
+  dsm($form_state);
+  watchdog('islandora solr', 'validate');
+  
+  $url = $form_state['values']['islandora_solr_url'];
+  
+  $ping = islandora_solr_ping($url);
+  if (!$ping) {
+    form_set_error('solr_ajax_wrapper', t('Unable to connect to Solr server at !islandora_solr_url', array('!islandora_solr_url' => $url)) );
+  }
+
+  
   $form_state['values']['islandora_solr_namespace_restriction'] = preg_replace('/:$/', '', $form_state['values']['islandora_solr_namespace_restriction']);
 }
 
@@ -502,9 +515,11 @@ function islandora_solr_admin_settings_validate($form, &$form_state) {
  * @param array $form_state
  * @return NULL
  */
-function islandora_solr_admin_settings_submit($form, &$form_state) {
+function _islandora_solr_admin_settings_submit($form, &$form_state) {
   dsm($form);
   dsm($form_state);
+  print_r($form, TRUE);
+  watchdog('islandora solr', 'submit');
   
   // old_default variable
   $old_default = variable_get('islandora_solr_primary_display', 'default');
@@ -522,7 +537,12 @@ function islandora_solr_admin_settings_submit($form, &$form_state) {
   $op = isset($form_state['values']['op']) ? $form_state['values']['op'] : '';
 
   // Exclude unnecessary elements.
-  unset($form_state['values']['submit'], $form_state['values']['reset'], $form_state['values']['form_id'], $form_state['values']['op'], $form_state['values']['form_token'], $form_state['values']['form_build_id']);
+  unset($form_state['values']['submit'],
+        $form_state['values']['reset'],
+        $form_state['values']['form_id'],
+        $form_state['values']['op'],
+        $form_state['values']['form_token'],
+        $form_state['values']['form_build_id']);
 
   foreach ($form_state['values'] as $key => $value) {
     if ($op == t('Reset to defaults')) {
@@ -577,7 +597,11 @@ function _islandora_solr_get_handlers($solr_url) {
  * Checks url validity and refreshes requestHandler dropdown list
  */
 function update_solr_url_div($form, $form_state) {
-  return $form['solr_ajax_wrapper']; // man, this is easy :)
+  unset($form_state['submit_handlers']);
+  form_execute_handlers('submit', $form, $form_state);
+  $form_state['rebuild'] = TRUE;
+  
+  return $form['solr_ajax_wrapper'];
 }
 
 /**
