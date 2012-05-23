@@ -26,31 +26,48 @@ function islandora_solr_admin_settings($form, &$form_state) {
     return;
   }
 
-  // set default requesthandler
-  $handlers['standard'] = 'standard';
+  // set default requesthandler // @TODO: why?
+  //$handlers['standard'] = 'standard';
 
-  // check for requesthandlers
-  $handler = !empty($form_state['values']['islandora_solr_requesthandler']) ? $form_state['values']['islandora_solr_requesthandler'] : variable_get('islandora_solr_requesthandler', 'standard');
+  // get request handler
+  $handler = !empty($form_state['values']['islandora_solr_request_handler']) ? $form_state['values']['islandora_solr_request_handler'] : variable_get('islandora_solr_request_handler', NULL);
+  // get solr url
   $solr_url = !empty($form_state['values']['islandora_solr_url']) ? $form_state['values']['islandora_solr_url'] : variable_get('islandora_solr_url', 'localhost:8080/solr');
-  $solr_avail = solr_available($solr_url);
+  // check if solr is available
+  $solr_avail = islandora_solr_ping($solr_url);
+
+  $dismax_allowed = FALSE;
+  // if solr is available, get the request handlers
   if ($solr_avail) {
-    $handlers = get_handlers($solr_url);
+    // find request handlers
+    $handlers = _islandora_solr_get_handlers($solr_url);
+    
+    // check if dismax is allowed
+    $dismax_allowed = _islandora_solr_check_dismax($solr_url, $handler);
   }
 
-  $dismax_allowed = check_dismax($solr_url, $handler);
-  $confirmation_message = ($solr_avail ? '<img src="' . url('misc/watchdog-ok.png') . '"/>'
-          . t('Successfully connected to Solr server at !islandora_solr_url', array('!islandora_solr_url' => $solr_url)) : '<img src="'
-          . url('misc/watchdog-error.png') . '"/> '
-          . t('Unable to connect to Solr server at !islandora_solr_url</p>', array('!islandora_solr_url' => $solr_url)));
 
+
+  // get confirmation message
+  if ($solr_avail) {
+    $confirmation_message = '<img src="' . url('misc/watchdog-ok.png') . '"/>'
+      . t('Successfully connected to Solr server at <a href="!islandora_solr_url_checked" target="_blank">!islandora_solr_url</a> <sub>(!ms ms)</sub>', array('!islandora_solr_url_checked' => islandora_solr_check_http($solr_url), '!islandora_solr_url' => $solr_url, '!ms' => number_format($solr_avail, 2)));
+  }
+  else {
+    $confirmation_message = '<img src="' . url('misc/watchdog-error.png') . '"/> '
+      . t('Unable to connect to Solr server at !islandora_solr_url</p>', array('!islandora_solr_url' => $solr_url));
+  }
+  
+  // set form array
   $form = array();
 
+  // ajax wrapper for url checking
   $form['solr_ajax_wrapper'] = array(
     '#prefix' => '<div id="solr-url">',
     '#suffix' => '</div>',
     '#type' => 'fieldset',
   );
-
+  // solr url
   $form['solr_ajax_wrapper']['islandora_solr_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Solr url'),
@@ -63,37 +80,39 @@ function islandora_solr_admin_settings($form, &$form_state) {
       'wrapper' => 'solr-url',
       'effect' => 'fade',
       'event' => 'blur',
-      'progress' => array('type' => 'none'), // don't show progress throbber
+      'progress' => array('type' => 'throbber'),
     ),
   );
-
+  // hidden submit button
   $form['solr_ajax_wrapper']['refresh_page'] = array(
     '#type' => 'submit',
     '#value' => t('Test connection'),
     '#attributes' => array('class' => array('refresh-button')),
     '#submit' => array('solr_admin_refresh'),
   );
-
+  // confirmation message
   $form['solr_ajax_wrapper']['infobox'] = array(
     '#type' => 'item',
     '#markup' => $confirmation_message,
   );
-
-  $form['solr_ajax_wrapper']['islandora_solr_requesthandler'] = array(
-    '#type' => 'select',
-    '#title' => t('Request Handler'),
-    '#options' => $handlers,
-    '#description' => t('Request handlers as defined by !config', array('!config' => l(t('solrconfig.xml'), 'http://wiki.apache.org/solr/SolrConfigXml'))),
-    '#default_value' => $handler,
-    '#ajax' => array(
-      'callback' => 'update_solr_url_div',
-      'wrapper' => 'solr-url',
-      'effect' => 'fade',
-      'event' => 'change',
-      'progress' => array('type' => 'none'), // don't show progress throbber
-    ),
-  );
-
+  // request handler
+  // don't show form item if no request handlers are found
+  if (!empty($handlers)) {
+    $form['solr_ajax_wrapper']['islandora_solr_request_handler'] = array(
+      '#type' => 'select',
+      '#title' => t('Request Handler'),
+      '#options' => $handlers,
+      '#description' => t('Request handlers as defined by !config', array('!config' => l(t('solrconfig.xml'), 'http://wiki.apache.org/solr/SolrConfigXml'))),
+      '#default_value' => $handler,
+      '#ajax' => array(
+        'callback' => 'update_solr_url_div',
+        'wrapper' => 'solr-url',
+        'effect' => 'fade',
+        'event' => 'change',
+        'progress' => array('type' => 'throbber'),
+      ),
+    );
+  }
 
   // display profiles
   $form['display_profiles'] = array(
@@ -141,7 +160,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     }
     // or else use the default
     else {
-      // sort alphabetically with default on top
+      // sort by key
       ksort($profiles); // only apply when there's no sort variable available.
       $profiles_sorted = $profiles;
     }
@@ -150,37 +169,43 @@ function islandora_solr_admin_settings($form, &$form_state) {
     // table loop
     foreach ($profiles_sorted as $machine_name => $profile) {
 
+      // incremetally add every display profile to the options array
       $options[$machine_name] = '';
 
+      // human name
       $form['display_profiles']['islandora_solr_primary_display_table']['name'][$machine_name] = array(
         '#type' => 'item',
         '#markup' => $profile['name'],
       );
+      // machine name
       $form['display_profiles']['islandora_solr_primary_display_table']['machine_name'][$machine_name] = array(
         '#type' => 'item',
         '#markup' => $machine_name,
       );
+      // weight
       $form['display_profiles']['islandora_solr_primary_display_table']['weight'][$machine_name] = array(
         '#type' => 'weight',
 //        '#default_value' => ($primary_display_array['weight'][$machine_name]) ? $primary_display_array['weight'][$machine_name] : 0,
         '#default_value' => 0, // if no displays are set 'weight' is not set. Need fixing
-        '#attributes' => array('class' => 'solr-weight'),
+        '#attributes' => array('class' => array('solr-weight')),
       );
+      // configuration url
       $form['display_profiles']['islandora_solr_primary_display_table']['configuration'][$machine_name] = array(
         '#type' => 'item',
         '#markup' => (isset($profile['configuration']) AND $profile['configuration'] != '') ? l(t('configure'), $profile['configuration']) : '',
       );
     }
-
+    // default display
     $form['display_profiles']['islandora_solr_primary_display_table']['default'] = array(
       '#type' => 'radios',
       '#options' => $options,
       '#default_value' => variable_get('islandora_solr_primary_display', 'default'),
     );
+    // enabled display
     $form['display_profiles']['islandora_solr_primary_display_table']['enabled'] = array(
       '#type' => 'checkboxes',
       '#options' => $options,
-      '#default_value' => (!empty($primary_display_array)) ? $primary_display_array['enabled'] : $primary_display_array, // $primary_display_array['enabled'][$machine_name]
+      '#default_value' => (!empty($primary_display_array)) ? $primary_display_array['enabled'] : array(), // $primary_display_array['enabled'][$machine_name]
     );
   }
 
@@ -274,7 +299,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Soft limit'),
     '#size' => 5,
-    '#description' => t('The number which should be shown initially. If there are more, then the a "Show more" button will allow the rest up to the value below to be displayed. Use 0 to disable.'),
+    '#description' => t('The number which should be displayed initially. If there are more, then the a "Show more" button will allow the rest up to the value below to be displayed. Use 0 to disable.'),
     '#default_value' => variable_get('islandora_solr_facet_soft_limit', '10'),
   );
   $form['facet_settings']['islandora_solr_facet_max_limit'] = array(
@@ -377,7 +402,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   
   
   //Notice: Undefined index: #options in expand_checkboxes() (line 1930 of /Applications/MAMP/htdocs/drupal-6.22/includes/form.inc).
-  $form['dismax_allowed'] = array(
+  $form['islandora_solr_dismax_allowed'] = array(
     '#type' => 'hidden',
     '#value' => $dismax_allowed,
   );
@@ -391,7 +416,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Save Solr Configuration'),
     '#weight' => 0,
-    '#submit' => 'solr_settings_form_submit',
+    '#submit' => 'islandora_solr_admin_settings_submit',
   );
   $form['actions']['reset'] = array(
     '#type' => 'submit',
@@ -460,67 +485,7 @@ function theme_islandora_solr_admin_primary_display($variables) {
   return $output;
 }
 
-/**
- *
- * @param String $solr_url
- * @return boolean
- *
- * Checks availability of Solr installation
- *
- */
-function solr_available($solr_url) {
-  $handle = curl_init($solr_url);
-  curl_setopt($handle, CURLOPT_RETURNTRANSFER, TRUE);
-  $response = curl_exec($handle);
-  $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-  $retval = TRUE;
-  if ($httpCode % 100 == 4) { //FIXME:  Should probably deal with 500 errors as well?
-    $retval = FALSE;
-  }
-  curl_close($handle);
-  return $retval;
-}
 
-/**
- * get handlers??
- * @param String $solr_url
- * @return array
- */
-function get_handlers($solr_url) {
-  $url = $solr_url . '/admin/file/?file=solrconfig.xml';
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-  curl_setopt($ch, CURLOPT_URL, $url);
-  $xml = simplexml_load_string(curl_exec($ch));
-  foreach ($xml->requestHandler as $handler) {
-    if ($handler['class'] == 'solr.SearchHandler') {
-      $handlerName = (string) $handler['name'];
-      $slashed = preg_match('/^\//', $handlerName);
-      if ($handlerName != 'dismax' && $handlerName != 'partitioned' & !$slashed) {
-        $handlers[$handlerName] = $handlerName;
-      }
-    }
-  }
-  return $handlers;
-}
-
-/**
- * Checks url validity and refreshes requestHandler dropdown list
- */
-function update_solr_url_div($form, $form_state) {
-  return $form['solr_ajax_wrapper']; // man, this is easy :)
-}
-
-/**
- * Solr admin refresh
- * @param type $form
- * @param array $form_state
- */
-function solr_admin_refresh($form, &$form_state) {
-  unset($form_state['submit_handlers']);
-  form_execute_handlers('submit', $form, $form_state);
-  $form_state['rebuild'] = TRUE;
-}
 
 /**
  * Form validator
@@ -537,7 +502,10 @@ function islandora_solr_admin_settings_validate($form, &$form_state) {
  * @param array $form_state
  * @return NULL
  */
-function solr_settings_form_submit($form, &$form_state) {
+function islandora_solr_admin_settings_submit($form, &$form_state) {
+  dsm($form);
+  dsm($form_state);
+  
   // old_default variable
   $old_default = variable_get('islandora_solr_primary_display', 'default');
   // new_default variable
@@ -581,13 +549,60 @@ function solr_settings_form_submit($form, &$form_state) {
 
 
 
+
+/**
+ * get handlers??
+ * @param String $solr_url
+ * @return array
+ */
+function _islandora_solr_get_handlers($solr_url) {
+  $url = $solr_url . '/admin/file/?file=solrconfig.xml';
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+  curl_setopt($ch, CURLOPT_URL, $url);
+  $xml = simplexml_load_string(curl_exec($ch));
+  foreach ($xml->requestHandler as $handler) {
+    if ($handler['class'] == 'solr.SearchHandler') {
+      $handlerName = (string) $handler['name'];
+      $slashed = preg_match('/^\//', $handlerName);
+      if ($handlerName != 'dismax' && $handlerName != 'partitioned' & !$slashed) {
+        $handlers[$handlerName] = $handlerName;
+      }
+    }
+  }
+  return $handlers;
+}
+
+/**
+ * Checks url validity and refreshes requestHandler dropdown list
+ */
+function update_solr_url_div($form, $form_state) {
+  return $form['solr_ajax_wrapper']; // man, this is easy :)
+}
+
+/**
+ * Solr admin refresh
+ * @param type $form
+ * @param array $form_state
+ */
+function solr_admin_refresh($form, &$form_state) {
+  unset($form_state['submit_handlers']);
+  form_execute_handlers('submit', $form, $form_state);
+  $form_state['rebuild'] = TRUE;
+}
+
+
+
+
+
+
 /**
  * Checks for dismax
  * @param type $solr_url
  * @param type $selected_handler
  * @return boolean 
  */
-function check_dismax($solr_url, $selected_handler) {
+function _islandora_solr_check_dismax($solr_url, $selected_handler) {
   $dismax = FALSE;
   $url = $solr_url . '/admin/file/?file=solrconfig.xml';
   $ch = curl_init();
@@ -609,3 +624,4 @@ function check_dismax($solr_url, $selected_handler) {
   }
   return $dismax;
 }
+

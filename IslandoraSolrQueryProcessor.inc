@@ -6,7 +6,7 @@
  * Depends on Apache_Solr_Php client.
  */
 
-DEFINE('SOLR_SEARCH_PATH','islandora/solr/search');
+DEFINE('SOLR_SEARCH_PATH','islandora/search');
 DEFINE('SOLR_BASE_QUERY','timestamp:[* TO NOW]');
 
 /**
@@ -54,7 +54,7 @@ class IslandoraSolrQueryProcessor {
    * @return type
    */
   function buildAndExecuteQuery($query, $params = NULL) {
-    if (variable_get('islandora_solr_requesthandler', NULL) == 'standard') {
+    if (variable_get('islandora_solr_request_handler', NULL) == 'standard') {
 
       if (!$query || $query == ' ') {
         $query = '%252F';
@@ -161,7 +161,7 @@ class IslandoraSolrQueryProcessor {
       'facet' => 'true',
       'facet.mincount' => variable_get('islandora_solr_facet_min_limit', '2'),
       'facet.limit' => variable_get('islandora_solr_facet_max_limit', '12'),
-      'qt' => variable_get("islandora_solr_requesthandler", "standard"),
+      'qt' => variable_get("islandora_solr_request_handler", "standard"), // @TODO: should we always set a qt? And should the default variable value be 'standard' or NULL ?
       'hl' => isset($keys[0]) ? 'true' : NULL,
       'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,
       'hl.fragsize' => 400,
@@ -194,8 +194,8 @@ class IslandoraSolrQueryProcessor {
       $this->solrParams['fq'][] = "PID:$namespace\:*";
     }
 
-    // if no qf fields are specified in rthe requestHandler a default list is supplied here for dismax searches
-    if (!variable_get('dismax_allowed', 0) && $this->internalSolrParams['type'] == "dismax") {
+    // if no qf fields are specified in the requestHandler a default list is supplied here for dismax searches
+    if (!variable_get('islandora_solr_dismax_allowed', FALSE) && $this->internalSolrParams['type'] == "dismax") {
       $this->solrParams['qf'] = 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type';
     }
 

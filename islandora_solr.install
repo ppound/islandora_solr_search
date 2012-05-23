@@ -69,7 +69,7 @@ function islandora_solr_uninstall() {
   // @TODO: update the latest additions
   $variables = array(
     'islandora_solr_url',
-    'islandora_solr_requesthandler',
+    'islandora_solr_request_handler',
     'islandora_solr_primary_display',
     'islandora_solr_primary_display_table',
     'islandora_solr_secondary_display',

@@ -58,7 +58,7 @@ function islandora_solr_boot() {
  * Implementation of hook_menu().
  */
 function islandora_solr_menu() {
-  $items['islandora/solr/search'] = array(
+  $items['islandora/search'] = array(
     'page callback' => 'islandora_solr',
     'access arguments' => array('view fedora collection'), //depends of fedora_repository view
     'type' => MENU_CALLBACK,
@@ -308,7 +308,7 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
   // set query
   $query = array('type' => 'dismax');
   
-  drupal_goto("islandora/solr/search/$searchString", $query);
+  drupal_goto("islandora/search/$searchString", $query);
 }
 
 /**
@@ -401,7 +401,7 @@ function islandora_solr_block_form_submit($form, &$form_state) {
   }
   $searchString = trim($searchString);
   $searchString = str_replace('/', '~slsh~', $searchString); //replace the slash so url doesn't break
-  drupal_goto("islandora/solr/search/$searchString");
+  drupal_goto("islandora/search/$searchString");
 }
 
 /**
@@ -618,4 +618,53 @@ function islandora_solr_help($path, $arg) {
           )
       );
   }
+}
+
+
+
+
+
+/**
+ *
+ * @param String $solr_url
+ * @return boolean
+ *
+ * Checks availability of Solr installation
+ *
+ */
+function islandora_solr_ping($solr_url) {
+  // check for 'http://' or 'https://' prefix
+  $solr_url = islandora_solr_check_http($solr_url);
+
+  // check for valid url string.
+  if(!filter_var($solr_url, FILTER_VALIDATE_URL)) {
+    return FALSE;
+  }
+
+  // split url in host/port/path
+  $solr_url_parsed = parse_url($solr_url);
+  // call solr
+  $solr_service = new Apache_Solr_Service($solr_url_parsed['host'], $solr_url_parsed['port'], $solr_url_parsed['path'] . '/');
+  
+  // ping solr
+  $ping = $solr_service->ping();
+
+  // if a ping time is returned
+  if ($ping) {
+    // Add 0.1 ms to the ping time so we never return 0.0.
+    return $ping + 0.01;
+  }
+
+  return FALSE;
+}
+
+
+
+function islandora_solr_check_http($url) {
+  
+  // check for 'http://' or 'https://' prefix - if not found, add it.
+  if(strpos($url, "http://") === FALSE AND strpos($url, "https://") === false) {
+    $url = 'http://' . $url;
+  }
+  return $url;
 }
