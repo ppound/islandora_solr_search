@@ -15,22 +15,22 @@ form#islandora-solr-simple-search-form input#edit-islandora-simple-search-query
   width:96%;
 }
 
-.islandora_solr_search_query_wrap,
-.islandora_solr_search_filter_wrap,
-.islandora_solr_search_facet_wrap
+.islandora-solr-query-wrap,
+.islandora-solr-filter-wrap,
+.islandora-solr-facet-wrap
 {
 }
 
-.islandora_solr_search_facet_name,
-.islandora_solr_search_facet_title
+.islandora-solr-facet-name,
+.islandora-solr-facet-title
 {
   font-weight:bold;
 }
 
-.islandora_solr_search_facet_wrap ul li
+.islandora-solr-facet-wrap ul li
 {
   font-size:90%;
-  line-height:1.3em;
+  line-height: 1.3em;
 }
 
 img.islandora_solr_add_remove_link
@@ -70,7 +70,7 @@ table.islandora_solr_search_results_table tr td
   font-size: 80%;
 }
 
-.islandora_solr_search_facet .plusminus {
+.facet-list .plusminus {
   float:right;
 }
 
@@ -81,6 +81,7 @@ img.islandora_solr_secondary_display_icon {
 ul#secondary-display-profiles
 {
   float:right;
+  margin: 0px 0px 0px 0px;
 }
 
 .item-list ul#secondary-display-profiles li
@@ -106,7 +107,7 @@ html.js .refresh-button {
 }
 
 /* hide the 2nd list if a facet list is split in two */
-.islandora_solr_search_facet .hidden
+.islandora-solr-facet .hidden
 {
   display: none;
 }

@@ -4,7 +4,6 @@ TODO:
 
 - permissions
 - default object url's
-- upgrade blocks and move them to islandora_solr.block.inc
 - split css files and js files between .base.css, .admin.css and theme.css
 - classes and ID's should have dashed. Also shorten where possible
 - check if variables have the same default everywhere.
@@ -15,3 +14,9 @@ TODO:
 - add dropdowns for sort and result count on search page
 
 - don't hardcode php solr library, instead override it.
+
+- upgrade blocks and move them to islandora_solr.block.inc
+- fix query
+- fix facets
+- fix display (shows up on all pages)
+- move functions away from resultsClass

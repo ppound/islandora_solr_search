@@ -266,7 +266,7 @@ class IslandoraSolrResults {
     $output = '';
     
     // get user provided filter parameters
-    $fq = $solrQueryProcessor->internalSolrParams['f'];
+    $fq = isset($solrQueryProcessor->internalSolrParams['f']) ? $solrQueryProcessor->internalSolrParams['f'] : array();
     
     // parameters set in url
     $params = $solrQueryProcessor->internalSolrParams;
@@ -305,7 +305,7 @@ class IslandoraSolrResults {
       
       // add wrap and list
       $output .= '<div class="islandora_solr_query_wrap">';
-      $output .= theme_item_list($query_list, t('Query'), "ul", array('class' => 'islandora_solr_query_list query_list'));
+      $output .= theme('item_list', array('items' => $query_list, 'title' => t('Query'), 'type' => 'ul', 'attributes' => array('class' => 'islandora_solr_query_list query_list')));
       $output .= '</div>'; // 'islandora_solr_query_wrap'
       
     }
@@ -358,10 +358,9 @@ class IslandoraSolrResults {
       }
       // return filter list
       $output .= '<div class="islandora_solr_filter_wrap">';
-      $output .= theme_item_list($filter_list, t("Enabled Filters"), "ul", array('class' => 'islandora_solr_filter_list filter_list'));
+      $output .= theme('item_list', array('items' => $filter_list, 'title' => t("Enabled Filters"), 'type' => 'ul', 'attributes' => array('class' => 'islandora_solr_filter_list filter_list')));
       $output .= '</div>'; // 'islandora_solr_filter_wrap'
     }
-    
     return $output;
   }
 
@@ -579,7 +578,6 @@ class IslandoraSolrResults {
     // loop over returned facet objects
     foreach ($facets as $facet_key => $facet) {
       $list_items = array();
-      $list_type = "ul";
       $list_title = NULL;
 
       // convert to array
@@ -600,13 +598,10 @@ class IslandoraSolrResults {
         if (count($list_items) >= $facet_min_count) {
           
           // opening facet div // @TODO: this should go in theme function
-          $facet_output .='<div class="islandora_solr_facet">';
+          $facet_output .='<div class="islandora-solr-facet">';
           
           // set title
           $list_title = $this->facetFieldArray[$facet_key];
-
-          // set attributes
-          $list_attributes = array('class' => 'islandora_solr_facet_list facet_list');
 
           // check if facet value amount is larger than the initial limit
           $split_facet = $facet_count > $initial_limit AND
@@ -620,18 +615,18 @@ class IslandoraSolrResults {
           }
 
           // theme the facet as a list
-          $facet_output .= theme('item_list', $list_items, $list_title, $list_type, $list_attributes);
+          $facet_output .= theme('item_list', array('items' => $list_items, 'title' => $list_title, 'type' => 'ul', 'attributes' => array('class' => 'facet-list')));
 
           // render the hidden facets
           if ($split_facet) {
             $facet_output .= '<a href="#" class="soft-limit">' . t('Show more') . '</a>';
             $facet_output .= '<a href="#" class="soft-limit hidden">' . t('Show less') . '</a>';
             $facet_output .= '<div class="toggle-wrapper hidden">';
-            $facet_output .= theme('item_list', $list_items_hidden, NULL, $list_type, $list_attributes);
+            $facet_output .= theme('item_list', array('items' => $list_items_hidden, 'title' => NULL, 'type' => 'ul', 'attributes' => array('class' => 'facet-list')));
             $facet_output .= '</div>';
           }
 
-          $facet_output .='</div>'; //div.islandora_solr_facet
+          $facet_output .='</div>'; //div.islandora-solr-facet
         }
       }
     }
@@ -648,7 +643,7 @@ class IslandoraSolrResults {
     //////////////////////////////////////////////////////////////////////////////////////
     $facet_output = str_replace('%2B', '%252B', $facet_output);
     if (!empty($facet_output)) {
-      $output .='<div class="islandora_solr_facet_wrap">';
+      $output .='<div class="islandora-solr-facet-wrap">';
       $output .= $facet_output;
       $output .= '</div>';
     }
@@ -670,7 +665,8 @@ class IslandoraSolrResults {
     
     //FIXME:  This isn't quite right...  It can make sense to facet on 
     //  the same field multiple times, provided it is multi-valued...
-    $fq = (array) $solrQueryProcessor->solrParams['fq'];
+    
+    $fq = isset($solrQueryProcessor->solrParams['fq']) ? $solrQueryProcessor->solrParams['fq'] : array();
     
     // @TODO: Should be changed to format_string for Drupal 7
     // @TODO: does this check for exclude filters? -PID:"foo"
@@ -726,171 +722,13 @@ class IslandoraSolrResults {
     }
   }
   
-  
-  
-  function _add_field(&$form, &$i, &$unprocessed_contents, &$types) {
-    $type = NULL;
-    $temp = preg_split('/:/', $unprocessed_contents, 2);
 
-    if (!isset($type)) {
-      if (trim($temp[0]) === '_query_') {
-        //We're using a subquery--let's assume dismax
-        //get the 'qf'..., dump the rest into 'terms'
-        $temp[1] = trim($temp[1]);
-        $qf = strpos($temp[1], 'qf=');
-        $end = strpos($temp[1], '}');
-        $type = substr($temp[1], $qf + 3, $end - $qf - 3);
-        $terms = trim(substr($temp[1], $end + 1, -1));
-      }
-      else {
-        $type = $temp[0];
-        $terms = trim($temp[1], '()');
-      }
-    }
 
-    $form['search_type']["type$i"] = array(
-      '#title' => '',
-      '#type' => 'select',
-      '#options' => $types,
-      '#default_value' => trim($type)
-    );
-    $form["fedora_terms$i"] = array(
-      '#size' => '24',
-      '#type' => 'textfield',
-      '#title' => '',
-      '#default_value' => stripslashes($terms),
-    );
-  }
 
-  /**
-   * Build solr search form
-   * @param type $repeat
-   * @param type $pathToSearchTerms
-   * @param type $query
-   * @return string
-   */
-  function build_solr_search_form($repeat = NULL, $pathToSearchTerms = NULL, $query = NULL) {
-    $types = array();
-    $terms = trim(variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject'));
-    $termsArray = preg_split('/[\n]/', $terms);
-    foreach ($termsArray as $term) {
-      $vals = split('~', $term);
-      if (!$vals[1]) {
-        $vals[1] = $vals[0];
-      }
-      $types[trim($vals[0])] = trim($vals[1]);
-    }
 
-    $queryArray = NULL;
-    if (isset($query)) {
-      //A regex like '\\) (OR|AND) \\(' should work, right?  Nope.  Seems that 
-      //  preg_split (when given PREG_SPLIT_DELIM_CAPTURE) returns each explicit 
-      //  capture group, so for that regex, you'd get only the 'AND' or 'OR'.
-      //  If you tried something like '('/(\\) (OR|AND) \\()/')', you'd get the 
-      //  'proper' ') AND (' or ') OR (', but also the 'AND' or 'OR' from the 
-      //  inner group...  RAGE!...  This turns out to be unused...  Anyway.
-      $bool_re = '/(OR|AND)/';
-      $queryArray = preg_split($bool_re, $query, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-      foreach ($queryArray as $key => $val) {
-        if (preg_match($bool_re, $val)) {
-          $andOrs[] = trim($val); // that is, just 'OR' or 'AND'
-          unset($queryArray[$key]); //remove that from the array
-        }
-      }
-      $queryArray = array_values($queryArray);
-    }
 
-    $andOrArray = array(
-      'AND' => 'and',
-      'OR' => 'or',
-    );
-    $form = array();
 
-    if (!isset($repeat)) {
-      $repeat = variable_get('islandora_solr_block_repeat', '3');
-    }
-    $i = 1;
-    $this->_add_field($form, $i, $queryArray[0], $types);
 
-    if ($repeat > 1 && $repeat < 9) { //don't want less then 2 or more then 9
-      for ($i = 2; $i < $repeat + 1; $i++) {
-        $t = $i - 1;
-        $j = $i - 2;
-        $andorj = ( isset($andOrs[$j]) ? $andOrs[$j] : 'AND' );
-
-        //$field_and_term = isset($queryArray[$t]) ? explode(':', $queryArray[$t]) : array('', '');
-        $form["andor$t"] = array(
-          '#title' => '',
-          '#type' => 'select',
-          '#default_value' => $andorj,
-          '#options' => $andOrArray
-        );
-        $this->_add_field($form, $i, $queryArray[$t], $types);
-      }
-    }
-
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('search')
-    );
-    return $form;
-  }
-
-  /**
-   * Build simple solr form
-   * @global type $islandora_query
-   * @return type
-   */
-  function build_simple_solr_form() {
-    // FIXME:  This should actually be checking the settings in the request handler...  Not making assumptions based on name
-    $required = FALSE;
-    if (variable_get('islandora_solr_request_handler', '') == 'standard') {
-      $required = TRUE;
-    }
-    global $islandora_query;
-    if (!strpos($islandora_query, ':')) {
-      $default = $islandora_query;
-    }
-    // TODO: Fix the above.  The global is no longer valid, and the test is not conclusive.  Should instead test for deftype=dismax.
-    $form["islandora_simple_search_query"] = array(
-      '#size' => '24%',
-      '#type' => 'textfield',
-      '#title' => '',
-      '#default_value' => $default,
-      '#required' => $required,
-    );
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('search')
-    );
-    return $form;
-  }
-
-  /**
-   * Theme solr search form
-   * @param type $form
-   * @return type
-   */
-  function theme_solr_search_form($form) {
-    if (!isset($repeat)) {
-      $repeat = variable_get('islandora_solr_block_repeat', '3');
-    }
-
-    $output = drupal_render($form['search_type']['type1']);
-    $output .= drupal_render($form['fedora_terms1']);
-    $output .= drupal_render($form['andor1']) . drupal_render($form['search_type']['type2']);
-    $output .= drupal_render($form['fedora_terms2']);
-    if ($repeat > 2 && $repeat < 9) {
-      for ($i = 3; $i < $repeat + 1; $i++) {
-        $t = $i - 1;
-        $output .= drupal_render($form["andor$t"]) . drupal_render($form['search_type']["type$i"]);
-        $output .= drupal_render($form["fedora_terms$i"]);
-      }
-    }
-    $output .= drupal_render($form['submit']);
-    $output .= drupal_render($form);
-    return $output;
-  }
 
   /**
    * Merges snippet fields with the rest of the solr results
