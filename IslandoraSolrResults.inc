@@ -74,6 +74,7 @@ class IslandoraSolrResults {
     $elements['solr_pager'] = theme('pager', array(NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5));
 
     // debug (will be removed)
+    $elements['solr_debug'] = '';
     if (variable_get('islandora_solr_debug_mode', FALSE)) {
       $elements['solr_debug'] = $this->printDebugOutput($solrResult);
     }
@@ -455,7 +456,7 @@ class IslandoraSolrResults {
         // create links
         // we're not using l() because of active classes: http://drupal.org/node/41595
         $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $filter_split[1] . '</a>'
-              . '<span class="islandora_solr_breadcrumb_super">(<a' . drupal_attributes($attr_x) . '>' . t('x') . '</a>)</span>';
+              . '<span class="islandora-solr-breadcrumb-super"> (<a' . drupal_attributes($attr_x) . '>' . t('x') . '</a>)</span>';
 
       }
 
@@ -467,7 +468,7 @@ class IslandoraSolrResults {
     if (!in_array($solrQueryProcessor->solrQuery, $solrQueryProcessor->different_kinds_of_nothing)) {
       // get query value
       $query_value = $solrQueryProcessor->solrQuery;
-      
+
       // remove all filters for this breadcrumb
       $query = array();
       $query = array_diff($params, array('f' => array()));
@@ -475,6 +476,9 @@ class IslandoraSolrResults {
       // remove button keeps all parameters (query gets removed instead)
       $query_x = array();
       $query_x = $params;
+      if (empty($params['f'])) {
+        unset($query_x['f']);
+      }
 
       // remove query from path
       $path_x = implode('/', explode('/', $path, -1)) . '/ ';
@@ -517,7 +521,7 @@ class IslandoraSolrResults {
       // create links
       // we're not using l() because of active classes: http://drupal.org/node/41595
       $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $query_value . '</a>'
-            . '<span class="islandora_solr_breadcrumb_super">(<a' . drupal_attributes($attr_x) . '>' . t('x') . '</a>)</span>';
+            . '<span class="islandora-solr-breadcrumb-super"> (<a' . drupal_attributes($attr_x) . '>' . t('x') . '</a>)</span>';
     }
     
     $breadcrumb[] = l(t('Home'), '<front>', array('attributes' => array('title' => t('Home'))));

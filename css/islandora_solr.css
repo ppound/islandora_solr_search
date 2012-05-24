@@ -64,10 +64,10 @@ table.islandora_solr_search_results_table tr td
   padding: 0 2px;
 }
 
-.islandora_solr_search_breadcrumb_super
+.islandora-solr-breadcrumb-super
 {
   vertical-align: super;
-  font-size: smaller;
+  font-size: 80%;
 }
 
 .islandora_solr_search_facet {
@@ -77,7 +77,7 @@ table.islandora_solr_search_results_table tr td
   float:right;
 }
 
-#islandora_solr_secondary_display_profiles {
+#islandora-solr-secondary-display-profiles {
   float:right;
 }
 

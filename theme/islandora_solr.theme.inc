@@ -29,14 +29,17 @@ function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
   // results count
   $total = $elements['solr_total'];
   $end = $elements['solr_end'];
-  $start = $elements['solr_start'] + ($total > 0 ? 1 : 0);  
+  $start = $elements['solr_start'] + ($total > 0 ? 1 : 0);
+  
+  // format numbers
+  $total = number_format($total , 0, '.', ',');
+  $end = number_format($end , 0, '.', ',');
+  $start = number_format($start , 0, '.', ',');
   // construct string
   $islandora_solr_result_count = t('(@start - @end of @total)', array('@start' => $start, '@end' => $end, '@total' => $total));
   // add to variables
   $variables['islandora_solr_result_count'] = $islandora_solr_result_count;
 
-  // solr debug placeholder @TODO: to be removed
-  $variables['solr_debug'] = '';
 }
 
 
