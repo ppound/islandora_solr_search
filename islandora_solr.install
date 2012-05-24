@@ -29,15 +29,11 @@
 function islandora_solr_requirements($phase) {
   $t = get_t();
   $requirements = array();
-    if (module_exists('apachesolr')) {
-      module_load_include('php', 'apachesolr', 'SolrPhpClient/Apache/Solr/Service');
-    }
-    else {
-      module_load_include('php', 'islandora_solr', 'SolrPhpClient/Apache/Solr/Service');
-    }
-    if ($phase == 'install') {
 
+  // @TODO: figure out if in the install file we should load this manually or if it loads it from the .info file
+  module_load_include('php', 'islandora_solr', 'SolrPhpClient/Apache/Solr/Service');
 
+  if ($phase == 'install') {
     if (!class_exists('Apache_Solr_Service')) {
       $requirements['islandora_solr'] = array(
         'title' => $t('Missing Apache Client'),
@@ -93,22 +89,4 @@ function islandora_solr_uninstall() {
   foreach ($variables as $variable) {
     variable_del($variable);
   }
-}
-
-/**
- * Variable name change. Catch old value.
- */
-function islandora_solr_update_6000() {
-  $ret = array();
-  // check for old variable. Return FALSE if it does not exist.
-  if ($old_val = variable_get('solr_namespace_restriction', FALSE)) {
-    // set new value
-    variable_set('islandora_solr_namespace_restriction', $old_val);
-    // remove old variable
-    variable_del('solr_namespace_restriction');
-    // set messages
-      $ret[] = array('success' => TRUE, 'query' => 'variable_set("islandora_solr_namespace_restriction")');
-      $ret[] = array('success' => TRUE, 'query' => 'variable_del("solr_namespace_restriction")');
-  }
-  return $ret;
 }
