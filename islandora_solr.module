@@ -7,8 +7,7 @@
 
 //$islandora_query;
 $_islandora_solr_queryclass;
-// set current display
-$current_display;
+
 
 /**
  * islandora solr search implentation of hook_init()

@@ -71,7 +71,7 @@ class IslandoraSolrResults {
 
     // pager
     islandora_solr_pager_init($total, $solrQueryProcessor->solrLimit);
-    $elements['solr_pager'] = theme('pager', NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5);
+    $elements['solr_pager'] = theme('pager', array(NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5));
 
     // debug (will be removed)
     if (variable_get('islandora_solr_debug_mode', FALSE)) {
@@ -85,7 +85,7 @@ class IslandoraSolrResults {
     $results = $this->printResults($apacheSolrResult);
         
     // return themed layout
-    return theme('islandora_solr_wrapper', $results, $secondary_profiles, $elements);
+    return theme('islandora_solr_wrapper', array('results' => $results, 'secondary_profiles' => $secondary_profiles, 'elements' => $elements));
   }
 
   function addSecondaries($solrQueryProcessor) {
@@ -135,7 +135,7 @@ class IslandoraSolrResults {
       }
     }
 
-    return theme('item_list', $query_list, NULL, "ul", array('class' => 'islandora-solr-search-secondary'));
+    return theme('item_list', array('items' => $query_list, 'title' => NULL, 'type' => 'ul', 'attributes' => array('class' => 'islandora-solr-search-secondary')));
   }
 
   /**
@@ -207,7 +207,7 @@ class IslandoraSolrResults {
     }
 
     // return themed search results
-    return theme('islandora_solr', $results_array, $elements);
+    return theme('islandora_solr', array('results' => $results_array, 'elements' => $elements));
   }
   
   
@@ -901,7 +901,7 @@ class IslandoraSolrResults {
   function prep_results($results) {
     $rawResponse = $results->getRawResponse();
     $responseArray = json_decode($rawResponse, TRUE);
-    $highlights = $responseArray['highlighting'];
+    $highlights = isset($responseArray['highlighting']) ? $responseArray['highlighting'] : NULL;
     $docs = $responseArray['response']['docs'];
 
     if (!is_array($highlights)) {

@@ -26,7 +26,7 @@ $values = array("/", "+");
  * @return
  *  The current page for $element. 0 by default if $_GET['page'] is empty.
  */
-function islandora_solr_search_pager_init($total, $limit = 10, $element = 0) {
+function islandora_solr_pager_init($total, $limit = 10, $element = 0) {
   global $pager_page_array, $pager_total, $pager_total_items;
   $page = isset($_GET['page']) ? $_GET['page'] : '';
 

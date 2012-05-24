@@ -26,7 +26,6 @@ function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
   foreach ($variables['elements'] as $key => $value) {
     $variables[$key] = $value;
   }
-
   // results count
   $total = $elements['solr_total'];
   $end = $elements['solr_end'];
@@ -36,6 +35,8 @@ function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
   // add to variables
   $variables['islandora_solr_result_count'] = $islandora_solr_result_count;
 
+  // solr debug placeholder @TODO: to be removed
+  $variables['solr_debug'] = '';
 }
 
 

@@ -25,7 +25,7 @@
       <dl class="solr-thumb">
         <dt>
           <?php $image = '<img src="' . $base_url . '/fedora/repository/' . $result['PID']['value'] . '/TN"' . ' onerror="this.src=\'' . $solr_default_img . '\'" />'; ?>
-          <?php print l($image, 'fedora/repository/' . $result['PID']['value'], array('html' => TRUE, 'attributes' => array('title' => $result['mods_title_mlt']['value']))); ?>
+          <?php print l($image, 'fedora/repository/' . $result['PID']['value'], array('html' => TRUE)); ?>
         </dt>
         <dd></dd>
       </dl>
