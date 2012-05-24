@@ -153,22 +153,12 @@ function islandora_solr_block_view($block_name = '') {
  * @return type
  */
 function islandora_solr_simple_search_form() {
-  // FIXME:  This should actually be checking the settings in the request handler...  Not making assumptions based on name
-  $required = FALSE;
-  if (variable_get('islandora_solr_request_handler', '') == 'standard') {
-    $required = TRUE;
-  }
-  global $islandora_query;
-  if (!strpos($islandora_query, ':')) {
-    $default = $islandora_query;
-  }
-  // TODO: Fix the above.  The global is no longer valid, and the test is not conclusive.  Should instead test for deftype=dismax.
+
   $form["islandora_simple_search_query"] = array(
-    '#size' => '24%',
+    '#size' => '24',
     '#type' => 'textfield',
     '#title' => '',
-    '#default_value' => $default,
-    '#required' => $required,
+    '#default_value' => '', // @TODO: should this be the searched value?
   );
   $form['submit'] = array(
     '#type' => 'submit',
