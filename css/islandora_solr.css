@@ -51,18 +51,7 @@ img.islandora_solr_add_remove_link
   margin: 0;
   background-image: none;
 }
-table.islandora_solr_search_results_table
-{
-}
-table.islandora_solr_search_results_table tr
-{
-  border-bottom-style: solid;
-  border-bottom-width: 1px;
-}
-table.islandora_solr_search_results_table tr td
-{
-  padding: 0 2px;
-}
+
 
 .islandora-solr-breadcrumb-super
 {

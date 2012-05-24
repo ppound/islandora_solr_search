@@ -5,3 +5,4 @@ package = Islandora Search
 version = 7.x-dev
 core = 7.x
 
+stylesheets[all][] = css/islandora_solr_config.css

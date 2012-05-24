@@ -18,13 +18,13 @@ function islandora_solr_config_islandora_solr_primary_display() {
     //   'function' => 'function_name',
     //   'description' => 'A description of the display profile',
     // );
-    'simple_table' => array(
-      'name' => t('Simple Table'),
+    'table' => array(
+      'name' => t('Table'),
       'module' => 'islandora_solr_config',
       'file' => 'IslandoraSolrResultsTable.inc',
       'class' => "IslandoraSolrResultsTable",
       'function' => "displayResults",
-      'description' => t("A simple tabular output"),
+      'description' => t("Search results as tabular output"),
     ),
   );
 }

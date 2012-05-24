@@ -33,7 +33,11 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
    *   output manually, should refactor to use drupal forms api.
    */
   function printResults($results) {
+    // set base_url
     global $base_url;
+    // set variable
+    $output = '';
+    
     $recordStart = (int)$results->response->start;
     if (empty($results)) {
       return "no results";
@@ -103,36 +107,33 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
     }
     array_unshift($header, '#');
 
+    // set rows variable
     $rows = array();
-    $row = 0;
-
+    // loop over each row
     foreach ($values as $num => $val_array) {
+      $row = array();
       unset($rowclass);
       $result_num = $recordStart + $num + 1;
-      $rows[$row]['data'][] = array(
+      $row['data'][] = array(
         'data' => (isset($val_array['PID']) ? l($result_num, 'islandora/object/' . $val_array['PID']) : $result_num),
         'header' => TRUE,
-        'class' => 'col-first'
+//        'class' => 'col-first'
 
       );
       $field_count = count($fields);
+      // loop over each cell within a row
       foreach ($fields as $fieldnum => $field) {
-        if (!isset ($val_array[$field])) {
-          $val_array['field'] = " ";
-        }
-          $cell_data = array('data' => $val_array[$field]);
-          $rows[$row]['data'][] = $cell_data;
+        $data = isset($val_array[$field]) ? $val_array[$field] : ' ' ;
+        $cell_data = array('data' => $data);
+        
+        $row['data'][] = $cell_data;
 
       }
-      $rows[$row]['data'][$field_count]['class'] = 'col-last';
-      $row++;
+      $rows[] = $row;
     }
-    $rows[0]['class'] = 'row-first';
-    $rows[$row -1]['class'] = 'row-last';
+    $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('islandora-solr-results-table'))));
 
-    $output .= theme_table($header, $rows, array('class' => 'islandora_solr_search_results_table'));
-
-    if (variable_get('islandora_solr_search_debug_mode', 0)) { // debug dump
+    if (variable_get('islandora_solr_debug_mode', 0)) { // debug dump
       $results_r .= "<pre>Results: " . print_r($results, TRUE) . "</pre>";
       $fieldset_r = array(
         '#title' => t("Raw Results"),
