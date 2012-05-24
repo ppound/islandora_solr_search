@@ -15,11 +15,11 @@ $_islandora_solr_queryclass;
  * @staticvar boolean $islandora_solr_init
  */
 function islandora_solr_init() {
-  //Including in the global scope (as was done previously) doesn't quite seem correct.
+  // include inc files
   module_load_include('inc', 'islandora_solr', 'islandora_solr.admin');
+  module_load_include('inc', 'islandora_solr', 'islandora_solr.block');
   module_load_include('inc', 'islandora_solr', 'includes/common');
-  module_load_include('inc', 'islandora_solr', 'IslandoraSolrQueryProcessor');
-    
+   
   static $islandora_solr_init = FALSE;
   if (!$islandora_solr_init) {
     // single underscore followed by the module and another underscore
@@ -76,6 +76,17 @@ function islandora_solr_menu() {
 
   return $items;
 }
+
+/**
+ * Implements hook_admin_paths().
+ */
+function islandora_solr_admin_paths() {
+  $paths = array(
+    'admin/config/islandora_solr_search' => TRUE,
+  );
+  return $paths;
+}
+
 
 /**
  * Implementation of hook_theme().
@@ -288,7 +299,7 @@ function islandora_solr_block($op = 'list', $delta = 0, $edit = array()) {
  * @return type
  */
 function islandora_solr_simple_search_form() {
-  module_load_include('inc', 'islandora_solr', 'IslandoraSolrResults');
+
   $resultsClass = new IslandoraSolrResults();
   return $resultsClass->build_simple_solr_form();
 }
@@ -318,7 +329,6 @@ function islandora_solr_block_form() {
   global $_islandora_solr_queryclass;
   islandora_solr_init();
 
-  module_load_include('inc', 'islandora_solr', 'IslandoraSolrResults');
   $resultsClass = new IslandoraSolrResults();
   return $resultsClass->build_solr_search_form(NULL, NULL, $_islandora_solr_queryclass->solrQuery);
 }
@@ -333,7 +343,6 @@ function theme_islandora_solr_block_form($form) {
   global $_islandora_solr_queryclass;
   islandora_solr_init();
 
-  module_load_include('inc', 'islandora_solr', 'IslandoraSolrResults');
   $resultsClass = new IslandoraSolrResults();
   return $resultsClass->theme_solr_search_form($form);
 }
@@ -571,7 +580,7 @@ function islandora_solr($query = NULL) {
   }
 
   if ($nope) {
-    module_load_include('inc', 'islandora_solr', 'IslandoraSolrResults');
+
     $resultsClass = new IslandoraSolrResults();
     $output = $resultsClass->displayResults($_islandora_solr_queryclass);
   }

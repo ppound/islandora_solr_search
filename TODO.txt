@@ -13,3 +13,5 @@ TODO:
 
 - add support for sort and result count through url
 - add dropdowns for sort and result count on search page
+
+- don't hardcode php solr library, instead override it.

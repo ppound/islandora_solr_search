@@ -5,7 +5,6 @@
  * Contains methods to search solr and display results.  depends on Apache_Solr_Php client.
  */
 
-module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrResults');
 
 /**
  * Extention of IslandoraSolrResults for templating purposes.
@@ -15,12 +14,7 @@ module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrResults');
 class IslandoraSolrResultsCSV extends IslandoraSolrResults {
 
   function IslandoraSolrResultsCSV() {
-    if (module_exists('apachesolr')) {
-      module_load_include('php', 'apachesolr', 'SolrPhpClient/Apache/Solr/Service');
-    }
-    else {
-      module_load_include('php', 'islandora_solr_search', 'SolrPhpClient/Apache/Solr/Service');
-    }
+
   }
 
   /**

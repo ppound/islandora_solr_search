@@ -19,12 +19,8 @@ class IslandoraSolrResults {
    * Constructor
    */
   function IslandoraSolrResults() {
-    if (module_exists('apachesolr')) {
-      module_load_include('php', 'apachesolr', 'SolrPhpClient/Apache/Solr/Service');
-    }
-    else {
-      module_load_include('php', 'islandora_solr', 'SolrPhpClient/Apache/Solr/Service');
-    }
+
+    // include common.inc
     module_load_include('inc', 'islandora_solr', 'includes/common');
     $this->prepFieldSubstitutions();
   }

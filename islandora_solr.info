@@ -6,12 +6,8 @@ configure = admin/config/islandora_solr
 version = 7.x-dev
 core = 7.x
 
+files[] = SolrPhpClient/Apache/Solr/Service.php
 files[] = IslandoraSolrQueryProcessor.inc
 files[] = IslandoraSolrResults.inc
-files[] = islandora_solr.admin.inc
-files[] = islandora_solr.block.inc
-files[] = islandora_solr.install
-files[] = islandora_solr.module
-files[] = theme/islandora_solr.theme.inc
-files[] = includes/common.inc
+
 stylesheets[all][] = css/islandora_solr.css

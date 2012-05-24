@@ -13,21 +13,12 @@
  */
 function islandora_solr_admin_settings($form, &$form_state) {
 
-  //checks for existence of PHP Solr client.
-  if (module_exists('apachesolr')) {
-    module_load_include('php', 'apachesolr', 'SolrPhpClient/Apache/Solr/Service');
-  }
-  else {
-    module_load_include('php', 'islandora_solr', 'SolrPhpClient/Apache/Solr/Service');
-  }
+  // check for the php solr lib class
   if (!class_exists('Apache_Solr_Service')) {
     $message = t('This module requires the !url. Please install the client directory in the root directory of this module before continuing.', array('!url' => l(t('Apache Solr php client'), 'http://code.google.com/p/solr-php-client')));
     drupal_set_message(check_plain($message));
     return;
   }
-
-  // set default requesthandler // @TODO: why?
-  //$handlers['standard'] = 'standard';
 
   // get request handler
   $handler = !empty($form_state['values']['islandora_solr_request_handler']) ? $form_state['values']['islandora_solr_request_handler'] : variable_get('islandora_solr_request_handler', '');
