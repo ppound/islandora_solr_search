@@ -1,8 +1,5 @@
 <?php
 
-
-
-
 /**
  * @file
  * Configuration module for islandora_solr_search.module
@@ -29,15 +26,6 @@ function islandora_solr_config_islandora_solr_primary_display() {
       'function' => "displayResults",
       'description' => t("A simple tabular output"),
     ),
-    'maps' => array(
-      'name' => t('Maps'),
-      'module' => 'islandora_solr_config',
-      'file' => 'IslandoraSolrResultsTable.inc',
-      'class' => "IslandoraSolrResultsTable",
-      'function' => "displayResults",
-      'description' => t('A tabular output for maps. Depends upon the existence of a TN datastream in fedora objects returned as results.')
-    ),
-
   );
 }
 
