@@ -70,14 +70,7 @@ table.islandora_solr_search_results_table tr td
   font-size: 80%;
 }
 
-.islandora_solr_search_facet {
-}
-
 .islandora_solr_search_facet .plusminus {
-  float:right;
-}
-
-#islandora-solr-secondary-display-profiles {
   float:right;
 }
 
@@ -85,7 +78,12 @@ img.islandora_solr_secondary_display_icon {
   vertical-align: bottom;
 }
 
-.item-list ul.islandora-solr-search-secondary li
+ul#secondary-display-profiles
+{
+  float:right;
+}
+
+.item-list ul#secondary-display-profiles li
 {
   display: inline-block;
   margin: 0px 0px 0px 0px;

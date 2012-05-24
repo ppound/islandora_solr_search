@@ -30,7 +30,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   //$handlers['standard'] = 'standard';
 
   // get request handler
-  $handler = !empty($form_state['values']['islandora_solr_request_handler']) ? $form_state['values']['islandora_solr_request_handler'] : variable_get('islandora_solr_request_handler', NULL);
+  $handler = !empty($form_state['values']['islandora_solr_request_handler']) ? $form_state['values']['islandora_solr_request_handler'] : variable_get('islandora_solr_request_handler', '');
   // get solr url
   $solr_url = !empty($form_state['values']['islandora_solr_url']) ? $form_state['values']['islandora_solr_url'] : variable_get('islandora_solr_url', 'localhost:8080/solr');
   // check if solr is available
@@ -281,12 +281,10 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $form['facet_settings']['islandora_solr_facets'] = array(
     '#type' => 'textarea',
     '#title' => t('Facet Fields'),
-    '#default_value' => variable_get('islandora_solr_facets', ''),
     '#description' => t("Indicate which fields will appear in the <strong>Islandora Facet Block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong> "),
     '#default_value' => variable_get('islandora_solr_facets', 'dc.subject ~ Subject,dc.type ~ Type'),
     '#wysiwyg' => FALSE,
-    '#default_value' => variable_get('islandora_solr_facets', 'dc.subject ~ Subject,dc.type ~ Type')
   );
   $form['facet_settings']['islandora_solr_facet_min_limit'] = array(
     '#type' => 'textfield',
@@ -327,7 +325,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
       Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
       module is available in Islandora's online documentation."),
-    '#default_value' => variable_get('islandora_solr_searchterms', 'dc.title ~ Title'),
+    '#default_value' => variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject'),
     '#wysiwyg' => FALSE,
   );
   $form['advanced_search_block']['islandora_solr_search_block_repeat'] = array(

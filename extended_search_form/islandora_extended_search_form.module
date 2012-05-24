@@ -80,11 +80,7 @@ function islandora_extended_search_form(array &$form_state) {
         '#title' => t('Field'),
         '#type' => 'select',
         '#default_value' => isset($value['field']) ? $value['field'] : 'dc.title',
-        '#options' => islandora_build_substitution_list(variable_get('islandora_solr_searchterms', <<<EOT
-dc.title ~ Title
-dc.description ~ Description
-EOT
-        ))
+        '#options' => islandora_build_substitution_list(variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject'))
       ),
       'search' => array(
         '#title' => t('Search terms'),

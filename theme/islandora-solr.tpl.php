@@ -24,8 +24,8 @@
       <!-- Thumbnail -->
       <dl class="solr-thumb">
         <dt>
-          <?php $image = '<img src="' . $base_url . '/fedora/repository/' . $result['PID']['value'] . '/TN"' . ' onerror="this.src=\'' . $solr_default_img . '\'" />'; ?>
-          <?php print l($image, 'fedora/repository/' . $result['PID']['value'], array('html' => TRUE)); ?>
+          <?php $image = '<img src="' . $base_url . '/islandora/object/' . $result['PID']['value'] . '/TN"' . ' onerror="this.src=\'' . $solr_default_img . '\'" />'; ?>
+          <?php print l($image, 'islandora/object/' . $result['PID']['value'], array('html' => TRUE)); ?>
         </dt>
         <dd></dd>
       </dl>
@@ -38,7 +38,7 @@
             <?php print $value['label']; ?>
           </dt>
           <?php if ($key == 'PID'): ?>
-            <?php $value['value'] = l($value['value'], 'fedora/repository/' . htmlspecialchars($value['value'], ENT_QUOTES, 'utf-8')); ?>
+            <?php $value['value'] = l($value['value'], 'islandora/object/' . htmlspecialchars($value['value'], ENT_QUOTES, 'utf-8')); ?>
           <?php endif; ?>
           <dd class="solr-value <?php print $value['class']; ?><?php print $row_field == 0 ? ' first' : ''; ?><?php print $row_field == $max_rows ? ' last' : ''; ?>">
             <?php print $value['value']; ?>

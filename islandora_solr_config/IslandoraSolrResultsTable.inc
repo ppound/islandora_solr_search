@@ -14,9 +14,6 @@ module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrResults');
 
 class IslandoraSolrResultsTable extends IslandoraSolrResults {
 
-  static $facetSeparator = '~';//used to separate facets in url
-  static $slashReplacement = '~slsh~';// a pattern used to replace / in url's the slash breaks drupal clean url's
-  public static $SEARCH_CLASS_ADVANCED_SEARCH_NUMBER_FIELDS = 5;
   function IslandoraSolrResultsTable() {
     parent::__construct();
   }
@@ -75,7 +72,7 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
         if ($field == 'dc.title' || $field == 'dc:title') {
           foreach ($value as $key => $val) {
             if (isset($doc->PID)) {
-              $value[$key] = l($val, 'fedora/repository/' . $doc->PID . '/-/' . $val);
+              $value[$key] = l($val, 'islandora/object/' . $doc->PID . '/-/' . $val);
             }
           }
         }
@@ -114,7 +111,7 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
       unset($rowclass);
       $result_num = $recordStart + $num + 1;
       $rows[$row]['data'][] = array(
-        'data' => (isset($val_array['PID']) ? l($result_num, 'fedora/repository/' . $val_array['PID']) : $result_num),
+        'data' => (isset($val_array['PID']) ? l($result_num, 'islandora/object/' . $val_array['PID']) : $result_num),
         'header' => TRUE,
         'class' => 'col-first'
 

@@ -10,7 +10,6 @@
  */
 class IslandoraSolrResults {
 
-  public static $SEARCH_CLASS_ADVANCED_SEARCH_NUMBER_FIELDS = 5;
   public $facetFieldArray = array();
   public $searchFieldArray = array();
   public $resultFieldArray = array();
@@ -75,7 +74,7 @@ class IslandoraSolrResults {
 
     // debug (will be removed)
     $elements['solr_debug'] = '';
-    if (variable_get('islandora_solr_debug_mode', FALSE)) {
+    if (variable_get('islandora_solr_debug_mode', 0)) {
       $elements['solr_debug'] = $this->printDebugOutput($solrResult);
     }
 
@@ -136,7 +135,7 @@ class IslandoraSolrResults {
       }
     }
 
-    return theme('item_list', array('items' => $query_list, 'title' => NULL, 'type' => 'ul', 'attributes' => array('class' => 'islandora-solr-search-secondary')));
+    return theme('item_list', array('items' => $query_list, 'title' => NULL, 'type' => 'ul', 'attributes' => array('id' => 'secondary-display-profiles')));
   }
 
   /**
@@ -327,7 +326,7 @@ class IslandoraSolrResults {
 
         // check for exclude filter
         if ($filter[0] == '-') {
-//          $symbol = '&#2260;';
+          // not equal sign
           $symbol = '&ne;';
         }
         else {
@@ -567,7 +566,7 @@ class IslandoraSolrResults {
     
     // limits
     $facet_min_count = variable_get('islandora_solr_facet_min_limit', '2');
-    $initial_limit = variable_get('islandora_solr_facet_soft_limit', '0');
+    $initial_limit = variable_get('islandora_solr_facet_soft_limit', '10');
     $facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
     
     // get facet values returned from solr
@@ -849,7 +848,7 @@ class IslandoraSolrResults {
   function build_simple_solr_form() {
     // FIXME:  This should actually be checking the settings in the request handler...  Not making assumptions based on name
     $required = FALSE;
-    if (variable_get('islandora_solr_request_handler', NULL) == 'standard') {
+    if (variable_get('islandora_solr_request_handler', '') == 'standard') {
       $required = TRUE;
     }
     global $islandora_query;
@@ -913,7 +912,7 @@ class IslandoraSolrResults {
     }
 
    // if highights exist, inetegrate them back into the doc array
-    $label = variable_get("islandora_solr_snippet_field", "");
+    $label = variable_get("islandora_solr_snippet_field", '');
     if ($label) {
       $label_parts = explode('~', $label);
       $field_label = trim($label_parts[1]);

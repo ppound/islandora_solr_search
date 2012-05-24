@@ -1,0 +1,15 @@
+
+TODO:
+=====
+
+- permissions
+- default object url's
+- upgrade blocks and move them to islandora_solr.block.inc
+- split css files and js files between .base.css, .admin.css and theme.css
+- classes and ID's should have dashed. Also shorten where possible
+- check if variables have the same default everywhere.
+- move extended solr search to advanced block
+- empty query with dismax seems to return the same as no dismax
+
+- add support for sort and result count through url
+- add dropdowns for sort and result count on search page

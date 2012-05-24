@@ -44,7 +44,7 @@ class IslandoraSolrResultsMaps extends IslandoraSolrResults {
       $rowspan = 0;
       $pidValue = NULL;
       $output .= '<tr>';
-      $output .= '<td ><img src="' . $base_url . '/fedora/repository/' . htmlspecialchars($doc->PID, ENT_QUOTES, 'utf-8') . '/TN"/></td>';
+      $output .= '<td ><img src="' . $base_url . '/islandora/object/' . htmlspecialchars($doc->PID, ENT_QUOTES, 'utf-8') . '/TN"/></td>';
       $output .= '<td><table>';
       foreach ($doc as $field => $value) {
         $rowspan++;
@@ -55,7 +55,7 @@ class IslandoraSolrResultsMaps extends IslandoraSolrResults {
         }
         if ($field == 'PID') {
           $pidValue = $value;
-          $output .= '<td><a href="' . $base_url . '/fedora/repository/' . htmlspecialchars($value, ENT_QUOTES, 'utf-8') . '">' . $value . '</td></tr>';
+          $output .= '<td><a href="' . $base_url . '/islandora/object/' . htmlspecialchars($value, ENT_QUOTES, 'utf-8') . '">' . $value . '</td></tr>';
         }
         else {
           $output .= '<td>' . $value . '</td></tr>';
