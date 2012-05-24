@@ -5,8 +5,6 @@ TODO:
 High priority
 -------------
 
-- fix simple_table to have it work at least
-
 - permissions
 - move extended solr search to advanced block
 - add support for sort and result count through url -> check luke for multivalue?
@@ -15,6 +13,8 @@ High priority
 - classes and ID's should have dashed. Also shorten where possible
 - fix display (shows up on all pages)
 
+- update documentation + doxygens
+- create islandora_solr.api.php
 
 
 Normal Priority
@@ -23,7 +23,7 @@ Normal Priority
 - empty query with dismax seems to return the same as no dismax (maybe it's just how solrconfig is defined)
 - add dropdowns for sort and result count on search page
 
-
+- check fixes in advanced_block branch, I might have forgotten.
 
 
 Low Priority
@@ -31,3 +31,4 @@ Low Priority
 
 - don't hardcode php solr library, instead override it.
 - put object url's in a global variable?
+- table display works but could use some improvement.
