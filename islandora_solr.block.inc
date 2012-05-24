@@ -191,7 +191,7 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
   // set query
   $query = array('type' => 'dismax');
   
-  drupal_goto("islandora/search/$searchString", $query);
+  drupal_goto('islandora/search/' . $searchString, array('query' => $query));
 }
 
 
@@ -438,7 +438,7 @@ function islandora_solr_display() {
     $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
     // set path
     $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
-  
+
     // get profiles
     $profiles = module_invoke_all("islandora_solr_primary_display");
     // get the table settings
@@ -496,7 +496,7 @@ function islandora_solr_display() {
       }
       // theme item list (if more than one displays are available)
       if (count($list_items) > 1) {
-        $output = theme('item_list', $list_items, NULL, "ul", array('class' => 'islandora-solr-search-display'));
+        $output = theme('item_list', array('items' => $list_items, 'title' => NULL, 'type' => 'ul', 'attributes' => array('class' => 'islandora-solr-display')));
       }
     }
   }
