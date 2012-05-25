@@ -122,6 +122,7 @@ html.js .refresh-button {
  .islandora-solr-search-result
 {
   float: left;
+  width: 100%;
 }
  
 .solr-thumb img {
