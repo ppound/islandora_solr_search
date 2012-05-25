@@ -78,13 +78,6 @@ function islandora_solr_menu() {
 }
 
 
-function islandora_solr_menu_alter(&$items) {
-  dsm($items);
-  watchdog('test', 'menu_alter');
-}
-
-
-
 /**
  * Implements hook_admin_paths().
  */
