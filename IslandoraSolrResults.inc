@@ -33,18 +33,13 @@ class IslandoraSolrResults {
    * @param type $output
    * @return string
    */
-  function displayResults($solrQueryProcessor, $title = NULL, $output = '') {
+  function displayResults($solrQueryProcessor) {
     
     // set variables to collect returned data.
     $results = NULL;
     $secondary_profiles = NULL;
     $elements = array();
 
-    // set title
-    if (!is_null($title)) {
-      drupal_set_title($title);
-    }
-    
     // set breadcrumbs
     $this->setBreadcrumbs($solrQueryProcessor);
     
@@ -95,19 +90,7 @@ class IslandoraSolrResults {
     // parameters set in url
     $params = $solrQueryProcessor->internalSolrParams;
     
-    // Expected return:
-    // 
-    // return array(
-    // 'machine-name' = array(
-    //   'name' => 'Human Readable Name',
-    //   'module' => 'module_name',
-    //   'file' => 'FileName.inc',
-    //   'class' => 'ClassName',
-    //   'function' => 'function_name',
-    //   'description' => 'A description of the display profile',
-    //   'logo' => 'Some text, some <html>, an <img>, etc used to link to this output,
-    // );
-
+    // get list of secondary displays
     $secondary_array = variable_get('islandora_solr_secondary_display', array());
     
     foreach ($secondary_array as $name => $status) {
