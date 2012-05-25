@@ -119,6 +119,11 @@ html.js .refresh-button {
  * Thumbnails float optionally to the left or right of descriptive lists.
  */
 
+ .islandora-solr-search-result
+{
+  float: left;
+}
+ 
 .solr-thumb img {
   max-width: 100%;
   *width: 100%;
