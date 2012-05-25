@@ -412,6 +412,9 @@ function islandora_solr_block_form_submit($form, &$form_state) {
   drupal_goto("islandora/search/$searchString");
 }
 
+
+
+
 /**
  * @return display switch
  */
@@ -419,7 +422,7 @@ function islandora_solr_display() {
   global $_islandora_solr_queryclass;
   
   // set variables
-  $output = FALSE;
+  $output = '';
   
   // check if the page is dealing with search results
   if (class_exists('IslandoraSolrResults')) {
