@@ -46,7 +46,7 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
     $fields = array();
     $values = array();
     $header = array();
-    $limitResults = variable_get('islandora_solr_search_limit_result_fields', 0);
+    $limitResults = variable_get('islandora_solr_limit_result_fields', 0);
 
     $object_link_placeholder = "~object_href~";
 
