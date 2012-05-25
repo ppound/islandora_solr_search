@@ -24,7 +24,7 @@
       <!-- Thumbnail -->
       <dl class="solr-thumb">
         <dt>
-          <?php $image = '<img src="' . $base_url . '/islandora/object/' . $result['PID']['value'] . '/TN"' . ' onerror="this.src=\'' . $solr_default_img . '\'" />'; ?>
+          <?php $image = '<img src="' . $base_url . '/islandora/object/' . $result['PID']['value'] . '/datastream/TN"' . ' onerror="this.src=\'' . $solr_default_img . '\'" />'; ?>
           <?php print l($image, 'islandora/object/' . $result['PID']['value'], array('html' => TRUE)); ?>
         </dt>
         <dd></dd>
