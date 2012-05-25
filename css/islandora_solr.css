@@ -197,3 +197,26 @@ dl.solr-fields {
 .solr-fields dd.first {
   border-top: 0;
 }
+
+
+
+
+
+
+
+/* advanced search block */
+/* @TODO: move in separate files */
+
+
+#islandora-extended-search-form div.form-item { 
+  display: inline-block;
+}
+
+#islandora-extended-search-form .progress-disabled, 
+#islandora-extended-search-form .ahah-progress, 
+#islandora-extended-search-form .ahah-progress throbber {
+  float:none; 
+}
+#islandora-extended-search-form .ahah-progress {
+  display: inline-block;
+}

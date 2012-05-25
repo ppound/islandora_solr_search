@@ -27,15 +27,15 @@ function islandora_solr_islandora_solr_query_blocks() {
     'advanced' => array(
       'name' => t('Islandora Advanced Search'),
       'module' => 'islandora_solr',
-      'file' => 'islandora_solr.module',
+      'file' => 'islandora_solr.block.inc',
       'class' => NULL,
       'function' => NULL,
-      'form' => 'islandora_solr_block_form',
+      'form' => 'islandora_solr_advanced_search_form',
     ),
     'simple' => array(
       'name' => t('Islandora Simple Search'),
       'module' => 'islandora_solr',
-      'file' => 'islandora_solr.module',
+      'file' => 'islandora_solr.block.inc',
       'class' => NULL,
       'function' => NULL,
       'form' => 'islandora_solr_simple_search_form',
@@ -59,7 +59,7 @@ function islandora_solr_islandora_solr_query_blocks() {
     'display_switch' => array(
       'name' => 'Islandora Displays',
       'module' => 'islandora_solr',
-      'file' => 'islandora_solr.module',
+      'file' => 'islandora_solr.block.inc',
       'class' => NULL,
       'function' => 'islandora_solr_display',
       'form' => NULL,
@@ -85,8 +85,6 @@ function islandora_solr_block_info() {
   }
   return $blocks;
 }
-
-
 
 
 /**
@@ -142,17 +140,11 @@ function islandora_solr_block_view($block_name = '') {
 
 
 
-
-
-
-
-
-
 /**
  * islandora solr simple search form
  * @return type
  */
-function islandora_solr_simple_search_form() {
+function islandora_solr_simple_search_form($form, &$form_state) {
 
   $form["islandora_simple_search_query"] = array(
     '#size' => '24',
@@ -175,15 +167,14 @@ function islandora_solr_simple_search_form() {
  */
 function islandora_solr_simple_search_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
-  $searchString = $form_state['values']['islandora_simple_search_query'];
-  $searchString = str_replace('/', '~slsh~', $searchString); //replace the slash so url doesn't break
+  $search_string = $form_state['values']['islandora_simple_search_query'];
+  $search_string = str_replace('/', '~slsh~', $search_string); //replace the slash so url doesn't break
   
   // set query
   $query = array('type' => 'dismax');
   
-  drupal_goto('islandora/search/' . $searchString, array('query' => $query));
+  drupal_goto('islandora/search/' . $search_string, array('query' => $query));
 }
-
 
 
 
@@ -192,224 +183,178 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
  * @global type $_islandora_solr_queryclass
  * @return type
  */
-function islandora_solr_block_form() {
+function islandora_solr_advanced_search_form($form, &$form_state) {
   global $_islandora_solr_queryclass;
-  islandora_solr_init();
+  islandora_solr_init(); // @TODO: figure out why init needs to be called
 
-  $repeat = NULL;
-  $query = $_islandora_solr_queryclass->solrQuery;
+  // include common.inc
+  module_load_include('inc', 'islandora_solr', 'includes/common');
   
+  // check if values are already set
+  if (isset($form_state['triggering_element'])) {
   
-  $types = array();
-    $terms = trim(variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject'));
-    $termsArray = preg_split('/[\n]/', $terms);
-    foreach ($termsArray as $term) {
-      $vals = explode('~', $term);
-      if (!$vals[1]) {
-        $vals[1] = $vals[0];
-      }
-      $types[trim($vals[0])] = trim($vals[1]);
+    // check for add
+    if ($form_state['triggering_element']['#value'] == '+') {
+      $form_state['values']['terms'][] = array();  
     }
-
-    $queryArray = NULL;
-    if (isset($query)) {
-      //A regex like '\\) (OR|AND) \\(' should work, right?  Nope.  Seems that 
-      //  preg_split (when given PREG_SPLIT_DELIM_CAPTURE) returns each explicit 
-      //  capture group, so for that regex, you'd get only the 'AND' or 'OR'.
-      //  If you tried something like '('/(\\) (OR|AND) \\()/')', you'd get the 
-      //  'proper' ') AND (' or ') OR (', but also the 'AND' or 'OR' from the 
-      //  inner group...  RAGE!...  This turns out to be unused...  Anyway.
-      $bool_re = '/(OR|AND)/';
-      $queryArray = preg_split($bool_re, $query, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-      foreach ($queryArray as $key => $val) {
-        if (preg_match($bool_re, $val)) {
-          $andOrs[] = trim($val); // that is, just 'OR' or 'AND'
-          unset($queryArray[$key]); //remove that from the array
-        }
-      }
-      $queryArray = array_values($queryArray);
+    // check for remove
+    elseif ($form_state['triggering_element']['#value'] == '-') {
+      $field = $form_state['triggering_element']['#field'];
+      array_splice($form_state['values']['terms'], $field, 1);
+      dsm($form_state['values']['terms']);
     }
-
-    $andOrArray = array(
-      'AND' => 'and',
-      'OR' => 'or',
-    );
-    $form = array();
-
-    if (!isset($repeat)) {
-      $repeat = variable_get('islandora_solr_block_repeat', '3');
-    }
-    $i = 1;
-    _add_field($form, $i, $queryArray[0], $types);
-
-    if ($repeat > 1 && $repeat < 9) { //don't want less then 2 or more then 9
-      for ($i = 2; $i < $repeat + 1; $i++) {
-        $t = $i - 1;
-        $j = $i - 2;
-        $andorj = ( isset($andOrs[$j]) ? $andOrs[$j] : 'AND' );
-
-        //$field_and_term = isset($queryArray[$t]) ? explode(':', $queryArray[$t]) : array('', '');
-        $form["andor$t"] = array(
-          '#title' => '',
-          '#type' => 'select',
-          '#default_value' => $andorj,
-          '#options' => $andOrArray
-        );
-        _add_field($form, $i, $queryArray[$t], $types);
-      }
-    }
-
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('search')
-    );
-    return $form;
-}
-
-
-
-  
-  
-  function _add_field(&$form, &$i, &$unprocessed_contents, &$types) {
-    $type = NULL;
-    $temp = preg_split('/:/', $unprocessed_contents, 2);
-
-    if (!isset($type)) {
-      if (trim($temp[0]) === '_query_') {
-        //We're using a subquery--let's assume dismax
-        //get the 'qf'..., dump the rest into 'terms'
-        $temp[1] = trim($temp[1]);
-        $qf = strpos($temp[1], 'qf=');
-        $end = strpos($temp[1], '}');
-        $type = substr($temp[1], $qf + 3, $end - $qf - 3);
-        $terms = trim(substr($temp[1], $end + 1, -1));
-      }
-      else {
-        $type = $temp[0];
-        //$terms = trim($temp[1], '()');
-        $terms = '';
-      }
-    }
-
-    $form['search_type']["type$i"] = array(
-      '#title' => '',
-      '#type' => 'select',
-      '#options' => $types,
-      '#default_value' => trim($type)
-    );
-    $form["fedora_terms$i"] = array(
-      '#size' => '24',
-      '#type' => 'textfield',
-      '#title' => '',
-      '#default_value' => stripslashes($terms),
+    
+    $values = $form_state['values'];
+  }
+  else {
+    //Need at least one term to draw the search box.
+    $values = array(
+      'terms' => array(''),
     );
   }
-
-
-
-
-
-/**
- * theme islandora solr search block form
- * @global type $_islandora_solr_queryclass
- * @param type $form
- * @return type
- */
-function theme_islandora_solr_block_form($form) {
-  global $_islandora_solr_queryclass;
-  islandora_solr_init();
-
-    if (!isset($repeat)) {
-      $repeat = variable_get('islandora_solr_block_repeat', '3');
+  $terms = array(
+    '#type' => 'markup',
+    '#prefix' => '<div id="islandora-solr-advanced-terms"><h3 class="search-title">' . t('Search') . '</h3>',
+    '#suffix' => '</div>',
+    '#tree' => TRUE,
+  );
+  // loop over each term
+  foreach ($values['terms'] as $i => $value) {
+    $term = array(
+      '#tree' => TRUE,
+      '#prefix' => '<div>',
+      '#suffix' => '</div>',
+      'field' => array(
+        '#title' => t('Field'),
+        '#type' => 'select',
+//        '#name' => 'field-name-' . $i,
+        '#default_value' => isset($value['field']) ? $value['field'] : 'dc.title',
+        '#options' => islandora_build_substitution_list(variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject')),
+      ),
+      'search' => array(
+        '#title' => t('Search terms'),
+        '#type' => 'textfield',
+//        '#name' => 'search-name-' . $i,
+        '#default_value' => isset($value['search']) ? $value['search'] : '',
+      ),
+      'hidden_submit' => array(// Used for when the user presses enter on the search field.
+        '#type' => 'submit',
+        '#value' => t('Search'),
+        '#attributes' => array('style' => 'visibility:hidden;position:fixed;top:-1000px;right:-1000px;')
+      ),
+      'add' => array(
+        '#type' => 'button',
+        '#value' => '+',
+        '#attributes' => array('title' => t('Add field')),
+        '#name' => 'add-field-' . $i,
+        '#ajax' => array(
+          'callback' => '_islandora_solr_advanced_search_terms',
+          'wrapper' => 'islandora-solr-advanced-terms',
+          'method' => 'replace',
+          'effect' => 'fade',
+          'progress' => array('type' => 'none'),
+        )
+      ),
+    );
+    if (count($values['terms']) > 1) {
+      $term['remove'] = array(
+        '#type' => 'button',
+        '#field' => $i,
+        '#value' => '-',
+        '#attributes' => array('title' => t('Remove field')),
+        '#name' => 'remove-field-' . $i,
+        '#ajax' => array(
+          'callback' => '_islandora_solr_advanced_search_terms',
+          'wrapper' => 'islandora-solr-advanced-terms',
+          'method' => 'replace',
+          'effect' => 'fade',
+          'progress' => array('type' => 'none'),
+        )
+      );
     }
-
-    $output = drupal_render($form['search_type']['type1']);
-    $output .= drupal_render($form['fedora_terms1']);
-    $output .= drupal_render($form['andor1']) . drupal_render($form['search_type']['type2']);
-    $output .= drupal_render($form['fedora_terms2']);
-    if ($repeat > 2 && $repeat < 9) {
-      for ($i = 3; $i < $repeat + 1; $i++) {
-        $t = $i - 1;
-        $output .= drupal_render($form["andor$t"]) . drupal_render($form['search_type']["type$i"]);
-        $output .= drupal_render($form["fedora_terms$i"]);
-      }
-    }
-    $output .= drupal_render($form['submit']);
-    $output .= drupal_render($form);
-    return $output;
+    $terms[] = $term;
+  }
+  dsm($terms);
+  // set form
+  $form = array();
+  // add terms
+  $form['terms'] = $terms;
+  // add controls
+  $form['controls'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div class="islandora-solr-advanced-controls">',
+    '#suffix' => '</div>',
+  );
+  $form['controls']['sort'] = array(
+    '#type' => 'select',
+    '#title' => t('Sort By'),
+    '#default_value' => (isset($values['sort']) ? $values['sort'] : 'score'),
+    '#options' => array( //XXX:  Need to make configurable...
+      'score' => t('Relevance'),
+      'mods_title_mlt' => t('Title'),
+      'mods_dateIssued_s' => t('Date Issued'),
+    ),
+  );
+  $form['controls']['order'] = array(    
+    '#type' => 'select',
+    '#title' => t('Order'),
+    '#default_value' => (isset($values['order']) ? $values['order'] : 'desc'),
+    '#options' => array(
+      'desc' => t('Descending'),
+      'asc' => t('Ascending'),
+    ),
+  );
+  $form['controls']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Search')
+  );
+  return $form;
 }
 
 
 
-
-
-
-
-
-
-
 /**
- * islandora solr search block form validate
+ * Callback for advanced search form
  * @param type $form
  * @param type $form_state
+ * @return type 
  */
-function islandora_solr_block_form_validate($form, &$form_state) {
-
-  $repeat = variable_get('islandora_solr_block_repeat', '3');
-  $found = FALSE;
-  for ($fieldNum = 1; $fieldNum <= $repeat; $fieldNum++) {
-    if (!empty($form_state['values']["fedora_terms$fieldNum"])) {
-      if ($form_state['values']["fedora_terms$fieldNum"] == '*') {
-       unset($form_state['values']["fedora_terms$fieldNum"]);
-       continue;
-      }
-      $found = TRUE;
-    }
-  }
-  if (!$found) {
-    form_set_error('edit_fedora_terms1', t('Please enter search term.'));
-  }
+function _islandora_solr_advanced_search_terms($form, &$form_state) {
+  dsm($form_state);
+  return $form['terms'];
 }
 
+
+
+
+
+
+
+
 /**
- * islandora solr search block form submit
- * @global type $_islandora_solr_queryclass
- * @param type $form
- * @param type $form_state
+ * Submit hook for the quick search form.
+ * 
+ * @param array $form
+ * @param array $form_state 
  */
-function islandora_solr_block_form_submit($form, &$form_state) {
-  $form_state['rebuild'] = TRUE;
-  global $_islandora_solr_queryclass;
-
-  $type_id = trim($form_state['values']['type']);
-  $repeat = variable_get('islandora_solr_block_repeat', '3');
-  $fedora_terms = array();
-  $types = array();
-  $booleans = array();
-
-  for ($fieldNum = 1; $fieldNum <= $repeat; $fieldNum++) {
-    if ($form_state['values']["fedora_terms$fieldNum"]) {
-      $types[] = trim($form_state['values']["type$fieldNum"]);
-      $fedora_terms[] = lesser_escape(trim($form_state['values']["fedora_terms$fieldNum"]));
-    }
-    $next = $fieldNum + 1;
-    if ($form_state['values']["fedora_terms$next"] && $form_state['values']["fedora_terms$fieldNum"]) {
-      $booleans[] = trim($form_state['values']["andor$fieldNum"]);
+function islandora_solr_advanced_search_form_submit($form, &$form_state) {
+  // render query
+  $query_array = array();
+  foreach ($form_state['values']['terms'] as $term) {
+    // set field
+    $field = $term['field'];
+    // set search value
+    $search = trim($term['search']);
+    //replace the slash so url doesn't break
+    $search = str_replace('/', '~slsh~', $search);
+    if (!empty($search)) {
+      $query_array[] = "$field:(\"$search\")";
     }
   }
-
-  for ($iteration = 0; $iteration < count($fedora_terms); $iteration++) {
-    //FIXME (minor): t() should be changed to format_string() in this instance, in Drupal 7
-    //  The string isn't really translatable, just templated.
-    $searchString .= t("!field:(!query) !bool ", array(
-        '!field' => $types[$iteration], 
-        '!query' => $fedora_terms[$iteration],
-        '!bool' => $booleans[$iteration]
-    ));
-  }
-  $searchString = trim($searchString);
-  $searchString = str_replace('/', '~slsh~', $searchString); //replace the slash so url doesn't break
-  drupal_goto("islandora/search/$searchString");
+  // create query string
+  $query = !empty($query_array) ? implode(' AND ', $query_array) : '*:*'; // Empty return all results. 
+   // Redirect to the search.
+  $form_state['redirect'] = 'islandora/search/' . $query;
 }
 
 

@@ -99,7 +99,7 @@ function islandora_solr_theme() {
 
   return array(
     // advanced solr search form/block
-    'islandora_solr_block_form' => array(
+    'islandora_solr_advanced_search_form' => array(
       'variables' => array(
         'form' => NULL,
       ),
