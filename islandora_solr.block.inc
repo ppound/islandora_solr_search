@@ -186,13 +186,16 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
 function islandora_solr_advanced_search_form($form, &$form_state) {
   global $_islandora_solr_queryclass;
   islandora_solr_init(); // @TODO: figure out why init needs to be called
-
+dsm($form_state);
   // include common.inc
   module_load_include('inc', 'islandora_solr', 'includes/common');
   
   // check if values are already set
   if (isset($form_state['triggering_element'])) {
-  
+    
+    // unset terms from input array
+    // http://drupal.stackexchange.com/questions/14855/how-do-i-dynamically-fill-a-textfield-with-ajax/16576#16576
+    unset($form_state['input']['terms']);
     // check for add
     if ($form_state['triggering_element']['#value'] == '+') {
       $form_state['values']['terms'][] = array();  
@@ -201,7 +204,6 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
     elseif ($form_state['triggering_element']['#value'] == '-') {
       $field = $form_state['triggering_element']['#field'];
       array_splice($form_state['values']['terms'], $field, 1);
-      dsm($form_state['values']['terms']);
     }
     
     $values = $form_state['values'];
@@ -227,14 +229,12 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
       'field' => array(
         '#title' => t('Field'),
         '#type' => 'select',
-//        '#name' => 'field-name-' . $i,
         '#default_value' => isset($value['field']) ? $value['field'] : 'dc.title',
         '#options' => islandora_build_substitution_list(variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject')),
       ),
       'search' => array(
         '#title' => t('Search terms'),
         '#type' => 'textfield',
-//        '#name' => 'search-name-' . $i,
         '#default_value' => isset($value['search']) ? $value['search'] : '',
       ),
       'hidden_submit' => array(// Used for when the user presses enter on the search field.
@@ -274,7 +274,6 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
     }
     $terms[] = $term;
   }
-  dsm($terms);
   // set form
   $form = array();
   // add terms
@@ -320,7 +319,6 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
  * @return type 
  */
 function _islandora_solr_advanced_search_terms($form, &$form_state) {
-  dsm($form_state);
   return $form['terms'];
 }
 
