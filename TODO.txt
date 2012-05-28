@@ -9,6 +9,9 @@ High priority
 - move extended solr search to advanced block
 - add support for sort and result count through url -> check luke for multivalue?
 
+- fix breadcrumb rendering for query
+- remove quotes from lucene query's
+
 - split css files and js files between .base.css, .admin.css and theme.css
 - classes and ID's should have dashed. Also shorten where possible
 - fix display (shows up on all pages)
