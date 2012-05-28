@@ -168,7 +168,7 @@ function islandora_solr_islandora_solr_primary_display() {
  */
 function islandora_solr($query = NULL) {
   global $_islandora_solr_queryclass;
-  
+
   // set title
   drupal_set_title(t('Search Results'));
   
@@ -358,5 +358,32 @@ function islandora_solr_check_http($url) {
 
 
 
+/**
+ * Function to get luke
+ */
+function islandora_solr_get_luke($solr_url = NULL, $num_terms = 0) {
+  
+  if (!$solr_url) {
+    // create url
+    $solr_url = variable_get('islandora_solr_url', 'localhost:8080/solr');
+  }
+  
+  // if solr is available get luke
+  if (islandora_solr_ping($solr_url)) {
+    // create url
+    $luke_url = $solr_url . '/admin/luke?wt=json&numTerms=' . $num_terms; //?wt=json
+    // check for http://
+    $luke_url = islandora_solr_check_http($luke_url);
+    // get file content (= json string)
+    $luke_json = file_get_contents($luke_url, 0, NULL, NULL);
 
+    // decode json to php array
+    $luke_array = json_decode($luke_json, TRUE);
+
+    return $luke_array;
+  }
+  else {
+    return FALSE;
+  }
+}
 
