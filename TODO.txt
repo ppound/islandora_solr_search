@@ -24,7 +24,7 @@ Normal Priority
 - add dropdowns for sort and result count on search page
 
 - check fixes in advanced_block branch, I might have forgotten.
-
+- Boolean operators as query seem to choke
 
 Low Priority
 ------------

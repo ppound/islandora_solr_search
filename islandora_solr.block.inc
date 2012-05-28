@@ -216,7 +216,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
   }
   $terms = array(
     '#type' => 'markup',
-    '#prefix' => '<div id="islandora-solr-advanced-terms"><h3 class="search-title">' . t('Search') . '</h3>',
+    '#prefix' => '<div id="islandora-solr-advanced-terms">',
     '#suffix' => '</div>',
     '#tree' => TRUE,
   );
@@ -226,35 +226,36 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
       '#tree' => TRUE,
       '#prefix' => '<div>',
       '#suffix' => '</div>',
-      'field' => array(
-        '#title' => t('Field'),
-        '#type' => 'select',
-        '#default_value' => isset($value['field']) ? $value['field'] : 'dc.title',
-        '#options' => islandora_build_substitution_list(variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject')),
-      ),
-      'search' => array(
-        '#title' => t('Search terms'),
-        '#type' => 'textfield',
-        '#default_value' => isset($value['search']) ? $value['search'] : '',
-      ),
-      'hidden_submit' => array(// Used for when the user presses enter on the search field.
-        '#type' => 'submit',
-        '#value' => t('Search'),
-        '#attributes' => array('style' => 'visibility:hidden;position:fixed;top:-1000px;right:-1000px;')
-      ),
-      'add' => array(
-        '#type' => 'button',
-        '#value' => '+',
-        '#attributes' => array('title' => t('Add field')),
-        '#name' => 'add-field-' . $i,
-        '#ajax' => array(
-          'callback' => '_islandora_solr_advanced_search_terms',
-          'wrapper' => 'islandora-solr-advanced-terms',
-          'method' => 'replace',
-          'effect' => 'fade',
-          'progress' => array('type' => 'none'),
-        )
-      ),
+    );
+    $term['field'] = array(
+      '#title' => t('Field'),
+      '#type' => 'select',
+      '#default_value' => isset($value['field']) ? $value['field'] : 'dc.title',
+      '#options' => islandora_build_substitution_list(variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject')),
+    );
+    $term['search'] = array(
+      '#title' => t('Search terms'),
+      '#type' => 'textfield',
+      '#size'=> 20,
+      '#default_value' => isset($value['search']) ? $value['search'] : '',
+    );
+    $term['hidden_submit'] = array(// Used for when the user presses enter on the search field.
+      '#type' => 'submit',
+      '#value' => t('Search'),
+      '#attributes' => array('style' => 'visibility:hidden;position:fixed;top:-1000px;right:-1000px;')
+    );
+    $term['add'] = array(
+      '#type' => 'button',
+      '#value' => '+',
+      '#attributes' => array('title' => t('Add field')),
+      '#name' => 'add-field-' . $i,
+      '#ajax' => array(
+        'callback' => '_islandora_solr_advanced_search_terms',
+        'wrapper' => 'islandora-solr-advanced-terms',
+        'method' => 'replace',
+        'effect' => 'fade',
+        'progress' => array('type' => 'none'),
+      )
     );
     if (count($values['terms']) > 1) {
       $term['remove'] = array(
@@ -271,6 +272,19 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
           'progress' => array('type' => 'none'),
         )
       );
+      if ((variable_get('islandora_solr_search_boolean', 'user') == 'user') AND ((count($values['terms']) -1) != $i)) {
+        $term['boolean'] = array(
+          '#type' => 'select',
+          '#prefix' => '<div>',
+          '#suffix' => '</div>',
+          '#default_value' => isset($value['boolean']) ? $value['boolean'] : 'AND',
+          '#options' => array(
+            'AND' => 'AND',
+            'OR' => 'OR',
+            'NOT' => 'NOT'
+          )
+        );
+      }
     }
     $terms[] = $term;
   }
@@ -289,7 +303,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
       '#type' => 'select',
       '#title' => t('Sort By'),
       '#default_value' => (isset($values['sort']) ? $values['sort'] : 'score'),
-      '#options' => islandora_build_substitution_list(variable_get('islandora_solr_search_sortby_terms', 'score ~ Relevance, dc.title ~ Title, dc.issued ~ Date Issued')),
+      '#options' => islandora_build_substitution_list(variable_get('islandora_solr_search_sortby_terms', 'score ~ Relevance, dc.title ~ Title, dc.date ~ Date Issued')),
     );
     $form['controls']['order'] = array(    
       '#type' => 'select',
@@ -334,7 +348,8 @@ function _islandora_solr_advanced_search_terms($form, &$form_state) {
  * @param array $form_state 
  */
 function islandora_solr_advanced_search_form_submit($form, &$form_state) {
-  // render query
+  
+  // Collect query values
   $query_array = array();
   foreach ($form_state['values']['terms'] as $term) {
     // set field
@@ -343,14 +358,44 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
     $search = trim($term['search']);
     //replace the slash so url doesn't break
     $search = str_replace('/', '~slsh~', $search);
+    // set boolean
+    $boolean = (isset($term['boolean'])) ? $term['boolean'] : variable_get('islandora_solr_search_boolean', 'user');
+    
+    // add query
     if (!empty($search)) {
-      $query_array[] = "$field:(\"$search\")";
+      $query_array[] = array(
+        'search' => "$field:(\"$search\")",
+        'boolean' => $boolean
+      );
     }
   }
-  // create query string
-  $query = !empty($query_array) ? implode(' AND ', $query_array) : '*:*'; // Empty return all results. 
-   // Redirect to the search.
-  $form_state['redirect'] = 'islandora/search/' . $query;
+
+  // create query
+  $query = '';
+  $i = 0;
+  foreach ($query_array as $term) {
+    $query .= $term['search'];
+    if (count($query_array) -1 != $i) {
+      $query .= ' ' . $term['boolean'] . ' ';
+    }
+    $i++;
+  }
+  
+  // check if query is empty
+  if (empty($query)) {
+    $query = '*:*';
+  }
+  
+  // set sort parameters
+  $params = array();
+  if (variable_get('islandora_solr_search_sortby', 1) == 1) {
+    $sort = $form_state['values']['sort'];
+    $order = $form_state['values']['order'];
+    
+    $params = array('query' => array('sort' => $sort . ' ' . $order));
+  }
+
+  drupal_goto('islandora/search/' . $query, $params);
 }
 
 
