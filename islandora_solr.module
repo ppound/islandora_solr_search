@@ -19,7 +19,7 @@ function islandora_solr_init() {
   module_load_include('inc', 'islandora_solr', 'islandora_solr.admin');
   module_load_include('inc', 'islandora_solr', 'islandora_solr.block');
   module_load_include('inc', 'islandora_solr', 'includes/common');
-   
+
   static $islandora_solr_init = FALSE;
   if (!$islandora_solr_init) {
     // single underscore followed by the module and another underscore
@@ -224,12 +224,15 @@ function islandora_solr($query = NULL) {
   // Include the file for the display profile
   require_once(drupal_get_path('module', $profile['module']) . '/' . $profile['file']);
 
-  // Set display class and function vars
+  // Get display class and function from current display
   $solrClass = $profile['class'];
   $solrFunction = $profile['function'];
 
   $nope = FALSE;
 
+
+  
+  // check if the display's class exists
   if (class_exists($solrClass)) {
     $implementation = new $solrClass();
   }
@@ -237,13 +240,17 @@ function islandora_solr($query = NULL) {
     $nope = TRUE;
   }
 
+  // check if the display's method exists
   if (!$nope && method_exists($implementation, $solrFunction)) {
+
+    // implement results
     $output = $implementation->$solrFunction($_islandora_solr_queryclass);
   }
   else {
     $nope = TRUE;
   }
 
+  // Class and method are not found: use default
   if ($nope) {
 
     $resultsClass = new IslandoraSolrResults();

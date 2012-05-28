@@ -49,14 +49,20 @@ class IslandoraSolrQueryProcessor {
    * @return type
    */
   function buildAndExecuteQuery($query, $params = NULL) {
+    // include IslandoraSolrResults
+    module_load_include('inc', 'islandora_solr', 'IslandoraSolrResults');
+    
+    // set empty string
     if (variable_get('islandora_solr_request_handler', '') == 'standard') {
 
       if (!$query || $query == ' ') {
         $query = '%252F';
       }
     }
+    // build the query and apply admin settings
     $this->buildQuery($query, $params);
 
+    // execute the query
     return $this->executeQuery();
   }
 
