@@ -350,13 +350,13 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#description' => t("Indicate what fields should appear in the dropdown menu of sort terms for the <strong>Solr Advanced Search Block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
       Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
-      module is available in Islandora's online documentation."),
+      module is available in Islandora's online documentation. <br /><strong>Important:</strong> Not all solr fields can be used for sorting. For more info, check the <a href='!sorturl' target='_blank'>solr documentation</a> on sorting.", array('!sorturl' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
     '#default_value' => variable_get('islandora_solr_search_sortby_terms', 'score ~ Relevance, dc.title ~ Title, dc.date ~ Date Issued'),
     '#wysiwyg' => FALSE,
   );
   
   
-  
+
   
   
 
