@@ -99,54 +99,18 @@ class IslandoraSolrQueryProcessor {
       $this->solrParams['defType'] = NULL;
     }
     
-    // Set display variable
-    if (isset($this->internalSolrParams['display'])) {
-      $display = $this->internalSolrParams['display'];
-      // if current display is default, unset display key.
-      if ($display == variable_get('islandora_solr_primary_display', 'default') ) {
-        unset($this->internalSolrParams['display']);
-      }
-    }
-    else {
-      $display = variable_get('islandora_solr_primary_display', 'default');
-      unset($this->internalSolrParams['display']);
-    }
-   
-    // display profiles can contain parameters. // @TODO: document that this is possible.
-    $profiles = module_invoke_all("islandora_solr_primary_display");
-    $profile = $profiles[$display];
-    $profile_params = array();
-    // if display has parameters defined
-    if (isset($profile['params'])) {
-      // loop over defined paramters
-      foreach ($profile['params'] as $param) {
-        $profile_params[] = $param;
-      }
-      // if the display has parameters defined, add them to the solr parameters array
-      if (is_array($profile_params)) {
-        $this->solrParams = array_merge($this->solrParams, $profile_params);
-      }
-    }
+    // set sort
+    $this->solrParams['sort'] = $this->internalSolrParams['sort'];
     
     // get pager variable
     $startPage = isset($_GET['page']) ? $_GET['page'] : 0;
     
     // set results limit
-    $this->solrLimit = variable_get('islandora_solr_num_of_results', 20);
+    $this->solrLimit = isset($this->internalSolrParams['limit']) ? $this->internalSolrParams['limit'] : variable_get('islandora_solr_num_of_results', 20);
 
     // set solr start
     $this->solrStart = max(0, $startPage) * $this->solrLimit;
 
-    
-    // Include the file for the display profile // @TODO: figure out why
-    require_once(drupal_get_path('module', $profile['module']) . '/' . $profile['file']);
-
-    // Set display class and function vars // @TODO: these two variables aren't used anywhere. Remove them?
-    $solrClass = $profile['class'];
-    $solrFunction = $profile['function'];
-
-
-    
     // set facet parameters
     // set variables
     $raw_facet_vals = variable_get("islandora_solr_facets", 'dc.subject ~ Subject,dc.type ~ Type');

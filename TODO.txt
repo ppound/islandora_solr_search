@@ -32,3 +32,5 @@ Low Priority
 - don't hardcode php solr library, instead override it.
 - put object url's in a global variable?
 - table display works but could use some improvement.
+
+- when changing primary display, keep &limit in the url or should it show the default? Displays can override this though.
