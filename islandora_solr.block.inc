@@ -284,25 +284,23 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
     '#prefix' => '<div class="islandora-solr-advanced-controls">',
     '#suffix' => '</div>',
   );
-  $form['controls']['sort'] = array(
-    '#type' => 'select',
-    '#title' => t('Sort By'),
-    '#default_value' => (isset($values['sort']) ? $values['sort'] : 'score'),
-    '#options' => array( //XXX:  Need to make configurable...
-      'score' => t('Relevance'),
-      'mods_title_mlt' => t('Title'),
-      'mods_dateIssued_s' => t('Date Issued'),
-    ),
-  );
-  $form['controls']['order'] = array(    
-    '#type' => 'select',
-    '#title' => t('Order'),
-    '#default_value' => (isset($values['order']) ? $values['order'] : 'desc'),
-    '#options' => array(
-      'desc' => t('Descending'),
-      'asc' => t('Ascending'),
-    ),
-  );
+  if (variable_get('islandora_solr_search_sortby', 1) == 1) {
+    $form['controls']['sort'] = array(
+      '#type' => 'select',
+      '#title' => t('Sort By'),
+      '#default_value' => (isset($values['sort']) ? $values['sort'] : 'score'),
+      '#options' => islandora_build_substitution_list(variable_get('islandora_solr_search_sortby_terms', 'score ~ Relevance, dc.title ~ Title, dc.issued ~ Date Issued')),
+    );
+    $form['controls']['order'] = array(    
+      '#type' => 'select',
+      '#title' => t('Order'),
+      '#default_value' => (isset($values['order']) ? $values['order'] : 'desc'),
+      '#options' => array(
+        'desc' => t('Descending'),
+        'asc' => t('Ascending'),
+      ),
+    );
+  }
   $form['controls']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Search')

@@ -83,7 +83,7 @@ function islandora_solr_menu() {
  */
 function islandora_solr_admin_paths() {
   $paths = array(
-    'admin/config/islandora_solr_search' => TRUE,
+    'admin/config/islandora_solr' => TRUE,
   );
   return $paths;
 }

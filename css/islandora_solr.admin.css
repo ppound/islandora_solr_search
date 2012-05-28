@@ -1,0 +1,7 @@
+/* Style sheet for admin form */
+
+/* dependent options styling */
+.form-item.dependent-options
+{
+  margin-left: 30px;
+}

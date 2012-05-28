@@ -13,6 +13,12 @@
  */
 function islandora_solr_admin_settings($form, &$form_state) {
 
+  // add admin form css
+  drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
+  
+  // add admin form js
+  drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
+  
   // check for the php solr lib class
   if (!class_exists('Apache_Solr_Service')) {
     $message = t('This module requires the !url. Please install the client directory in the root directory of this module before continuing.', array('!url' => l(t('Apache Solr php client'), 'http://code.google.com/p/solr-php-client')));
@@ -302,6 +308,8 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $form['facet_settings']['islandora_facet_display_table'] = array();  
   
   
+  
+  
   // advanced search block
   $form['advanced_search_block'] = array(
     '#type' => 'fieldset',
@@ -319,14 +327,42 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject'),
     '#wysiwyg' => FALSE,
   );
-  $form['advanced_search_block']['islandora_solr_search_block_repeat'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Search Field Repetition'),
-    '#size' => 5,
-    '#description' => t('The number of fields you would like to have appear in the <strong>Solr Advanced Search Block</strong>'),
-    '#default_value' => variable_get('islandora_solr_search_block_repeat', '3'),
+  $form['advanced_search_block']['islandora_solr_search_term_repeat'] = array(
+    '#type' => 'select',
+    '#title' => t('Search Term Repetition'),
+    '#options' => array(1 => t('Unlimited'), 0 => 1) + drupal_map_assoc(range(2, 10)),
+    '#description' => t('The number of fields you would like to have appear in the <strong>Solr Advanced Search Block</strong>.'),
+    '#default_value' => variable_get('islandora_solr_search_term_repeat', '3'),
   );
-
+  $form['advanced_search_block']['islandora_solr_search_andor'] = array(
+    '#type' => 'radios',
+    '#title' => t('Default boolean operator'),
+    '#default_value' => variable_get('islandora_solr_search_andor', 0),
+    '#options' => array(t('User configurable'), t('AND'), t('OR')),
+    '#description' => t('Select a default boolean operator for the search query. User configurable exposes a dropdown which gives the user the choice between AND, OR and NOT.'),
+  );
+  $form['advanced_search_block']['islandora_solr_search_sortby'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Expose sort controls'),
+    '#return_value' => 1,
+    '#default_value' => variable_get('islandora_solr_search_sortby', 1),
+    '#description' => t('If checked, sort controls will be available to the advanced search block. If unchecked, results will be sorted by score'), // @TODO: double check if this is true.
+  );
+  $form['advanced_search_block']['islandora_solr_search_sortby_terms'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Sort Terms'),
+    '#description' => t("Indicate what fields should appear in the dropdown menu of sort terms for the <strong>Solr Advanced Search Block</strong>.<br />
+      Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
+      Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
+      module is available in Islandora's online documentation."),
+    '#default_value' => variable_get('islandora_solr_search_sortby_terms', 'score ~ Relevance, dc.title ~ Title, dc.issued ~ Date Issued'),
+    '#wysiwyg' => FALSE,
+  );
+  
+  
+  
+  
+  
 
   
   // query defaults
