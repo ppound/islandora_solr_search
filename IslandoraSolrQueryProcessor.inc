@@ -100,7 +100,10 @@ class IslandoraSolrQueryProcessor {
     }
     
     // set sort
-    $this->solrParams['sort'] = $this->internalSolrParams['sort'];
+    if (isset($this->internalSolrParams['sort'])) {
+      $this->solrParams['sort'] = $this->internalSolrParams['sort'];
+    }
+    
     
     // get pager variable
     $startPage = isset($_GET['page']) ? $_GET['page'] : 0;
