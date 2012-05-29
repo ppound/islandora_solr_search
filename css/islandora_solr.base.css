@@ -1,11 +1,4 @@
-/* $Id: */
-
-form#islandora-solr-search-block-form select#edit-type1,
-form#islandora-solr-search-block-form select#edit-type2,
-form#islandora-solr-search-block-form select#edit-type3
-{
-  width:100%;
-}
+/* Base style sheet for islandora solr */
 
 form#islandora-solr-search-block-form input#edit-fedora-terms1,
 form#islandora-solr-search-block-form input#edit-fedora-terms2,
