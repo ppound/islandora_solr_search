@@ -17,20 +17,17 @@ DEFINE('SOLR_SEARCH_PATH','islandora/search');
  */
 class IslandoraSolrQueryProcessor {
 
-  static $facetSeparator = '~'; //used to separate facets in url
-  static $slashReplacement = '~slsh~'; // a pattern used to replace / in url's the slash breaks drupal clean url's
-  public static $SEARCH_CLASS_ADVANCED_SEARCH_NUMBER_FIELDS = 5;
-  
-  public $solrQuery;
+  public $solrQuery; // solr query
   public $internalSolrQuery; // query alternative set if solrQuery is empty
-  public $solrParams = array();
-  public $internalSolrParams; // parameters from url
   public $solrStart;
   public $solrLimit;
   public $solrDefType;
+  public $solrParams = array(); // all other solr parameters
 
-  public $solrResult;
+  public $solrResult; // raw solr results returned after query execution
 
+  public $display; // the current display (for modules wanting to alter the query of a display)
+  public $internalSolrParams; // parameters from url
   public $different_kinds_of_nothing = array( ' ', '%20', '%252F', '%2F', '%252F-', ''); 
 
   /**
@@ -104,6 +101,13 @@ class IslandoraSolrQueryProcessor {
       $this->solrParams['sort'] = $this->internalSolrParams['sort'];
     }
     
+    // set display property (so display plugin modules can use this in a conditional to alter the query class)
+    if (isset($this->internalSolrParams['display'])) {
+      $this->display = $this->internalSolrParams['display'];
+    }
+    else {
+      $this->display = variable_get('islandora_solr_primary_display', 'default');
+    }
     
     // get pager variable
     $startPage = isset($_GET['page']) ? $_GET['page'] : 0;
