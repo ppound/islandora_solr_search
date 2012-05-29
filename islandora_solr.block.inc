@@ -190,7 +190,12 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
   // include common.inc
   module_load_include('inc', 'islandora_solr', 'includes/common');
   
-  // check if values are already set
+  // check form states
+  // 1. form update using ajax
+  // 2. populate with current query on search results page
+  // 3. anywhere else: empty form
+  
+  // 1. form update using ajax
   if (isset($form_state['triggering_element'])) {
     
     // unset terms from input array
@@ -205,9 +210,73 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
       $field = $form_state['triggering_element']['#field'];
       array_splice($form_state['values']['terms'], $field, 1);
     }
-    
+    // set values
     $values = $form_state['values'];
   }
+  // 2. populate with current query on search results page
+  elseif(class_exists('IslandoraSolrResults') AND (!isset($_islandora_solr_queryclass->internalSolrParams['type']) OR $_islandora_solr_queryclass->internalSolrParams['type'] != 'dismax')) {
+    
+    // get current query
+    $query = $_islandora_solr_queryclass->solrQuery;
+    // set value variable
+    $values['terms'] = array();
+
+    // explode on space
+    $query_explode = explode(' ', $query);
+
+    // break up the solr query to populate the advanced search form
+    $i = 0;
+    foreach($query_explode as $key => $value) {
+      $term = array();
+      
+      // check for first colon to split the string
+      if (strpos($value, ':') != FALSE) {
+        // split the filter into field and value
+        $value_split = explode(':', $value, 2);
+        // set field
+        $values['terms'][$i]['field'] = $value_split[0];
+        
+        // second part of the split is the query value (or first part of it)
+        $value_split[1] = str_replace(array('(', ')'), '', $value_split[1]);
+        // add search string
+        $values['terms'][$i]['search'] = $value_split[1];
+        
+      }
+      // if the string does not include a colon or AND/OR/NOT, then it is a
+      // part of the query value
+      elseif (!preg_match('/(AND|OR|NOT)/', $value, $matches)) {
+        // trim brackets
+        $value = str_replace(array('(', ')'), '', $value);
+        
+        if (isset($values['terms'][$i]['search'])) {
+          // append to search string
+          $values['terms'][$i]['search'] .= ' ' . $value;
+        }
+        else {
+          // search field is not set, so create new search value
+          $values['terms'][$i]['search'] = $value;
+        }
+      }
+      // if it matches AND/OR/NOT, then we have the boolean operator
+      else {
+        // set boolean operator
+        $values['terms'][$i]['boolean'] = $value;
+        
+        // increment to next field
+        $i++;
+      }
+    }
+    // also set defaults for sorting
+    if (isset($_islandora_solr_queryclass->internalSolrParams['sort'])) {
+      
+      $sort_explode = explode(' ', $_islandora_solr_queryclass->internalSolrParams['sort']);
+      
+      $values['sort'] = $sort_explode[0];
+      $values['order'] = isset($sort_explode[1]) ? $sort_explode[1] : NULL;
+    }
+    
+  }
+  // 3. anywhere else: empty form
   else {
     //Need at least one term to draw the search box.
     $values = array(
