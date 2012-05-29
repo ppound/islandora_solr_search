@@ -58,7 +58,7 @@ function islandora_solr_boot() {
 function islandora_solr_menu() {
   $items['islandora/search'] = array(
     'page callback' => 'islandora_solr',
-    'access arguments' => array('view fedora collection'), //depends of fedora_repository view
+    'access arguments' => array('search islandora solr'),
     'type' => MENU_CALLBACK,
   );
 
@@ -86,6 +86,18 @@ function islandora_solr_admin_paths() {
     'admin/config/islandora_solr' => TRUE,
   );
   return $paths;
+}
+
+/**
+ * Implements hook_permission(). 
+ */
+function islandora_solr_permission() {
+  return array(
+    'administer my module' => array(
+      'title' => t('view search results'), 
+      'description' => t('Search the islandora solr index.'),
+    ),
+  );
 }
 
 
