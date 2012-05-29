@@ -71,9 +71,6 @@ function islandora_solr_menu() {
     'file' => 'islandora_solr.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
-
-
-
   return $items;
 }
 
@@ -93,9 +90,9 @@ function islandora_solr_admin_paths() {
  */
 function islandora_solr_permission() {
   return array(
-    'administer my module' => array(
-      'title' => t('view search results'), 
-      'description' => t('Search the islandora solr index.'),
+    'search islandora solr' => array(
+      'title' => t('Search the islandora solr index'), 
+      'description' => t('Search the islandora solr index. (Expose search blocks and view search results)'),
     ),
   );
 }

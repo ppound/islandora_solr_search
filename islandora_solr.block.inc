@@ -104,7 +104,7 @@ function islandora_solr_block_view($block_name = '') {
   $solr_blocks = module_invoke_all("islandora_solr_query_blocks");
 
   // if the block that is called is defined
-  if (!empty($solr_blocks[$block_name])) {
+  if (!empty($solr_blocks[$block_name]) AND user_access('search islandora solr')) {
 
     // set block title
     $block['subject'] = $solr_blocks[$block_name]['name'];
