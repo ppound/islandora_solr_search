@@ -11,6 +11,7 @@ High priority
 
 - fix breadcrumb rendering for query
 - remove quotes from lucene query's
+- set $this->display again in the query processor (for invoke all functions)
 
 - split css files and js files between .base.css, .admin.css and theme.css
 - classes and ID's should have dashed. Also shorten where possible

@@ -364,7 +364,7 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
     // add query
     if (!empty($search)) {
       $query_array[] = array(
-        'search' => "$field:(\"$search\")",
+        'search' => "$field:($search)",
         'boolean' => $boolean
       );
     }
