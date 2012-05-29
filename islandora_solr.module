@@ -67,7 +67,7 @@ function islandora_solr_menu() {
     'description' => 'Managing Islandora Solr Searching',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_solr_admin_settings'),
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer islandora solr'),
     'file' => 'islandora_solr.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
@@ -91,8 +91,12 @@ function islandora_solr_admin_paths() {
 function islandora_solr_permission() {
   return array(
     'search islandora solr' => array(
-      'title' => t('Search the islandora solr index'), 
+      'title' => t('Search the Islandora Solr index'), 
       'description' => t('Search the islandora solr index. (Expose search blocks and view search results)'),
+    ),
+    'administer islandora solr' => array(
+      'title' => t('Administer Islandora Solr'),
+      'description' => t('Administer the Islandora Solr settings'),
     ),
   );
 }

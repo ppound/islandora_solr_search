@@ -39,3 +39,5 @@ Low Priority
 - table display works but could use some improvement.
 
 - when changing primary display, keep &limit in the url or should it show the default? Displays can override this though.
+
+- added permission to restrict access to search results page and search blocks: should we restrict access to the execute query method? (other modules might implement execute query)
