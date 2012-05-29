@@ -9,7 +9,7 @@
       var wrapper = $('.form-item-islandora-solr-search-sortby-terms');
       // add dependent class
       wrapper.addClass('dependent-options');
-console.log("loaded");
+
       // set default state
       if (!checkbox.is(':checked')) {
         wrapper.hide();

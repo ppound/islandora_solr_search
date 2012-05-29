@@ -44,7 +44,7 @@ function islandora_solr_config_islandora_solr_secondary_display() {
       'class' => 'IslandoraSolrResultsCSV',
       'function' => 'printCSV',
       'description' => 'Download complete resultset as a CSV Spreadsheet',
-      'logo' => '<img src="' . $path . '/images/csv.png" class="islandora_solr_secondary_display_icon">',
+      'logo' => '<img src="' . $path . '/images/csv.png" class="secondary-display-csv">',
     ),
   );
 }
