@@ -25,7 +25,8 @@
           <?php print l($image, 'islandora/object/' . $result['PID']['value'], array('html' => TRUE)); ?>
         </dt>
         <dd class="solr-grid-caption">
-          <?php print isset($result['dc.subject']['value'])? $result['dc.subject']['value'] : ''; ?>
+          <?php $title = isset($result['dc.subject']['value']) ? $result['dc.subject']['value'] : ''; ?>
+          <?php print l($title, 'islandora/object/' . htmlspecialchars($result['PID']['value'], ENT_QUOTES, 'utf-8')); ?>
         </dd>
       </dl>
     <?php endforeach; ?>
