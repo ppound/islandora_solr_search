@@ -158,7 +158,7 @@ function islandora_solr_islandora_solr_primary_display() {
     // Note: this class should either be, or extend, the class IslandoraSolrResults.
     //
     'default' => array(
-      'name' => t('Fields (default)'),
+      'name' => t('List (default)'),
       'module' => 'islandora_solr',
       'file' => 'IslandoraSolrResults.inc',
       'class' => "IslandoraSolrResults",
@@ -254,7 +254,7 @@ function islandora_solr($query = NULL) {
   else {
     $nope = TRUE;
   }
-
+  
   // check if the display's method exists
   if (!$nope && method_exists($implementation, $solrFunction)) {
 
