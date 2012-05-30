@@ -77,7 +77,7 @@ class IslandoraSolrResults {
     
     // rendered results
     $results = $this->printResults($apacheSolrResult);
-        
+    
     // return themed layout
     return theme('islandora_solr_wrapper', array('results' => $results, 'secondary_profiles' => $secondary_profiles, 'elements' => $elements));
   }
@@ -708,8 +708,14 @@ class IslandoraSolrResults {
    * @return array
    */
   function prep_results($results) {
+    // catch if the result query returned an error
+    if (!isset($results)) {
+      return FALSE;
+    }
+
     $rawResponse = $results->getRawResponse();
     $responseArray = json_decode($rawResponse, TRUE);
+ 
     $highlights = isset($responseArray['highlighting']) ? $responseArray['highlighting'] : NULL;
     $docs = $responseArray['response']['docs'];
 

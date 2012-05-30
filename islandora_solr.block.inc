@@ -546,7 +546,7 @@ function islandora_solr_sort() {
     $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
     
     // get sort terms
-    $sort_terms = islandora_build_substitution_list(variable_get('islandora_solr_sort_terms', 'score ~ Relevance, dc.title ~ Title, dc.date ~ Date Issued'));
+    $sort_terms = islandora_build_substitution_list(variable_get('islandora_solr_sort_terms', 'score ~ Relevance, fgs.title ~ Title, fgs.createdDate ~ Date Created'));
 
     // get current sort (check in the actual parameters used for the query, because modules might have altered it)
     if (isset($_islandora_solr_queryclass->solrParams['sort'])) {
@@ -555,9 +555,10 @@ function islandora_solr_sort() {
       $current_sort_order = isset($sort_explode[1]) ? $sort_explode[1] : NULL;
     }
     else {
-      // @TODO: if no sort is applied, is the default 'score desc' ?
-      $current_sort_term = NULL;
-      $current_sort_order = NULL;      
+      // if no parameters are given, internally solr defaults to 'score desc'
+      // http://wiki.apache.org/solr/CommonQueryParameters#sort
+      $current_sort_term = 'score';
+      $current_sort_order = 'desc';
     }
     
     // set variables

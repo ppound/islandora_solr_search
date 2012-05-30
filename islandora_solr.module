@@ -223,6 +223,10 @@ function islandora_solr($query = NULL) {
   // Build and execute Apache Solr query
   $queryResult = $_islandora_solr_queryclass->buildAndExecuteQuery($query, $params);
 
+  if (empty($_islandora_solr_queryclass->solrResult)) {
+    return t('Error searching solr index.');
+  }
+  
   // TODO: Also filter secondary displays against those checked in the configuration options.
   if (isset($_GET['solr_profile']) AND isset($secondary_profiles[$_GET['solr_profile']])) {
     $profile = $secondary_profiles[$_GET['solr_profile']];
@@ -243,8 +247,6 @@ function islandora_solr($query = NULL) {
 
   $nope = FALSE;
 
-
-  
   // check if the display's class exists
   if (class_exists($solrClass)) {
     $implementation = new $solrClass();
