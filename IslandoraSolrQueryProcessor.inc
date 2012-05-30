@@ -171,8 +171,6 @@ class IslandoraSolrQueryProcessor {
       $this->solrParams['qf'] = 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type';
     }
 
-    // Invoke a hook for third-party modules to alter the parameters.
-    module_invoke_all('islandora_solr_query_processor', $this); //The hook implementation needs to specify that it takes a reference, not be passed one
     return;
   }
 
@@ -189,7 +187,9 @@ class IslandoraSolrQueryProcessor {
    */
   function executeQuery() {
     
-    // @TODO: add possibility to alter the query right before it gets excecuted.
+    // Invoke a hook for third-party modules to alter the parameters.
+    //The hook implementation needs to specify that it takes a reference, not be passed one
+    module_invoke_all('islandora_solr_query_processor', $this);
 
     // set variables
     $url = variable_get('islandora_solr_url', 'localhost:8080/solr');
