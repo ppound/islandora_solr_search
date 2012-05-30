@@ -208,30 +208,6 @@ class IslandoraSolrResults {
     return theme('fieldset', $fieldset_r);
   }
 
-  const FIELD_ALL = 0, FIELD_SEARCH = 1, FIELD_FACET = 2, FIELD_RESULT = 3;
-
-  function _make_pattern($string) {
-    return "/^" . preg_quote($string, '/') . "/";
-  }
-
-  function getSubstitutedFields($string_in, $type = FIELD_SEARCH) {
-    $replacements = NULL;
-    switch ($type) {
-      case FIELD_SEARCH:
-        $replacements = $this->searchFieldArray;
-        break;
-      case FIELD_FACET:
-        $replacements = $this->facetFieldArray;
-        break;
-      case FIELD_RESULT:
-        $replacements = $this->resultFieldArray;
-        break;
-      case FIELD_ALL:
-      default:
-        $replacements = $this->allSubsArray;
-    }
-    return preg_replace(array_map(array($this, '_make_pattern'), array_keys($replacements)), array_values($replacements), $string_in);
-  }
 
   /**
    * Function: currentQuery
@@ -521,24 +497,7 @@ class IslandoraSolrResults {
     
   }
   
-  /**
-   * Function: prepFieldSubstitutions
-   *
-   * Description: reads configuration values and preps a number of key=>value
-   *   arrays for output substitution
-   */
-  function prepFieldSubstitutions() {
-    $rawFacetVals = variable_get("islandora_solr_facets", 'dc.subject ~ Subject,dc.type ~ Type');
-    $this->facetFieldArray = islandora_build_substitution_list($rawFacetVals);
 
-    $rawSearchTerms = variable_get('islandora_solr_searchterms', 'dc.title ~ Title');
-    $this->searchFieldArray = islandora_build_substitution_list($rawSearchTerms);
-
-    $rawResultFields = variable_get('islandora_solr_result_fields', 'dc.subject ~ Subject,dc.type ~ Type');
-    $this->resultFieldArray = islandora_build_substitution_list($rawResultFields);
-
-    $this->allSubsArray = array_merge($this->facetFieldArray, $this->searchFieldArray, $this->resultFieldArray);
-  }
 
 
   /**
@@ -721,7 +680,24 @@ class IslandoraSolrResults {
 
 
 
+  /**
+   * Function: prepFieldSubstitutions
+   *
+   * Description: reads configuration values and preps a number of key=>value
+   *   arrays for output substitution
+   */
+  function prepFieldSubstitutions() {
+    $rawFacetVals = variable_get("islandora_solr_facets", 'dc.subject ~ Subject,dc.type ~ Type');
+    $this->facetFieldArray = islandora_build_substitution_list($rawFacetVals);
 
+    $rawSearchTerms = variable_get('islandora_solr_searchterms', 'dc.title ~ Title');
+    $this->searchFieldArray = islandora_build_substitution_list($rawSearchTerms);
+
+    $rawResultFields = variable_get('islandora_solr_result_fields', 'dc.subject ~ Subject,dc.type ~ Type');
+    $this->resultFieldArray = islandora_build_substitution_list($rawResultFields);
+
+    $this->allSubsArray = array_merge($this->facetFieldArray, $this->searchFieldArray, $this->resultFieldArray);
+  }
 
 
 
