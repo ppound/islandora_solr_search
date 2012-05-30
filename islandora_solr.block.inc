@@ -536,7 +536,7 @@ function islandora_solr_sort() {
   
   // set variables
   $output = '';
-  dsm($_islandora_solr_queryclass);
+
   // check if the page is dealing with search results
   if (class_exists('IslandoraSolrResults')) {
     
