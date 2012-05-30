@@ -35,9 +35,6 @@ class IslandoraSolrResults {
    */
   function displayResults($solrQueryProcessor) {
     
-    // add islandora solr theme css
-    drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.theme.css');
-    
     // set variables to collect returned data.
     $results = NULL;
     $secondary_profiles = NULL;
@@ -128,6 +125,10 @@ class IslandoraSolrResults {
    * @param Apache_Solr_Object $results
    */
   function printResults($results) {
+    
+    // add islandora solr theme css
+    drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.theme.css');
+    
     // set variables
     $results_array = array();
     $elements = array();
