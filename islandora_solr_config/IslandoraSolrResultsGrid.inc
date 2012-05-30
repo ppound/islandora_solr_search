@@ -35,9 +35,6 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
     // get prepared search results
     $docs = $this->prep_results($results);
 
-    // optionally limit results to values given
-    $limitResults = variable_get('islandora_solr_limit_result_fields', 0);
-
     // loop over results array
     foreach ($docs as $doc) {
       $rows = array();
@@ -46,11 +43,6 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
 
       // loop over individual results to process fields
       foreach ($doc as $field => $value) {
-
-        // check if this field should be included
-        if ($limitResults && empty($this->resultFieldArray[$field])) {
-          continue;
-        }
 
         // check for field label substitutions
         $translated_field_name = isset($this->allSubsArray[$field]) ? $this->allSubsArray[$field] : $field;

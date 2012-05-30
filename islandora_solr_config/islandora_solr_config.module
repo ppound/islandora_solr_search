@@ -97,3 +97,26 @@ function islandora_solr_config_help($path, $arg) {
   }
 }
 
+
+function islandora_solr_config_islandora_solr_query_processor($processor) {
+
+  // we're dealing with the grid display
+  if ($processor->display == 'grid') {
+    
+    // set results limit
+    $limit = $processor->solrLimit;
+    
+    // not dividable yet
+    $dividable = FALSE;
+    while ($dividable == FALSE) {
+      // dividable by 4 and 3
+      if (($limit % 4) == 0 AND ($limit % 3) == 0) {
+        $dividable = TRUE;
+        $solr_limit = $limit;
+      }
+      $limit++;
+    }
+    // set new limit
+    $processor->solrLimit = $solr_limit;
+  }
+}
