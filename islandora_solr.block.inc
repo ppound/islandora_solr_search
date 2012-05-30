@@ -546,7 +546,7 @@ function islandora_solr_sort() {
     $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
     
     // get sort terms
-    $sort_terms = islandora_build_substitution_list(variable_get('islandora_solr_sort_terms', 'score ~ Relevance, fgs.title ~ Title, fgs.createdDate ~ Date Created'));
+    $sort_terms = islandora_build_substitution_list(variable_get('islandora_solr_sort_terms', 'score ~ Relevance, PID ~ PID'));
 
     // get current sort (check in the actual parameters used for the query, because modules might have altered it)
     if (isset($_islandora_solr_queryclass->solrParams['sort'])) {

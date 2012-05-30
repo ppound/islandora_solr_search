@@ -275,7 +275,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
       Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
       module is available in Islandora's online documentation. <br /><strong>Important:</strong> Not all solr fields can be used for sorting. For more info, check the <a href='!sorturl' target='_blank'>solr documentation</a> on sorting.", array('!sorturl' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
-    '#default_value' => variable_get('islandora_solr_sort_terms', 'score ~ Relevance, fgs.title ~ Title, fgs.createdDate ~ Date Created'),
+    '#default_value' => variable_get('islandora_solr_sort_terms', 'score ~ Relevance, PID ~ PID'),
     '#wysiwyg' => FALSE,
   );
 
