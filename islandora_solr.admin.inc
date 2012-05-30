@@ -16,9 +16,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
   // add admin form css
   drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
   
-  // add admin form js
-  drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
-  
   // check for the php solr lib class
   if (!class_exists('Apache_Solr_Service')) {
     $message = t('This module requires the !url. Please install the client directory in the root directory of this module before continuing.', array('!url' => l(t('Apache Solr php client'), 'http://code.google.com/p/solr-php-client')));
@@ -265,6 +262,22 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#description' => t('The number of results to show per page.'),
     '#default_value' => variable_get('islandora_solr_num_of_results', '20'),
   );
+  $form['default_display_settings']['sort'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Sort'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['default_display_settings']['sort']['islandora_solr_sort_terms'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Sort Terms'),
+    '#description' => t("Indicate what fields should appear in the <strong>Islandora sort block</strong>.<br />
+      Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
+      Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
+      module is available in Islandora's online documentation. <br /><strong>Important:</strong> Not all solr fields can be used for sorting. For more info, check the <a href='!sorturl' target='_blank'>solr documentation</a> on sorting.", array('!sorturl' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
+    '#default_value' => variable_get('islandora_solr_sort_terms', 'score ~ Relevance, dc.title ~ Title, dc.date ~ Date Issued'),
+    '#wysiwyg' => FALSE,
+  );
 
   
 
@@ -273,7 +286,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Facet settings'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
   );
   $form['facet_settings']['islandora_solr_facets'] = array(
     '#type' => 'textarea',
@@ -314,7 +327,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Advanced search block'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
   );
   $form['advanced_search_block']['islandora_solr_searchterms'] = array(
     '#type' => 'textarea',
@@ -337,25 +350,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
     ),
     '#description' => t('Select a default boolean operator for the search query. User configurable exposes a dropdown which gives the user the choice between AND, OR and NOT.'),
   );
-  $form['advanced_search_block']['islandora_solr_search_sortby'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Expose sort controls'),
-    '#return_value' => 1,
-    '#default_value' => variable_get('islandora_solr_search_sortby', 1),
-    '#description' => t('If checked, sort controls will be available to the advanced search block. If unchecked, results will be sorted by score'), // @TODO: double check if this is true.
-  );
-  $form['advanced_search_block']['islandora_solr_search_sortby_terms'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Sort Terms'),
-    '#description' => t("Indicate what fields should appear in the dropdown menu of sort terms for the <strong>Solr Advanced Search Block</strong>.<br />
-      Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
-      Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
-      module is available in Islandora's online documentation. <br /><strong>Important:</strong> Not all solr fields can be used for sorting. For more info, check the <a href='!sorturl' target='_blank'>solr documentation</a> on sorting.", array('!sorturl' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
-    '#default_value' => variable_get('islandora_solr_search_sortby_terms', 'score ~ Relevance, dc.title ~ Title, dc.date ~ Date Issued'),
-    '#wysiwyg' => FALSE,
-  );
-  
-  
 
   
   
@@ -393,24 +387,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('islandora_solr_base_filter', ''),
     '#wysiwyg' => FALSE,
   );
-  $form['query_defaults']['sort_fields'] = array(
-    '#type' => 'fieldset',
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
-  );
-  $form['query_defaults']['sort_fields']['islandora_solr_sort_field'] = array(
-    '#type' => 'textfield', '#title' => t('Sort field'),
-    '#size' => 20,
-    '#description' => t('Results will be sorted on this field. If left blank will default to <em>score</em>.'),
-    '#default_value' => variable_get('islandora_solr_sort_field', ''),
-  );
 
-  $form['query_defaults']['sort_fields']['islandora_solr_sort_order'] = array(
-    '#type' => 'radios',
-    '#title' => t('Sort Order'),
-    '#options' => array('asc' => t('Ascending'), 'desc' => t('Decending')),
-    '#default_value' => 'desc',
-  );
   
   // debug mode
   $form['islandora_solr_debug_mode'] = array(

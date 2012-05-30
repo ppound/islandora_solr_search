@@ -57,11 +57,19 @@ function islandora_solr_islandora_solr_query_blocks() {
       'form' => NULL,
     ),
     'display_switch' => array(
-      'name' => 'Islandora Displays',
+      'name' => t('Islandora Displays'),
       'module' => 'islandora_solr',
       'file' => 'islandora_solr.block.inc',
       'class' => NULL,
       'function' => 'islandora_solr_display',
+      'form' => NULL,
+    ),
+    'sort' => array(
+      'name' => t('Islandora Sort'),
+      'module' => 'islandora_solr',
+      'file' => 'islandora_solr.block.inc',
+      'class' => NULL,
+      'function' => 'islandora_solr_sort',
       'form' => NULL,
     ),
   );
@@ -79,7 +87,7 @@ function islandora_solr_block_info() {
   $solr_blocks = module_invoke_all("islandora_solr_query_blocks");
   foreach ($solr_blocks as $name => $block ) {
     $blocks[$name] = array(
-      'info' => t($block['name']),
+      'info' => $block['name'],
       'cache' => DRUPAL_NO_CACHE,
     );
   }
@@ -266,15 +274,6 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
         $i++;
       }
     }
-    // also set defaults for sorting
-    if (isset($_islandora_solr_queryclass->internalSolrParams['sort'])) {
-      
-      $sort_explode = explode(' ', $_islandora_solr_queryclass->internalSolrParams['sort']);
-      
-      $values['sort'] = $sort_explode[0];
-      $values['order'] = isset($sort_explode[1]) ? $sort_explode[1] : NULL;
-    }
-    
   }
   // 3. anywhere else: empty form
   else {
@@ -367,23 +366,6 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
     '#prefix' => '<div class="islandora-solr-advanced-controls">',
     '#suffix' => '</div>',
   );
-  if (variable_get('islandora_solr_search_sortby', 1) == 1) {
-    $form['controls']['sort'] = array(
-      '#type' => 'select',
-      '#title' => t('Sort By'),
-      '#default_value' => (isset($values['sort']) ? $values['sort'] : 'score'),
-      '#options' => islandora_build_substitution_list(variable_get('islandora_solr_search_sortby_terms', 'score ~ Relevance, dc.title ~ Title, dc.date ~ Date Issued')),
-    );
-    $form['controls']['order'] = array(    
-      '#type' => 'select',
-      '#title' => t('Order'),
-      '#default_value' => (isset($values['order']) ? $values['order'] : 'desc'),
-      '#options' => array(
-        'desc' => t('Descending'),
-        'asc' => t('Ascending'),
-      ),
-    );
-  }
   $form['controls']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Search')
@@ -455,22 +437,15 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
     $query = '*:*';
   }
   
-  // set sort parameters
-  $params = array();
-  if (variable_get('islandora_solr_search_sortby', 1) == 1) {
-    $sort = $form_state['values']['sort'];
-    $order = $form_state['values']['order'];
-    
-    $params = array('query' => array('sort' => $sort . ' ' . $order));
-  }
-
-  drupal_goto('islandora/search/' . $query, $params);
+  // navigate to results page
+  drupal_goto('islandora/search/' . $query);
 }
 
 
 
 
 /**
+ * Provides a list of enabled displays to switch
  * @return display switch
  */
 function islandora_solr_display() {
@@ -549,5 +524,108 @@ function islandora_solr_display() {
       }
     }
   }
+  return $output;
+}
+
+
+/**
+ *  Sort solr results
+ */
+function islandora_solr_sort() {
+  global $_islandora_solr_queryclass;
+  
+  // set variables
+  $output = '';
+  dsm($_islandora_solr_queryclass);
+  // check if the page is dealing with search results
+  if (class_exists('IslandoraSolrResults')) {
+    
+    // parameters set in url
+    $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
+    // set path
+    $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
+    
+    // get sort terms
+    $sort_terms = islandora_build_substitution_list(variable_get('islandora_solr_sort_terms', 'score ~ Relevance, dc.title ~ Title, dc.date ~ Date Issued'));
+
+    // get current sort (check in the actual parameters used for the query, because modules might have altered it)
+    if (isset($_islandora_solr_queryclass->solrParams['sort'])) {
+      $sort_explode = explode(' ', $_islandora_solr_queryclass->solrParams['sort']);
+      $current_sort_term = $sort_explode[0];
+      $current_sort_order = isset($sort_explode[1]) ? $sort_explode[1] : NULL;
+    }
+    else {
+      // @TODO: if no sort is applied, is the default 'score desc' ?
+      $current_sort_term = NULL;
+      $current_sort_order = NULL;      
+    }
+    
+    // set variables
+    $list_items = array();
+    
+    // loop over sort terms
+    foreach ($sort_terms as $term => $label) {
+      
+      // set indicator variable
+      $indicator = '';
+
+      // create query and indicator arrow
+      if ($term == $current_sort_term) {
+        if (isset($current_sort_order) AND $current_sort_order == 'asc') {
+          // set order
+          $order = 'desc';
+          // create indicator
+          $indicator = theme('tablesort_indicator', array('style' => 'desc'));
+        }
+        else {
+          // set order
+          $order = 'asc';
+          // create indicator
+          $indicator = theme('tablesort_indicator', array('style' => 'asc'));
+        }
+      }
+      // the term is score or a date, we want descending order by default
+      elseif ($term == 'score' OR stripos($term, 'date')) {
+        // set order
+        $order = 'desc';
+      }
+      else {
+        // set order
+        $order = 'asc';
+      }
+
+      // set sort parameter
+      $sort_param = $term . ' ' . $order;
+      
+      // set query
+      $query = array_merge($params, array('sort' => $sort_param));
+      
+      // set attributes
+      $attr = array();
+      // set class
+      if ($term == $current_sort_term) {
+        $attr['class'] = 'active';
+      }
+      // nofollow
+      $attr['rel'] = 'nofollow';
+      // title
+      $attr['title'] = $label;
+      // url
+      $attr['href'] = url($path, array('query' => $query));
+
+      // create link
+      // we're not using l() because of active classes: http://drupal.org/node/41595
+      $item = '<a' . drupal_attributes($attr) . '>' . $label . ' ' . $indicator . '</a>';
+
+      // add link to list
+      $list_items[] = $item;
+    }
+    
+    // theme item list
+    if (!empty($list_items)) {
+      $output = theme('item_list', array('items' => $list_items, 'title' => NULL, 'type' => 'ul', 'attributes' => array('class' => 'islandora-solr-sort')));
+    }
+  }
+  
   return $output;
 }

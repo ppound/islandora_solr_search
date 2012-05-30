@@ -5,17 +5,7 @@ TODO:
 High priority
 -------------
 
-- permissions
-- move extended solr search to advanced block
-- add support for sort and result count through url -> check luke for multivalue?
-
-- fix breadcrumb rendering for query
-- remove quotes from lucene query's
-- set $this->display again in the query processor (for invoke all functions)
-
-- split css files and js files between .base.css, .admin.css and theme.css
-- classes and ID's should have dashed. Also shorten where possible
-- fix display (shows up on all pages)
+- expose sort and result limit controls (block? dropdowns?)
 
 - update documentation + doxygens
 - create islandora_solr.api.php
@@ -25,19 +15,20 @@ Normal Priority
 ---------------
 
 - update translation file
-- empty query with dismax seems to return the same as no dismax (maybe it's just how solrconfig is defined)
-- add dropdowns for sort and result count on search page
+- don't hardcode php solr library, instead override it.
+- check fixes in advanced_block branch, I might have forgotten some.
+- table display works but could use some improvement.
 
-- check fixes in advanced_block branch, I might have forgotten.
-- Boolean operators as query seem to choke
+- check luke for multivalue on sort
+
+- empty query with dismax seems to return the same as no dismax (maybe it's just how solrconfig is defined)
 
 Low Priority
 ------------
 
-- don't hardcode php solr library, instead override it.
 - put object url's in a global variable?
-- table display works but could use some improvement.
+- Boolean operators as query seem to choke
+- sort without order chokes. Check before adding parameter in processor?
 
 - when changing primary display, keep &limit in the url or should it show the default? Displays can override this though.
-
-- added permission to restrict access to search results page and search blocks: should we restrict access to the execute query method? (other modules might implement execute query)
+- make sure islandora_solr.theme.css is populated and called right.

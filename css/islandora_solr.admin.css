@@ -1,11 +1,5 @@
 /* Admin style sheet for islandora solr */
 
-/* dependent options styling */
-.form-item.dependent-options
-{
-  margin-left: 30px;
-}
-
 /* refresh button */
 html.js .refresh-button {
   display: none;
