@@ -524,8 +524,9 @@ function islandora_solr_display() {
           // set attributes
           $attr = array();
           // set class
+          $attr['class'] = 'display-' . strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $key));
           if ($key == $current_display) {
-            $attr['class'] = 'active';
+            $attr['class'] .= ' active';
           }
           // nofollow
           $attr['rel'] = 'nofollow';
