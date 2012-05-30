@@ -34,7 +34,7 @@ class IslandoraSolrResults {
    * @return string
    */
   function displayResults($solrQueryProcessor) {
-    
+
     // set variables to collect returned data.
     $results = NULL;
     $secondary_profiles = NULL;
@@ -42,10 +42,10 @@ class IslandoraSolrResults {
 
     // set breadcrumbs
     $this->setBreadcrumbs($solrQueryProcessor);
-    
+
     // raw solr results
     $apacheSolrResult = $solrQueryProcessor->solrResult;
-    
+
     // solr results count
     // total solr results
     $total = (int) $apacheSolrResult->response->numFound;
@@ -71,10 +71,10 @@ class IslandoraSolrResults {
 
     // rendered secondary display profiles
     $secondary_profiles = $this->addSecondaries($solrQueryProcessor);
-    
+
     // rendered results
     $results = $this->printResults($apacheSolrResult);
-    
+
     // return themed layout
     return theme('islandora_solr_wrapper', array('results' => $results, 'secondary_profiles' => $secondary_profiles, 'elements' => $elements));
   }
@@ -83,16 +83,16 @@ class IslandoraSolrResults {
     $query_list = array();
     // Get secondary display profiles
     $secondary_display_profiles = module_invoke_all('islandora_solr_secondary_display');
-    
+
     // set path
     $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
-    
+
     // parameters set in url
     $params = $solrQueryProcessor->internalSolrParams;
-    
+
     // get list of secondary displays
     $secondary_array = variable_get('islandora_solr_secondary_display', array());
-    
+
     foreach ($secondary_array as $name => $status) {
       if ($status === $name) {
         // generate url
@@ -103,7 +103,7 @@ class IslandoraSolrResults {
         // set title
         $attr['title'] = $secondary_display_profiles[$name]['description'];
         // set rel
-        $attr['rel'] = 'nofollow';      
+        $attr['rel'] = 'nofollow';
         // set url
         $attr['href'] = url($path, array('query' => $query_secondary));
         // logo
@@ -125,20 +125,20 @@ class IslandoraSolrResults {
    * @param Apache_Solr_Object $results
    */
   function printResults($results) {
-    
+
     // add islandora solr theme css
     drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.theme.css');
-    
+
     // set variables
     $results_array = array();
     $elements = array();
-    
+
     // total
     $elements['solr_total'] = $results->response->numFound;
 
     // start
     $elements['solr_start'] = $results->response->start;
-    
+
     // get prepared search results
     $docs = $this->prep_results($results);
 
@@ -166,7 +166,7 @@ class IslandoraSolrResults {
         $rows[$field]['label'] = $translated_field_name;
 
         // add class: render solr field name to string that can be used as class name
-        $rows[$field]['class'] = strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
+        $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
 
         // split value if the result value is an array
         if (is_array($value)) {
@@ -192,10 +192,10 @@ class IslandoraSolrResults {
     // return themed search results
     return theme('islandora_solr', array('results' => $results_array, 'elements' => $elements));
   }
-  
-  
-  
-  
+
+
+
+
 
   function printDebugOutput($results) {
     // debug dump
@@ -221,38 +221,38 @@ class IslandoraSolrResults {
    * @param IslandoraSolrQueryProcessor $solrQueryProcessor
    */
   function currentQuery($solrQueryProcessor) {
-    
+
     // set path
     $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
-    
+
     // set output variable
     $output = '';
-    
+
     // get user provided filter parameters
     $fq = isset($solrQueryProcessor->internalSolrParams['f']) ? $solrQueryProcessor->internalSolrParams['f'] : array();
-    
+
     // parameters set in url
     $params = $solrQueryProcessor->internalSolrParams;
     // set filter key if there are no filters included
     if (empty($params['f'])) {
       $params['f'] = array();
     }
-    
+
     // Get Query values
     if (!in_array($solrQueryProcessor->solrQuery, $solrQueryProcessor->different_kinds_of_nothing)) {
       // get query value
       $query_value = $solrQueryProcessor->solrQuery;
-      
+
       // set list variables
       $query_list = array();
-      
+
       // remove link keeps all parameters (query gets removed instead)
       $query_minus = array();
       $query_minus = $params;
 
       // remove query from path
       $path_minus = implode('/', explode('/', $path, -1)) . '/ ';
-      
+
       // set attributes variable for remove link
       $attr_minus = array();
       // set title
@@ -260,28 +260,28 @@ class IslandoraSolrResults {
       // set class
       $attr_minus['class'] = 'remove-query';
       // set rel
-      $attr_minus['rel'] = 'nofollow';      
+      $attr_minus['rel'] = 'nofollow';
       // set url
       $attr_minus['href'] = url($path_minus, array('query' => $query_minus));
-      
+
       // create link
       // we're not using l() because of active classes: http://drupal.org/node/41595
       $query_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $query_value;
-      
+
       // add wrap and list
       $output .= '<div class="islandora_solr_query_wrap">';
       $output .= theme('item_list', array('items' => $query_list, 'title' => t('Query'), 'type' => 'ul', 'attributes' => array('class' => 'islandora_solr_query_list query_list')));
       $output .= '</div>'; // 'islandora_solr_query_wrap'
-      
+
     }
-    
-    
+
+
     // Get Filter values
     if (!empty($fq)) {
-      
+
       // set list variables
       $filter_list = array();
-      
+
       // loop over filters
       foreach ($fq as $key => $filter) {
 
@@ -315,7 +315,7 @@ class IslandoraSolrResults {
         // set class
         $attr_minus['class'] = 'remove-filter';
         // set rel
-        $attr_minus['rel'] = 'nofollow';      
+        $attr_minus['rel'] = 'nofollow';
         // set url
         $attr_minus['href'] = url($path, array('query' => $query_minus));
 
@@ -333,17 +333,17 @@ class IslandoraSolrResults {
 
   /**
    * Function: setBreadcrumbs
-   * 
-   * Description: sets the drupal breadcrumbs based on the current query and filters. 
+   *
+   * Description: sets the drupal breadcrumbs based on the current query and filters.
    */
   function setBreadcrumbs($solrQueryProcessor) {
-    
+
     // set path
     $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
-    
+
     // set breadcrumb variable
     $breadcrumb = array();
-    
+
     // get user provided filter parameters
     if (isset($solrQueryProcessor->internalSolrParams['f'])) {
       $fq = $solrQueryProcessor->internalSolrParams['f'];
@@ -351,14 +351,14 @@ class IslandoraSolrResults {
     else {
       $fq = array();
     }
-    
+
     // parameters set in url
     $params = $solrQueryProcessor->internalSolrParams;
     // set filter key if there are no filters included
     if (empty($params['f'])) {
       $params['f'] = array();
     }
-    
+
     // loop to create filter breadcrumbs if available
     if (!empty($fq)) {
       // set var
@@ -376,7 +376,7 @@ class IslandoraSolrResults {
         // trim brackets
         $filter_split[1] = trim($filter_split[1], "\"");
 
-       
+
         // increment filter array with current filter (for breadcrumb link)
         $query = array();
         $query_diff = array_diff($params, array('f' => array()));
@@ -410,7 +410,7 @@ class IslandoraSolrResults {
         // set title
         $attr_x['title'] = t('Remove') . ' ' . $filter;
         // set rel
-        $attr_x['rel'] = 'nofollow';      
+        $attr_x['rel'] = 'nofollow';
         // set url
         $attr_x['href'] = url($path, array('query' => $query_x));
 
@@ -424,7 +424,7 @@ class IslandoraSolrResults {
       // at this point reverse the breadcrumbs array (only contains filters)
       $breadcrumb = array_reverse($breadcrumb);
     }
-    
+
     // create Query breadcrumb
     if (!in_array($solrQueryProcessor->solrQuery, $solrQueryProcessor->different_kinds_of_nothing)) {
       // get query value
@@ -433,7 +433,7 @@ class IslandoraSolrResults {
       // remove all filters for this breadcrumb
       $query = array();
       $query = array_diff($params, array('f' => array()));
-      
+
       // remove button keeps all parameters (query gets removed instead)
       $query_x = array();
       $query_x = $params;
@@ -443,7 +443,7 @@ class IslandoraSolrResults {
 
       // remove query from path
       $path_x = implode('/', explode('/', $path, -1)) . '/ ';
-      
+
       // set attributes variable
       $attr = array();
       // set title
@@ -458,7 +458,7 @@ class IslandoraSolrResults {
       // set title
       $attr_x['title'] = t('Remove') . ' ' . $query_value;
       // set rel
-      $attr_x['rel'] = 'nofollow';      
+      $attr_x['rel'] = 'nofollow';
       // set url
       $attr_x['href'] = url($path_x, array('query' => $query_x));
 
@@ -484,20 +484,20 @@ class IslandoraSolrResults {
         $query_implode[] = $value;
       }
       $query_value = implode(" ", $query_implode);
-      
+
       // create links
       // we're not using l() because of active classes: http://drupal.org/node/41595
       $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $query_value . '</a>'
             . '<span class="islandora-solr-breadcrumb-super"> <a' . drupal_attributes($attr_x) . '>(' . t('x') . ')</a></span>';
     }
-    
+
     $breadcrumb[] = l(t('Home'), '<front>', array('attributes' => array('title' => t('Home'))));
     if (!empty($breadcrumb))
       $breadcrumb = array_reverse($breadcrumb);
     drupal_set_breadcrumb($breadcrumb);
-    
+
   }
-  
+
 
 
 
@@ -514,12 +514,12 @@ class IslandoraSolrResults {
   function displayFacets($solrQueryProcessor) {
     // set variables
     $facet_output = $output = '';
-    
+
     // limits
     $facet_min_count = variable_get('islandora_solr_facet_min_limit', '2');
     $initial_limit = variable_get('islandora_solr_facet_soft_limit', '10');
     $facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
-    
+
     // get facet values returned from solr
     $facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_fields) ? $solrQueryProcessor->solrResult->facet_counts->facet_fields : array();
 
@@ -538,7 +538,7 @@ class IslandoraSolrResults {
 
       // convert to array
       $facet = get_object_vars($facet);
-      
+
       // if the facet contains the minimum amount of values
       if (count($facet) >= $facet_min_count) {
         // set facet count
@@ -552,10 +552,10 @@ class IslandoraSolrResults {
 
         // check for minumum returned values again, because some might have been disabled
         if (count($list_items) >= $facet_min_count) {
-          
+
           // opening facet div // @TODO: this should go in theme function
           $facet_output .='<div class="islandora-solr-facet">';
-          
+
           // set title
           $list_title = $this->facetFieldArray[$facet_key];
 
@@ -607,7 +607,7 @@ class IslandoraSolrResults {
     return $output;
   }
 
-  
+
   /**
    * Add facet callback
    * @param type $key
@@ -615,15 +615,15 @@ class IslandoraSolrResults {
    * @param type $number
    * @param type $solrQueryProcessor
    * @param int $facet_count
-   * @param string $list 
+   * @param string $list
    */
   function _addFacets(&$key, &$value, &$number, &$solrQueryProcessor, &$facet_count, &$list) {
-    
-    //FIXME:  This isn't quite right...  It can make sense to facet on 
+
+    //FIXME:  This isn't quite right...  It can make sense to facet on
     //  the same field multiple times, provided it is multi-valued...
-    
+
     $fq = isset($solrQueryProcessor->solrParams['fq']) ? $solrQueryProcessor->solrParams['fq'] : array();
-    
+
     // @TODO: Should be changed to format_string for Drupal 7
     // @TODO: does this check for exclude filters? -PID:"foo"
     $filter = $key . ':"' . replaceSlashes($value) . '"'; // PID:"foo"
@@ -639,14 +639,14 @@ class IslandoraSolrResults {
 
       $query_plus = array();
       $query_minus = array();
-      
+
       // parameters set in url
       $params = $solrQueryProcessor->internalSolrParams;
       // set filter key if there are no filters included
       if (empty($params['f'])) {
         $params['f'] = array();
       }
-      
+
       // merge recursively to add new filter parameter
       $query_plus = array_merge_recursive($params, array('f' => array($filter)));
       $query_minus = array_merge_recursive($params, array('f' => array('-' . $filter)));
@@ -655,16 +655,16 @@ class IslandoraSolrResults {
       $attr = array('rel' => 'nofollow');
 
       $attr_plus = $attr_minus = $attr;
-      
+
       // add url
       $attr['href'] = url($path, array('query' => $query_plus));
       $attr_plus['href'] = url($path, array('query' => $query_plus));
       $attr_minus['href'] = url($path, array('query' => $query_minus));
-      
+
       // add classes
       $attr_plus['class'] = 'plus';
       $attr_minus['class'] = 'minus';
-      
+
       // create links
       // we're not using l() because of active classes: http://drupal.org/node/41595
       $list[] = '<a' . drupal_attributes($attr) . '>' . $value . '</a>' . ' (' . $number . ')' .
@@ -673,11 +673,11 @@ class IslandoraSolrResults {
           . ' ' .
           '<a' . drupal_attributes($attr_minus) . '>-</a>'
           . '</span>';
-      
+
       $facet_count++;
     }
   }
-  
+
 
 
 
@@ -716,12 +716,12 @@ class IslandoraSolrResults {
 
     $rawResponse = $results->getRawResponse();
     $responseArray = json_decode($rawResponse, TRUE);
- 
+
     $highlights = isset($responseArray['highlighting']) ? $responseArray['highlighting'] : NULL;
     $docs = $responseArray['response']['docs'];
 
     if (!is_array($highlights)) {
-       return $docs;
+      return $docs;
     }
 
    // if highights exist, inetegrate them back into the doc array

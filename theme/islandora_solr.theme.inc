@@ -7,7 +7,7 @@
 
 // page + elements
 // islandora-solr-search.tpl.php
-// 
+//
 // solr search results
 // islandora-solr-search-default.tpl.php
 
@@ -21,7 +21,7 @@ function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
 
   // elements
   $elements = $variables['elements'];
-  
+
   // make all variables in 'elements' available as variables in the template file
   foreach ($variables['elements'] as $key => $value) {
     $variables[$key] = $value;
@@ -30,7 +30,7 @@ function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
   $total = $elements['solr_total'];
   $end = $elements['solr_end'];
   $start = $elements['solr_start'] + ($total > 0 ? 1 : 0);
-  
+
   // format numbers
   $total = number_format($total , 0, '.', ',');
   $end = number_format($end , 0, '.', ',');
@@ -58,10 +58,10 @@ function islandora_solr_preprocess_islandora_solr(&$variables) {
 
   // set base path
   $variables['base_path'] = $base_path;
-  
+
   // get path
   $path = $base_path . drupal_get_path('module', 'islandora_solr');
-  
+
   // placeholder image
   $solr_default_img = $path . '/images/defaultimg.png';
   $variables['elements']['solr_default_img'] = $solr_default_img;
@@ -70,5 +70,5 @@ function islandora_solr_preprocess_islandora_solr(&$variables) {
   foreach ($variables['elements'] as $key => $value) {
     $variables[$key] = $value;
   }
-  
+
 }

@@ -33,15 +33,15 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
    *   output manually, should refactor to use drupal forms api.
    */
   function printResults($results) {
-    
+
     // add islandora solr theme css
     drupal_add_css(drupal_get_path('module', 'islandora_solr_config') . '/css/islandora_solr.table.css');
-    
+
     // set base_url
     global $base_url;
     // set variable
     $output = '';
-    
+
     $recordStart = (int)$results->response->start;
     if (empty($results)) {
       return "no results";
@@ -129,7 +129,7 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
       foreach ($fields as $fieldnum => $field) {
         $data = isset($val_array[$field]) ? $val_array[$field] : ' ' ;
         $cell_data = array('data' => $data);
-        
+
         $row['data'][] = $cell_data;
 
       }

@@ -1,12 +1,12 @@
 <?php
 
 /**
-* @file
-* Contains all blocks related functionality
-*/
+ * @file
+ * Contains all blocks related functionality
+ */
 
 /**
- * Implements hook_islandora_solr_query_blocks()
+ * Implements hook_islandora_solr_query_blocks().
  */
 function islandora_solr_islandora_solr_query_blocks() {
   return array(
@@ -77,12 +77,12 @@ function islandora_solr_islandora_solr_query_blocks() {
 
 
 /**
- * Implementation of hook_block_info().
+ * Implements hook_block_info().
  */
 function islandora_solr_block_info() {
   // set variable
   $blocks = array();
-  
+
   // return a list of block descriptions for block administration
   $solr_blocks = module_invoke_all("islandora_solr_query_blocks");
   foreach ($solr_blocks as $name => $block ) {
@@ -96,18 +96,18 @@ function islandora_solr_block_info() {
 
 
 /**
- * Implementation of hook_block_view().
+ * Implements hook_block_view().
  */
 function islandora_solr_block_view($block_name = '') {
   // set variable
   $block = array();
-  
+
   // get global class
   global $_islandora_solr_queryclass;
-  
+
   // all hook_init()
   islandora_solr_init(); // @TODO: should we really call islandora_solr_init() again ?
-  
+
   // get solr blocks
   $solr_blocks = module_invoke_all("islandora_solr_query_blocks");
 
@@ -177,10 +177,10 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $search_string = $form_state['values']['islandora_simple_search_query'];
   $search_string = str_replace('/', '~slsh~', $search_string); //replace the slash so url doesn't break
-  
+
   // set query
   $query = array('type' => 'dismax');
-  
+
   drupal_goto('islandora/search/' . $search_string, array('query' => $query));
 }
 
@@ -197,21 +197,21 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
 
   // include common.inc
   module_load_include('inc', 'islandora_solr', 'includes/common');
-  
+
   // check form states
   // 1. form update using ajax
   // 2. populate with current query on search results page
   // 3. anywhere else: empty form
-  
+
   // 1. form update using ajax
   if (isset($form_state['triggering_element'])) {
-    
+
     // unset terms from input array
     // http://drupal.stackexchange.com/questions/14855/how-do-i-dynamically-fill-a-textfield-with-ajax/16576#16576
     unset($form_state['input']['terms']);
     // check for add
     if ($form_state['triggering_element']['#value'] == '+') {
-      $form_state['values']['terms'][] = array();  
+      $form_state['values']['terms'][] = array();
     }
     // check for remove
     elseif ($form_state['triggering_element']['#value'] == '-') {
@@ -222,8 +222,8 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
     $values = $form_state['values'];
   }
   // 2. populate with current query on search results page
-  elseif(class_exists('IslandoraSolrResults') AND (!isset($_islandora_solr_queryclass->internalSolrParams['type']) OR $_islandora_solr_queryclass->internalSolrParams['type'] != 'dismax')) {
-    
+  elseif (class_exists('IslandoraSolrResults') AND (!isset($_islandora_solr_queryclass->internalSolrParams['type']) OR $_islandora_solr_queryclass->internalSolrParams['type'] != 'dismax')) {
+
     // get current query
     $query = $_islandora_solr_queryclass->solrQuery;
     // set value variable
@@ -234,28 +234,28 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
 
     // break up the solr query to populate the advanced search form
     $i = 0;
-    foreach($query_explode as $key => $value) {
+    foreach ($query_explode as $key => $value) {
       $term = array();
-      
+
       // check for first colon to split the string
       if (strpos($value, ':') != FALSE) {
         // split the filter into field and value
         $value_split = explode(':', $value, 2);
         // set field
         $values['terms'][$i]['field'] = $value_split[0];
-        
+
         // second part of the split is the query value (or first part of it)
         $value_split[1] = str_replace(array('(', ')'), '', $value_split[1]);
         // add search string
         $values['terms'][$i]['search'] = $value_split[1];
-        
+
       }
       // if the string does not include a colon or AND/OR/NOT, then it is a
       // part of the query value
       elseif (!preg_match('/(AND|OR|NOT)/', $value, $matches)) {
         // trim brackets
         $value = str_replace(array('(', ')'), '', $value);
-        
+
         if (isset($values['terms'][$i]['search'])) {
           // append to search string
           $values['terms'][$i]['search'] .= ' ' . $value;
@@ -269,7 +269,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
       else {
         // set boolean operator
         $values['terms'][$i]['boolean'] = $value;
-        
+
         // increment to next field
         $i++;
       }
@@ -304,7 +304,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
     $term['search'] = array(
       '#title' => t('Search terms'),
       '#type' => 'textfield',
-      '#size'=> 20,
+      '#size' => 20,
       '#default_value' => isset($value['search']) ? $value['search'] : '',
     );
     $term['hidden_submit'] = array(// Used for when the user presses enter on the search field.
@@ -379,7 +379,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
  * Callback for advanced search form
  * @param type $form
  * @param type $form_state
- * @return type 
+ * @return type
  */
 function _islandora_solr_advanced_search_terms($form, &$form_state) {
   return $form['terms'];
@@ -394,12 +394,12 @@ function _islandora_solr_advanced_search_terms($form, &$form_state) {
 
 /**
  * Submit hook for the quick search form.
- * 
+ *
  * @param array $form
- * @param array $form_state 
+ * @param array $form_state
  */
 function islandora_solr_advanced_search_form_submit($form, &$form_state) {
-  
+
   // Collect query values
   $query_array = array();
   foreach ($form_state['values']['terms'] as $term) {
@@ -411,7 +411,7 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
     $search = str_replace('/', '~slsh~', $search);
     // set boolean
     $boolean = (isset($term['boolean'])) ? $term['boolean'] : variable_get('islandora_solr_search_boolean', 'user');
-    
+
     // add query
     if (!empty($search)) {
       $query_array[] = array(
@@ -431,12 +431,12 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
     }
     $i++;
   }
-  
+
   // check if query is empty
   if (empty($query)) {
     $query = '*:*';
   }
-  
+
   // navigate to results page
   drupal_goto('islandora/search/' . $query);
 }
@@ -450,13 +450,13 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
  */
 function islandora_solr_display() {
   global $_islandora_solr_queryclass;
-  
+
   // set variables
   $output = '';
-  
+
   // check if the page is dealing with search results
   if (class_exists('IslandoraSolrResults')) {
-  
+
     // parameters set in url
     $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
     // set path
@@ -466,7 +466,7 @@ function islandora_solr_display() {
     $profiles = module_invoke_all("islandora_solr_primary_display");
     // get the table settings
     $primary_display_array = variable_get('islandora_solr_primary_display_table', array());
-    
+
     if (!empty($primary_display_array)) {
 
       $weight = $primary_display_array['weight'];
@@ -489,20 +489,20 @@ function islandora_solr_display() {
           else {
             $current_display = $default;
           }
-          
+
           // title
           $display_name = $profiles[$key]['name'];
-          
+
           // description
           $display_description = isset($profiles[$key]['description']) ? $profiles[$key]['description'] : NULL;
-          
+
           // query
           $query = array_merge($params, array('display' => $key));
-          
+
           // set attributes
           $attr = array();
           // set class
-          $attr['class'] = 'display-' . strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $key));
+          $attr['class'] = 'display-' . drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $key));
           if ($key == $current_display) {
             $attr['class'] .= ' active';
           }
@@ -512,11 +512,11 @@ function islandora_solr_display() {
           $attr['title'] = $display_description;
           // url
           $attr['href'] = url($path, array('query' => $query));
-          
+
           // create link
           // we're not using l() because of active classes: http://drupal.org/node/41595
           $item = '<a' . drupal_attributes($attr) . '>' . $display_name . '</a>';
-          
+
           // add link to list
           $list_items[] = $item;
         }
@@ -536,18 +536,18 @@ function islandora_solr_display() {
  */
 function islandora_solr_sort() {
   global $_islandora_solr_queryclass;
-  
+
   // set variables
   $output = '';
 
   // check if the page is dealing with search results
   if (class_exists('IslandoraSolrResults')) {
-    
+
     // parameters set in url
     $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
     // set path
     $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
-    
+
     // get sort terms
     $sort_terms = islandora_build_substitution_list(variable_get('islandora_solr_sort_terms', 'score ~ Relevance, PID ~ PID'));
 
@@ -563,13 +563,13 @@ function islandora_solr_sort() {
       $current_sort_term = 'score';
       $current_sort_order = 'desc';
     }
-    
+
     // set variables
     $list_items = array();
-    
+
     // loop over sort terms
     foreach ($sort_terms as $term => $label) {
-      
+
       // set indicator variable
       $indicator = '';
 
@@ -600,10 +600,10 @@ function islandora_solr_sort() {
 
       // set sort parameter
       $sort_param = $term . ' ' . $order;
-      
+
       // set query
       $query = array_merge($params, array('sort' => $sort_param));
-      
+
       // set attributes
       $attr = array();
       // set class
@@ -624,12 +624,12 @@ function islandora_solr_sort() {
       // add link to list
       $list_items[] = $item;
     }
-    
+
     // theme item list
     if (!empty($list_items)) {
       $output = theme('item_list', array('items' => $list_items, 'title' => NULL, 'type' => 'ul', 'attributes' => array('class' => 'islandora-solr-sort')));
     }
   }
-  
+
   return $output;
 }

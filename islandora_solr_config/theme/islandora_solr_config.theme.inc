@@ -19,10 +19,10 @@ function islandora_solr_config_preprocess_islandora_solr_grid(&$variables) {
 
   // set base path
   $variables['base_path'] = $base_path;
-  
+
   // get path
   $path = $base_path . drupal_get_path('module', 'islandora_solr');
-  
+
   // placeholder image
   $solr_default_img = $path . '/images/defaultimg.png';
   $variables['elements']['solr_default_img'] = $solr_default_img;
@@ -31,5 +31,5 @@ function islandora_solr_config_preprocess_islandora_solr_grid(&$variables) {
   foreach ($variables['elements'] as $key => $value) {
     $variables[$key] = $value;
   }
-  
+
 }

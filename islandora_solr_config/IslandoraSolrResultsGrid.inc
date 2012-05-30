@@ -21,17 +21,17 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
 
     // add islandora solr theme css
     drupal_add_css(drupal_get_path('module', 'islandora_solr_config') . '/css/islandora_solr_config.grid.css');
-    
+
     // set variables
     $results_array = array();
     $elements = array();
-    
+
     // total
     $elements['solr_total'] = $results->response->numFound;
 
     // start
     $elements['solr_start'] = $results->response->start;
-    
+
     // get prepared search results
     $docs = $this->prep_results($results);
 
@@ -51,7 +51,7 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
         $rows[$field]['label'] = $translated_field_name;
 
         // add class: render solr field name to string that can be used as class name
-        $rows[$field]['class'] = strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
+        $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
 
         // split value if the result value is an array
         if (is_array($value)) {
@@ -77,8 +77,8 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
     // return themed search results
     return theme('islandora_solr_grid', array('results' => $results_array, 'elements' => $elements));
   }
-  
-  
+
+
 
 }
 

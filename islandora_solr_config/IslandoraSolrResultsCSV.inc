@@ -160,8 +160,8 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
       $row_count++;
     }
 
-    drupal_set_header('Content-Type: text/csv');
-    drupal_set_header('Content-Disposition: attachment; filename="searchresults.csv"');
+    drupal_add_http_header('Content-Type', 'text/csv; utf-8');
+    drupal_add_http_header('Content-Disposition', 'attachment; filename="searchresults.csv');
 
     print implode($seperator, $header) . "\r\n";
     foreach ($rows as $count => $row) {

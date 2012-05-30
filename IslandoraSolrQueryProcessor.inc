@@ -6,7 +6,7 @@
  * Depends on Apache_Solr_Php client.
  */
 
-DEFINE('SOLR_SEARCH_PATH','islandora/search');
+DEFINE('SOLR_SEARCH_PATH', 'islandora/search');
 
 /**
  * Islandora Solr Query Processor
@@ -28,7 +28,7 @@ class IslandoraSolrQueryProcessor {
 
   public $display; // the current display (for modules wanting to alter the query of a display)
   public $internalSolrParams; // parameters from url
-  public $different_kinds_of_nothing = array( ' ', '%20', '%252F', '%2F', '%252F-', ''); 
+  public $different_kinds_of_nothing = array( ' ', '%20', '%252F', '%2F', '%252F-', '');
 
   /**
    * Constructor
@@ -48,7 +48,7 @@ class IslandoraSolrQueryProcessor {
   function buildAndExecuteQuery($query, $params = NULL) {
     // include IslandoraSolrResults
     module_load_include('inc', 'islandora_solr', 'IslandoraSolrResults');
-    
+
     // set empty string
     if (variable_get('islandora_solr_request_handler', '') == 'standard') {
 
@@ -67,14 +67,14 @@ class IslandoraSolrQueryProcessor {
    * Default implementation for solr search.  You can configure others in the block config settings
    */
   function buildQuery($query, $params = array() ) {
-    
+
     // set internal parameters gathered from the url
     $this->internalSolrParams = $params;
-    
+
     // don't store the q and page parameter internally
     unset($this->internalSolrParams['q']);
     unset($this->internalSolrParams['page']);
-    
+
     // Set Solr type (dismax)
     if (isset($this->internalSolrParams['type']) AND $this->internalSolrParams['type'] == 'dismax') {
       $this->solrDefType = $this->internalSolrParams['type'];
@@ -88,19 +88,19 @@ class IslandoraSolrQueryProcessor {
     // if the query is empty
     if (empty($this->solrQuery) || in_array($this->solrQuery, $this->different_kinds_of_nothing)) {
       $this->solrQuery = ' '; //so we can allow empty queries to dismax
-      
+
       // set base query
       $this->internalSolrQuery = variable_get('islandora_solr_base_query', 'timestamp:[* TO NOW]');
       // we must also undo dismax if it's been set
       $this->solrDefType = NULL;
       $this->solrParams['defType'] = NULL;
     }
-    
+
     // set sort
     if (isset($this->internalSolrParams['sort'])) {
       $this->solrParams['sort'] = $this->internalSolrParams['sort'];
     }
-    
+
     // set display property (so display plugin modules can use this in a conditional to alter the query class)
     if (isset($this->internalSolrParams['display'])) {
       $this->display = $this->internalSolrParams['display'];
@@ -108,10 +108,10 @@ class IslandoraSolrQueryProcessor {
     else {
       $this->display = variable_get('islandora_solr_primary_display', 'default');
     }
-    
+
     // get pager variable
     $startPage = isset($_GET['page']) ? $_GET['page'] : 0;
-    
+
     // set results limit
     $this->solrLimit = isset($this->internalSolrParams['limit']) ? $this->internalSolrParams['limit'] : variable_get('islandora_solr_num_of_results', 20);
 
@@ -147,7 +147,7 @@ class IslandoraSolrQueryProcessor {
 
     // set base filters
     $base_filters = preg_split("/\\r\\n|\\n|\\r/", variable_get('islandora_solr_base_filter', ''), -1, PREG_SPLIT_NO_EMPTY);
-    
+
     // set filter parameters - both from url and admin settings.
     if (isset($this->internalSolrParams['f']) AND is_array($this->internalSolrParams['f'])) {
       $this->solrParams['fq'] = $this->internalSolrParams['f'];
@@ -158,8 +158,8 @@ class IslandoraSolrQueryProcessor {
     elseif (!empty($base_filters)) {
       $this->solrParams['fq'] = $base_filters;
     }
-    
-    
+
+
     // restrict results based on specified namespace
     $namespace = trim(variable_get('islandora_solr_namespace_restriction', ''));
     if ($namespace) {
@@ -186,7 +186,7 @@ class IslandoraSolrQueryProcessor {
    * @return type
    */
   function executeQuery() {
-    
+
     // Invoke a hook for third-party modules to alter the parameters.
     //The hook implementation needs to specify that it takes a reference, not be passed one
     module_invoke_all('islandora_solr_query_processor', $this);

@@ -32,8 +32,7 @@ function islandora_solr_init() {
 }
 
 /**
- * 
- * @global type $conf 
+ * @global type $conf
  */
 function islandora_solr_boot() {
   global $conf;
@@ -46,14 +45,14 @@ function islandora_solr_boot() {
       'islandora_solr_searchterms'
     );
 
-    $conf['i18n_variables'] = (isset($conf['i18n_variables']) && is_array($conf['i18n_variables'])) ? 
+    $conf['i18n_variables'] = (isset($conf['i18n_variables']) && is_array($conf['i18n_variables'])) ?
       array_merge($vars, $conf['i18n_variables']):
       $vars;
   }
 }
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function islandora_solr_menu() {
   $items['islandora/search'] = array(
@@ -86,12 +85,12 @@ function islandora_solr_admin_paths() {
 }
 
 /**
- * Implements hook_permission(). 
+ * Implements hook_permission().
  */
 function islandora_solr_permission() {
   return array(
     'search islandora solr' => array(
-      'title' => t('Search the Islandora Solr index'), 
+      'title' => t('Search the Islandora Solr index'),
       'description' => t('Search the islandora solr index. (Expose search blocks and view search results)'),
     ),
     'administer islandora solr' => array(
@@ -103,7 +102,7 @@ function islandora_solr_permission() {
 
 
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function islandora_solr_theme() {
   // set path
@@ -141,7 +140,7 @@ function islandora_solr_theme() {
 }
 
 /**
- * Implements hook_islandora_solr_primary_display()
+ * Implements hook_islandora_solr_primary_display().
  */
 function islandora_solr_islandora_solr_primary_display() {
   return array(
@@ -184,14 +183,14 @@ function islandora_solr($query = NULL) {
 
   // set title
   drupal_set_title(t('Search Results'));
-  
+
   // get all url parameters
   $params = $_GET;
- 
+
   // get profiles
   $primary_profiles = module_invoke_all('islandora_solr_primary_display');
   $secondary_profiles = module_invoke_all('islandora_solr_secondary_display');
-  
+
 // Get the preferred display profile
   // Order: First choice is what's in the ?profile query var
   //        Second choice is the primary display profile
@@ -218,7 +217,7 @@ function islandora_solr($query = NULL) {
     // unset invalid parameter
     unset($params['display']);
   }
-  
+
 
   // Build and execute Apache Solr query
   $queryResult = $_islandora_solr_queryclass->buildAndExecuteQuery($query, $params);
@@ -226,7 +225,7 @@ function islandora_solr($query = NULL) {
   if (empty($_islandora_solr_queryclass->solrResult)) {
     return t('Error searching solr index.');
   }
-  
+
   // TODO: Also filter secondary displays against those checked in the configuration options.
   if (isset($_GET['solr_profile']) AND isset($secondary_profiles[$_GET['solr_profile']])) {
     $profile = $secondary_profiles[$_GET['solr_profile']];
@@ -254,7 +253,7 @@ function islandora_solr($query = NULL) {
   else {
     $nope = TRUE;
   }
-  
+
   // check if the display's method exists
   if (!$nope && method_exists($implementation, $solrFunction)) {
 
@@ -280,7 +279,7 @@ function islandora_solr($query = NULL) {
 }
 
 /**
- * Implementation of hook_help().
+ * Implements hook_help().
  */
 function islandora_solr_help($path, $arg) {
   switch ($path) {
@@ -335,19 +334,19 @@ function islandora_solr_ping($solr_url) {
     return FALSE;
   }
 
-  
-  
+
+
   // split url in host/port/path
   $solr_url_parsed = parse_url($solr_url);
-  
+
   // if it's not a correct url for solr to check, return false.
   if (!isset($solr_url_parsed['host']) OR !isset($solr_url_parsed['port'])) {
     return FALSE;
   }
-  
+
   // call solr
   $solr_service = new Apache_Solr_Service($solr_url_parsed['host'], $solr_url_parsed['port'], $solr_url_parsed['path'] . '/');
-  
+
   // ping solr
   $ping = $solr_service->ping();
 
@@ -363,7 +362,7 @@ function islandora_solr_ping($solr_url) {
 
 
 function islandora_solr_check_http($url) {
-  
+
   // check for 'http://' or 'https://' prefix - if not found, add it.
   if (strpos($url, "http://") === FALSE AND strpos($url, "https://") === FALSE) {
     $url = 'http://' . $url;
@@ -377,12 +376,12 @@ function islandora_solr_check_http($url) {
  * Function to get luke
  */
 function islandora_solr_get_luke($solr_url = NULL, $num_terms = 0) {
-  
+
   if (!$solr_url) {
     // create url
     $solr_url = variable_get('islandora_solr_url', 'localhost:8080/solr');
   }
-  
+
   // if solr is available get luke
   if (islandora_solr_ping($solr_url)) {
     // create url

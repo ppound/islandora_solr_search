@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_requirements().
+ * Implements hook_requirements().
  *
  * @return
  *   An array describing the status of the site regarding available updates.
@@ -47,16 +47,16 @@ function islandora_solr_requirements($phase) {
 
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 
 function islandora_solr_install() {
-  $message = t('Islandora Solr <a href="!link">configuration page</a>.', array('!link' => url('admin/settings/islandora_solr')));
+  $message = st('Islandora Solr <a href="!link">configuration page</a>.', array('!link' => url('admin/settings/islandora_solr')));
   drupal_set_message(filter_xss($message));
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 
 function islandora_solr_uninstall() {
