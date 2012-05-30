@@ -493,6 +493,9 @@ function islandora_solr_display() {
           // title
           $display_name = $profiles[$key]['name'];
           
+          // description
+          $display_description = isset($profiles[$key]['description']) ? $profiles[$key]['description'] : NULL;
+          
           // query
           $query = array_merge($params, array('display' => $key));
           
@@ -506,7 +509,7 @@ function islandora_solr_display() {
           // nofollow
           $attr['rel'] = 'nofollow';
           // title
-          $attr['title'] = $display_name;
+          $attr['title'] = $display_description;
           // url
           $attr['href'] = url($path, array('query' => $query));
           
