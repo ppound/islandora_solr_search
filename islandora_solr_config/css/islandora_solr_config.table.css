@@ -1,11 +1,5 @@
-/* stylesheet for islandora_solr_config */
+/* Style sheet for table display */
 
-
-/* Table */
-
-table.islandora-solr-results-table
-{
-}
 table.islandora-solr-results-table tr
 {
   border-bottom-style: solid;

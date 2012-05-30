@@ -1,8 +1,6 @@
-name = Islandora Solr Sample Configuration
-description = Example Code for Implementation of Islandora Solr Configuration providing Table output.
+name = Islandora Solr display profiles
+description = Display profiles for Islandora Solr. (Grid, Table and CSV)
 dependencies[] = islandora_solr
 package = Islandora Search
 version = 7.x-dev
 core = 7.x
-
-stylesheets[all][] = css/islandora_solr_config.css

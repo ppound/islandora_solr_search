@@ -33,6 +33,10 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
    *   output manually, should refactor to use drupal forms api.
    */
   function printResults($results) {
+    
+    // add islandora solr theme css
+    drupal_add_css(drupal_get_path('module', 'islandora_solr_config') . '/css/islandora_solr.table.css');
+    
     // set base_url
     global $base_url;
     // set variable
