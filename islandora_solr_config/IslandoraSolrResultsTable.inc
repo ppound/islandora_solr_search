@@ -35,7 +35,7 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
   function printResults($results) {
 
     // add islandora solr theme css
-    drupal_add_css(drupal_get_path('module', 'islandora_solr_config') . '/css/islandora_solr.table.css');
+    drupal_add_css(drupal_get_path('module', 'islandora_solr_config') . '/css/islandora_solr_config.theme.css');
 
     // set base_url
     global $base_url;
