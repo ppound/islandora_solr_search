@@ -12,7 +12,7 @@ $_islandora_solr_queryclass;
 /**
  * Implements hook_init().
  *
- * @global IslandoraSolrQueryProcessor $_islandora_solr_queryclass
+ * @global IslandoraSolrQuery $_islandora_solr_queryclass
  * @staticvar boolean $islandora_solr_init
  */
 function islandora_solr_init() {
@@ -26,7 +26,7 @@ function islandora_solr_init() {
     // single underscore followed by the module and another underscore
     global $_islandora_solr_queryclass;
     if (empty($_islandora_solr_queryclass)) {
-      $_islandora_solr_queryclass = new IslandoraSolrQueryProcessor();
+      $_islandora_solr_queryclass = new IslandoraSolrQuery();
     }
     $islandora_solr_init = TRUE;
   }
@@ -181,8 +181,8 @@ function islandora_solr_islandora_solr_primary_display() {
  * Finds the right display and calls the IslandoraSolrRestuls class to build the
  * display, which it returns to the page.
  *
- * @global IslandoraSolrQueryProcessor $_islandora_solr_queryclass
- *   the IslandoraSolrQueryProcessor object which includes the current query
+ * @global IslandoraSolrQuery $_islandora_solr_queryclass
+ *   the IslandoraSolrQuery object which includes the current query
  *   settings and the raw Solr results.
  * @param $query
  *   The query string

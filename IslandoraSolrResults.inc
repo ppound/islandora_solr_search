@@ -29,8 +29,8 @@ class IslandoraSolrResults {
   /**
    * Output the main body of the search results
    *
-   * @param type $solrQueryProcessor
-   *   The IslandoraSolrQueryProcessor object which includes the current query
+   * @param type $islandoraSolrQuery
+   *   The IslandoraSolrQuery object which includes the current query
    *   settings and the raw Solr results.
    * @return
    *   Returns themed Solr results page, including wrapper and rendered search
@@ -38,7 +38,7 @@ class IslandoraSolrResults {
    *
    * @see islandora_solr()
    */
-  function displayResults($solrQueryProcessor) {
+  function displayResults($islandoraSolrQuery) {
 
     // set variables to collect returned data.
     $results = NULL;
@@ -46,10 +46,10 @@ class IslandoraSolrResults {
     $elements = array();
 
     // set breadcrumbs
-    $this->setBreadcrumbs($solrQueryProcessor);
+    $this->setBreadcrumbs($islandoraSolrQuery);
 
     // raw solr results
-    $apacheSolrResult = $solrQueryProcessor->solrResult;
+    $apacheSolrResult = $islandoraSolrQuery->solrResult;
 
     // solr results count
     // total solr results
@@ -57,16 +57,16 @@ class IslandoraSolrResults {
     $elements['solr_total'] = $total;
 
     // solr start
-    // to display: $solrQueryProcessor->solrStart + ($total > 0 ? 1 : 0)
-    $elements['solr_start'] = $solrQueryProcessor->solrStart;
+    // to display: $islandoraSolrQuery->solrStart + ($total > 0 ? 1 : 0)
+    $elements['solr_start'] = $islandoraSolrQuery->solrStart;
 
     // solr results end
-    $end = min(($solrQueryProcessor->solrLimit + $solrQueryProcessor->solrStart), $total);
+    $end = min(($islandoraSolrQuery->solrLimit + $islandoraSolrQuery->solrStart), $total);
     $elements['solr_end'] = $end;
 
     // pager
-    islandora_solr_pager_init($total, $solrQueryProcessor->solrLimit);
-    $elements['solr_pager'] = theme('pager', array(NULL, $solrQueryProcessor->solrLimit, 0, NULL, 5));
+    islandora_solr_pager_init($total, $islandoraSolrQuery->solrLimit);
+    $elements['solr_pager'] = theme('pager', array(NULL, $islandoraSolrQuery->solrLimit, 0, NULL, 5));
 
     // debug (will be removed)
     $elements['solr_debug'] = '';
@@ -75,7 +75,7 @@ class IslandoraSolrResults {
     }
 
     // rendered secondary display profiles
-    $secondary_profiles = $this->addSecondaries($solrQueryProcessor);
+    $secondary_profiles = $this->addSecondaries($islandoraSolrQuery);
 
     // rendered results
     $results = $this->printResults($apacheSolrResult);
@@ -87,24 +87,24 @@ class IslandoraSolrResults {
   /**
    * Renders the secondary display profile list
    *
-   * @param type $solrQueryProcessor
-   *   the IslandoraSolrQueryProcessor object which includes the current query
+   * @param type $islandoraSolrQuery
+   *   the IslandoraSolrQuery object which includes the current query
    *   settings and the raw Solr results.
    * @return
    *   Themed list of secondary displays
    *
    * @see IslandoraSolrResults::displayResults()
    */
-  function addSecondaries($solrQueryProcessor) {
+  function addSecondaries($islandoraSolrQuery) {
     $query_list = array();
     // Get secondary display profiles
     $secondary_display_profiles = module_invoke_all('islandora_solr_secondary_display');
 
     // set path
-    $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
+    $path = SOLR_SEARCH_PATH . '/' . $islandoraSolrQuery->solrQuery; // $_GET['q'] didn't seem to work here
 
     // parameters set in url
-    $params = $solrQueryProcessor->internalSolrParams;
+    $params = $islandoraSolrQuery->internalSolrParams;
 
     // get list of secondary displays
     $secondary_array = variable_get('islandora_solr_secondary_display', array());
@@ -139,7 +139,7 @@ class IslandoraSolrResults {
    * override.
    *
    * @param type $results
-   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
+   *   The raw Solr results from IslandoraSolrQuery::solrResult
    * @return
    *   Rendered Solr results
    *
@@ -216,34 +216,34 @@ class IslandoraSolrResults {
    * Displays elements of the current solr query. Displays current query and
    * current filters. Includes a link to exclude the query/filter.
    *
-   * @param type $solrQueryProcessor
-   *   The IslandoraSolrQueryProcessor object which includes the current query
+   * @param type $islandoraSolrQuery
+   *   The IslandoraSolrQuery object which includes the current query
    *   settings and the raw Solr results.
    * @return
    *   Rendered lists of the currently active query and/or filters.
    */
-  function currentQuery($solrQueryProcessor) {
+  function currentQuery($islandoraSolrQuery) {
 
     // set path
-    $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
+    $path = SOLR_SEARCH_PATH . '/' . $islandoraSolrQuery->solrQuery; // $_GET['q'] didn't seem to work here
 
     // set output variable
     $output = '';
 
     // get user provided filter parameters
-    $fq = isset($solrQueryProcessor->internalSolrParams['f']) ? $solrQueryProcessor->internalSolrParams['f'] : array();
+    $fq = isset($islandoraSolrQuery->internalSolrParams['f']) ? $islandoraSolrQuery->internalSolrParams['f'] : array();
 
     // parameters set in url
-    $params = $solrQueryProcessor->internalSolrParams;
+    $params = $islandoraSolrQuery->internalSolrParams;
     // set filter key if there are no filters included
     if (empty($params['f'])) {
       $params['f'] = array();
     }
 
     // Get Query values
-    if (!in_array($solrQueryProcessor->solrQuery, $solrQueryProcessor->different_kinds_of_nothing)) {
+    if (!in_array($islandoraSolrQuery->solrQuery, $islandoraSolrQuery->different_kinds_of_nothing)) {
       // get query value
-      $query_value = $solrQueryProcessor->solrQuery;
+      $query_value = $islandoraSolrQuery->solrQuery;
 
       // set list variables
       $query_list = array();
@@ -337,28 +337,28 @@ class IslandoraSolrResults {
    * Sets the drupal breadcrumbs based on the current query and filters.
    * Provides links to exclude the query or filters.
    *
-   * @param type $solrQueryProcessor
-   *   The IslandoraSolrQueryProcessor object which includes the current query
+   * @param type $islandoraSolrQuery
+   *   The IslandoraSolrQuery object which includes the current query
    *   settings and the raw Solr results.
    */
-  function setBreadcrumbs($solrQueryProcessor) {
+  function setBreadcrumbs($islandoraSolrQuery) {
 
     // set path
-    $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
+    $path = SOLR_SEARCH_PATH . '/' . $islandoraSolrQuery->solrQuery; // $_GET['q'] didn't seem to work here
 
     // set breadcrumb variable
     $breadcrumb = array();
 
     // get user provided filter parameters
-    if (isset($solrQueryProcessor->internalSolrParams['f'])) {
-      $fq = $solrQueryProcessor->internalSolrParams['f'];
+    if (isset($islandoraSolrQuery->internalSolrParams['f'])) {
+      $fq = $islandoraSolrQuery->internalSolrParams['f'];
     }
     else {
       $fq = array();
     }
 
     // parameters set in url
-    $params = $solrQueryProcessor->internalSolrParams;
+    $params = $islandoraSolrQuery->internalSolrParams;
     // set filter key if there are no filters included
     if (empty($params['f'])) {
       $params['f'] = array();
@@ -431,9 +431,9 @@ class IslandoraSolrResults {
     }
 
     // create Query breadcrumb
-    if (!in_array($solrQueryProcessor->solrQuery, $solrQueryProcessor->different_kinds_of_nothing)) {
+    if (!in_array($islandoraSolrQuery->solrQuery, $islandoraSolrQuery->different_kinds_of_nothing)) {
       // get query value
-      $query_value = $solrQueryProcessor->solrQuery;
+      $query_value = $islandoraSolrQuery->solrQuery;
 
       // remove all filters for this breadcrumb
       $query = array();
@@ -508,8 +508,8 @@ class IslandoraSolrResults {
    * Displays facets based on a query response. Includes links to include or
    * exclude a facet field in a search.
    *
-   * @param type $solrQueryProcessor
-   *   The IslandoraSolrQueryProcessor object which includes the current query
+   * @param type $islandoraSolrQuery
+   *   The IslandoraSolrQuery object which includes the current query
    *   settings and the raw Solr results.
    * @return
    *   Rendered lists of facets including links to include or exclude a facet
@@ -518,7 +518,7 @@ class IslandoraSolrResults {
    * @see islandora_solr_islandora_solr_query_blocks()
    * @see islandora_solr_block_view()
    */
-  function displayFacets($solrQueryProcessor) {
+  function displayFacets($islandoraSolrQuery) {
     // set variables
     $facet_output = $output = '';
 
@@ -528,7 +528,7 @@ class IslandoraSolrResults {
     $facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
 
     // get facet values returned from solr
-    $facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_fields) ? $solrQueryProcessor->solrResult->facet_counts->facet_fields : array();
+    $facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_fields) ? $islandoraSolrQuery->solrResult->facet_counts->facet_fields : array();
 
     // return if no facets are available
     if (empty($facets)) {
@@ -554,7 +554,7 @@ class IslandoraSolrResults {
         // render facet values
         foreach ($facet as $value => $number) {
           // add facet
-          $this->_addFacets($facet_key, $value, $number, $solrQueryProcessor, $facet_count, $list_items);
+          $this->_addFacets($facet_key, $value, $number, $islandoraSolrQuery, $facet_count, $list_items);
         }
 
         // check for minumum returned values again, because some might have been disabled
@@ -624,8 +624,8 @@ class IslandoraSolrResults {
    * @param type $number
    *   Facet value count. The amount of occurrences of the string in this
    *   specific Solr field in the index.
-   * @param type $solrQueryProcessor
-   *   The IslandoraSolrQueryProcessor object which includes the current query
+   * @param type $islandoraSolrQuery
+   *   The IslandoraSolrQuery object which includes the current query
    *   settings and the raw Solr results.
    * @param type $facet_count
    *   Incrementing ingeger to count fields per facet. Used to set a soft limit
@@ -636,31 +636,31 @@ class IslandoraSolrResults {
    *
    * @see IslandoraSolrResults::addFacets()
    */
-  function _addFacets(&$key, &$value, &$number, &$solrQueryProcessor, &$facet_count, &$list) {
+  function _addFacets(&$key, &$value, &$number, &$islandoraSolrQuery, &$facet_count, &$list) {
 
     //FIXME:  This isn't quite right...  It can make sense to facet on
     //  the same field multiple times, provided it is multi-valued...
 
-    $fq = isset($solrQueryProcessor->solrParams['fq']) ? $solrQueryProcessor->solrParams['fq'] : array();
+    $fq = isset($islandoraSolrQuery->solrParams['fq']) ? $islandoraSolrQuery->solrParams['fq'] : array();
 
     // @TODO: Should be changed to format_string for Drupal 7
     // @TODO: does this check for exclude filters? -PID:"foo"
     $filter = $key . ':"' . replace_slashes($value) . '"'; // PID:"foo"
 
     // check if item should show up
-    $disable_link = (array_search($filter, $fq) !== FALSE) || $number == $solrQueryProcessor->solrResult->response->numFound;
+    $disable_link = (array_search($filter, $fq) !== FALSE) || $number == $islandoraSolrQuery->solrResult->response->numFound;
 
     // if link isn't disabled
     if (!$disable_link) {
 
       // set variables
-      $path = SOLR_SEARCH_PATH . '/' . $solrQueryProcessor->solrQuery; // $_GET['q'] didn't seem to work here
+      $path = SOLR_SEARCH_PATH . '/' . $islandoraSolrQuery->solrQuery; // $_GET['q'] didn't seem to work here
 
       $query_plus = array();
       $query_minus = array();
 
       // parameters set in url
-      $params = $solrQueryProcessor->internalSolrParams;
+      $params = $islandoraSolrQuery->internalSolrParams;
       // set filter key if there are no filters included
       if (empty($params['f'])) {
         $params['f'] = array();
@@ -704,7 +704,7 @@ class IslandoraSolrResults {
    * debugging purposes.
    *
    * @param type $apacheSolrResults
-   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
+   *   The raw Solr results from IslandoraSolrQuery::solrResult
    * @return
    *   Rendered fieldset containing raw Solr results data.
    *
@@ -750,7 +750,7 @@ class IslandoraSolrResults {
    * Merges highlight fields with the rest of the solr results.
    *
    * @param type $results
-   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
+   *   The raw Solr results from IslandoraSolrQuery::solrResult
    * @return
    *   raw Solr results array merged with highlight fields
    */

@@ -21,13 +21,13 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
    * the html headers so it'll prompt to be downloaded.
    *
    * @global type $base_url
-   * @param type $solrQueryProcessor
-   *   the IslandoraSolrQueryProcessor object which includes the current query
+   * @param type $islandoraSolrQuery
+   *   the IslandoraSolrQuery object which includes the current query
    *   settings and the raw Solr results.
    *
    * @see IslandoraSolrResults
    */
-  function printCSV($solrQueryProcessor) {
+  function printCSV($islandoraSolrQuery) {
 
     // Note: solrLimit is really stating the number of rows wanted,
     // not the row number of the upper limit document.  That is, if you
@@ -37,7 +37,7 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
     global $base_url;
 
     // First off, update outer limits
-    $upperLimit = $solrQueryProcessor->solrResult->response->numFound;
+    $upperLimit = $islandoraSolrQuery->solrResult->response->numFound;
     $lowerLimit = 0;
     $increment = 5000;
     // typical failure point for an unbounded query seems to be around 10000-15000,
@@ -51,28 +51,28 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
     $wrap = '"';
     $replace_value = '""';
 
-    $solrQueryProcessor->solrStart = $lowerLimit;
-    $solrQueryProcessor->solrLimit = $increment;
+    $islandoraSolrQuery->solrStart = $lowerLimit;
+    $islandoraSolrQuery->solrLimit = $increment;
 
     $docfile = tmpfile();
 
-    while ($solrQueryProcessor->solrStart < $upperLimit) {
+    while ($islandoraSolrQuery->solrStart < $upperLimit) {
 
       // Perform the incremental re-query.
-      $solrQueryProcessor->resetResults();
-      $solrQueryProcessor->executeQuery();
+      $islandoraSolrQuery->resetResults();
+      $islandoraSolrQuery->executeQuery();
 
       // Update incremental limits for the next round.
       $lowerLimit += $increment;
-      $solrQueryProcessor->solrStart = $lowerLimit;
+      $islandoraSolrQuery->solrStart = $lowerLimit;
 
       // If there are no results, skip ahead (i.e. exit).
-      if (empty($solrQueryProcessor->solrResult)) {
+      if (empty($islandoraSolrQuery->solrResult)) {
         continue;
       }
 
       // else ...
-      $rawResponse = $solrQueryProcessor->solrResult->getRawResponse();
+      $rawResponse = $islandoraSolrQuery->solrResult->getRawResponse();
       $responseData = json_decode($rawResponse, TRUE); // TRUE == associative array, not object
       unset($rawResponse); // unknown usefulness
 
