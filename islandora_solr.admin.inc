@@ -95,7 +95,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   if (!empty($handlers)) {
     $form['solr_ajax_wrapper']['islandora_solr_request_handler'] = array(
       '#type' => 'select',
-      '#title' => t('Request Handler'),
+      '#title' => t('Request handler'),
       '#options' => $handlers,
       '#description' => t('Request handlers as defined by <a href="!url">solrconfig.xml</a>', array('!url' => 'http://wiki.apache.org/solr/SolrConfigXml')),
       '#default_value' => $handler,
@@ -119,7 +119,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   // primary displays
   $form['display_profiles']['islandora_solr_primary_display_table'] = array(
     '#type' => 'item',
-    '#title' => t('Primary Display Profiles'),
+    '#title' => t('Primary display profiles'),
     '#description' => t('Preferred normal display profile for search results.  These may be provided by third-party modules.'),
     '#tree' => TRUE, // this attribute is important to return the submitted values in a deeper nested arrays in
     '#theme' => 'islandora_solr_admin_primary_display',
@@ -214,7 +214,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   if (!empty($islandora_solr_secondary_display_options)) {
     $form['display_profiles']['islandora_solr_secondary_display'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Secondary Display Profiles'),
+      '#title' => t('Secondary display profiles'),
       '#options' => $islandora_solr_secondary_display_options,
       '#default_value' => variable_get('islandora_solr_secondary_display', array()),
       '#description' => "Enabled secondary output/download types for search results.",
@@ -232,7 +232,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   $form['default_display_settings']['islandora_solr_result_fields'] = array(
     '#type' => 'textarea',
-    '#title' => t('Labels for Returned Fields'),
+    '#title' => t('Labels for returned fields'),
     '#description' => t('Set labels for fields returned from query.
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong>'),
     '#default_value' => variable_get('islandora_solr_result_fields', 'dc.subject ~ Subject,dc.type ~ Type'),
@@ -247,7 +247,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   $form['default_display_settings']['islandora_solr_snippet_field'] = array(
     '#type' => 'textfield',
-    '#title' => t('Snippet Field'),
+    '#title' => t('Snippet field'),
     '#default_value' => variable_get('islandora_solr_snippet_field', ''),
     '#description' => t("If a match is found on this field, a snippet of text will be returned, with the search term highlighted.<br />
       An optional friendly label may inserted using the following pattern <strong>dsm.Text ~ Full Text</strong><br />
@@ -270,7 +270,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   $form['default_display_settings']['sort']['islandora_solr_sort_terms'] = array(
     '#type' => 'textarea',
-    '#title' => t('Sort Terms'),
+    '#title' => t('Sort terms'),
     '#description' => t("Indicate what fields should appear in the <strong>Islandora sort block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
       Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
@@ -290,7 +290,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   $form['facet_settings']['islandora_solr_facets'] = array(
     '#type' => 'textarea',
-    '#title' => t('Facet Fields'),
+    '#title' => t('Facet fields'),
     '#description' => t("Indicate which fields will appear in the <strong>Islandora Facet Block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong> "),
     '#default_value' => variable_get('islandora_solr_facets', 'dc.subject ~ Subject,dc.type ~ Type'),
@@ -331,7 +331,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   $form['advanced_search_block']['islandora_solr_searchterms'] = array(
     '#type' => 'textarea',
-    '#title' => t('Search Terms'),
+    '#title' => t('Search terms'),
     '#description' => t("Indicate what fields should appear in the dropdown menu of terms for the <strong>Advanced Search Block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
       Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
@@ -371,7 +371,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   $form['query_defaults']['islandora_solr_base_query'] = array(
     '#type' => 'textfield',
-    '#title' => t('Solr Default Query'),
+    '#title' => t('Solr default query'),
     '#size' => 30,
     '#description' => t('A default query to use to browse solr results when no explicit user query is set.
       Setting a useful default query allows users to use solr to browse, without entering a query themselves.
@@ -381,7 +381,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   $form['query_defaults']['islandora_solr_base_filter'] = array(
     '#type' => 'textarea',
-    '#title' => t('Solr Base Filter'),
+    '#title' => t('Solr base filter'),
     '#description' => t('Some base filters to append to all user queries -- may be used to filter results and to facilitate null-query browsing. Enter one per line. <br />
       These filters will be applied to all queries in addition to any user-selected facet filters'),
     '#default_value' => variable_get('islandora_solr_base_filter', ''),
@@ -392,7 +392,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   // debug mode
   $form['islandora_solr_debug_mode'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Debug Mode?'),
+    '#title' => t('Debug mode?'),
     '#return_value' => 1,
     '#default_value' => variable_get('islandora_solr_debug_mode', 0),
     '#description' => t('Dumps solr query to the screen for testing. Warning: if you have the Drupal Apache Solr module enabled alongside this one then the debug function will not work.'),

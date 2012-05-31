@@ -25,7 +25,7 @@ function islandora_solr_islandora_solr_query_blocks() {
     //
 
     'advanced' => array(
-      'name' => t('Islandora Advanced Search'),
+      'name' => t('Islandora advanced search'),
       'module' => 'islandora_solr',
       'file' => 'islandora_solr.block.inc',
       'class' => NULL,
@@ -33,7 +33,7 @@ function islandora_solr_islandora_solr_query_blocks() {
       'form' => 'islandora_solr_advanced_search_form',
     ),
     'simple' => array(
-      'name' => t('Islandora Simple Search'),
+      'name' => t('Islandora simple search'),
       'module' => 'islandora_solr',
       'file' => 'islandora_solr.block.inc',
       'class' => NULL,
@@ -41,7 +41,7 @@ function islandora_solr_islandora_solr_query_blocks() {
       'form' => 'islandora_solr_simple_search_form',
     ),
     'basic_facets' => array(
-      'name' => t('Islandora Facets'),
+      'name' => t('Islandora facets'),
       'module' => 'islandora_solr',
       'file' => 'IslandoraSolrResults.inc',
       'class' => 'IslandoraSolrResults',
@@ -49,7 +49,7 @@ function islandora_solr_islandora_solr_query_blocks() {
       'form' => NULL,
     ),
     'current_query' => array(
-      'name' => t('Islandora Query'),
+      'name' => t('Islandora query'),
       'module' => 'islandora_solr',
       'file' => 'IslandoraSolrResults.inc',
       'class' => 'IslandoraSolrResults',
@@ -57,7 +57,7 @@ function islandora_solr_islandora_solr_query_blocks() {
       'form' => NULL,
     ),
     'display_switch' => array(
-      'name' => t('Islandora Displays'),
+      'name' => t('Islandora displays'),
       'module' => 'islandora_solr',
       'file' => 'islandora_solr.block.inc',
       'class' => NULL,
@@ -65,7 +65,7 @@ function islandora_solr_islandora_solr_query_blocks() {
       'form' => NULL,
     ),
     'sort' => array(
-      'name' => t('Islandora Sort'),
+      'name' => t('Islandora sort'),
       'module' => 'islandora_solr',
       'file' => 'islandora_solr.block.inc',
       'class' => NULL,
