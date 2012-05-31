@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Configuration module for islandora_solr_search.module
+ * Configuration module for Islandora Solr.
  */
 
 /**
- * Implements hook_islandora_solr_primary_display()
+ * Implements hook_islandora_solr_primary_display().
  */
 function islandora_solr_config_islandora_solr_primary_display() {
   return array(
@@ -59,7 +59,7 @@ function islandora_solr_config_islandora_solr_secondary_display() {
 
 
 /**
- * Implementation of hook_theme() 
+ * Implementation of hook_theme().
  */
 function islandora_solr_config_theme() {
   // set path
@@ -78,7 +78,11 @@ function islandora_solr_config_theme() {
 }
 
 /**
- * Implementation of hook_help()
+ * Implementation of hook_help().
+ *
+ * @param type $path
+ * @param type $arg
+ * @return type
  */
 function islandora_solr_config_help($path, $arg) {
 
@@ -97,15 +101,23 @@ function islandora_solr_config_help($path, $arg) {
   }
 }
 
-
+/**
+ * Implements hook_islandora_solr_query_processor().
+ * Takes the current results limit (admin default or from url parameter) and
+ * finds the closed number that is dividable by 4 and 3, so when the layout is
+ * sized down in a responsive layout, the last row of results won't show
+ * 'trailing' results.
+ *
+ * @param type $processor
+ */
 function islandora_solr_config_islandora_solr_query_processor($processor) {
 
   // we're dealing with the grid display
   if ($processor->display == 'grid') {
-    
+
     // set results limit
     $limit = $processor->solrLimit;
-    
+
     // not dividable yet
     $dividable = FALSE;
     while ($dividable == FALSE) {

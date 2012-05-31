@@ -2,7 +2,8 @@
 
 /**
  * @file
- * Contains methods to search solr and display results.  depends on Apache_Solr_Php client.
+ * Contains methods to create rendered Solr displays from raw Solr results.
+ * Depends on Apache_Solr_Php client.
  */
 
 /**
@@ -29,9 +30,7 @@ class IslandoraSolrResults {
    * Output the main body of the search results
    *
    * @param type $solrQueryProcessor
-   * @param type $title
-   * @param type $output
-   * @return string
+   * @return type
    */
   function displayResults($solrQueryProcessor) {
 
@@ -79,6 +78,12 @@ class IslandoraSolrResults {
     return theme('islandora_solr_wrapper', array('results' => $results, 'secondary_profiles' => $secondary_profiles, 'elements' => $elements));
   }
 
+  /**
+   * Renders the secondary display profile list
+   *
+   * @param type $solrQueryProcessor
+   * @return type
+   */
   function addSecondaries($solrQueryProcessor) {
     $query_list = array();
     // Get secondary display profiles
@@ -118,11 +123,12 @@ class IslandoraSolrResults {
   }
 
   /**
-   * Function: printResults
+   * Renders the primary or secondary display profile based on the raw Solr
+   * results. This is the method most Islandora Solr display plugins would
+   * override.
    *
-   * Description: translates a solr query result into a basic in-browser search result.
-   *
-   * @param Apache_Solr_Object $results
+   * @param type $results
+   * @return type
    */
   function printResults($results) {
 
@@ -191,16 +197,12 @@ class IslandoraSolrResults {
   }
 
 
-
   /**
-   * Function: currentQuery
+   * Displays elements of the current solr query. Displays current query and
+   * current filters. Includes a link to exclude the query/filter.
    *
-   * Description: Displays elements of the current solr query (with enabled filters).
-   *   This functionality was previously rolled into the facet block, but it makes
-   *   sense to separate the two functions, particularly as the current query is now
-   *   imprinted in the system's breadcrumb.
-   *
-   * @param IslandoraSolrQueryProcessor $solrQueryProcessor
+   * @param type $solrQueryProcessor
+   * @return string
    */
   function currentQuery($solrQueryProcessor) {
 
@@ -314,9 +316,10 @@ class IslandoraSolrResults {
   }
 
   /**
-   * Function: setBreadcrumbs
+   * Sets the drupal breadcrumbs based on the current query and filters.
+   * Provides links to exclude the query or filters.
    *
-   * Description: sets the drupal breadcrumbs based on the current query and filters.
+   * @param type $solrQueryProcessor
    */
   function setBreadcrumbs($solrQueryProcessor) {
 
@@ -481,16 +484,11 @@ class IslandoraSolrResults {
   }
 
 
-
-
   /**
-   * Function: displayFacets
+   * Displays facets based on a query response. Includes links to include or
+   * exclude a facet field in a search.
    *
-   * Description: Displays basic facets based on an apache solr query response,
-   *   as contained with the IslandoraSolrQueryProcessor.
-   *
-   * @global string $base_url
-   * @param IslandoraSolrQueryProcessor $solrQueryProcessor
+   * @param type $solrQueryProcessor
    * @return string
    */
   function displayFacets($solrQueryProcessor) {
@@ -574,11 +572,10 @@ class IslandoraSolrResults {
       drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_soft_limit.js');
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    // as we add additional facets, we're repeatedly URL-encoding old facet             //
-    // strings. when we double-encode quotation marks they're incomprehensible to solr. //
-    // This is a quick workaround:                                                      //
-    //////////////////////////////////////////////////////////////////////////////////////
+
+    // As we add additional facets, we're repeatedly URL-encoding old facet
+    // strings. when we double-encode quotation marks they're incomprehensible
+    // to solr. This is a quick workaround:                                                      //
     $facet_output = str_replace('%2B', '%252B', $facet_output);
     if (!empty($facet_output)) {
       $output .='<div class="islandora-solr-facet-wrap">';
@@ -591,12 +588,13 @@ class IslandoraSolrResults {
 
 
   /**
-   * Add facet callback
+   * A facet callback. Renders a single facet field.
+   *
    * @param type $key
-   * @param type $name
+   * @param type $value
    * @param type $number
    * @param type $solrQueryProcessor
-   * @param int $facet_count
+   * @param type $facet_count
    * @param string $list
    */
   function _addFacets(&$key, &$value, &$number, &$solrQueryProcessor, &$facet_count, &$list) {
@@ -662,7 +660,13 @@ class IslandoraSolrResults {
 
 
 
-
+  /**
+   * Creates a fieldset containing raw Solr results of the current page for
+   * debugging purposes.
+   *
+   * @param type $apacheSolrResults
+   * @return type
+   */
   function printDebugOutput($apacheSolrResults) {
     // debug dump
 
@@ -680,10 +684,9 @@ class IslandoraSolrResults {
 
 
   /**
-   * Function: prepFieldSubstitutions
-   *
-   * Description: reads configuration values and preps a number of key=>value
-   *   arrays for output substitution
+   * Reads configuration values and preps a number of key => value arrays for
+   * output substitution. Replaces solr field labels with human readable labels
+   * as set in the admin form.
    */
   function prepFieldSubstitutions() {
     $rawFacetVals = variable_get("islandora_solr_facets", 'dc.subject ~ Subject,dc.type ~ Type');
@@ -700,11 +703,11 @@ class IslandoraSolrResults {
 
 
 
-
   /**
-   * Merges snippet fields with the rest of the solr results
-   * @param Apache Solr Object $results
-   * @return array
+   * Merges highlight fields with the rest of the solr results.
+   *
+   * @param type $results
+   * @return boolean
    */
   function prep_results($results) {
     // catch if the result query returned an error

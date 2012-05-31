@@ -42,12 +42,24 @@ function islandora_solr_pager_init($total, $limit = 10, $element = 0) {
   return $pager_page_array[$element];
 }
 
+/**
+ * Restore slashes in a string.
+ *
+ * @param type $str
+ * @return type
+ */
 function restore_slashes($str) {
   $replacements = array("~slsh~", "~plus~");
   $values = array("/", "+");
   return str_replace($replacements, $values, $str); //can't have a slash in the url breaks drupal clean urls
 }
 
+/**
+ * Replace slashes in a string.
+ *
+ * @param type $str
+ * @return type
+ */
 function replace_slashes($str) {
   $replacements = array("~slsh~", "~plus~");
   $values = array("/", "+");
@@ -55,7 +67,16 @@ function replace_slashes($str) {
 }
 
 
-//a better explode method allows quotes in the returned strings.  taken from the php.net site
+/**
+ * A better explode method allows quotes in the returned strings. Taken from
+ * php.net.
+ *
+ * @param type $delim
+ * @param type $str
+ * @param type $enclose
+ * @param type $preserve
+ * @return type
+ */
 function csv_explode($delim = ',', $str, $enclose = '"', $preserve = FALSE) {
   $res_arr = array();
   $n = 0;
@@ -73,7 +94,14 @@ function csv_explode($delim = ',', $str, $enclose = '"', $preserve = FALSE) {
   return $res_arr;
 }
 
-//copied from apache solr service and added space as a value to escape.  We are using this to escape the field being searched not the text being searched for so we need both.
+/**
+ * Copied from Apache Solr Service and added space as a value to escape.  We are
+ * using this to escape the field being searched not the text being searched for
+ * so we need both.
+ *
+ * @param type $value
+ * @return type
+ */
 function lesser_escape($value) {
   //list taken from http://lucene.apache.org/java/docs/queryparsersyntax.html#Escaping%20Special%20Characters
   // Zac removed the quotation mark and whitespace from this list.
@@ -99,7 +127,13 @@ function solr_escape($facets) {
   return $return_facets;
 }
 
-
+/**
+ * Turns term fields strings from the admin forms into arrays. Mostly used with
+ * variable_get().
+ *
+ * @param type $raw_field_list
+ * @return type
+ */
 function islandora_build_substitution_list($raw_field_list) {
   $facet_array = array();
   $facet_fields = '';

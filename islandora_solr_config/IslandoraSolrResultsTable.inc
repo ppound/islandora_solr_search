@@ -2,15 +2,13 @@
 
 /*
  * @file
- * Contains methods to search solr and display results.  depends on Apache_Solr_Php client.
+ * Contains methods to search solr and display results. Depends on
+ * Apache_Solr_Php client.
  */
-
 
 /**
- * Extention of IslandoraSolrResults for templating purposes.
- * This overrides the displayResults function to provide an alternate display type.
+ * Extention of IslandoraSolrResults to create an alternative display type.
  */
-
 class IslandoraSolrResultsTable extends IslandoraSolrResults {
 
   function IslandoraSolrResultsTable() {
@@ -18,19 +16,11 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
   }
 
   /**
-   * Outputs results in unified tabular format.
+   * Renders the Solr results as a table.
    *
-   * This function collects all field names from all results in the
-   * resultset and constructs a single table with said field names in
-   * a unified header row, rather than outputting each result as a
-   * miniature horizontal table.
-   *
-   * @param $results
-   *   A solr resultset object.
-   *
-   * @return
-   *   html output for the resultset. Note: we currently create this
-   *   output manually, should refactor to use drupal forms api.
+   * @global type $base_url
+   * @param type $results
+   * @return type
    */
   function printResults($results) {
 
@@ -44,7 +34,7 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
 
     $recordStart = (int)$results->response->start;
     if (empty($results)) {
-      return "no results";
+      return t('no results');
     }
     $count = 0;
     $fields = array();

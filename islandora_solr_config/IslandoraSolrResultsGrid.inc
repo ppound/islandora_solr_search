@@ -6,16 +6,16 @@
  */
 
 /**
- * Islandora Solr Results
+ * Extention of IslandoraSolrResults to create an alternative display type.
  */
 class IslandoraSolrResultsGrid extends IslandoraSolrResults {
 
   /**
-   * Function: printResults
+   * Renders the Solr results as a responsive grid view. Markup and styling is based
+   * on the Islandora collection grid view. Some styling is inherited from it.
    *
-   * Description: translates a solr query result into a basic in-browser search result.
-   *
-   * @param Apache_Solr_Object $results
+   * @param type $results
+   * @return type
    */
   function printResults($results) {
 

@@ -1,9 +1,13 @@
+/**
+ * @file
+ * Snippet for facet block toggle to expose and hide facet fields.
+ */
+
 (function ($) {
-  
-  // snippet for facet block toggle
+
   Drupal.behaviors.islandora_solr_toggle = {
     attach: function(context, settings) {
-      // show more  
+      // show more
       if (!$(".soft-limit").hasClass('processed')) {
         $(".soft-limit").click(function(e) {
           // toggle class .hidden
@@ -16,5 +20,5 @@
       }
     }
   };
-  
+
 })(jQuery);

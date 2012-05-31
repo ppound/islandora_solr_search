@@ -20,7 +20,7 @@ ul#secondary-display-profiles
   display: inline-block;
   margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
-  background-image: none; 
+  background-image: none;
 }
 
 
@@ -40,7 +40,7 @@ ul#secondary-display-profiles
 
 /* advanced search block */
 
-#islandora-solr-advanced-search-form div.form-item { 
+#islandora-solr-advanced-search-form div.form-item {
   display: inline-block;
   margin-right: 10px;
 }

@@ -5,12 +5,13 @@
  * Implementation of Solr search for the Islandora fedora_search module.
  */
 
-//$islandora_query;
+// set query class variable
 $_islandora_solr_queryclass;
 
 
 /**
- * islandora solr search implentation of hook_init()
+ * Implements hook_init().
+ *
  * @global IslandoraSolrQueryProcessor $_islandora_solr_queryclass
  * @staticvar boolean $islandora_solr_init
  */
@@ -32,6 +33,7 @@ function islandora_solr_init() {
 }
 
 /**
+ * Implements hook_boot().
  * @global type $conf
  */
 function islandora_solr_boot() {
@@ -172,11 +174,14 @@ function islandora_solr_islandora_solr_primary_display() {
 
 
 /**
- * islandora solr search
- * @global type $_islandora_solr_queryclass
+ * Islandora Solr callback.
+ * Gathers url parameters, and calls the query builder, which prepares the query
+ * based on the admin settings and url values.
+ * Finds the right display and calls the IslandoraSolrRestuls class to build the
+ * display, which it returns to the page.
+ *
+ * @global IslandoraSolrQueryProcessor $_islandora_solr_queryclass
  * @param type $query
- * @param type $fq
- * @param type $dismax
  * @return type
  */
 function islandora_solr($query = NULL) {
@@ -321,12 +326,10 @@ function islandora_solr_help($path, $arg) {
 
 
 /**
+ * Pings a solr instance for availability. Returns ping time or a FALSE boolean
  *
- * @param String $solr_url
+ * @param type $solr_url
  * @return boolean
- *
- * Checks availability of Solr installation
- *
  */
 function islandora_solr_ping($solr_url) {
   // check for 'http://' or 'https://' prefix
@@ -336,8 +339,6 @@ function islandora_solr_ping($solr_url) {
   if (!filter_var($solr_url, FILTER_VALIDATE_URL)) {
     return FALSE;
   }
-
-
 
   // split url in host/port/path
   $solr_url_parsed = parse_url($solr_url);
@@ -363,7 +364,12 @@ function islandora_solr_ping($solr_url) {
 }
 
 
-
+/**
+ * Check for 'http://' or 'https://'
+ *
+ * @param string $url
+ * @return string
+ */
 function islandora_solr_check_http($url) {
 
   // check for 'http://' or 'https://' prefix - if not found, add it.
@@ -376,7 +382,11 @@ function islandora_solr_check_http($url) {
 
 
 /**
- * Function to get luke
+ * Function to get Solr luke as a php array.
+ *
+ * @param type $solr_url
+ * @param type $num_terms
+ * @return boolean
  */
 function islandora_solr_get_luke($solr_url = NULL, $num_terms = 0) {
 

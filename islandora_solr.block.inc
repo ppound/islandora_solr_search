@@ -97,6 +97,10 @@ function islandora_solr_block_info() {
 
 /**
  * Implements hook_block_view().
+ *
+ * @global type $_islandora_solr_queryclass
+ * @param type $block_name
+ * @return type
  */
 function islandora_solr_block_view($block_name = '') {
   // set variable
@@ -149,8 +153,11 @@ function islandora_solr_block_view($block_name = '') {
 
 
 /**
- * islandora solr simple search form
- * @return type
+ * Islandora Solr simple search form
+ *
+ * @param type $form
+ * @param type $form_state
+ * @return string
  */
 function islandora_solr_simple_search_form($form, &$form_state) {
 
@@ -169,9 +176,10 @@ function islandora_solr_simple_search_form($form, &$form_state) {
 
 
 /**
- * islandora solr simple search form submit
+ * Islandora Solr simple search form submit
+ *
  * @param type $form
- * @param type $form_state
+ * @param array $form_state
  */
 function islandora_solr_simple_search_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
@@ -187,9 +195,12 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
 
 
 /**
- * islandora solr search block form
+ * Islandora Solr advanced search block form
+ *
  * @global type $_islandora_solr_queryclass
- * @return type
+ * @param type $form
+ * @param array $form_state
+ * @return string
  */
 function islandora_solr_advanced_search_form($form, &$form_state) {
   global $_islandora_solr_queryclass;
@@ -376,7 +387,8 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
 
 
 /**
- * Callback for advanced search form
+ * AJAX callback for advanced search form
+ *
  * @param type $form
  * @param type $form_state
  * @return type
@@ -393,10 +405,10 @@ function _islandora_solr_advanced_search_terms($form, &$form_state) {
 
 
 /**
- * Submit hook for the quick search form.
+ * Islandora Solr advanced search form submit
  *
- * @param array $form
- * @param array $form_state
+ * @param type $form
+ * @param type $form_state
  */
 function islandora_solr_advanced_search_form_submit($form, &$form_state) {
 
@@ -445,8 +457,11 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
 
 
 /**
- * Provides a list of enabled displays to switch
- * @return display switch
+ * Provides list to change primary displays. Only populated with displays
+ * that are enabled through the admin form.
+ *
+ * @global type $_islandora_solr_queryclass
+ * @return type
  */
 function islandora_solr_display() {
   global $_islandora_solr_queryclass;
@@ -532,7 +547,10 @@ function islandora_solr_display() {
 
 
 /**
- *  Sort solr results
+ * Provides a list to change the sorting on a current search query.
+ *
+ * @global type $_islandora_solr_queryclass
+ * @return type
  */
 function islandora_solr_sort() {
   global $_islandora_solr_queryclass;

@@ -5,14 +5,12 @@
  * Theme functions for the Islandora Solr Search module.
  */
 
-// page + elements
-// islandora-solr-search.tpl.php
-//
-// solr search results
-// islandora-solr-search-default.tpl.php
 
 /**
- * hook_preprocess function for islandora_solr
+ * hook_preprocess function for islandora_solr_wrapper
+ *
+ * @global type $base_url
+ * @param type $variables
  */
 function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
   // base url
@@ -46,6 +44,10 @@ function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
 
 /**
  * hook_preprocess function for islandora_solr_default
+ *
+ * @global type $base_url
+ * @global type $base_path
+ * @param type $variables
  */
 function islandora_solr_preprocess_islandora_solr(&$variables) {
   // base url

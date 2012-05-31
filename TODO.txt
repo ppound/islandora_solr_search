@@ -5,9 +5,10 @@ TODO:
 High priority
 -------------
 
-- update documentation + doxygens
+- update README.txt
+- update hook_help functions
 - create islandora_solr.api.php
-
+- check if islandora_solr.install is doing the right things.
 
 Normal Priority
 ---------------

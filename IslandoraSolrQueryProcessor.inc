@@ -2,18 +2,16 @@
 
 /**
  * @file
- * Contains methods to build and execute a solr query.
- * Depends on Apache_Solr_Php client.
+ * Contains methods to build and execute a solr query. Depends on
+ * Apache_Solr_Php client.
  */
 
 DEFINE('SOLR_SEARCH_PATH', 'islandora/search');
 
 /**
- * Islandora Solr Query Processor
- * @todo Stop using global vars, start using this object's vars.
- *  The module itself should initially create an instance of this
- *  object and reference the query vars inside that object when calling
- *  other output display functions.
+ * Islandora Solr Query Processor.
+ * Used to store Solr query parameters and to connect to solr to execute the
+ * query. Populates the solrResult property with the raw Solr query results.
  */
 class IslandoraSolrQueryProcessor {
 
@@ -40,8 +38,9 @@ class IslandoraSolrQueryProcessor {
   }
 
   /**
-   * Build and execute a query
-   * @param type $query
+   * Build and execute a query.
+   *
+   * @param string $query
    * @param type $params
    * @return type
    */
@@ -64,7 +63,12 @@ class IslandoraSolrQueryProcessor {
   }
 
   /**
-   * Default implementation for solr search.  You can configure others in the block config settings
+   * Builds and performs checks for a Solr query based on url parameters and
+   * defaults set in the Islandora Solr admin form.
+   *
+   * @param type $query
+   * @param type $params
+   * @return type
    */
   function buildQuery($query, $params = array() ) {
 
@@ -190,7 +194,9 @@ class IslandoraSolrQueryProcessor {
   }
 
   /**
-   * Execute the query
+   * Connects to Solr and executes the query. Collects the raw Solr results and
+   * populates the solrResults property.
+   *
    * @return type
    */
   function executeQuery() {

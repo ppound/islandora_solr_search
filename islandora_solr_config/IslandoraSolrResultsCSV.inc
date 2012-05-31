@@ -2,15 +2,14 @@
 
 /**
  * @file
- * Contains methods to search solr and display results.  depends on Apache_Solr_Php client.
+ * Contains methods to search solr and display results. Depends on
+ * Apache_Solr_Php client.
  */
 
 
 /**
- * Extention of IslandoraSolrResults for templating purposes.
- * This overrides the displayResults function to provide an alternate display type.
+ * Extention of IslandoraSolrResults to create an alternative display type.
  */
-
 class IslandoraSolrResultsCSV extends IslandoraSolrResults {
 
   function IslandoraSolrResultsCSV() {
@@ -18,15 +17,12 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
   }
 
   /**
-   * Outputs results basically in the normal way, but with thumbnails pulled
-   * from the Fedora repository.
+   * Renders the Solr results as a comma separated values file (.csv). Resets
+   * the html headers so it'll prompt to be downloaded.
    *
-   * @param $results
-   *   A solr resultset object.
-   *
-   * @return
-   *   html output for the resultset. Note: we currently create this
-   *   output manually, should refactor to use drupal forms api.
+   * @global type $base_url
+   * @param type $solrQueryProcessor
+   * @param type $title
    */
   function printCSV($solrQueryProcessor, $title = "Search Results") {
 

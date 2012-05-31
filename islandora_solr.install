@@ -8,7 +8,8 @@
 /**
  * Implements hook_requirements().
  *
- * @return
+ * @param type $phase
+ * @return array
  *   An array describing the status of the site regarding available updates.
  *   If there is no update data, only one record will be returned, indicating
  *   that the status of core can't be determined. If data is available, there
@@ -22,9 +23,6 @@
  *   notification messages during update_cron(), and might be useful for other
  *   modules that invoke update_requirements() to find out if the site is up
  *   to date or not.
- *
- * @see _update_message_text()
- * @see _update_cron_notify()
  */
 function islandora_solr_requirements($phase) {
   $t = get_t();
@@ -49,7 +47,6 @@ function islandora_solr_requirements($phase) {
 /**
  * Implements hook_install().
  */
-
 function islandora_solr_install() {
   $message = st('Islandora Solr <a href="!link">configuration page</a>.', array('!link' => url('admin/settings/islandora_solr')));
   drupal_set_message(filter_xss($message));
@@ -58,7 +55,6 @@ function islandora_solr_install() {
 /**
  * Implements hook_uninstall().
  */
-
 function islandora_solr_uninstall() {
 
   // removing variables
