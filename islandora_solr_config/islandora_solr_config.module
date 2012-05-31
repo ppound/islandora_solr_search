@@ -109,17 +109,17 @@ function islandora_solr_config_help($path, $arg) {
  * sized down in a responsive layout, the last row of results won't show
  * 'trailing' results.
  *
- * @param type $processor
- *   the IslandoraSolrQueryProcessor object which includes the current query
- *   settings but before it has called ::executeQuery().
+ * @param type $queryProcessor
+ *   The IslandoraSolrQueryProcessor object which includes the current query
+ *   settings but before it calls IslandoraSolrQueryProcessor::executeQuery().
  */
-function islandora_solr_config_islandora_solr_query_processor($processor) {
+function islandora_solr_config_islandora_solr_query_processor($queryProcessor) {
 
   // we're dealing with the grid display
-  if ($processor->display == 'grid') {
+  if ($queryProcessor->display == 'grid') {
 
     // set results limit
-    $limit = $processor->solrLimit;
+    $limit = $queryProcessor->solrLimit;
 
     // not dividable yet
     $dividable = FALSE;
@@ -132,6 +132,6 @@ function islandora_solr_config_islandora_solr_query_processor($processor) {
       $limit++;
     }
     // set new limit
-    $processor->solrLimit = $solr_limit;
+    $queryProcessor->solrLimit = $solr_limit;
   }
 }

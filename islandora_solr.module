@@ -147,7 +147,7 @@ function islandora_solr_theme() {
  */
 function islandora_solr_islandora_solr_primary_display() {
   return array(
-    // 'machine-name' = array(
+    // 'machine_name' => array(
     //   'name' => 'Human Readable Name',
     //   'module' => 'module_name',
     //   'file' => 'FileName.inc',

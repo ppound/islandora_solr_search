@@ -11,7 +11,7 @@
 function islandora_solr_islandora_solr_query_blocks() {
   return array(
     // 'machine_name' => array(
-    //   'name' => 'Human Readable Name',
+    //   'name' => t('Human Readable Name'),
     //   'module' => 'module_name',
     //   'file' => 'FileName.inc',
     //   'class' => 'ClassName',
