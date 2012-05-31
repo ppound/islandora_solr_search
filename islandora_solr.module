@@ -64,7 +64,7 @@ function islandora_solr_menu() {
 
   $items['admin/islandora/search/islandora_solr'] = array(
     'title' => 'Islandora solr client',
-    'description' => 'Managing Islandora Solr Searching',
+    'description' => 'Managing Islandora Solr searching',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_solr_admin_settings'),
     'access arguments' => array('administer islandora solr'),
