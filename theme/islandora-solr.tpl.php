@@ -17,7 +17,7 @@
 <?php if (empty($results)): ?>
   <p class="no-results"><?php print t('Sorry, but your search returned no results.'); ?></p>
 <?php else: ?>
-  <div class="islandora-solr-search-results">
+  <div class="islandora islandora-solr-search-results">
     <?php $row_result = 0; ?>
     <?php foreach($results as $result): ?>
     <!-- Search result -->
@@ -31,7 +31,7 @@
         <dd></dd>
       </dl>
       <!-- Metadata -->
-      <dl class="solr-fields">
+      <dl class="solr-fields islandora-inline-metadata">
         <?php $row_field = 0; ?>
         <?php $max_rows = count($results[$row_result]) - 1; ?>
         <?php foreach($result as $key => $value): ?>

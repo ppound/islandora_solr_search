@@ -56,13 +56,14 @@ function islandora_solr_boot() {
  */
 function islandora_solr_menu() {
   $items['islandora/search'] = array(
+    'title' => 'Search results',
     'page callback' => 'islandora_solr',
     'access arguments' => array('search islandora solr'),
     'type' => MENU_CALLBACK,
   );
 
   $items['admin/islandora/search/islandora_solr'] = array(
-    'title' => 'Islandora Solr Client',
+    'title' => 'Islandora solr client',
     'description' => 'Managing Islandora Solr Searching',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_solr_admin_settings'),
@@ -181,8 +182,8 @@ function islandora_solr_islandora_solr_primary_display() {
 function islandora_solr($query = NULL) {
   global $_islandora_solr_queryclass;
 
-  // set title
-  drupal_set_title(t('Search Results'));
+  // add islandora solr theme css
+  drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.theme.css');
 
   // get all url parameters
   $params = $_GET;
@@ -274,7 +275,6 @@ function islandora_solr($query = NULL) {
   // debug dump
   if (variable_get('islandora_solr_debug_mode', 0)) {
     $message = t('Params: <br /><pre>!debug</pre>', array('!debug' => print_r($_islandora_solr_queryclass->solrParams, TRUE)));
-
     drupal_set_message(filter_xss($message, array('pre', 'br')), 'status');
   }
 

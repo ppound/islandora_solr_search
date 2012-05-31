@@ -1,19 +1,6 @@
 /* Base style sheet for islandora solr */
 
 
-/* breadcrumbs */
-.strikethrough
-{
-  text-decoration: line-through !important;
-}
-
-.islandora-solr-breadcrumb-super
-{
-  vertical-align: super;
-  font-size: 80%;
-}
-
-
 /* solr results wrapper elements */
 
 #islandora-solr-top
@@ -49,19 +36,6 @@ ul#secondary-display-profiles
 {
   float: right;
 }
-
-.islandora-solr-facet-name,
-.islandora-solr-facet-title
-{
-  font-weight:bold;
-}
-
-.islandora-solr-facet-wrap ul li
-{
-  font-size:90%;
-  line-height: 1.3em;
-}
-
 
 
 /* advanced search block */
