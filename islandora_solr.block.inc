@@ -124,11 +124,11 @@ function islandora_solr_block_view($block_name = '') {
     // The variable $_islandora_solr_queryclass (the IslandoraSolrQueryProcessor, containing
     // the Solr search result), is fed as an argument.
     if (!empty($solr_blocks[$block_name]['class'])) {
-      $displayClass = new $solr_blocks[$block_name]['class']();
+      $display_class = new $solr_blocks[$block_name]['class']();
       $block_function = $solr_blocks[$block_name]['function'];
-      if (method_exists($displayClass, $block_function)) {
+      if (method_exists($display_class, $block_function)) {
         // set content
-        $block['content'] = $displayClass->$block_function($_islandora_solr_queryclass);
+        $block['content'] = $display_class->$block_function($_islandora_solr_queryclass);
       }
       // otherwise, simply load the form.
     }

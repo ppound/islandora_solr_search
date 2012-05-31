@@ -271,8 +271,11 @@ function islandora_solr($query = NULL) {
     $output = $resultsClass->displayResults($_islandora_solr_queryclass);
   }
 
-  if (variable_get('islandora_solr_debug_mode', 0)) { // debug dump
-    drupal_set_message(t('Params: <br/><pre>!debug</pre>', array('!debug' => print_r($_islandora_solr_queryclass->solrParams, TRUE))), 'status');
+  // debug dump
+  if (variable_get('islandora_solr_debug_mode', 0)) {
+    $message = t('Params: <br /><pre>!debug</pre>', array('!debug' => print_r($_islandora_solr_queryclass->solrParams, TRUE)));
+
+    drupal_set_message(filter_xss($message, array('pre', 'br')), 'status');
   }
 
   return $output;

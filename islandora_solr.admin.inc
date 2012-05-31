@@ -18,7 +18,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
   // check for the php solr lib class
   if (!class_exists('Apache_Solr_Service')) {
-    $message = t('This module requires the !url. Please install the client directory in the root directory of this module before continuing.', array('!url' => l(t('Apache Solr php client'), 'http://code.google.com/p/solr-php-client')));
+    $message = t('This module requires the <a href="!url">Apache Solr php client</a>. Please install the client directory in the root directory of this module before continuing.', array('!url' => 'http://code.google.com/p/solr-php-client'));
     drupal_set_message(check_plain($message));
     return;
   }
@@ -97,7 +97,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       '#type' => 'select',
       '#title' => t('Request Handler'),
       '#options' => $handlers,
-      '#description' => t('Request handlers as defined by !config', array('!config' => l(t('solrconfig.xml'), 'http://wiki.apache.org/solr/SolrConfigXml'))),
+      '#description' => t('Request handlers as defined by <a href="!url">solrconfig.xml</a>', array('!url' => 'http://wiki.apache.org/solr/SolrConfigXml')),
       '#default_value' => $handler,
       '#ajax' => array(
         'callback' => 'update_solr_url_div',
@@ -584,10 +584,10 @@ function _islandora_solr_get_handlers($solr_url) {
   $xml = simplexml_load_string(curl_exec($ch));
   foreach ($xml->requestHandler as $handler) {
     if ($handler['class'] == 'solr.SearchHandler') {
-      $handlerName = (string) $handler['name'];
-      $slashed = preg_match('/^\//', $handlerName);
-      if ($handlerName != 'dismax' && $handlerName != 'partitioned' & !$slashed) {
-        $handlers[$handlerName] = $handlerName;
+      $handler_name = (string) $handler['name'];
+      $slashed = preg_match('/^\//', $handler_name);
+      if ($handler_name != 'dismax' && $handler_name != 'partitioned' & !$slashed) {
+        $handlers[$handler_name] = $handler_name;
       }
     }
   }

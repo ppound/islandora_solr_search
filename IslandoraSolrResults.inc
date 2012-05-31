@@ -66,7 +66,7 @@ class IslandoraSolrResults {
     // debug (will be removed)
     $elements['solr_debug'] = '';
     if (variable_get('islandora_solr_debug_mode', 0)) {
-      $elements['solr_debug'] = $this->printDebugOutput($solrResult);
+      $elements['solr_debug'] = $this->printDebugOutput($apacheSolrResult);
     }
 
     // rendered secondary display profiles
@@ -193,21 +193,6 @@ class IslandoraSolrResults {
     return theme('islandora_solr', array('results' => $results_array, 'elements' => $elements));
   }
 
-
-
-
-
-  function printDebugOutput($results) {
-    // debug dump
-    $results_r .= "<pre>Results: " . print_r($results, TRUE) . "</pre>";
-    $fieldset_r = array(
-      '#title' => t("Raw Results"),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      '#value' => $results_r,
-    );
-    return theme('fieldset', $fieldset_r);
-  }
 
 
   /**
@@ -626,7 +611,7 @@ class IslandoraSolrResults {
 
     // @TODO: Should be changed to format_string for Drupal 7
     // @TODO: does this check for exclude filters? -PID:"foo"
-    $filter = $key . ':"' . replaceSlashes($value) . '"'; // PID:"foo"
+    $filter = $key . ':"' . replace_slashes($value) . '"'; // PID:"foo"
 
     // check if item should show up
     $disable_link = (array_search($filter, $fq) !== FALSE) || $number == $solrQueryProcessor->solrResult->response->numFound;
@@ -678,6 +663,22 @@ class IslandoraSolrResults {
     }
   }
 
+
+
+
+  function printDebugOutput($apacheSolrResults) {
+    // debug dump
+
+    $results = "<pre>Results: " . print_r($apacheSolrResults, TRUE) . "</pre>";
+    $fieldset = array(
+      '#title' => t("Raw Results"),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#value' => $results,
+      '#children' => '',
+    );
+    return theme('fieldset', array('element' => $fieldset));
+  }
 
 
 

@@ -1,4 +1,4 @@
-(function($) {
+(function ($) {
   
   // snippet for facet block toggle
   Drupal.behaviors.islandora_solr_toggle = {
@@ -17,4 +17,4 @@
     }
   };
   
-}(jQuery));   
+})(jQuery);
