@@ -205,8 +205,6 @@ class IslandoraSolrQueryProcessor {
       $solr_query = ($this->internalSolrQuery) ? $this->internalSolrQuery : $this->solrQuery;
       // execute query
       $results = $solr->search($solr_query, $this->solrStart, $this->solrLimit, $this->solrParams);
-    
-      
     } catch (Exception $e) {
       drupal_set_message(check_plain(t('Error searching solr index')) . ' ' . $e->getMessage(), 'error');
     }
