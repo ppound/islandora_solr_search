@@ -13,7 +13,6 @@ Normal Priority
 ---------------
 
 - don't hardcode php solr library, instead override it.
-- check fixes in advanced_block branch, I might have forgotten some.
 - table display works but should be rendered through a template file.
 
 - check luke for multivalue on sort
@@ -25,8 +24,6 @@ Low Priority
 - expose result limit controls
 - put object url's in a global variable?
 - Boolean operators as query seem to choke
-- sort without order chokes. Check before adding parameter in processor?
 
-- empty query with dismax seems to return the same as no dismax (maybe it's just how solrconfig is defined)
 - when changing primary display, keep &limit in the url or should it show the default? Displays can override this though.
-- make sure islandora_solr.theme.css is populated and called right.
+- empty query with dismax seems to return the same as no dismax (maybe it's just how solrconfig is defined)
