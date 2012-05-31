@@ -10,6 +10,7 @@ DEFINE('SOLR_SEARCH_PATH', 'islandora/search');
 
 /**
  * Islandora Solr Query Processor.
+ *
  * Used to store Solr query parameters and to connect to solr to execute the
  * query. Populates the solrResult property with the raw Solr query results.
  */
@@ -41,8 +42,12 @@ class IslandoraSolrQueryProcessor {
    * Build and execute a query.
    *
    * @param string $query
+   *   The query string provided in the url.
    * @param type $params
-   * @return type
+   *   All url parameters from the solr results page.
+   * @return
+   *   The contents of the executeQuery() method. ExecuteQuery() stores the raw
+   *   solr results in the solrResult property.
    */
   function buildAndExecuteQuery($query, $params = NULL) {
     // include IslandoraSolrResults
@@ -63,12 +68,18 @@ class IslandoraSolrQueryProcessor {
   }
 
   /**
-   * Builds and performs checks for a Solr query based on url parameters and
-   * defaults set in the Islandora Solr admin form.
+   * Builds Solr query and performs checks based on url parameters and
+   * defaults set in the Islandora Solr admin form. Populates the properties to
+   * be used for the query execution.
    *
    * @param type $query
+   *   The query string provided in the url.
    * @param type $params
-   * @return type
+   *   All url parameters from the solr results page.
+   * @return
+   *   Doesn't return anything.
+   *
+   * @see IslandoraSolrQueryProcessor::buildAndExecuteQuery()
    */
   function buildQuery($query, $params = array() ) {
 
@@ -195,9 +206,12 @@ class IslandoraSolrQueryProcessor {
 
   /**
    * Connects to Solr and executes the query. Collects the raw Solr results and
-   * populates the solrResults property.
+   * populates the solrResults property. Includes a module_invoke_all to make
+   * changes to the query object before it executes.
    *
-   * @return type
+   * @return
+   *   Doesn't return anything, but does populate the solrResults property with
+   *   the raw Solr results.
    */
   function executeQuery() {
 

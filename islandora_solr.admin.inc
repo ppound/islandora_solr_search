@@ -10,7 +10,8 @@
  *
  * @param type $form
  * @param type $form_state
- * @return int
+ * @return
+ *   The form array.
  */
 function islandora_solr_admin_settings($form, &$form_state) {
 
@@ -72,7 +73,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#default_value' => $solr_url,
     '#required' => TRUE,
     '#ajax' => array(
-      'callback' => 'update_solr_url_div',
+      'callback' => 'update_solr_url',
       'wrapper' => 'solr-url',
       'effect' => 'fade',
       'event' => 'blur',
@@ -101,7 +102,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       '#description' => t('Request handlers as defined by <a href="!url">solrconfig.xml</a>', array('!url' => 'http://wiki.apache.org/solr/SolrConfigXml')),
       '#default_value' => $handler,
       '#ajax' => array(
-        'callback' => 'update_solr_url_div',
+        'callback' => 'update_solr_url',
         'wrapper' => 'solr-url',
         'effect' => 'fade',
         'event' => 'change',
@@ -436,7 +437,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
  * Theme function for the admin primary display table
  *
  * @param type $variables
- * @return type
+ *   render element: $form
+ *   Contains the form array
+ * @return
+ *   rendered form element
+ *
+ *  @see islandora_solr_admin_settings()
  */
 function theme_islandora_solr_admin_primary_display($variables) {
   // set form
@@ -581,7 +587,10 @@ function _islandora_solr_admin_settings_submit($form, &$form_state) {
  * Get available handlers
  *
  * @param String $solr_url
- * @return array
+ *   url which points to Solr
+ * @return
+ *   a php array with request handlers found in solrconfig.xml of the Solr
+ *   instance
  */
 function _islandora_solr_get_handlers($solr_url) {
   $url = $solr_url . '/admin/file/?file=solrconfig.xml';
@@ -602,13 +611,16 @@ function _islandora_solr_get_handlers($solr_url) {
 }
 
 /**
+ * AJAX callback from the admin form.
  * Checks url validity and refreshes request handler dropdown list
  *
  * @param type $form
  * @param array $form_state
  * @return type
+ *
+ * @see islandora_solr_admin_settings()
  */
-function update_solr_url_div($form, $form_state) {
+function update_solr_url($form, $form_state) {
   unset($form_state['submit_handlers']);
   form_execute_handlers('submit', $form, $form_state);
   $form_state['rebuild'] = TRUE;
@@ -617,10 +629,12 @@ function update_solr_url_div($form, $form_state) {
 }
 
 /**
- * admin AJAX callback
+ * Submit button callback to update the solr url only
  *
  * @param type $form
  * @param array $form_state
+ *
+ * @see islandora_solr_admin_settings()
  */
 function solr_admin_refresh($form, &$form_state) {
   unset($form_state['submit_handlers']);
@@ -637,8 +651,13 @@ function solr_admin_refresh($form, &$form_state) {
  * Checks for dismax
  *
  * @param type $solr_url
+ *   url which point to solr
  * @param type $selected_handler
+ *   handler to check if dismax is allowed on it
  * @return boolean
+ *  TRUE if dismax is allowed, FALSE if not.
+ *
+ * @see islandora_solr_admin_settings()
  */
 function _islandora_solr_check_dismax($solr_url, $selected_handler) {
   $dismax = FALSE;

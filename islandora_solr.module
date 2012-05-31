@@ -174,15 +174,22 @@ function islandora_solr_islandora_solr_primary_display() {
 
 
 /**
- * Islandora Solr callback.
+ * Page callback: Islandora Solr.
+ *
  * Gathers url parameters, and calls the query builder, which prepares the query
  * based on the admin settings and url values.
  * Finds the right display and calls the IslandoraSolrRestuls class to build the
  * display, which it returns to the page.
  *
  * @global IslandoraSolrQueryProcessor $_islandora_solr_queryclass
- * @param type $query
- * @return type
+ *   the IslandoraSolrQueryProcessor object which includes the current query
+ *   settings and the raw Solr results.
+ * @param $query
+ *   The query string
+ * @return
+ *   A rendered Solr display
+ *
+ * @see hook_menu()
  */
 function islandora_solr($query = NULL) {
   global $_islandora_solr_queryclass;
@@ -247,24 +254,24 @@ function islandora_solr($query = NULL) {
   require_once(drupal_get_path('module', $profile['module']) . '/' . $profile['file']);
 
   // Get display class and function from current display
-  $solrClass = $profile['class'];
-  $solrFunction = $profile['function'];
+  $solr_class = $profile['class'];
+  $solr_function = $profile['function'];
 
   $nope = FALSE;
 
   // check if the display's class exists
-  if (class_exists($solrClass)) {
-    $implementation = new $solrClass();
+  if (class_exists($solr_class)) {
+    $implementation = new $solr_class();
   }
   else {
     $nope = TRUE;
   }
 
   // check if the display's method exists
-  if (!$nope && method_exists($implementation, $solrFunction)) {
+  if (!$nope && method_exists($implementation, $solr_function)) {
 
     // implement results
-    $output = $implementation->$solrFunction($_islandora_solr_queryclass);
+    $output = $implementation->$solr_function($_islandora_solr_queryclass);
   }
   else {
     $nope = TRUE;
@@ -273,8 +280,8 @@ function islandora_solr($query = NULL) {
   // Class and method are not found: use default
   if ($nope) {
 
-    $resultsClass = new IslandoraSolrResults();
-    $output = $resultsClass->displayResults($_islandora_solr_queryclass);
+    $results_class = new IslandoraSolrResults();
+    $output = $results_class->displayResults($_islandora_solr_queryclass);
   }
 
   // debug dump
@@ -288,6 +295,10 @@ function islandora_solr($query = NULL) {
 
 /**
  * Implements hook_help().
+ *
+ * @param type $path
+ * @param type $arg
+ * @return type
  */
 function islandora_solr_help($path, $arg) {
   switch ($path) {
@@ -326,10 +337,12 @@ function islandora_solr_help($path, $arg) {
 
 
 /**
- * Pings a solr instance for availability. Returns ping time or a FALSE boolean
+ * Pings a solr instance for availability.
  *
- * @param type $solr_url
- * @return boolean
+ * @param $solr_url
+ *   A url that points to Solr.
+ * @return
+ *   Returns ping time in milliseconds or a FALSE boolean
  */
 function islandora_solr_ping($solr_url) {
   // check for 'http://' or 'https://' prefix
@@ -365,10 +378,13 @@ function islandora_solr_ping($solr_url) {
 
 
 /**
- * Check for 'http://' or 'https://'
+ * Check for url scheme
  *
  * @param string $url
+ *   A url to check
  * @return string
+ *   If the url doesn't include a scheme ('http://' or 'https://') then it will
+ *   include the url with added 'http://' scheme.
  */
 function islandora_solr_check_http($url) {
 
@@ -385,8 +401,15 @@ function islandora_solr_check_http($url) {
  * Function to get Solr luke as a php array.
  *
  * @param type $solr_url
+ *   url which points to solr
  * @param type $num_terms
- * @return boolean
+ *   number of terms to include per solr field. Terms are indexed strings which
+ *   include the number of occurrences in the solr index. Higher occurrences are
+ *   listed first. Defaults to 0 because including this can add a siginificant
+ *   perfomance hit.
+ * @return
+ *   if solr is available it returns Solr Luke data as a php array, if not it
+ *   returns FALSE.
  */
 function islandora_solr_get_luke($solr_url = NULL, $num_terms = 0) {
 

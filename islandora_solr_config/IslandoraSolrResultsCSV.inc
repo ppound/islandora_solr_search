@@ -22,9 +22,12 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
    *
    * @global type $base_url
    * @param type $solrQueryProcessor
-   * @param type $title
+   *   the IslandoraSolrQueryProcessor object which includes the current query
+   *   settings and the raw Solr results.
+   *
+   * @see IslandoraSolrResults
    */
-  function printCSV($solrQueryProcessor, $title = "Search Results") {
+  function printCSV($solrQueryProcessor) {
 
     // Note: solrLimit is really stating the number of rows wanted,
     // not the row number of the upper limit document.  That is, if you

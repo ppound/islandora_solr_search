@@ -11,6 +11,18 @@
  *
  * @global type $base_url
  * @param type $variables
+ *   An associative array containing:
+ *   - results: Rendered primary display
+ *   - secondary_profiles: (optional) Rendered list of secondary display
+ *     profiles
+ *   - elements: additional elements to populate the results page
+ *     - pager: (optional) Rendered pager
+ *     - solr_total: (optional) Total amount of documents found.
+ *     - solr_start: (optional) Solr start position
+ *     - solr_end: (optional) Solr end position
+ *
+ * @see islandora_solr_theme()
+ * @see IslandoraSolrResults::displayResults()
  */
 function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
   // base url
@@ -48,6 +60,12 @@ function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
  * @global type $base_url
  * @global type $base_path
  * @param type $variables
+ *   An associative array containing:
+ *   - results: array of returned Solr documents
+ *   - elements: (optional) additional elements to include in the template file
+ *
+ * @see islandora_solr_theme()
+ * @see IslandoraSolrResults::printResults()
  */
 function islandora_solr_preprocess_islandora_solr(&$variables) {
   // base url

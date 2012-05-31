@@ -30,7 +30,13 @@ class IslandoraSolrResults {
    * Output the main body of the search results
    *
    * @param type $solrQueryProcessor
-   * @return type
+   *   The IslandoraSolrQueryProcessor object which includes the current query
+   *   settings and the raw Solr results.
+   * @return
+   *   Returns themed Solr results page, including wrapper and rendered search
+   *   results.
+   *
+   * @see islandora_solr()
    */
   function displayResults($solrQueryProcessor) {
 
@@ -82,7 +88,12 @@ class IslandoraSolrResults {
    * Renders the secondary display profile list
    *
    * @param type $solrQueryProcessor
-   * @return type
+   *   the IslandoraSolrQueryProcessor object which includes the current query
+   *   settings and the raw Solr results.
+   * @return
+   *   Themed list of secondary displays
+   *
+   * @see IslandoraSolrResults::displayResults()
    */
   function addSecondaries($solrQueryProcessor) {
     $query_list = array();
@@ -128,7 +139,11 @@ class IslandoraSolrResults {
    * override.
    *
    * @param type $results
-   * @return type
+   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
+   * @return
+   *   Rendered Solr results
+   *
+   * @see IslandoraSolrResults::displayResults()
    */
   function printResults($results) {
 
@@ -202,7 +217,10 @@ class IslandoraSolrResults {
    * current filters. Includes a link to exclude the query/filter.
    *
    * @param type $solrQueryProcessor
-   * @return string
+   *   The IslandoraSolrQueryProcessor object which includes the current query
+   *   settings and the raw Solr results.
+   * @return
+   *   Rendered lists of the currently active query and/or filters.
    */
   function currentQuery($solrQueryProcessor) {
 
@@ -320,6 +338,8 @@ class IslandoraSolrResults {
    * Provides links to exclude the query or filters.
    *
    * @param type $solrQueryProcessor
+   *   The IslandoraSolrQueryProcessor object which includes the current query
+   *   settings and the raw Solr results.
    */
   function setBreadcrumbs($solrQueryProcessor) {
 
@@ -489,7 +509,14 @@ class IslandoraSolrResults {
    * exclude a facet field in a search.
    *
    * @param type $solrQueryProcessor
-   * @return string
+   *   The IslandoraSolrQueryProcessor object which includes the current query
+   *   settings and the raw Solr results.
+   * @return
+   *   Rendered lists of facets including links to include or exclude a facet
+   *   field.
+   *
+   * @see islandora_solr_islandora_solr_query_blocks()
+   * @see islandora_solr_block_view()
    */
   function displayFacets($solrQueryProcessor) {
     // set variables
@@ -591,11 +618,23 @@ class IslandoraSolrResults {
    * A facet callback. Renders a single facet field.
    *
    * @param type $key
+   *   Facet field name.
    * @param type $value
+   *   Facet field value.
    * @param type $number
+   *   Facet value count. The amount of occurrences of the string in this
+   *   specific Solr field in the index.
    * @param type $solrQueryProcessor
+   *   The IslandoraSolrQueryProcessor object which includes the current query
+   *   settings and the raw Solr results.
    * @param type $facet_count
-   * @param string $list
+   *   Incrementing ingeger to count fields per facet. Used to set a soft limit
+   *   on facet fields, hiding a certain amount of facet fields by default and
+   *   having the ability to expose more if the user chooses so.
+   * @param array $list
+   *   An array to populate all the fields per facet.
+   *
+   * @see IslandoraSolrResults::addFacets()
    */
   function _addFacets(&$key, &$value, &$number, &$solrQueryProcessor, &$facet_count, &$list) {
 
@@ -665,7 +704,11 @@ class IslandoraSolrResults {
    * debugging purposes.
    *
    * @param type $apacheSolrResults
-   * @return type
+   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
+   * @return
+   *   Rendered fieldset containing raw Solr results data.
+   *
+   * @see IslandoraSolrResults::displayResults()
    */
   function printDebugOutput($apacheSolrResults) {
     // debug dump
@@ -707,7 +750,9 @@ class IslandoraSolrResults {
    * Merges highlight fields with the rest of the solr results.
    *
    * @param type $results
-   * @return boolean
+   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
+   * @return
+   *   raw Solr results array merged with highlight fields
    */
   function prep_results($results) {
     // catch if the result query returned an error

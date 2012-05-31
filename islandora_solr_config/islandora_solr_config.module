@@ -103,12 +103,15 @@ function islandora_solr_config_help($path, $arg) {
 
 /**
  * Implements hook_islandora_solr_query_processor().
+ *
  * Takes the current results limit (admin default or from url parameter) and
  * finds the closed number that is dividable by 4 and 3, so when the layout is
  * sized down in a responsive layout, the last row of results won't show
  * 'trailing' results.
  *
  * @param type $processor
+ *   the IslandoraSolrQueryProcessor object which includes the current query
+ *   settings but before it has called ::executeQuery().
  */
 function islandora_solr_config_islandora_solr_query_processor($processor) {
 

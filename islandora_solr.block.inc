@@ -99,8 +99,12 @@ function islandora_solr_block_info() {
  * Implements hook_block_view().
  *
  * @global type $_islandora_solr_queryclass
+ *   the IslandoraSolrQueryProcessor object which includes the current query
+ *   settings and the raw Solr results.
  * @param type $block_name
+ *   delta parameter for blocks. This is the unique block name.
  * @return type
+ *   returns an array containing the data to display in the block
  */
 function islandora_solr_block_view($block_name = '') {
   // set variable
@@ -198,6 +202,8 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
  * Islandora Solr advanced search block form
  *
  * @global type $_islandora_solr_queryclass
+ *   the IslandoraSolrQueryProcessor object which includes the current query
+ *   settings and the raw Solr results.
  * @param type $form
  * @param array $form_state
  * @return string
@@ -392,16 +398,12 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
  * @param type $form
  * @param type $form_state
  * @return type
+ *
+ * @see islandora_solr_advanced_search_form()
  */
 function _islandora_solr_advanced_search_terms($form, &$form_state) {
   return $form['terms'];
 }
-
-
-
-
-
-
 
 
 /**
@@ -409,6 +411,8 @@ function _islandora_solr_advanced_search_terms($form, &$form_state) {
  *
  * @param type $form
  * @param type $form_state
+ *
+ * @see islandora_solr_advanced_search_form()
  */
 function islandora_solr_advanced_search_form_submit($form, &$form_state) {
 
@@ -461,7 +465,10 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
  * that are enabled through the admin form.
  *
  * @global type $_islandora_solr_queryclass
- * @return type
+ *   the IslandoraSolrQueryProcessor object which includes the current query
+ *   settings and the raw Solr results.
+ * @return
+ *   a rendered list containing enabled primary display links
  */
 function islandora_solr_display() {
   global $_islandora_solr_queryclass;
@@ -550,7 +557,11 @@ function islandora_solr_display() {
  * Provides a list to change the sorting on a current search query.
  *
  * @global type $_islandora_solr_queryclass
- * @return type
+ *   the IslandoraSolrQueryProcessor object which includes the current query
+ *   settings and the raw Solr results.
+ * @return
+ *   a rendered list containing Solr sort links
+ *
  */
 function islandora_solr_sort() {
   global $_islandora_solr_queryclass;

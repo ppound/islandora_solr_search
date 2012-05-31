@@ -18,9 +18,12 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
   /**
    * Renders the Solr results as a table.
    *
-   * @global type $base_url
    * @param type $results
-   * @return type
+   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
+   * @return
+   *   Rendered Solr results
+   *
+   * @see IslandoraSolrResults::displayResults()
    */
   function printResults($results) {
 
