@@ -17,7 +17,7 @@ Normal Priority
 - table display works but should be rendered through a template file.
 
 - check luke for multivalue on sort
-
+- add watchdog messages on error.
 
 Low Priority
 ------------
