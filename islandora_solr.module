@@ -5,10 +5,6 @@
  * Implementation of Solr search for the Islandora fedora_search module.
  */
 
-// set query class variable
-$_islandora_solr_queryclass;
-
-
 /**
  * Implements hook_init().
  *
