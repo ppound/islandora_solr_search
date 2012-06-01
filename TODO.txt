@@ -18,6 +18,8 @@ Normal Priority
 
 - check luke for multivalue on sort
 - add watchdog messages on error.
+- on query without filter parameters the delete link adds a ? or &
+- some snippets of markup could go in theme functions
 
 Low Priority
 ------------
