@@ -38,7 +38,7 @@ function islandora_solr_config_islandora_solr_primary_display() {
 }
 
 /**
- * Implements hook_islandora_solr_secondary_display()
+ * Implements hook_islandora_solr_secondary_display().
  */
 function islandora_solr_config_islandora_solr_secondary_display() {
   // set path
@@ -59,7 +59,7 @@ function islandora_solr_config_islandora_solr_secondary_display() {
 
 
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function islandora_solr_config_theme() {
   // set path
@@ -78,7 +78,7 @@ function islandora_solr_config_theme() {
 }
 
 /**
- * Implementation of hook_help().
+ * Implements hook_help().
  *
  * @param type $path
  * @param type $arg
@@ -96,7 +96,7 @@ function islandora_solr_config_help($path, $arg) {
         <li>Class - IslandoraSolrResultsTable</l1>
         <li>Method - displayResults</l1>
         </ul>
-        ", array('!page' => l("Islandora_solr_search configuration page", 'admin/islandora/search/islandora_solr'),)
+        ", array('!page' => l("Islandora_solr_search configuration page", 'admin/islandora/search/islandora_solr'))
       );
   }
 }
@@ -109,17 +109,17 @@ function islandora_solr_config_help($path, $arg) {
  * sized down in a responsive layout, the last row of results won't show
  * 'trailing' results.
  *
- * @param type $islandoraSolrQuery
+ * @param type $islandora_solr_query
  *   The IslandoraSolrQueryProcessor object which includes the current query
  *   settings but at the beginning of IslandoraSolrQueryProcessor::executeQuery().
  */
-function islandora_solr_config_islandora_solr_query($islandoraSolrQuery) {
+function islandora_solr_config_islandora_solr_query($islandora_solr_query) {
 
   // we're dealing with the grid display
-  if ($islandoraSolrQuery->display == 'grid') {
+  if ($islandora_solr_query->display == 'grid') {
 
     // set results limit
-    $limit = $islandoraSolrQuery->solrLimit;
+    $limit = $islandora_solr_query->solrLimit;
 
     // not dividable yet
     $dividable = FALSE;
@@ -132,6 +132,6 @@ function islandora_solr_config_islandora_solr_query($islandoraSolrQuery) {
       $limit++;
     }
     // set new limit
-    $islandoraSolrQuery->solrLimit = $solr_limit;
+    $islandora_solr_query->solrLimit = $solr_limit;
   }
 }

@@ -53,18 +53,18 @@ function hook_islandora_solr_secondary_display() {
 }
 
 /**
- * Hook which passes the IslandoraSolrQueryProcessor object right before it
+ * Hook which passes the IslandoraSolrQuery object right before it
  * connects to Solr and executes it. This is a hook to call when you want to
  * make 'last minute' changes.
  *
- * @param type $islandoraSolrQuery
- *   The IslandoraSolrQueryProcessor object which includes the current query
- *   settings but at the beginning of IslandoraSolrQueryProcessor::executeQuery().
+ * @param type $islandora_solr_query
+ *   The IslandoraSolrQuery object which includes the current query
+ *   settings but at the beginning of IslandoraSolrQuery::executeQuery().
  */
-function hook_islandora_solr_query($islandoraSolrQuery) {
+function hook_islandora_solr_query($islandora_solr_query) {
   // example: on example_display, always sort descending on fgs.createdDate
-  if ($islandoraSolrQuery->display == 'example_display') {
-    $islandoraSolrQuery->solrParams['sort'] = 'fgs.createdDate desc';
+  if ($islandora_solr_query->display == 'example_display') {
+    $islandora_solr_query->solrParams['sort'] = 'fgs.createdDate desc';
   }
 }
 
