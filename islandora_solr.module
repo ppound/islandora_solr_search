@@ -65,8 +65,8 @@ function islandora_solr_menu() {
   );
 
   $items['admin/islandora/search/islandora_solr'] = array(
-    'title' => 'Islandora solr client',
-    'description' => 'Managing Islandora Solr searching',
+    'title' => 'Solr client',
+    'description' => 'Configure Solr search settings.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_solr_admin_settings'),
     'access arguments' => array('administer islandora solr'),
@@ -93,12 +93,12 @@ function islandora_solr_admin_paths() {
 function islandora_solr_permission() {
   return array(
     'search islandora solr' => array(
-      'title' => t('Search the Islandora Solr index'),
-      'description' => t('Search the islandora solr index. (Expose search blocks and view search results)'),
+      'title' => t('Search the Solr index'),
+      'description' => t('Search for objects in the repository using Solr. This permission exposes the search blocks and allows you to see search results.'),
     ),
     'administer islandora solr' => array(
-      'title' => t('Administer Islandora Solr'),
-      'description' => t('Administer the Islandora Solr settings'),
+      'title' => t('Administer Solr'),
+      'description' => t('Administer settings for the Solr client.'),
     ),
   );
 }
