@@ -14,7 +14,7 @@ DEFINE('SOLR_SEARCH_PATH', 'islandora/search');
  * Used to store Solr query parameters and to connect to solr to execute the
  * query. Populates the solrResult property with the raw Solr query results.
  */
-class IslandoraSolrQuery {
+class IslandoraSolrQueryProcessor {
 
   public $solrQuery; // solr query
   public $internalSolrQuery; // query alternative set if solrQuery is empty
@@ -32,7 +32,7 @@ class IslandoraSolrQuery {
   /**
    * Constructor
    */
-  function IslandoraSolrQuery() {
+  function IslandoraSolrQueryProcessor() {
 
     // include common.inc
     module_load_include('inc', 'islandora_solr', 'includes/common');
@@ -79,7 +79,7 @@ class IslandoraSolrQuery {
    * @return
    *   Doesn't return anything.
    *
-   * @see IslandoraSolrQuery::buildAndExecuteQuery()
+   * @see IslandoraSolrQueryProcessor::buildAndExecuteQuery()
    */
   function buildQuery($query, $params = array() ) {
 

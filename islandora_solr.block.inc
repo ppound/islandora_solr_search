@@ -99,7 +99,7 @@ function islandora_solr_block_info() {
  * Implements hook_block_view().
  *
  * @global type $_islandora_solr_queryclass
- *   the IslandoraSolrQuery object which includes the current query
+ *   the IslandoraSolrQueryProcessor object which includes the current query
  *   settings and the raw Solr results.
  * @param type $block_name
  *   delta parameter for blocks. This is the unique block name.
@@ -129,7 +129,7 @@ function islandora_solr_block_view($block_name = '') {
     require_once( drupal_get_path('module', $solr_blocks[$block_name]['module']) . '/' . $solr_blocks[$block_name]['file'] );
 
     // if a class is present, instantiate it and proceed.
-    // The variable $_islandora_solr_queryclass (the IslandoraSolrQuery, containing
+    // The variable $_islandora_solr_queryclass (the IslandoraSolrQueryProcessor, containing
     // the Solr search result), is fed as an argument.
     if (!empty($solr_blocks[$block_name]['class'])) {
       $display_class = new $solr_blocks[$block_name]['class']();
@@ -202,7 +202,7 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
  * Islandora Solr advanced search block form
  *
  * @global type $_islandora_solr_queryclass
- *   the IslandoraSolrQuery object which includes the current query
+ *   the IslandoraSolrQueryProcessor object which includes the current query
  *   settings and the raw Solr results.
  * @param type $form
  * @param array $form_state
@@ -465,7 +465,7 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
  * that are enabled through the admin form.
  *
  * @global type $_islandora_solr_queryclass
- *   the IslandoraSolrQuery object which includes the current query
+ *   the IslandoraSolrQueryProcessor object which includes the current query
  *   settings and the raw Solr results.
  * @return
  *   a rendered list containing enabled primary display links
@@ -557,7 +557,7 @@ function islandora_solr_display() {
  * Provides a list to change the sorting on a current search query.
  *
  * @global type $_islandora_solr_queryclass
- *   the IslandoraSolrQuery object which includes the current query
+ *   the IslandoraSolrQueryProcessor object which includes the current query
  *   settings and the raw Solr results.
  * @return
  *   a rendered list containing Solr sort links

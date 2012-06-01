@@ -7,6 +7,6 @@ version = 7.x-dev
 core = 7.x
 
 files[] = SolrPhpClient/Apache/Solr/Service.php
-files[] = IslandoraSolrQuery.inc
+files[] = IslandoraSolrQueryProcessor.inc
 
 stylesheets[all][] = css/islandora_solr.base.css

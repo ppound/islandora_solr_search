@@ -22,7 +22,7 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
    *
    * @global type $base_url
    * @param type $islandoraSolrQuery
-   *   the IslandoraSolrQuery object which includes the current query
+   *   the IslandoraSolrQueryProcessor object which includes the current query
    *   settings and the raw Solr results.
    *
    * @see IslandoraSolrResults

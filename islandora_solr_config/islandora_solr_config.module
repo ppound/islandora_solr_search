@@ -110,8 +110,8 @@ function islandora_solr_config_help($path, $arg) {
  * 'trailing' results.
  *
  * @param type $islandoraSolrQuery
- *   The IslandoraSolrQuery object which includes the current query
- *   settings but at the beginning of IslandoraSolrQuery::executeQuery().
+ *   The IslandoraSolrQueryProcessor object which includes the current query
+ *   settings but at the beginning of IslandoraSolrQueryProcessor::executeQuery().
  */
 function islandora_solr_config_islandora_solr_query($islandoraSolrQuery) {
 

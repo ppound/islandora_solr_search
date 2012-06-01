@@ -30,7 +30,7 @@ class IslandoraSolrResults {
    * Output the main body of the search results
    *
    * @param type $islandoraSolrQuery
-   *   The IslandoraSolrQuery object which includes the current query
+   *   The IslandoraSolrQueryProcessor object which includes the current query
    *   settings and the raw Solr results.
    * @return
    *   Returns themed Solr results page, including wrapper and rendered search
@@ -88,7 +88,7 @@ class IslandoraSolrResults {
    * Renders the secondary display profile list
    *
    * @param type $islandoraSolrQuery
-   *   the IslandoraSolrQuery object which includes the current query
+   *   the IslandoraSolrQueryProcessor object which includes the current query
    *   settings and the raw Solr results.
    * @return
    *   Themed list of secondary displays
@@ -139,7 +139,7 @@ class IslandoraSolrResults {
    * override.
    *
    * @param type $results
-   *   The raw Solr results from IslandoraSolrQuery::solrResult
+   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
    * @return
    *   Rendered Solr results
    *
@@ -217,7 +217,7 @@ class IslandoraSolrResults {
    * current filters. Includes a link to exclude the query/filter.
    *
    * @param type $islandoraSolrQuery
-   *   The IslandoraSolrQuery object which includes the current query
+   *   The IslandoraSolrQueryProcessor object which includes the current query
    *   settings and the raw Solr results.
    * @return
    *   Rendered lists of the currently active query and/or filters.
@@ -338,7 +338,7 @@ class IslandoraSolrResults {
    * Provides links to exclude the query or filters.
    *
    * @param type $islandoraSolrQuery
-   *   The IslandoraSolrQuery object which includes the current query
+   *   The IslandoraSolrQueryProcessor object which includes the current query
    *   settings and the raw Solr results.
    */
   function setBreadcrumbs($islandoraSolrQuery) {
@@ -509,7 +509,7 @@ class IslandoraSolrResults {
    * exclude a facet field in a search.
    *
    * @param type $islandoraSolrQuery
-   *   The IslandoraSolrQuery object which includes the current query
+   *   The IslandoraSolrQueryProcessor object which includes the current query
    *   settings and the raw Solr results.
    * @return
    *   Rendered lists of facets including links to include or exclude a facet
@@ -625,7 +625,7 @@ class IslandoraSolrResults {
    *   Facet value count. The amount of occurrences of the string in this
    *   specific Solr field in the index.
    * @param type $islandoraSolrQuery
-   *   The IslandoraSolrQuery object which includes the current query
+   *   The IslandoraSolrQueryProcessor object which includes the current query
    *   settings and the raw Solr results.
    * @param type $facet_count
    *   Incrementing ingeger to count fields per facet. Used to set a soft limit
@@ -704,7 +704,7 @@ class IslandoraSolrResults {
    * debugging purposes.
    *
    * @param type $apacheSolrResults
-   *   The raw Solr results from IslandoraSolrQuery::solrResult
+   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
    * @return
    *   Rendered fieldset containing raw Solr results data.
    *
@@ -750,7 +750,7 @@ class IslandoraSolrResults {
    * Merges highlight fields with the rest of the solr results.
    *
    * @param type $results
-   *   The raw Solr results from IslandoraSolrQuery::solrResult
+   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
    * @return
    *   raw Solr results array merged with highlight fields
    */

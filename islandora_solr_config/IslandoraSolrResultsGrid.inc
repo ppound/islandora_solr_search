@@ -15,7 +15,7 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
    * on the Islandora collection grid view. Some styling is inherited from it.
    *
    * @param type $results
-   *   The raw Solr results from IslandoraSolrQuery::solrResult
+   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
    * @return
    *   Rendered Solr results
    *
