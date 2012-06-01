@@ -271,8 +271,8 @@ class IslandoraSolrResults {
       $query_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $query_value;
 
       // add wrap and list
-      $output .= '<div class="islandora_solr_query_wrap">';
-      $output .= theme('item_list', array('items' => $query_list, 'title' => t('Query'), 'type' => 'ul', 'attributes' => array('class' => 'islandora_solr_query_list query_list')));
+      $output .= '<div class="islandora-solr-query-wrap">';
+      $output .= theme('item_list', array('items' => $query_list, 'title' => t('Query'), 'type' => 'ul', 'attributes' => array('class' => 'islandora-solr-query-list query-list')));
       $output .= '</div>'; // 'islandora_solr_query_wrap'
 
     }
@@ -326,8 +326,8 @@ class IslandoraSolrResults {
         $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . $filter_split[1];
       }
       // return filter list
-      $output .= '<div class="islandora_solr_filter_wrap">';
-      $output .= theme('item_list', array('items' => $filter_list, 'title' => t("Enabled Filters"), 'type' => 'ul', 'attributes' => array('class' => 'islandora_solr_filter_list filter_list')));
+      $output .= '<div class="islandora-solr-filter-wrap">';
+      $output .= theme('item_list', array('items' => $filter_list, 'title' => t("Enabled Filters"), 'type' => 'ul', 'attributes' => array('class' => 'islandora-solr-filter-list filter-list')));
       $output .= '</div>'; // 'islandora_solr_filter_wrap'
     }
     return $output;
