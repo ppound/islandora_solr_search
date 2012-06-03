@@ -433,3 +433,26 @@ function islandora_solr_get_luke($solr_url = NULL, $num_terms = 0) {
   }
 }
 
+
+
+/**
+ * Check if the current context is the search results page.
+ *
+ * @TODO: checking for display might not be the best way to do this. Need to
+ * review the way blocks are created.
+ * 
+ * @param object $islandora_solr_query
+ *   The IslandoraSolrQueryProcessor object which includes the current query
+ *   settings but at the beginning of IslandoraSolrQueryProcessor::executeQuery().
+ * @return boolean
+ *   Returns TRUE if the context is the search results page. FALSE if not.
+ */
+function islandora_solr_results_page($islandora_solr_query) {
+  
+  if (isset($islandora_solr_query->display)) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
