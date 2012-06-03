@@ -9,10 +9,17 @@ High priority
 - update hook_help functions
 - create islandora_solr.api.php
 - check if islandora_solr.install is doing the right things.
+- there's an issue if a solr query is executed programatcially. The query block
+shows up. Really need to rethink how blocks are rendered and when/how
+IslandoraSolrResults is called
+- add a check to see if the context is the search results page. Currently we
+check if IslandoraSolrQueryProcessor::display is set, which is not ideal.
 
 Normal Priority
 ---------------
 
+- check if spaces could be replaced by + or %20 , which would simplify some functions (splitting strings)
+http://wiki.apache.org/solr/CommonQueryParameters#sort
 - don't hardcode php solr library, instead override it.
 - table display works but should be rendered through a template file.
 

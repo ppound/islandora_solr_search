@@ -239,7 +239,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
     $values = $form_state['values'];
   }
   // 2. populate with current query on search results page
-  elseif (class_exists('IslandoraSolrResults') AND (!isset($_islandora_solr_queryclass->internalSolrParams['type']) OR $_islandora_solr_queryclass->internalSolrParams['type'] != 'dismax')) {
+  elseif (isset($_islandora_solr_queryclass->display) AND (!isset($_islandora_solr_queryclass->internalSolrParams['type']) OR $_islandora_solr_queryclass->internalSolrParams['type'] != 'dismax')) {
 
     // get current query
     $query = $_islandora_solr_queryclass->solrQuery;
