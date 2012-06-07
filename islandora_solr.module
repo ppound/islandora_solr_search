@@ -396,9 +396,11 @@ function islandora_solr_check_http($url) {
 /**
  * Function to get Solr luke as a php array.
  *
- * @param type $solr_url
+ * @param string $solr_url
  *   url which points to solr
- * @param type $num_terms
+ * @param string $field
+ *   limit luke results by entering a single solr field
+ * @param int $num_terms
  *   number of terms to include per solr field. Terms are indexed strings which
  *   include the number of occurrences in the solr index. Higher occurrences are
  *   listed first. Defaults to 0 because including this can add a siginificant
@@ -407,7 +409,7 @@ function islandora_solr_check_http($url) {
  *   if solr is available it returns Solr Luke data as a php array, if not it
  *   returns FALSE.
  */
-function islandora_solr_get_luke($solr_url = NULL, $num_terms = 0) {
+function islandora_solr_get_luke($solr_url = NULL, $field = NULL, $num_terms = 0) {
 
   if (!$solr_url) {
     // create url
@@ -416,10 +418,23 @@ function islandora_solr_get_luke($solr_url = NULL, $num_terms = 0) {
 
   // if solr is available get luke
   if (islandora_solr_ping($solr_url)) {
+
     // create url
-    $luke_url = $solr_url . '/admin/luke?wt=json&numTerms=' . $num_terms; //?wt=json
+    $luke_url = $solr_url . '/admin/luke';
     // check for http://
     $luke_url = islandora_solr_check_http($luke_url);
+    
+    $luke_query = array(
+      'wt' => 'json',
+      'numTerms' => $num_terms,
+    );
+    if ($field) {
+      $luke_query['fl'] = $field;
+    }
+
+    // generate nice url
+    $luke_url = url($luke_url, array('absolute' => TRUE, 'query' => $luke_query));
+
     // get file content (= json string)
     $luke_json = file_get_contents($luke_url, 0, NULL, NULL);
 
