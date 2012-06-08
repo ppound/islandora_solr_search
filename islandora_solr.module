@@ -449,6 +449,15 @@ function islandora_solr_get_luke($solr_url = NULL, $field = NULL, $num_terms = 0
 }
 
 
+/**
+ * Returns an array containing all fields in Luke that are sortable.
+ *
+ * @param string $solr_url
+ *   url which points to solr
+ * @return boolean
+ *   returns an array containing all fields in Luke that are sortable. If no
+ *   fields are sortable, it returns FALSE
+ */
 function islandora_solr_get_sortable($solr_url = NULL) {
   // set variable
   $sortable = array();
@@ -478,10 +487,20 @@ function islandora_solr_get_sortable($solr_url = NULL) {
   return $sortable; 
 }
 
-
+/**
+ * Checks a single solr field if it's sortable.
+ *
+ * @param string $solr_url
+ *   url which points to solr
+ * @param string $field
+ *   solr field to be checked for being sortable
+ * @return boolean
+ *   Returns TRUE if the given field is sortable, returns FALSE if the field is
+ *   not sortable or if field is not set.
+ */
 function islandora_solr_check_sortable($solr_url = NULL, $field = NULL) {
   // set variable
-  $sortable = 'FALSE';
+  $sortable = FALSE;
   
   if ($field) {
     $luke = islandora_solr_get_luke($solr_url, $field);
@@ -493,7 +512,7 @@ function islandora_solr_check_sortable($solr_url = NULL, $field = NULL) {
       // must be indexed and can't be multivalued
       // http://wiki.apache.org/solr/CommonQueryParameters#sort
       if (strstr($schema, "I") != FALSE AND strstr($schema, "M") == FALSE) {
-        $sortable = 'TRUE';
+        $sortable = TRUE;
       }
     }
   }
