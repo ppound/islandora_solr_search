@@ -342,7 +342,8 @@ class IslandoraSolrResults {
         $filter_split[1] = trim($filter_split[1], "\"");
 
         // if value is date
-        if (isset($solrQueryProcessor->solrParams['facet.date']) AND in_array($key, $solrQueryProcessor->solrParams['facet.date'])) {
+        if (isset($solrQueryProcessor->solrParams['facet.date']) AND in_array(ltrim($filter_split[0], '-'), $solrQueryProcessor->solrParams['facet.date'])) {
+          // split range filter string to return formatted date values
           $filter_str = $filter_split[1];
           $filter_str = trim($filter_str, '[');
           $filter_str = trim($filter_str, ']');
@@ -424,8 +425,9 @@ class IslandoraSolrResults {
         // trim brackets
         $filter_split[1] = trim($filter_split[1], "\"");
 
-      // if value is date
-        if (isset($solrQueryProcessor->solrParams['facet.date']) AND in_array($key, $solrQueryProcessor->solrParams['facet.date'])) {
+        // if value is date
+        if (isset($solrQueryProcessor->solrParams['facet.date']) AND in_array(ltrim($filter_split[0], '-'), $solrQueryProcessor->solrParams['facet.date'])) {
+          // split range filter string to return formatted date values
           $filter_str = $filter_split[1];
           $filter_str = trim($filter_str, '[');
           $filter_str = trim($filter_str, ']');
@@ -587,29 +589,36 @@ class IslandoraSolrResults {
 
     // get facet values returned from solr
     $facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_fields) ? $solrQueryProcessor->solrResult->facet_counts->facet_fields : array();
+    // object to json
     $facets_json  = json_encode($facets);
+    // json  to array
     $facets = json_decode($facets_json, true);
+    
     // get date facet values
     $date_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_dates) ? $solrQueryProcessor->solrResult->facet_counts->facet_dates : array();
+    // object to json
     $date_facets_json  = json_encode($date_facets);
+    // json to array
     $date_facets = json_decode($date_facets_json, true);
     // clean up facet dates array
     $format = variable_get('islandora_solr_facet_date_format' , 'Y');
     foreach ($date_facets as $key => $fields) {
-      unset($date_facets[$key]['gap']);
-      unset($date_facets[$key]['other']);
-      
+      // loop over each field
       $date_facets[$key] = array();
       foreach ($fields as $date => $number) {
+        // facet.date includes other values in the facet results - excluding these
+        // we're turning the facet results in an array with multiple values
         if (!in_array($field_keys[$field_key], array('gap', 'end', 'other'))) {
+          // set number or documents
           $date_facets[$key][$date]['number'] = $number;
+          // logic to get the next range key (next date)
           $field_keys = array_keys($fields);
-
           $field_key = array_search($date, $field_keys);
           $field_key++;
           $date_next = (!in_array($field_keys[$field_key], array('gap', 'end', 'other'))) ? $field_keys[$field_key] : $fields['end'];
-
+          // set date range filter for facet url
           $date_facets[$key][$date]['range'] = '[' . $date . ' TO ' . $date_next . ']';
+          // set formatted value for facet link
           $date_facets[$key][$date]['value'] = date($format, strtotime($date) + (60 * 60 * 24)) . ' - ' . date($format, strtotime($date_next) + (60 * 60 * 24));
         }
       }
@@ -719,10 +728,15 @@ class IslandoraSolrResults {
    */
   function _addFacets(&$key, &$value, &$data, &$solrQueryProcessor, &$facet_count, &$list, $min_result) {
     
+    // value of date facet is an array, normal facets is a string.
     if (is_array($data)) {
+      // set value
       $value = $data['value'];
+      // set filter to include in url
       $filter = $key . ':' . $data['range'];
+      // set number of found solr documents
       $data = $data['number'];
+      // don't include facet fields with a document count lower than the configured minimum
       if ($data < $min_result) {
         return;
       } 
