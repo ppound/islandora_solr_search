@@ -557,6 +557,13 @@ class IslandoraSolrResults {
     $rawFacetVals = variable_get("islandora_solr_search_block_facets", 'dc.subject ~ Subject,dc.type ~ Type');
     $this->facetFieldArray = islandora_build_substitution_list($rawFacetVals);
 
+    // populate with date facet readable names
+    $rawDateFacetVals = variable_get('islandora_solr_facet_date' , NULL);
+    $rawDateFacetVals = islandora_build_substitution_list($rawDateFacetVals);
+    if ($rawDateFacetVals != NULL) {
+      $this->facetFieldArray = array_merge($this->facetFieldArray, $rawDateFacetVals);
+    }
+
     $rawSearchTerms = variable_get('islandora_solr_searchterms', 'dc.title ~ Title');
     $this->searchFieldArray = islandora_build_substitution_list($rawSearchTerms);
 
@@ -580,7 +587,7 @@ class IslandoraSolrResults {
   function displayFacets($solrQueryProcessor) {
     // set variables
     $facet_output = $output = '';
-    
+
     // shown limit
     $facet_min_count = 1;
     $min_result = variable_get('islandora_solr_search_block_facet_min_count', '2');
@@ -599,23 +606,26 @@ class IslandoraSolrResults {
     // object to json
     $date_facets_json  = json_encode($date_facets);
     // json to array
-    $date_facets = json_decode($date_facets_json, true);
+    $date_facets_arr = json_decode($date_facets_json, true);
     // clean up facet dates array
     $format = variable_get('islandora_solr_facet_date_format' , 'Y');
-    foreach ($date_facets as $key => $fields) {
+    // set variable
+    $date_facets = array();
+    // loop over each date field
+    foreach ($date_facets_arr as $key => $fields) {
       // loop over each field
       $date_facets[$key] = array();
       foreach ($fields as $date => $number) {
         // facet.date includes other values in the facet results - excluding these
         // we're turning the facet results in an array with multiple values
-        if (!in_array($field_keys[$field_key], array('gap', 'end', 'other'))) {
+        if (!in_array($date, array('gap', 'end', 'other', 'hardend', 'include'))) {
           // set number or documents
           $date_facets[$key][$date]['number'] = $number;
           // logic to get the next range key (next date)
           $field_keys = array_keys($fields);
           $field_key = array_search($date, $field_keys);
           $field_key++;
-          $date_next = (!in_array($field_keys[$field_key], array('gap', 'end', 'other'))) ? $field_keys[$field_key] : $fields['end'];
+          $date_next = (!in_array($field_keys[$field_key], array('gap', 'end', 'other', 'hardend', 'include'))) ? $field_keys[$field_key] : $fields['end'];
           // set date range filter for facet url
           $date_facets[$key][$date]['range'] = '[' . $date . ' TO ' . $date_next . ']';
           // set formatted value for facet link
@@ -623,11 +633,10 @@ class IslandoraSolrResults {
         }
       }
     }
-    
- 
+
     // merge facet fields with date facets
-    $facets = array_merge($facets, $date_facets);
-  
+    $facets = array_merge($date_facets, $facets);
+
     // return if no facets are available
     if (empty($facets)) {
       return $output;
