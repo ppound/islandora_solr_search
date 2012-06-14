@@ -651,9 +651,6 @@ class IslandoraSolrResults {
       $list_type = "ul";
       $list_title = NULL;
 
-      // convert to array
-      //$facet = get_object_vars($facet);
-
       // if the facet contains the minimum amount of values
       if (count($facet) >= $facet_min_count) {
         // set facet count
