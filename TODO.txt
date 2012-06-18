@@ -11,7 +11,8 @@ High priority
 - add a check to see if the context is the search results page. Currently we
 check if IslandoraSolrQueryProcessor::display is set, which is not ideal.
 
-- port date faceting from D6
+- we could save us some code by storing the primary display settings in a DB table
+
 - add luke check for date fields (breaks if not)
 - more user friendly controls + advanced option
 - settings per date field (now same settings for all fields)
@@ -33,9 +34,13 @@ http://wiki.apache.org/solr/CommonQueryParameters#sort
 Low Priority
 ------------
 
+- provide integration with display suite
 - expose result limit controls
 - put object url's in one variable?
 - Boolean operators as query seem to choke
 
 - when changing primary display, keep &limit in the url or should it show the default? Displays can override this though.
 - empty query with dismax seems to return the same as no dismax (maybe it's just how solrconfig is defined)
+
+machine name - label  -  display - search term - facet term - range/date facet term - sort term
+[          ]   [   ]       [x]        [x]           [x]             [x]                  [x]

@@ -4,3 +4,14 @@
 html.js .refresh-button {
   display: none;
 }
+
+/* drag handler placeholder cell */
+.islandora-solr-multiple-drag
+{
+  width: 30px;
+}
+
+.islandora-solr-operations
+{
+  width: 60px;
+}

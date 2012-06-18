@@ -59,7 +59,6 @@ function islandora_solr_menu() {
     'access arguments' => array('search islandora solr'),
     'type' => MENU_CALLBACK,
   );
-
   $items['admin/islandora/search/islandora_solr'] = array(
     'title' => 'Solr client',
     'description' => 'Configure Solr search settings.',
@@ -68,6 +67,14 @@ function islandora_solr_menu() {
     'access arguments' => array('administer islandora solr'),
     'file' => 'islandora_solr.admin.inc',
     'type' => MENU_NORMAL_ITEM,
+  );
+  $items['islandora_solr/autocomplete_luke'] = array(
+    'title' => 'Islandora Solr Luke autocomplete',
+    'description' => t('Autocomplete callback to populate solr text fields.'),
+    'page callback' => '_islandora_solr_autocomplete_luke',
+    'access arguments' => array('administer islandora solr'),
+    'file' => 'islandora_solr.admin.inc',
+    'type' => MENU_CALLBACK,
   );
   return $items;
 }
@@ -117,6 +124,12 @@ function islandora_solr_theme() {
     ),
     // theme admin form
     'islandora_solr_admin_primary_display' => array(
+      'path' => $path,
+      'file' => 'islandora_solr.admin.inc',
+      'render element' => 'form',
+    ),
+    // theme admin form fields
+    'islandora_solr_result_fields' => array(
       'path' => $path,
       'file' => 'islandora_solr.admin.inc',
       'render element' => 'form',
