@@ -15,3 +15,32 @@ html.js .refresh-button {
 {
   width: 60px;
 }
+
+/* autocomplete styling */
+#autocomplete
+{
+  max-height: 300px;
+  overflow: auto;
+}
+
+#autocomplete ul
+{
+  
+}
+
+#autocomplete ul li
+{
+  padding: 3px;
+}
+
+#autocomplete ul li:nth-child(even)
+{
+  background-color: #eee;
+}
+
+#autocomplete ul li.selected:nth-child(even)
+{
+  background-color: #0074BD;
+}
+
+

@@ -214,7 +214,7 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
 function islandora_solr_advanced_search_form($form, &$form_state) {
   global $_islandora_solr_queryclass;
   islandora_solr_init(); // @TODO: figure out why init needs to be called
-
+dsm($form_state);
   // include common.inc
   module_load_include('inc', 'islandora_solr', 'includes/common');
 

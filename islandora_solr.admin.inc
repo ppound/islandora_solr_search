@@ -226,7 +226,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
   }
 
-
+//  dsm($form_state);
 
   // default display settings
   $form['islandora_solr_tabs']['default_display_settings'] = array(
@@ -242,14 +242,31 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#title' => t('Display fields'),
     '#description' => t('sample description'),
     '#tree' => TRUE,
+    '#prefix' => '<div id="islandora-solr-result-fields-wrapper">',
+    '#suffix' => '</div>',
     '#theme' => 'islandora_solr_result_fields',
   );
-  $test = array('one', 'two', 'three');
   
+  
+  
+  
+  dsm($form_state);
+  
+  if (isset($form_state['triggering_element']) AND $form_state['triggering_element']['#value'] == t('Add another item') ) {
+    $form_state['values']['islandora_solr_result_fields'][] = array();
+    $result_fields = $form_state['values'];
+  }
+  else {
+    $result_fields = array('');
+  }
+    //Add another item
+  
+  
+
   $options = array();
-  foreach ($test as $key => $value) {
+  foreach ($result_fields as $key => $value) {
     $options[$key] = '';
-    
+
     $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields']['draggable_handler'][$key] = array(
       '#type' => 'item',
       '#markup' => '',
@@ -258,12 +275,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
       '#type' => 'textfield',
       '#size' => 10,
       '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
-      '#default_value' => $value,
+      '#default_value' => $value ? $value : '',
     );
     $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields']['solr_field_label'][$key] = array(
       '#type' => 'textfield',
       '#size' => 10,
-      '#default_value' => $value,
+      '#default_value' => $value ? $value : '',
     );
     $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields']['weight'][$key] = array(
       '#type' => 'weight',
@@ -287,14 +304,14 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#default_value' => array(),
   );
   
-  $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields']['add_more'] = array(
+  $form['islandora_solr_tabs']['default_display_settings']['add_more'] = array(
     '#type' => 'submit',
     '#value' => t('Add another item'),
     '#attributes' => array('class' => array('islandora-solr-add-more-submit')),
     '#submit' => array('field_add_more_submit'),
     '#ajax' => array(
-      'callback' => 'field_add_more_js',
-      'wrapper' => 'test',
+      'callback' => '_islandora_solr_add_field',
+      'wrapper' => 'islandora-solr-result-fields-wrapper',
       'effect' => 'fade',
     ),
   );
@@ -544,7 +561,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
 function theme_islandora_solr_result_fields($variables) {
   // set form
   $form = $variables['form'];
-  dsm($form);
+
   $rows = array();
   foreach ($form['solr_field'] as $key => $element) {
     if (is_array($element) && element_child($key)) {
@@ -559,10 +576,9 @@ function theme_islandora_solr_result_fields($variables) {
       $row[] = array('data' => drupal_render($form['remove'][$key]), 'class' => 'islandora-solr-operations');
       // add to rows
       $rows[] = array('data' => $row, 'class' => array('draggable'));
-      
     }
-    
   }
+
   $header = array();
   $header[] = array('data' => t('Solr field'), 'colspan' => 2);
   $header[] = array('data' => t('Label'));
@@ -595,7 +611,6 @@ function theme_islandora_solr_result_fields($variables) {
 function theme_islandora_solr_admin_primary_display($variables) {
   // set form
   $form = $variables['form'];
-  dsm($form);
 
   $default = variable_get('islandora_solr_primary_display', 'default');
   $rows = array();
@@ -848,6 +863,15 @@ function _islandora_solr_autocomplete_luke($string = '') {
     }
   }
 
+  // sort alphabetically
+  ksort($result);
+  
   drupal_json_output($result);
   exit();
+}
+
+
+function _islandora_solr_add_field($form, &$form_state) {
+
+  return $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields'];
 }

@@ -44,3 +44,15 @@ Low Priority
 
 machine name - label  -  display - search term - facet term - range/date facet term - sort term
 [          ]   [   ]       [x]        [x]           [x]             [x]                  [x]
+
+
+DB tables
+
+islandora_solr_primary_displays
+islandora_solr_result_fields
+islandora_solr_sort_fields
+islandora_solr_facet_fields
+islandora_solr_search_fields
+
+islandora_solr_displays
+islandora_solr_fields
