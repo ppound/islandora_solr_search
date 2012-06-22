@@ -341,7 +341,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       '#ajax' => array(
         'callback' => '_islandora_solr_update_fields',
         'wrapper' => 'islandora-solr-result-fields-wrapper',
-        'effect' => 'fade',
+        'effect' => 'none',
         'event' => 'click',
         'progress' => array('message' => '', 'type' => 'throbber'),
       ),
@@ -362,7 +362,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       'callback' => '_islandora_solr_update_fields',
       'wrapper' => 'islandora-solr-result-fields-wrapper',
       'event' => 'click',
-      'effect' => 'fade',
+      'effect' => 'none',
     ),
   );
   
