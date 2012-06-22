@@ -44,3 +44,20 @@ html.js .refresh-button {
 }
 
 
+
+/* result fields js */
+
+html.js .islandora-solr-remove-submit
+{
+  display: none;
+}
+
+.islandora-solr-remove-link
+{
+  display: none;
+}
+
+html.js .islandora-solr-remove-link
+{
+  display: block;
+}
