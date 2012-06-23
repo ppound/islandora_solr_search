@@ -19,42 +19,45 @@ function islandora_solr_admin_settings($form, &$form_state) {
   drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
   drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
 
-  // check for the php solr lib class
-  if (!class_exists('Apache_Solr_Service')) {
-    $message = t('This module requires the <a href="!url">Apache Solr php client</a>. Please install the client directory in the root directory of this module before continuing.', array('!url' => 'http://code.google.com/p/solr-php-client'));
-    drupal_set_message(check_plain($message));
-    return;
+  // triggering handler is dismax check or no trigger at all (page load)
+  if ((isset($form_state['triggering_element']) AND $form_state['triggering_element']['#name'] == 'islandora_solr_url') OR !isset($form_state['triggering_element'])) {
+  
+    // check for the php solr lib class
+    if (!class_exists('Apache_Solr_Service')) {
+      $message = t('This module requires the <a href="!url">Apache Solr php client</a>. Please install the client directory in the root directory of this module before continuing.', array('!url' => 'http://code.google.com/p/solr-php-client'));
+      drupal_set_message(check_plain($message));
+      return;
+    }
+
+    // get request handler
+    $handler = !empty($form_state['values']['islandora_solr_request_handler']) ? $form_state['values']['islandora_solr_request_handler'] : variable_get('islandora_solr_request_handler', '');
+    // get solr url
+    $solr_url = !empty($form_state['values']['islandora_solr_url']) ? $form_state['values']['islandora_solr_url'] : variable_get('islandora_solr_url', 'localhost:8080/solr');
+    // check if solr is available
+    $solr_avail = islandora_solr_ping($solr_url);
+
+    $dismax_allowed = FALSE;
+    // if solr is available, get the request handlers
+    if ($solr_avail) {
+      // find request handlers (500ms)
+      $handlers = _islandora_solr_get_handlers($solr_url);
+
+      // check if dismax is allowed (400ms)
+      $dismax_allowed = _islandora_solr_check_dismax($solr_url, $handler);
+    }
+
+
+
+    // get confirmation message
+    if ($solr_avail) {
+      $confirmation_message = '<img src="' . url('misc/watchdog-ok.png') . '"/>'
+        . t('Successfully connected to Solr server at <a href="!islandora_solr_url_checked" target="_blank">!islandora_solr_url</a> <sub>(!ms ms)</sub>', array('!islandora_solr_url_checked' => islandora_solr_check_http($solr_url), '!islandora_solr_url' => $solr_url, '!ms' => number_format($solr_avail, 2)));
+    }
+    else {
+      $confirmation_message = '<img src="' . url('misc/watchdog-error.png') . '"/> '
+        . t('Unable to connect to Solr server at !islandora_solr_url', array('!islandora_solr_url' => $solr_url));
+    }
   }
-
-  // get request handler
-  $handler = !empty($form_state['values']['islandora_solr_request_handler']) ? $form_state['values']['islandora_solr_request_handler'] : variable_get('islandora_solr_request_handler', '');
-  // get solr url
-  $solr_url = !empty($form_state['values']['islandora_solr_url']) ? $form_state['values']['islandora_solr_url'] : variable_get('islandora_solr_url', 'localhost:8080/solr');
-  // check if solr is available
-  $solr_avail = islandora_solr_ping($solr_url);
-
-  $dismax_allowed = FALSE;
-  // if solr is available, get the request handlers
-  if ($solr_avail) {
-    // find request handlers
-    $handlers = _islandora_solr_get_handlers($solr_url);
-
-    // check if dismax is allowed
-    $dismax_allowed = _islandora_solr_check_dismax($solr_url, $handler);
-  }
-
-
-
-  // get confirmation message
-  if ($solr_avail) {
-    $confirmation_message = '<img src="' . url('misc/watchdog-ok.png') . '"/>'
-      . t('Successfully connected to Solr server at <a href="!islandora_solr_url_checked" target="_blank">!islandora_solr_url</a> <sub>(!ms ms)</sub>', array('!islandora_solr_url_checked' => islandora_solr_check_http($solr_url), '!islandora_solr_url' => $solr_url, '!ms' => number_format($solr_avail, 2)));
-  }
-  else {
-    $confirmation_message = '<img src="' . url('misc/watchdog-error.png') . '"/> '
-      . t('Unable to connect to Solr server at !islandora_solr_url', array('!islandora_solr_url' => $solr_url));
-  }
-
   // set form array
   $form = array();
   $form['islandora_solr_tabs'] = array(
@@ -247,7 +250,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   
   
-
+//dsm($form_state);
   // 1. triggered element
   if (isset($form_state['triggering_element'])) {
     
@@ -353,10 +356,10 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields'] = $terms;
 
   $form['islandora_solr_tabs']['default_display_settings']['add_more'] = array(
-    '#type' => 'submit',
+    '#type' => 'button',
     '#value' => t('Add another item'),
     '#attributes' => array('class' => array('islandora-solr-add-more-submit')),
-    '#submit' => array('field_add_more_submit'),
+//    '#submit' => array('_islandora_solr_update_fields'),
     '#name' => 'result_fields_add_more',
     '#ajax' => array(
       'callback' => '_islandora_solr_update_fields',
@@ -366,10 +369,10 @@ function islandora_solr_admin_settings($form, &$form_state) {
     ),
   );
   
+
+
   
-  
-  
-  
+    
 //  $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields_old'] = array(
 //    '#type' => 'textarea',
 //    '#title' => t('Labels for returned fields'),
