@@ -129,7 +129,7 @@ function islandora_solr_theme() {
       'render element' => 'form',
     ),
     // theme admin form fields
-    'islandora_solr_result_fields' => array(
+    'islandora_solr_admin_fields' => array(
       'path' => $path,
       'file' => 'islandora_solr.admin.inc',
       'render element' => 'form',

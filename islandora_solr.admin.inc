@@ -14,14 +14,15 @@
  *   The form array.
  */
 function islandora_solr_admin_settings($form, &$form_state) {
-
+//dsm($form_state);
   // add admin form css
   drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
   drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
 
+  // Solr connect
   // triggering handler is dismax check or no trigger at all (page load)
   if ((isset($form_state['triggering_element']) AND $form_state['triggering_element']['#name'] == 'islandora_solr_url') OR !isset($form_state['triggering_element'])) {
-  
+
     // check for the php solr lib class
     if (!class_exists('Apache_Solr_Service')) {
       $message = t('This module requires the <a href="!url">Apache Solr php client</a>. Please install the client directory in the root directory of this module before continuing.', array('!url' => 'http://code.google.com/p/solr-php-client'));
@@ -41,13 +42,9 @@ function islandora_solr_admin_settings($form, &$form_state) {
     if ($solr_avail) {
       // find request handlers (500ms)
       $handlers = _islandora_solr_get_handlers($solr_url);
-
       // check if dismax is allowed (400ms)
       $dismax_allowed = _islandora_solr_check_dismax($solr_url, $handler);
     }
-
-
-
     // get confirmation message
     if ($solr_avail) {
       $confirmation_message = '<img src="' . url('misc/watchdog-ok.png') . '"/>'
@@ -118,6 +115,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
   }
 
+  
   // display profiles
   $form['display_profiles'] = array(
     '#type' => 'fieldset',
@@ -134,7 +132,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#theme' => 'islandora_solr_admin_primary_display',
   );
 
-
   // get the table settings
   $primary_display_array = variable_get('islandora_solr_primary_display_table', array());
   // get all defined primary displays
@@ -147,15 +144,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
     if (!empty($primary_display_array)) {
       // set weight variable
       $weight = $primary_display_array['weight'];
-
       // First sort by value and then sort equal values by key: http://stackoverflow.com/a/6611077/477949
       array_multisort(array_values($weight), SORT_ASC, array_keys($weight), SORT_ASC, $weight);
-
       // Add all previously existing profiles with a weight...
       foreach (array_intersect_key($weight, $profiles) as $key => $value) {
         $profiles_sorted[$key] = $profiles[$key];
       }
-
       // account for new profiles.
       foreach (array_diff_assoc($profiles, $profiles_sorted) as $key => $value) {
         $profiles_sorted[$key] = $value;
@@ -172,7 +166,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
     // table loop
     foreach ($profiles_sorted as $machine_name => $profile) {
-
       // incremetally add every display profile to the options array
       $options[$machine_name] = '';
 
@@ -212,14 +205,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
   }
 
-
   // secondary profiles
   $profiles = module_invoke_all("islandora_solr_secondary_display");
   ksort($profiles);
   foreach ($profiles as $machine_name => $profile) {
     $islandora_solr_secondary_display_options[$machine_name] = $profile['name'];
   }
-
   if (!empty($islandora_solr_secondary_display_options)) {
     $form['display_profiles']['islandora_solr_secondary_display'] = array(
       '#type' => 'checkboxes',
@@ -230,6 +221,8 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
   }
 
+  
+  
   // default display settings
   $form['islandora_solr_tabs']['default_display_settings'] = array(
     '#type' => 'fieldset',
@@ -237,50 +230,56 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
-  
-  // display settings
+  // display fields
   $terms = array(
     '#type' => 'item',
     '#title' => t('Display fields'),
-    '#description' => t('sample description'),
+    '#description' => t('Set labels for Solr fields to be included in the search results. If snippet is checked, a snippet of text with the search term highlighted will be returned if a match is found on this field.<br /> <strong>Note:</strong><em> This feature is not supported by all display profiles.</em>'),
     '#tree' => TRUE,
     '#prefix' => '<div id="islandora-solr-result-fields-wrapper">',
     '#suffix' => '</div>',
-    '#theme' => 'islandora_solr_result_fields',
+    '#part_of' => 'result_fields',
+    '#theme' => 'islandora_solr_admin_fields',
   );
   
-  
-//dsm($form_state);
-  // 1. triggered element
-  if (isset($form_state['triggering_element'])) {
+  // Ways to populate the fields table
+  // 1. Saved values from the DB
+  // 2. Triggered element (Add another item or remove)
+  // 3. no results available
+
+  // 2. Triggered element (Add another item or remove)
+  if (isset($form_state['triggering_element']) AND $form_state['triggering_element']['#part_of'] == 'result_fields') {
     
     // unset terms from input array
     // http://drupal.stackexchange.com/questions/14855/how-do-i-dynamically-fill-a-textfield-with-ajax/16576#16576
     unset($form_state['input']['islandora_solr_result_fields']);
-    
-    if ($form_state['triggering_element']['#value'] == t('Add another item')) {
+    // add field
+    if ($form_state['triggering_element']['#name'] == 'result_fields_add_more') {
       $form_state['values']['islandora_solr_result_fields'][] = array('');
     }
+    // remove field
     if ($form_state['triggering_element']['#value'] == t('Remove')) {
-      $field = $form_state['triggering_element']['#field'];
-      array_splice($form_state['values']['islandora_solr_result_fields'], $field, 1);
-    }
-    $result_fields = $form_state['values']['islandora_solr_result_fields'];
-    if (empty($result_fields)) {
-      $result_fields = array('');
+      $result_field = $form_state['triggering_element']['#field'];
+      array_splice($form_state['values']['islandora_solr_result_fields'], $result_field, 1);
     }
   }
-  // 2. no results available
-  else {
+  // 3. no results available
+  if (!isset($form_state['triggering_element'])) {
     $result_fields = array('');
   }
-  
+
+  // create result_fields array
+  if (empty($result_fields) OR !isset($form_state['values']['islandora_solr_result_fields'])) {
+    $result_fields = array('');
+  }
+  else {
+    $result_fields = $form_state['values']['islandora_solr_result_fields'];    
+  }
+
   // set variable
   $term = array();
   // loop over all result fields
   foreach ($result_fields as $key => $value) {
-    
-
     $term['draggable_handler'] = array(
       '#type' => 'item',
       '#markup' => '',
@@ -303,43 +302,23 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
     $term['weight'] = array(
       '#type' => 'weight',
-      '#default_value' => isset($value['weight']) ? $value['weight'] : '',
-      '#attributes' => array('class' => array('test-weight')),
+      '#default_value' => isset($value['weight']) ? $value['weight'] : 0,
+      '#attributes' => array('class' => array('solr-weight-result-fields')),
     );  
-//    $term['configure'] = array(
-//      '#type' => 'item',
-//      '#markup' => l('configure', '<front>'),
-//    );
-
-    $link_id = 'remove-link-' . $key;
     $term['remove'] = array(
       '#type' => 'link',
       '#title' => t('remove'),
       '#href' => '#',
-//      '#id' => $link_id,
       '#options' => array('attributes' => array('class' => 'islandora-solr-remove-link')), 
-//      '#process' => array('ajax_process_form'),
-//      '#ajax' => array(
-//        'callback' => '_islandora_solr_update_fields',
-//        'wrapper' => 'islandora-solr-result-fields-wrapper',
-//        'effect' => 'fade',
-//        'event' => 'click',
-////        'progress' => array('type' => 'none'),
-//        // Trigger as the Switch button.
-//        'trigger_as' => array(
-//          'name' => 'result_fields_remove_' . $key,
-////          'name' => 'remove_button',
-//          'value' => t('Remove'),
-//        ),
-//      ),
     );
-
     $term['remove_button'] = array(
       '#type' => 'submit',
       '#value' => t('Remove'),
+//      '#name' => 'result_fields_remove',
       '#field' => $key,
+      '#part_of' => 'result_fields',
       '#attributes' => array('class' => array('islandora-solr-remove-submit')),
-      '#submit' => array('field_add_more_submit'),
+      '#submit' => array('_islandora_solr_update_fields_submit'),
       '#name' => 'result_fields_remove_' . $key,
       '#ajax' => array(
         'callback' => '_islandora_solr_update_fields',
@@ -355,15 +334,157 @@ function islandora_solr_admin_settings($form, &$form_state) {
   // result fields
   $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields'] = $terms;
 
+  // add more button
   $form['islandora_solr_tabs']['default_display_settings']['add_more'] = array(
     '#type' => 'button',
     '#value' => t('Add another item'),
-    '#attributes' => array('class' => array('islandora-solr-add-more-submit')),
-//    '#submit' => array('_islandora_solr_update_fields'),
+    '#attributes' => array('class' => array('islandora-solr-result-add-more-submit')),
+    '#submit' => array('_islandora_solr_update_fields_submit'),
     '#name' => 'result_fields_add_more',
+    '#part_of' => 'result_fields',
     '#ajax' => array(
       'callback' => '_islandora_solr_update_fields',
       'wrapper' => 'islandora-solr-result-fields-wrapper',
+      'event' => 'click',
+      'effect' => 'none',
+    ),
+  );
+
+  $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_limit_result_fields'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Limit results to fields listed above?'),
+    '#return_value' => 1,
+    '#default_value' => variable_get('islandora_solr_limit_result_fields', 0),
+    '#description' => t('If checked, results displayed will be limited to the fields specified above.<br /><strong>Note:</strong> Some display profiles may not honour this value.'),
+  );
+  $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_num_of_results'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Results per page'),
+    '#size' => 5,
+    '#description' => t('The number of results to show per page.'),
+    '#default_value' => variable_get('islandora_solr_num_of_results', '20'),
+  );
+  
+  
+  
+  
+  // sort settings
+  $form['islandora_solr_tabs']['sort'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Sort settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $sort_terms = array(
+    '#type' => 'item',
+    '#title' => t('Sort fields'),
+    '#description' => t('Indicate what fields should appear in the <strong>Islandora sort block</strong>.<br /><strong>Note:</strong> <em>Not all fields are sortable. For more info check the <a href="!url">Solr documentation</a>.</em>', array('!url' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
+    '#tree' => TRUE,
+    '#prefix' => '<div id="islandora-solr-sort-fields-wrapper">',
+    '#suffix' => '</div>',
+    '#part_of' => 'sort_fields',
+    '#theme' => 'islandora_solr_admin_fields',
+  );
+  
+  
+  // Ways to populate the fields table
+  // 1. Triggered element (Add another item or remove)
+  // 2. Saved values from the DB
+  // 3. no results available
+
+  // 1. Triggered element (Add another item or remove)
+  if (isset($form_state['triggering_element']) AND $form_state['triggering_element']['#part_of'] == 'sort_fields') {
+    
+    // unset terms from input array
+    // http://drupal.stackexchange.com/questions/14855/how-do-i-dynamically-fill-a-textfield-with-ajax/16576#16576
+    unset($form_state['input']['islandora_solr_sort_fields']);
+    // add field
+    if ($form_state['triggering_element']['#name'] == 'sort_fields_add_more') {
+      $form_state['values']['islandora_solr_sort_fields'][] = array('');
+    }
+    // remove field
+    if ($form_state['triggering_element']['#value'] == t('Remove')) {
+      $sort_field = $form_state['triggering_element']['#field'];
+      array_splice($form_state['values']['islandora_solr_sort_fields'], $sort_field, 1);
+    }
+  }
+  // 3. no results available
+  if (!isset($form_state['triggering_element'])) {
+    $sort_fields = array('');
+  }
+  
+  // populate the sort_fields array
+  if (empty($sort_fields) OR !isset($form_state['values']['islandora_solr_sort_fields'])) {
+    $sort_fields = array('');
+  }
+  else {
+    $sort_fields = $form_state['values']['islandora_solr_sort_fields'];
+  }
+  
+  // set variable
+  $sort_term = array();
+  // loop over all sort fields
+  foreach ($sort_fields as $key => $value) {
+    $sort_term['draggable_handler'] = array(
+      '#type' => 'item',
+      '#markup' => '',
+    );
+    $sort_term['solr_field'] = array(
+      '#type' => 'textfield',
+      '#size' => 10,
+      '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
+      '#default_value' => isset($value['solr_field']) ? $value['solr_field'] : '',
+    );
+    $sort_term['solr_field_label'] = array(
+      '#type' => 'textfield',
+      '#size' => 10,
+      '#default_value' => isset($value['solr_field_label']) ? $value['solr_field_label'] : '',
+    );
+    $sort_term['weight'] = array(
+      '#type' => 'weight',
+      '#default_value' => isset($value['weight']) ? $value['weight'] : 0,
+      '#attributes' => array('class' => array('solr-weight-sort-fields')),
+    );  
+    $sort_term['remove'] = array(
+      '#type' => 'link',
+      '#title' => t('remove'),
+      '#href' => '#',
+      '#options' => array('attributes' => array('class' => 'islandora-solr-remove-link')), 
+    );
+    $sort_term['remove_button'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove'),
+      '#field' => $key,
+      '#part_of' => 'sort_fields',
+      '#attributes' => array('class' => array('islandora-solr-remove-submit')),
+      '#submit' => array('_islandora_solr_update_fields_submit'),
+      '#name' => 'sort_fields_remove_' . $key,
+      '#ajax' => array(
+        'callback' => '_islandora_solr_update_fields',
+        'wrapper' => 'islandora-solr-sort-fields-wrapper',
+        'effect' => 'none',
+        'event' => 'click',
+        'progress' => array('message' => '', 'type' => 'throbber'),
+      ),
+    );
+    $sort_terms[] = $sort_term;
+  }
+
+  // sort fields
+  $form['islandora_solr_tabs']['sort']['islandora_solr_sort_fields'] = $sort_terms;
+
+  // add more button
+  $form['islandora_solr_tabs']['sort']['add_more'] = array(
+    '#type' => 'button',
+    '#value' => t('Add another item'),
+    '#attributes' => array('class' => array('islandora-solr-add-more-submit')),
+    '#submit' => array('_islandora_solr_update_fields_submit'),
+    '#name' => 'sort_fields_add_more',
+    '#part_of' => 'sort_fields',
+    '#ajax' => array(
+      'callback' => '_islandora_solr_update_fields',
+      'wrapper' => 'islandora-solr-sort-fields-wrapper',
       'event' => 'click',
       'effect' => 'none',
     ),
@@ -372,57 +493,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
 
   
-    
-//  $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields_old'] = array(
-//    '#type' => 'textarea',
-//    '#title' => t('Labels for returned fields'),
-//    '#description' => t('Set labels for fields returned from query.
-//      Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong>'),
-//    '#default_value' => variable_get('islandora_solr_result_fields', 'dc.subject ~ Subject,dc.type ~ Type'),
-//    '#wysiwyg' => FALSE,
-//  );
-  $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_limit_result_fields'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Limit results to fields listed above?'),
-    '#return_value' => 1,
-    '#default_value' => variable_get('islandora_solr_limit_result_fields', 0),
-    '#description' => t('If checked, results displayed will be limited to the fields specified above.<br /><strong>Note:</strong> Some display profiles may not honour this value.'),
-  );
-//  $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_snippet_field'] = array(
-//    '#type' => 'textfield',
-//    '#title' => t('Snippet field'),
-//    '#default_value' => variable_get('islandora_solr_snippet_field', ''),
-//    '#description' => t("If a match is found on this field, a snippet of text will be returned, with the search term highlighted.<br />
-//      An optional friendly label may inserted using the following pattern <strong>dsm.Text ~ Full Text</strong><br />
-//      Use an asterisk (<strong>*</strong>) for all fields, leave blank to disable highlighting.<br />
-//      <strong>Note:</strong><em> This feature is not supported by all display profiles.</em> "),
-//    '#wysiwyg' => FALSE,
-//  );
-  $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_num_of_results'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Results per page'),
-    '#size' => 5,
-    '#description' => t('The number of results to show per page.'),
-    '#default_value' => variable_get('islandora_solr_num_of_results', '20'),
-  );
-  $form['islandora_solr_tabs']['sort'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Sort settings'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['islandora_solr_tabs']['sort']['islandora_solr_sort_terms'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Sort terms'),
-    '#description' => t("Indicate what fields should appear in the <strong>Islandora sort block</strong>.<br />
-      Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
-      Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
-      module is available in Islandora's online documentation. <br /><strong>Important:</strong> Not all solr fields can be used for sorting. For more info, check the <a href='!sorturl' target='_blank'>solr documentation</a> on sorting.", array('!sorturl' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
-    '#default_value' => variable_get('islandora_solr_sort_terms', 'score ~ Relevance, PID ~ PID'),
-    '#wysiwyg' => FALSE,
-  );
-
-
 
   // facet settings
   $form['islandora_solr_tabs']['facet_settings'] = array(
@@ -613,11 +683,20 @@ function islandora_solr_admin_settings($form, &$form_state) {
 }
 
 
-
-function theme_islandora_solr_result_fields($variables) {
+/**
+ * Theme function to create an admin table for result fields
+ * @param array $variables
+ *   Array containing form elements to be themed.
+ * @return string
+ *   Rendered table
+ */
+function theme_islandora_solr_admin_fields($variables) {
   // set form
   $form = $variables['form'];
-//dsm($form);
+
+  $partof = $form['#part_of'];
+  $partof_id = str_replace('_', '-', $partof);
+  
   $rows = array();
   foreach ($form as $key => $element) {
     if (is_array($element) && element_child($key)) {
@@ -626,8 +705,8 @@ function theme_islandora_solr_result_fields($variables) {
       $row[] = array('data' => drupal_render($form[$key]['draggable_handler']), 'class' => 'islandora-solr-multiple-drag');
       $row[] = array('data' => drupal_render($form[$key]['solr_field']));
       $row[] = array('data' => drupal_render($form[$key]['solr_field_label']));
-      $row[] = array('data' => drupal_render($form[$key]['snippet']));
-      $row[] = array('data' => drupal_render($form[$key]['weight']), 'class' => 'solr-weightt');
+      if ($partof == 'result_fields') { $row[] = array('data' => drupal_render($form[$key]['snippet'])); }
+      $row[] = array('data' => drupal_render($form[$key]['weight']), 'class' => 'solr-weight-' . $partof_id);
 //      $row[] = array('data' => drupal_render($form['configure'][$key]));
       $row[] = array('data' => drupal_render($form[$key]['remove']), 'class' => 'islandora-solr-operations');
       $row[] = array('data' => drupal_render($form[$key]['remove_button']), 'class' => 'islandora-solr-operations');
@@ -639,20 +718,22 @@ function theme_islandora_solr_result_fields($variables) {
   $header = array();
   $header[] = array('data' => t('Solr field'), 'colspan' => 2);
   $header[] = array('data' => t('Label'));
-  $header[] = array('data' => t('Snippet'));
+  if ($partof == 'result_fields') { $header[] = array('data' => t('Snippet')); }
   $header[] = array('data' => t('Weight'));
   $header[] = array('data' => t('Operations'), 'colspan' => 2);
-  
+
   // render form
   $output = '';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'islandora-solr-result-fields')));
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'islandora-solr-' . $partof_id)));
   $output .= drupal_render_children($form);
 
   // add tabledrag features
-  drupal_add_tabledrag('islandora-solr-result-fields', 'order', 'sibling', 'solr-weightt');
+  drupal_add_tabledrag('islandora-solr-' . $partof_id, 'order', 'sibling', 'solr-weight-' . $partof_id);
 
   return $output;
 }
+
+
 
 /**
  * Theme function for the admin primary display table
@@ -935,8 +1016,23 @@ function _islandora_solr_autocomplete_luke($string = '') {
   exit();
 }
 
+function _islandora_solr_update_fields_submit($form, &$form_state) {
+
+  $form_state['rebuild'] = TRUE;
+}
 
 function _islandora_solr_update_fields($form, &$form_state) {
 
-  return $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields'];
+  // check what section the call is from
+  switch ($form_state['triggering_element']['#part_of']) {
+    case 'result_fields':
+      return $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields'];
+      break;
+    case 'sort_fields':
+      return $form['islandora_solr_tabs']['sort']['islandora_solr_sort_fields'];
+      break;
+    default:
+      break;
+    
+  }
 }

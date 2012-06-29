@@ -56,3 +56,10 @@ islandora_solr_search_fields
 
 islandora_solr_displays
 islandora_solr_fields
+
+
+islandora_solr_displays
+id  -  machine_name  -  label   -  weight
+
+islandora_solr_fields
+id  -  machine_name  - label  -  snippet  -  range  -  options
