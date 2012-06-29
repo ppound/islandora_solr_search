@@ -905,17 +905,26 @@ function _islandora_solr_check_dismax($solr_url, $selected_handler) {
 
 /**
  * Admin autocomplete callback which returns solr fields from Luke. 
+ *
+ * @param string $string
+ *   String filled out in the autocomplete textfield.
+ * @return json
+ *   A json array containing the Solr luke values that contain the given string.
  */
 function _islandora_solr_autocomplete_luke($string = '') {
   
   $luke = islandora_solr_get_luke();
   $result = array();
   
+  // loop over luke fields
   foreach ($luke['fields'] as $term => $value) {
-
-    $length = strlen($string);
-    if (substr($term, 0, $length) === $string) {
-      $result[$term] = $term . '<strong style="position: absolute; right: 5px;">(' . $value['type'] . ')</strong>';
+    // if string is found in the solr term
+    if (stripos($term, $string) !== FALSE) {
+      // add strong elements to highlight the found string. Search case
+      // insensitive, but keep the case on replace.
+      // http://stackoverflow.com/a/3489768/477949
+      $term_str = preg_replace("/$string/i", "<strong>\$0</strong>", $term);
+      $result[$term] = $term_str . '<strong style="position: absolute; right: 5px;">(' . $value['type'] . ')</strong>';
     }
   }
 
