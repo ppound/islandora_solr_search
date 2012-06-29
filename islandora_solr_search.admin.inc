@@ -12,7 +12,6 @@
  * @return array
  */
 function islandora_solr_admin_settings(&$form_state) {
-  module_load_include('inc', 'islandora_solr_search', 'IslandoraSolrQueryProcessor');
   //checks for existence of PHP Solr client.
   if (module_exists('apachesolr')) {
     module_load_include('php', 'apachesolr', 'SolrPhpClient/Apache/Solr/Service');
