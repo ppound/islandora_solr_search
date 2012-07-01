@@ -275,6 +275,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
   // set variable
   $term = array();
+  $count = count($result_fields);
   // loop over all result fields
   foreach ($result_fields as $key => $value) {
     $term['draggable_handler'] = array(
@@ -300,7 +301,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     $term['weight'] = array(
       '#type' => 'weight',
       '#default_value' => isset($value['weight']) ? $value['weight'] : $key,
-      '#delta' => 50,
+      '#delta' => $count >= 10 ? $count : 10,
       '#attributes' => array('class' => array('solr-weight-result-fields')),
     );  
     $term['remove'] = array(
@@ -419,6 +420,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   
   // set variable
   $sort_term = array();
+  $count = count($sort_fields);
   // loop over all sort fields
   foreach ($sort_fields as $key => $value) {
     $sort_term['draggable_handler'] = array(
@@ -439,7 +441,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     $sort_term['weight'] = array(
       '#type' => 'weight',
       '#default_value' => isset($value['weight']) ? $value['weight'] : $key,
-      '#delta' => 50,
+      '#delta' => $count >= 10 ? $count : 10,
       '#attributes' => array('class' => array('solr-weight-sort-fields')),
     );  
     $sort_term['remove'] = array(
@@ -622,6 +624,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   
   // set variable
   $search_term = array();
+  $count = count($search_fields);
   // loop over all search fields
   foreach ($search_fields as $key => $value) {
     $search_term['draggable_handler'] = array(
@@ -642,7 +645,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     $search_term['weight'] = array(
       '#type' => 'weight',
       '#default_value' => isset($value['weight']) ? $value['weight'] : $key,
-      '#delta' => 50,
+      '#delta' => $count >= 10 ? $count : 10,
       '#attributes' => array('class' => array('solr-weight-search-fields')),
     );  
     $search_term['remove'] = array(
