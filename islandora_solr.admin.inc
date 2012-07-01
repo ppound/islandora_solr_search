@@ -299,7 +299,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
     $term['weight'] = array(
       '#type' => 'weight',
-      '#default_value' => isset($value['weight']) ? $value['weight'] : 0,
+      '#default_value' => isset($value['weight']) ? $value['weight'] : $key,
       '#attributes' => array('class' => array('solr-weight-result-fields')),
     );  
     $term['remove'] = array(
@@ -437,7 +437,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
     $sort_term['weight'] = array(
       '#type' => 'weight',
-      '#default_value' => isset($value['weight']) ? $value['weight'] : 0,
+      '#default_value' => isset($value['weight']) ? $value['weight'] : $key,
       '#attributes' => array('class' => array('solr-weight-sort-fields')),
     );  
     $sort_term['remove'] = array(
@@ -639,7 +639,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
     $search_term['weight'] = array(
       '#type' => 'weight',
-      '#default_value' => isset($value['weight']) ? $value['weight'] : 0,
+      '#default_value' => isset($value['weight']) ? $value['weight'] : $key,
       '#attributes' => array('class' => array('solr-weight-search-fields')),
     );  
     $search_term['remove'] = array(
@@ -802,7 +802,7 @@ function theme_islandora_solr_admin_fields($variables) {
       $row[] = array('data' => drupal_render($form[$key]['solr_field']));
       $row[] = array('data' => drupal_render($form[$key]['solr_field_label']));
       if ($partof == 'result_fields') { $row[] = array('data' => drupal_render($form[$key]['snippet'])); }
-      $row[] = array('data' => drupal_render($form[$key]['weight']), 'class' => 'solr-weight-' . $partof_id);
+      $row[] = array('data' => drupal_render($form[$key]['weight']));
 //      $row[] = array('data' => drupal_render($form['configure'][$key]));
       $row[] = array('data' => drupal_render($form[$key]['remove']), 'class' => 'islandora-solr-operations');
       $row[] = array('data' => drupal_render($form[$key]['remove_button']), 'class' => 'islandora-solr-operations');
@@ -863,7 +863,7 @@ function theme_islandora_solr_admin_primary_display($variables) {
       $row[] = array('data' => drupal_render($form['enabled'][$key]));
       $row[] = array('data' => drupal_render($form['name'][$key]), 'title' => $key);
       $row[] = array('data' => drupal_render($form['machine_name'][$key]));
-      $row[] = array('data' => drupal_render($form['weight'][$key]), 'class' => 'solr-weight');
+      $row[] = array('data' => drupal_render($form['weight'][$key]));
       $row[] = array('data' => drupal_render($form['configuration'][$key]));
 
       // add to rows

@@ -65,4 +65,4 @@ islandora_solr_fields
 id  -  machine_name  - label  -  snippet  -  range  -  options
 
 
-Too much code duplication in the form function !!!! Needs to be fixed !
+- Too much code duplication in the form function !!!! Needs to be fixed !
