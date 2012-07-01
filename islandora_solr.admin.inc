@@ -300,6 +300,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     $term['weight'] = array(
       '#type' => 'weight',
       '#default_value' => isset($value['weight']) ? $value['weight'] : $key,
+      '#delta' => 50,
       '#attributes' => array('class' => array('solr-weight-result-fields')),
     );  
     $term['remove'] = array(
@@ -438,6 +439,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     $sort_term['weight'] = array(
       '#type' => 'weight',
       '#default_value' => isset($value['weight']) ? $value['weight'] : $key,
+      '#delta' => 50,
       '#attributes' => array('class' => array('solr-weight-sort-fields')),
     );  
     $sort_term['remove'] = array(
@@ -640,6 +642,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     $search_term['weight'] = array(
       '#type' => 'weight',
       '#default_value' => isset($value['weight']) ? $value['weight'] : $key,
+      '#delta' => 50,
       '#attributes' => array('class' => array('solr-weight-search-fields')),
     );  
     $search_term['remove'] = array(
