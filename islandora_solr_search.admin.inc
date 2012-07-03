@@ -195,6 +195,7 @@ function islandora_solr_admin_settings(&$form_state) {
   );
 
 
+  // Display settings
   $form['default_display_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Default display settings'),
@@ -256,8 +257,26 @@ function islandora_solr_admin_settings(&$form_state) {
   );
   
   
-
+  // Sort
+  $form['sort'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Sort'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['sort']['islandora_solr_search_sort_terms'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Sort terms'),
+    '#description' => t("Indicate what fields should appear in the <strong>Islandora sort block</strong>.<br />
+      Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.title ~ Title</strong><br />
+      Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
+      module is available in Islandora's online documentation. <br /><strong>Important:</strong> Not all solr fields can be used for sorting. For more info, check the <a href='!sorturl' target='_blank'>solr documentation</a> on sorting.", array('!sorturl' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
+    '#default_value' => variable_get('islandora_solr_search_sort_terms', 'score ~ Relevance, PID ~ PID'),
+    '#wysiwyg' => FALSE,
+  );
   
+
+  // Facets
   $form['facet_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Facet settings'),
@@ -339,7 +358,7 @@ function islandora_solr_admin_settings(&$form_state) {
   
   
   
-  
+  // Advanced search block
   $form['advanced_search_block'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced search block'),
@@ -367,6 +386,7 @@ function islandora_solr_admin_settings(&$form_state) {
 
   
   
+  // Query defaults
   $form['query_defaults'] = array(
     '#type' => 'fieldset',
     '#title' => t('Query defaults'),
@@ -400,7 +420,7 @@ function islandora_solr_admin_settings(&$form_state) {
   );
   
   
-  
+  // Debug
   $form['islandora_solr_search_debug_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Debug Mode?'),
