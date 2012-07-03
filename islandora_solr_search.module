@@ -536,7 +536,7 @@ function islandora_solr_search_limit() {
     $path = SOLR_SEARCH_PATH . '/' . $queryClass->solrQuery;
     
     // get limit results values
-    $limit_results = variable_get('islandora_solr_limit_results_exposed', '10, 25, 50, 100');
+    $limit_results = variable_get('islandora_solr_search_limit_results_exposed', '10, 25, 50, 100');
     
     // conver to array
     $limit_results = explode(',', $limit_results);
@@ -586,7 +586,7 @@ function islandora_solr_search_limit() {
       }
       // theme item list (if more than one displays are available)
       if (count($list_items) > 1) {
-        $styling = (variable_get('islandora_solr_limit_results_exposed_styling', 0) == 1) ? ' horizontal' : '';
+        $styling = (variable_get('islandora_solr_search_limit_results_exposed_styling', 0) == 1) ? ' horizontal' : '';
         $output = theme('item_list', $list_items, NULL, "ul", array('class' => 'islandora-solr-search-limit' . $styling));
       }
     }

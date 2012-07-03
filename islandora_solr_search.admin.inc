@@ -240,19 +240,19 @@ function islandora_solr_admin_settings(&$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  $form['default_display_settings']['exposed_limit']['islandora_solr_limit_results_exposed'] = array(
+  $form['default_display_settings']['exposed_limit']['islandora_solr_search_limit_results_exposed'] = array(
     '#type' => 'textfield',
     '#title' => t('Exposed results per page'),
-    '#default_value' => variable_get('islandora_solr_limit_results_exposed', '10, 25, 50, 100'),
+    '#default_value' => variable_get('islandora_solr_search_limit_results_exposed', '10, 25, 50, 100'),
     '#description' => t("Comma separated values (integers) to expose links in a block which provides the user the ability to limit search results manually.<br />
     <strong>Note:</strong><em> Some display profiles might override this value.</em> "),
     '#wysiwyg' => FALSE,
   );
-  $form['default_display_settings']['exposed_limit']['islandora_solr_limit_results_exposed_styling'] = array(
+  $form['default_display_settings']['exposed_limit']['islandora_solr_search_limit_results_exposed_styling'] = array(
     '#type' => 'checkbox',
     '#title' => t('Horizontal styling'),
     '#return_value' => 1,
-    '#default_value' => variable_get('islandora_solr_limit_results_exposed_styling', 0),
+    '#default_value' => variable_get('islandora_solr_search_limit_results_exposed_styling', 0),
     '#description' => t('Styles the exposed result limit links horizontally with separators.'),
   );
   
@@ -618,15 +618,15 @@ function callback_prep() {
 function islandora_solr_admin_settings_validate($form, &$form_state) {
   $form_state['values']['islandora_solr_search_namespace_restriction'] = preg_replace('/:$/', '', $form_state['values']['islandora_solr_search_namespace_restriction']);
   
-  $limit_results_exposed = explode(',', $form_state['values']['islandora_solr_limit_results_exposed']);
+  $limit_results_exposed = explode(',', $form_state['values']['islandora_solr_search_limit_results_exposed']);
 
   foreach ($limit_results_exposed as $limit) {
     $limit = trim($limit);
     if (!is_numeric($limit)) {
-      form_set_error('islandora_solr_limit_results_exposed', t('Exposed results must be numeric.'));
+      form_set_error('islandora_solr_search_limit_results_exposed', t('Exposed results must be numeric.'));
     }
     if (strpos($limit, '.') OR strpos($limit, ',')) {
-      form_set_error('islandora_solr_limit_results_exposed', t('Exposed results cannot be decimals.'));
+      form_set_error('islandora_solr_search_limit_results_exposed', t('Exposed results cannot be decimals.'));
     }
   }
 }
