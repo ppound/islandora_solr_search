@@ -213,6 +213,14 @@ function islandora_solr_search_islandora_solr_query_blocks() {
       'function' => 'islandora_solr_search_display',
       'form' => NULL,
     ),
+    'limit_results' => array(
+      'name' => 'Islandora Limit Results',
+      'module' => 'islandora_solr_search',
+      'file' => 'islandora_solr_search.module',
+      'class' => NULL,
+      'function' => 'islandora_solr_search_limit',
+      'form' => NULL,
+    ),
   );
 }
 
@@ -494,6 +502,90 @@ function islandora_solr_search_display() {
   }
   return $output;
 }
+
+
+/**
+ * Callback function for Islandora Result Limit block. Returns a styled list of
+ * links to limit the search results per page.
+ *
+ * @global IslandoraSolrQueryProcessor $queryClass
+ * @return string
+ *   Returns a themed unordered list containing links to limit search results
+ *   per page.
+ */
+function islandora_solr_search_limit() {
+  global $queryClass;
+  
+  // set variables
+  $output = '';
+  
+  // check if the page is dealing with search results
+  if (class_exists('IslandoraSolrResults')) {
+    
+    // parameters set in url
+    $params = $queryClass->internalSolrParams;
+    // set path
+    $path = SOLR_SEARCH_PATH . '/' . $queryClass->solrQuery;
+    
+    // get limit results values
+    $limit_results = variable_get('islandora_solr_limit_results_exposed', '10, 25, 50, 100');
+    
+    // conver to array
+    $limit_results = explode(',', $limit_results);
+    
+    if (!empty($limit_results)) {
+
+      // set variables
+      $list_items = array();
+
+      foreach ($limit_results as $limit) {
+        // trim value
+        $limit = trim($limit);
+        
+        if (is_numeric($limit)) {
+
+          // current display
+          if ($params['limit']) {
+            $current_limit = $params['limit'];
+          }
+          else {
+            $current_limit = variable_get('islandora_solr_search_num_of_results', '25');
+          }
+          
+          // query
+          $query = array_merge($params, array('limit' => $limit));
+          
+          // set attributes
+          $attr = array();
+          // set class
+          if ($limit == $current_limit) {
+            $attr['class'] = 'active';
+          }
+          // nofollow
+          $attr['rel'] = 'nofollow';
+          // title
+          $attr['title'] = t('Show @limit results', array('@limit' => $limit));
+          // url
+          $attr['href'] = url($path, array('query' => $query));
+          
+          // create link
+          // we're not using l() because of active classes: http://drupal.org/node/41595
+          $item = '<a' . drupal_attributes($attr) . '>' . $limit . '</a>';
+          
+          // add link to list
+          $list_items[] = $item;
+        }
+      }
+      // theme item list (if more than one displays are available)
+      if (count($list_items) > 1) {
+        $styling = (variable_get('islandora_solr_limit_results_exposed_styling', 0) == 1) ? ' horizontal' : '';
+        $output = theme('item_list', $list_items, NULL, "ul", array('class' => 'islandora-solr-search-limit' . $styling));
+      }
+    }
+  }
+  return $output;
+}
+
 
 
 /**

@@ -89,6 +89,8 @@ function islandora_solr_search_uninstall() {
     'islandora_solr_search_debug_mode',
     'islandora_solr_search_limit_result_fields',
     'islandora_solr_search_num_of_results',
+    'islandora_solr_limit_results_exposed_styling',
+    'islandora_solr_limit_results_exposed',
     'islandora_solr_search_result_fields',
     'islandora_solr_snippet_field',
     'islandora_solr_search_namespace_restriction',

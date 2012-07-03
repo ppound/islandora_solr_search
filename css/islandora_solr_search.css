@@ -94,6 +94,26 @@ img.islandora_solr_secondary_display_icon {
 }
 
 
+.item-list ul.islandora-solr-search-limit.horizontal li a
+{
+  float: left;
+  line-height: 12px;
+}
+
+.item-list ul.islandora-solr-search-limit.horizontal li
+{
+  display: inline-block;
+  background-image: none;
+  margin: 0;
+  padding: 0 6px 0 3px;
+  border-right: 1px solid #494949;
+}
+
+.item-list ul.islandora-solr-search-limit.horizontal li.last
+{
+  border-right: 0;
+}
+
 html.js .refresh-button {
   display: none;
 }
