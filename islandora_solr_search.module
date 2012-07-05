@@ -229,6 +229,14 @@ function islandora_solr_search_islandora_solr_query_blocks() {
       'function' => 'islandora_solr_search_sort',
       'form' => NULL,
     ),
+    'date_filter' => array(
+      'name' => t('Islandora Date Filter'),
+      'module' => 'islandora_solr_search',
+      'file' => 'islandora_solr_search.module',
+      'class' => NULL,
+      'function' => 'islandora_solr_search_date_filter',
+      'form' => NULL,
+    ),
   );
 }
 
@@ -713,6 +721,203 @@ function islandora_solr_search_sort() {
 
 
 
+
+
+
+
+
+
+
+
+
+function islandora_solr_search_date_filter() {
+
+  // set variables
+  $output = '';
+
+  // check if the page is dealing with search results
+  if (class_exists('IslandoraSolrResults')) {
+
+    $output = drupal_get_form('islandora_solr_search_date_filter_form');
+  }
+
+  return $output;
+}
+
+
+
+function islandora_solr_search_date_filter_form() {
+  global $queryClass;
+
+  // set variables
+  $form = array();
+  
+  // get date filter terms    
+  $date_filter_terms = islandora_build_substitution_list(variable_get('islandora_solr_date_filter', 'timestamp ~ Timestamp'));
+dsm($date_filter_terms);
+  // Field
+  // Provide dropdown if multiple values are given
+  if (count($date_filter_terms) > 1) {
+    $form['date_filter_terms'] = array(
+      '#type' => 'select',
+      '#title' => t('Field'),
+      '#options' => $date_filter_terms,
+//        '#default_value' => '',
+    );
+  }
+  else {
+    $date_filter_term = key($date_filter_terms);
+    
+    dsm($date_filter_term);
+    $form['date_filter_term'] = array(
+      '#type' => 'hidden',
+      '#value' => $date_filter_term,
+    );
+  }
+
+
+  // check if default value is possible
+
+  // parameters set in url
+  $params = isset($queryClass->internalSolrParams) ? $queryClass->internalSolrParams : array();
+  if (isset($params['f'])) {
+    $format = 'Y/m/d';
+    foreach ($params['f'] as $filter) {
+      if (strpos($filter, $date_filter_term) === 0) {
+        // split the filter into field and value
+        $filter_split = explode(':', $filter, 2);
+        // trim brackets
+        $filter_split[1] = trim($filter_split[1], "\"");
+        // split range filter string to return formatted date values
+        $filter_str = $filter_split[1];
+        $filter_str = trim($filter_str, '[');
+        $filter_str = trim($filter_str, ']');
+        $filter_array = explode(' TO ', $filter_str);
+        $from_default = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format);
+        $to_default = format_date(strtotime(trim($filter_array[1])) + (60 * 60 * 24), 'custom', $format);
+      }
+    }
+  }
+
+  
+  
+  // From
+  $form['date_filter_from'] = array(
+    '#type' => 'textfield',
+    '#title' => t('From date'),
+    '#default_value' => ($from_default) ? $from_default : '',
+    '#size' => 10,
+    '#maxsize' => 10,
+//    '#required' => TRUE,
+    '#description' => t('Format: @date', array('@date' => date("Y/d/m"))),
+  );
+
+  // To
+  $form['date_filter_to'] = array(
+    '#type' => 'textfield',
+    '#title' => t('To date'),
+    '#default_value' => ($to_default) ? $to_default : '',
+    '#size' => 10,
+    '#maxsize' => 10,
+//    '#required' => TRUE,
+    '#description' => t('Format: @date', array('@date' => date("Y/d/m"))),
+  );
+
+  // Submit
+  $form['date_filter_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Refine'),
+  );
+  
+  return $form;
+}
+
+function islandora_solr_search_date_filter_form_validate($form, &$form_state) {
+  
+  $from = explode('/', $form_state['values']['date_filter_from']);
+  $to = explode('/', $form_state['values']['date_filter_to']);
+
+  // Apply some defaults
+  $default = '01';
+  if (!isset($from[1])) {
+    $from[1] = $default;
+  }
+  if (!isset($from[2])) {
+    $from[2] = $default;
+  }
+  if (!isset($to[1])) {
+    $to[1] = $default;
+  }
+  if (!isset($to[2])) {
+    $to[2] = $default;
+  }
+  
+  // check from date
+  if (!checkdate(intval($from[1]), intval($from[2]), intval($from[0]))) {
+    form_set_error('date_filter_from', t('From date isn\'t formatted correctly.'));
+  }
+
+  // check to date
+  if (!checkdate(intval($to[1]), intval($to[2]), intval($to[0]))) {
+    form_set_error('date_filter_to', t('To date isn\'t formatted correctly.'));
+  }
+  
+}
+
+function islandora_solr_search_date_filter_form_submit($form, &$form_state) {
+  global $queryClass;
+  dsm($form_state);
+  
+  $form_state['rebuild'] = TRUE;
+  
+  // get values
+  // term
+  if (isset($form_state['values']['date_filter_term'])) {
+    $term = $form_state['values']['date_filter_term'];
+  }
+  else {
+    $term = $form_state['values']['date_filter_terms'];
+  }
+
+  // date
+  $from = explode('/', $form_state['values']['date_filter_from']);
+  $to = explode('/', $form_state['values']['date_filter_to']);
+
+  // Apply some defaults
+  $default = '01';
+  if (!isset($from[1])) {
+    $from[1] = $default;
+  }
+  if (!isset($from[2])) {
+    $from[2] = $default;
+  }
+  if (!isset($to[1])) {
+    $to[1] = $default;
+  }
+  if (!isset($to[2])) {
+    $to[2] = $default;
+  }
+  
+  // create filter
+  // timestamp:[1900-01-01T00:00:00Z TO 1990-01-01T00:00:00Z]
+  $filter = "$term:[$from[0]-$from[1]-$from[2]T00:00:00Z TO $to[0]-$to[1]-$to[2]T00:00:00Z]";
+  
+  // parameters set in url
+  $params = isset($queryClass->internalSolrParams) ? $queryClass->internalSolrParams : array();
+  // set path
+  $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
+
+  // set filter key if there are no filters included
+  if (empty($params['f'])) {
+    $params['f'] = array();
+  }
+      
+  // merge recursively to add new filter parameter
+  $query = array_merge_recursive($params, array('f' => array($filter)));
+
+  drupal_goto($path, $query);
+  
+}
 
 
 

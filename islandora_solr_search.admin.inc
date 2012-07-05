@@ -358,6 +358,50 @@ function islandora_solr_admin_settings(&$form_state) {
   
   
   
+  // Date filter
+  $form['date_filter'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Date filter'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['date_filter']['islandora_solr_date_filter'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Date filter terms'),
+    '#description' => t("Indicate what fields should be used to filter dates on in the <strong>date filter block</strong>. When multiple values are given, these will be displayed in a dropdown for the user to select.<br />
+      Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>timestamp ~ Timestamp</strong><br />
+      Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
+      module is available in Islandora's online documentation."),
+    '#default_value' => variable_get('islandora_solr_date_filter', 'timestamp ~ Timestamp'),
+    '#wysiwyg' => FALSE,
+  );
+
+  // only expose when jquery_ui is installed
+  if (module_exists('jquery_ui')) {
+    $form['date_filter']['islandora_solr_date_filter_year_range'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Years back and forward'),
+      '#default_value' => variable_get('islandora_solr_date_filter_year_range', '-3:+3'),
+      '#size' => 10,
+      '#maxsize' => 10,
+      '#description' => t('Number of years to go back and forward in the year selection list, default is -3:+3.'),
+    );
+  }
+  else {
+    $form['date_filter']['islandora_solr_date_filter_not_available'] = array(
+      '#type' => 'markup',
+      '#value' => t('In order to use the date filter you need to install the <a href="!url">jquery_ui</a> module.', array('!url', 'http://drupal.org/project/jquery_ui')),
+      '#prefix' => '<p>',
+      '#suffix' => '</p>',
+    );
+  }
+  
+  
+  
+  
+  
+  
   // Advanced search block
   $form['advanced_search_block'] = array(
     '#type' => 'fieldset',
