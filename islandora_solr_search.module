@@ -612,7 +612,7 @@ function islandora_solr_search_limit() {
 /**
  * Provides a list to change the sorting on a current search query.
  *
- * @global type $_islandora_solr_queryclass
+ * @global type $queryClass
  *   the IslandoraSolrQueryProcessor object which includes the current query
  *   settings and the raw Solr results.
  * @return
@@ -631,7 +631,7 @@ function islandora_solr_search_sort() {
     // parameters set in url
     $params = isset($queryClass->internalSolrParams) ? $queryClass->internalSolrParams : array();
     // set path
-    $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
+    $path = SOLR_SEARCH_PATH . '/' . $queryClass->solrQuery;
 
     // get sort terms
     $sort_terms = islandora_build_substitution_list(variable_get('islandora_solr_search_sort_terms', 'score ~ Relevance, PID ~ PID'));
@@ -754,7 +754,7 @@ function islandora_solr_search_date_filter_form() {
   
   // get date filter terms    
   $date_filter_terms = islandora_build_substitution_list(variable_get('islandora_solr_date_filter', 'timestamp ~ Timestamp'));
-dsm($date_filter_terms);
+
   // Field
   // Provide dropdown if multiple values are given
   if (count($date_filter_terms) > 1) {
@@ -768,7 +768,6 @@ dsm($date_filter_terms);
   else {
     $date_filter_term = key($date_filter_terms);
     
-    dsm($date_filter_term);
     $form['date_filter_term'] = array(
       '#type' => 'hidden',
       '#value' => $date_filter_term,
@@ -780,9 +779,9 @@ dsm($date_filter_terms);
 
   // parameters set in url
   $params = isset($queryClass->internalSolrParams) ? $queryClass->internalSolrParams : array();
-  if (isset($params['f'])) {
+  if (isset($params['date_filter'])) {
     $format = 'Y/m/d';
-    foreach ($params['f'] as $filter) {
+    foreach ($params['date_filter'] as $key => $filter) {
       if (strpos($filter, $date_filter_term) === 0) {
         // split the filter into field and value
         $filter_split = explode(':', $filter, 2);
@@ -798,8 +797,6 @@ dsm($date_filter_terms);
       }
     }
   }
-
-  
   
   // From
   $form['date_filter_from'] = array(
@@ -827,6 +824,11 @@ dsm($date_filter_terms);
   $form['date_filter_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Refine'),
+  );
+  
+  $form['date_filter_reset'] = array(
+    '#type' => 'submit',
+    '#value' => t('Reset'),
   );
   
   return $form;
@@ -865,12 +867,16 @@ function islandora_solr_search_date_filter_form_validate($form, &$form_state) {
 }
 
 function islandora_solr_search_date_filter_form_submit($form, &$form_state) {
-  global $queryClass;
-  dsm($form_state);
-  
+
   $form_state['rebuild'] = TRUE;
   
-  // get values
+  // set variables
+  $op = isset($form_state['values']['op']) ? $form_state['values']['op'] : '';  
+  // parameters set in url
+  global $queryClass;
+  $params = isset($queryClass->internalSolrParams) ? $queryClass->internalSolrParams : array();
+  // set path
+  $path = SOLR_SEARCH_PATH . '/' . $queryClass->solrQuery;
   // term
   if (isset($form_state['values']['date_filter_term'])) {
     $term = $form_state['values']['date_filter_term'];
@@ -878,44 +884,54 @@ function islandora_solr_search_date_filter_form_submit($form, &$form_state) {
   else {
     $term = $form_state['values']['date_filter_terms'];
   }
-
-  // date
-  $from = explode('/', $form_state['values']['date_filter_from']);
-  $to = explode('/', $form_state['values']['date_filter_to']);
-
-  // Apply some defaults
-  $default = '01';
-  if (!isset($from[1])) {
-    $from[1] = $default;
-  }
-  if (!isset($from[2])) {
-    $from[2] = $default;
-  }
-  if (!isset($to[1])) {
-    $to[1] = $default;
-  }
-  if (!isset($to[2])) {
-    $to[2] = $default;
-  }
   
-  // create filter
-  // timestamp:[1900-01-01T00:00:00Z TO 1990-01-01T00:00:00Z]
-  $filter = "$term:[$from[0]-$from[1]-$from[2]T00:00:00Z TO $to[0]-$to[1]-$to[2]T00:00:00Z]";
-  
-  // parameters set in url
-  $params = isset($queryClass->internalSolrParams) ? $queryClass->internalSolrParams : array();
-  // set path
-  $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
-
-  // set filter key if there are no filters included
-  if (empty($params['f'])) {
-    $params['f'] = array();
-  }
+  // Refine and reset
+  switch ($op) {
+    case t('Reset'):
+      // unset current filter
+      unset($params['date_filter'][$term]);
+      $query = $params;
+      // redirect
+      drupal_goto($path, $query);
       
-  // merge recursively to add new filter parameter
-  $query = array_merge_recursive($params, array('f' => array($filter)));
+      break;
+    case t('Refine'):
+      // date
+      $from = explode('/', $form_state['values']['date_filter_from']);
+      $to = explode('/', $form_state['values']['date_filter_to']);
 
-  drupal_goto($path, $query);
+      // Apply some defaults
+      $default = '01';
+      if (!isset($from[1])) {
+        $from[1] = $default;
+      }
+      if (!isset($from[2])) {
+        $from[2] = $default;
+      }
+      if (!isset($to[1])) {
+        $to[1] = $default;
+      }
+      if (!isset($to[2])) {
+        $to[2] = $default;
+      }
+
+      // create filter
+      // timestamp:[1900-01-01T00:00:00Z TO 1990-01-01T00:00:00Z]
+      $filter = "$term:[$from[0]-$from[1]-$from[2]T00:00:00Z TO $to[0]-$to[1]-$to[2]T00:00:00Z]";
+
+      // set date filter key if there are no date filters included
+      if (isset($params['date_filter'][$term])) {
+        $params['date_filter'][$term] = $filter;
+        $query = $params;
+      }
+      else {
+        $query = array_merge_recursive($params, array('date_filter' => array($term => $filter)));
+      }
+      // redirect
+      drupal_goto($path, $query);
+
+      break;
+  }
   
 }
 

@@ -206,17 +206,24 @@ class IslandoraSolrQueryProcessor {
     // set base filters
     $base_filters = preg_split("/\\r\\n|\\n|\\r/", variable_get('islandora_solr_search_base_filter', ''), -1, PREG_SPLIT_NO_EMPTY);
     
-    // set filter parameters - both from url and admin settings.
-    if (is_array($this->internalSolrParams['f'])) {
-      $this->solrParams['fq'] = $this->internalSolrParams['f'];
-      if (!empty($base_filters)) {
-        $this->solrParams['fq'] = array_merge($this->internalSolrParams['f'], $base_filters);
-      }
-    }
-    elseif (!empty($base_filters)) {
-      $this->solrParams['fq'] = $base_filters;
-    }
     
+    // set filter parameters - both from url and admin settings.
+    if (is_array($this->internalSolrParams['f']) OR is_array($this->internalSolrParams['date_filter']) OR !empty($base_filters)) {
+      $this->solrParams['fq'] = array();
+    }
+    // filters
+    if (is_array($this->internalSolrParams['f'])) {
+      $this->solrParams['fq'] = array_merge($this->solrParams['fq'], $this->internalSolrParams['f']);
+    }
+    // date range filters
+    if (is_array($this->internalSolrParams['date_filter'])) {
+      $this->solrParams['fq'] = array_merge($this->solrParams['fq'], array_values($this->internalSolrParams['date_filter']));
+    }
+    // base filters
+    if (!empty($base_filters)) {
+      $this->solrParams['fq'] = array_merge($this->solrParams['fq'], $base_filters);
+    }
+    dsm($this->solrParams);
     
     // restrict results based on specified namespace
     $namespace = trim(variable_get('islandora_solr_search_namespace_restriction', NULL));
