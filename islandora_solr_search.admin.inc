@@ -321,7 +321,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Date facets'),
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => FALSE,
   );
   $form['facet_settings']['facet_dates']['islandora_solr_facet_date'] = array(
     '#type' => 'textarea',
@@ -329,6 +329,13 @@ function islandora_solr_admin_settings(&$form_state) {
     '#description' => t("Indicate which date field will appear in the <strong>Islandora Facet Block</strong>.<br />
       Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.date ~ Date</strong> "),
     '#default_value' => variable_get('islandora_solr_facet_date' , NULL),
+  );
+  $form['facet_settings']['facet_dates']['islandora_solr_facet_date_gap_variable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Variable range gap'),
+    '#return_value' => 1,
+    '#default_value' => variable_get('islandora_solr_facet_date_gap_variable', 0),
+    '#description' => t('When checked, the following date range settings will be used as a default. If a date range is filtered down, a new date range gap will be calculated and applied. When unchecked the following settings provide fixed range gaps.'),
   );
   $form['facet_settings']['facet_dates']['islandora_solr_facet_date_start'] = array(
     '#type' => 'textfield',
@@ -355,31 +362,50 @@ function islandora_solr_admin_settings(&$form_state) {
     '#default_value' => variable_get('islandora_solr_facet_date_format' , 'Y'),
   );
   
-  
-  
-  
+  // Range slider
+  $form['facet_settings']['facet_dates']['range_slider'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Date range slider'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  // only expose when jquery_ui is installed
+  if (module_exists('jquery_ui')) {
+    $form['facet_settings']['facet_dates']['range_slider']['islandora_solr_range_slider_enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable range slider'),
+      '#return_value' => 1,
+      '#default_value' => variable_get('islandora_solr_range_slider_enabled', 0),
+      '#description' => t('When checked, the normal range facet will be replaced by a date slider widget.'),
+    );
+  }
+  else {
+    $form['facet_settings']['facet_dates']['date_filter']['islandora_solr_date_filter_not_available'] = array(
+      '#type' => 'markup',
+      '#value' => t('In order to use the date range slider you need to install the <a href="!url">jquery_ui</a> module.', array('!url', 'http://drupal.org/project/jquery_ui')),
+      '#prefix' => '<p>',
+      '#suffix' => '</p>',
+    );
+  }
+
+
   // Date filter
-  $form['date_filter'] = array(
+  $form['facet_settings']['facet_dates']['date_filter'] = array(
     '#type' => 'fieldset',
     '#title' => t('Date filter'),
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => FALSE,
   );
-
-  $form['date_filter']['islandora_solr_date_filter'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Date filter terms'),
-    '#description' => t("Indicate what fields should be used to filter dates on in the <strong>date filter block</strong>. When multiple values are given, these will be displayed in a dropdown for the user to select.<br />
-      Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>timestamp ~ Timestamp</strong><br />
-      Review the schema.xml to see what terms are available. A list of the fields available when using the schema.xml packaged with the Islandora Solr
-      module is available in Islandora's online documentation."),
-    '#default_value' => variable_get('islandora_solr_date_filter', 'timestamp ~ Timestamp'),
-    '#wysiwyg' => FALSE,
+  $form['facet_settings']['facet_dates']['date_filter']['islandora_solr_date_filter_enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable date range filter'),
+    '#return_value' => 1,
+    '#default_value' => variable_get('islandora_solr_date_filter_enabled', 0),
+    '#description' => t('When checked, a date range filter will become available underneath the date range facets. The date range filter includes a <em>from date</em> and a <em>to date</em> textfield. If the jquery ui module is installed and enabled, it will provide a calendar widget.'),
   );
-
   // only expose when jquery_ui is installed
   if (module_exists('jquery_ui')) {
-    $form['date_filter']['islandora_solr_date_filter_year_range'] = array(
+    $form['facet_settings']['facet_dates']['date_filter']['islandora_solr_date_filter_year_range'] = array(
       '#type' => 'textfield',
       '#title' => t('Years back and forward'),
       '#default_value' => variable_get('islandora_solr_date_filter_year_range', '-3:+3'),
@@ -389,9 +415,9 @@ function islandora_solr_admin_settings(&$form_state) {
     );
   }
   else {
-    $form['date_filter']['islandora_solr_date_filter_not_available'] = array(
+    $form['facet_settings']['facet_dates']['date_filter']['islandora_solr_date_filter_not_available'] = array(
       '#type' => 'markup',
-      '#value' => t('In order to use the date filter you need to install the <a href="!url">jquery_ui</a> module.', array('!url', 'http://drupal.org/project/jquery_ui')),
+      '#value' => t('In order to use a calendar popup with the date filter you need to install the <a href="!url">jquery_ui</a> module.', array('!url', 'http://drupal.org/project/jquery_ui')),
       '#prefix' => '<p>',
       '#suffix' => '</p>',
     );
