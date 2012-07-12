@@ -35,3 +35,21 @@ Drupal.behaviors.dateRangeFilter = function (context) {
    $('.toggle-date-range-filter').addClass('processed');
  }
 }
+
+
+// Datepicker
+Drupal.behaviors.dateRangeFilterDatepicker = function (context) {
+
+  // get year range variable
+  var yearRangeVal = Drupal.settings.islandora_solr_search_datepicker_range;
+
+  // set datepicker
+  // @TODO: add date range functionality: http://jqueryui.com/demos/datepicker/#date-range
+  $(".islandora-solr-search-datepicker").datepicker({
+    changeMonth: true,
+    changeYear: true,
+    dateFormat: "yy/mm/dd",
+    yearRange: yearRangeVal
+  });
+}
+

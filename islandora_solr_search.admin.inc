@@ -405,13 +405,14 @@ function islandora_solr_admin_settings(&$form_state) {
   );
   // only expose when jquery_ui is installed
   if (module_exists('jquery_ui')) {
-    $form['facet_settings']['facet_dates']['date_filter']['islandora_solr_date_filter_year_range'] = array(
+    $form['facet_settings']['facet_dates']['date_filter']['islandora_solr_search_datepicker_range'] = array(
       '#type' => 'textfield',
       '#title' => t('Years back and forward'),
-      '#default_value' => variable_get('islandora_solr_date_filter_year_range', '-3:+3'),
+      '#default_value' => variable_get('islandora_solr_search_datepicker_range', '-100:+3'),
       '#size' => 10,
       '#maxsize' => 10,
-      '#description' => t('Number of years to go back and forward in the year selection list, default is -3:+3.'),
+      // @TODO: in D7 more options are possible because of jquery ui 1.8 in D7 vs 1.6 in D6
+      '#description' => t('Number of years to go back and forward in the datepicker popup dropdown. Values: either relative to today\'s year (-nn:+nn) or absolute (nnnn:nnnn).'),
     );
   }
   else {
@@ -423,7 +424,7 @@ function islandora_solr_admin_settings(&$form_state) {
     );
   }
   
-  
+
   
   
   

@@ -727,18 +727,22 @@ class IslandoraSolrResults {
         $facet_output .= drupal_get_form('islandora_solr_search_date_filter_form_' . $date_filter_key, $date_filter_key, $facet_key);
         $date_filter_key++;
         $facet_output .='</div>';
-
       }
-      
     }
 
+    // include jquery ui datepicker
+    if ($date_filter_key > 0 AND module_exists('jquery_ui')) {
+      jquery_ui_add(array('ui.datepicker'));
+      $date_range = variable_get('islandora_solr_search_datepicker_range', '-100:+3');
+      drupal_add_js(array('islandora_solr_search_datepicker_range' => trim($date_range)), 'setting');
+    }
+    
+    // add js for facets
     if ($show_more OR $date_filter_key > 0) {
       // if there is at least one occurence of a split array, we add js to the page.
       drupal_add_js(drupal_get_path('module', 'islandora_solr_search') . '/js/islandora_solr_search_facets.js');
     }
 
-    
-    
     //////////////////////////////////////////////////////////////////////////////////////
     // as we add additional facets, we're repeatedly URL-encoding old facet             //
     // strings. when we double-encode quotation marks they're incomprehensible to solr. //

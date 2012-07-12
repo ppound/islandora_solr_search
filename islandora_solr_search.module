@@ -790,7 +790,7 @@ function islandora_solr_search_date_filter_form(&$form_state, $form_key, $solr_f
   // Show/hide link
   $form['date_range_expand'] = array(
     '#type' => 'markup',
-    '#value' => t('Specific date range: <a href="#" class="toggle-date-range-filter @class">@value</a>', array('@class' => $class, '@value' => $value)),
+    '#value' => t('Specify date range: <a href="#" class="toggle-date-range-filter @class">@value</a>', array('@class' => $class, '@value' => $value)),
   );
 
   // wrapper around form elements
@@ -803,7 +803,7 @@ function islandora_solr_search_date_filter_form(&$form_state, $form_key, $solr_f
   // description
   $form[$form_key]['date_filter'] = array(
     '#type' => 'markup',
-    '#value' => '<div class="description">' . t('Format: @date', array('@date' => date("Y/d/m"))) . '</div>',
+    '#value' => '<div class="description">' . t('Format: @date', array('@date' => date("Y/m/d"))) . '</div>',
   );
   
   
@@ -814,6 +814,7 @@ function islandora_solr_search_date_filter_form(&$form_state, $form_key, $solr_f
     '#default_value' => ($from_default) ? $from_default : '',
     '#size' => 10,
     '#maxsize' => 10,
+    '#attributes' => array('class' => 'islandora-solr-search-datepicker'),
   );
 
   // To
@@ -823,6 +824,7 @@ function islandora_solr_search_date_filter_form(&$form_state, $form_key, $solr_f
     '#default_value' => ($to_default) ? $to_default : '',
     '#size' => 10,
     '#maxsize' => 10,
+    '#attributes' => array('class' => 'islandora-solr-search-datepicker'),
   );
 
   // Submit

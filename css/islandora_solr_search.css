@@ -264,3 +264,12 @@ dl.solr-fields {
 {
   
 }
+table.ui-datepicker tbody td.ui-datepicker-current-day a
+{
+  background: yellow;
+}
+
+table.ui-datepicker tbody td.ui-datepicker-today a
+{
+  background: #cbe5fc;
+}
