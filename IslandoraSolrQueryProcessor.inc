@@ -208,16 +208,12 @@ class IslandoraSolrQueryProcessor {
     
     
     // set filter parameters - both from url and admin settings.
-    if (is_array($this->internalSolrParams['f']) OR is_array($this->internalSolrParams['date_filter']) OR !empty($base_filters)) {
+    if (is_array($this->internalSolrParams['f']) OR !empty($base_filters)) {
       $this->solrParams['fq'] = array();
     }
     // filters
     if (is_array($this->internalSolrParams['f'])) {
       $this->solrParams['fq'] = array_merge($this->solrParams['fq'], $this->internalSolrParams['f']);
-    }
-    // date range filters
-    if (is_array($this->internalSolrParams['date_filter'])) {
-      $this->solrParams['fq'] = array_merge($this->solrParams['fq'], array_values($this->internalSolrParams['date_filter']));
     }
     // base filters
     if (!empty($base_filters)) {
