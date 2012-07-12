@@ -600,7 +600,7 @@ class IslandoraSolrResults {
   function displayFacets($solrQueryProcessor) {
     // set variables
     $facet_output = $output = '';
-
+    $date_filter_key = 0;
     // shown limit
     $facet_min_count = 1;
     $min_result = variable_get('islandora_solr_search_block_facet_min_count', '2');
@@ -709,17 +709,36 @@ class IslandoraSolrResults {
             $facet_output .= theme('item_list', $list_items_hidden, NULL, $list_type, $list_attributes);
             $facet_output .= '</div>';
           }
-
+          
           $facet_output .='</div>'; //div.islandora_solr_search_facet
         }
       }
+      
+      // check if we need range filter form.
+      if (variable_get('islandora_solr_date_filter_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr)) {
+        // opening facet div // @TODO: this should go in theme function
+        $facet_output .='<div class="islandora_solr_search_date_filter">';
+
+        if (count($list_items) < $facet_min_count) {
+          // add title
+          $facet_output .='<h3>' . $this->facetFieldArray[$facet_key] . '</h3>';
+        }
+
+        $facet_output .= drupal_get_form('islandora_solr_search_date_filter_form_' . $date_filter_key, $date_filter_key, $facet_key);
+        $date_filter_key++;
+        $facet_output .='</div>';
+
+      }
+      
     }
 
-    if ($show_more) {
+    if ($show_more OR $date_filter_key > 0) {
       // if there is at least one occurence of a split array, we add js to the page.
-      drupal_add_js(drupal_get_path('module', 'islandora_solr_search') . '/js/islandora_solr_search_shown_limit.js');
+      drupal_add_js(drupal_get_path('module', 'islandora_solr_search') . '/js/islandora_solr_search_facets.js');
     }
 
+    
+    
     //////////////////////////////////////////////////////////////////////////////////////
     // as we add additional facets, we're repeatedly URL-encoding old facet             //
     // strings. when we double-encode quotation marks they're incomprehensible to solr. //

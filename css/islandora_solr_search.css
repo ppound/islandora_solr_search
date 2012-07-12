@@ -223,3 +223,44 @@ dl.solr-fields {
 .solr-fields dd.first {
   border-top: 0;
 }
+
+
+
+
+/* Date filters */
+
+.islandora_solr_search_date_filter label
+{
+  display: inline-block;  
+}
+
+.islandora_solr_search_date_filter input
+{
+  float: right;  
+}
+
+.islandora_solr_search_date_filter form
+{
+  float: left;
+  width: 100%;
+}
+
+.islandora_solr_search_date_filter .description
+{
+  font-size: 0.85em;
+}
+
+.islandora_solr_search_date_filter .date-range-expanded-wrapper
+{
+  
+}
+
+.islandora_solr_search_date_filter .date-range-collapsed-wrapper
+{
+
+}
+
+.islandora_solr_search_date_filter .date-range-filter-wrapper
+{
+  
+}

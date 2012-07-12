@@ -219,7 +219,6 @@ class IslandoraSolrQueryProcessor {
     if (!empty($base_filters)) {
       $this->solrParams['fq'] = array_merge($this->solrParams['fq'], $base_filters);
     }
-    dsm($this->solrParams);
     
     // restrict results based on specified namespace
     $namespace = trim(variable_get('islandora_solr_search_namespace_restriction', NULL));
