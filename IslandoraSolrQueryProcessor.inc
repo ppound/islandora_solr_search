@@ -184,18 +184,27 @@ class IslandoraSolrQueryProcessor {
       'hl.fragsize' => 400,
     );
     // check for date facets
-    if (variable_get('islandora_solr_facet_date' , NULL) != NULL) {
+    if (variable_get('islandora_solr_facet_date', NULL) != NULL) {
       // set variables
       $facet_date = variable_get('islandora_solr_facet_date' , NULL);
-      $facet_date = islandora_build_substitution_list($facet_date);
-      $facet_date = implode(",", array_keys($facet_date));
+      $facet_date_arr = islandora_build_substitution_list($facet_date);
+      $facet_date = implode(",", array_keys($facet_date_arr));
       $params_date_facets = array(
         'facet.date' => explode(',', $facet_date),
         'facet.date.start' => variable_get('islandora_solr_facet_date_start' , 'NOW/YEAR-20YEARS'),
         'facet.date.end' => variable_get('islandora_solr_facet_date_end' , 'NOW'),
         'facet.date.gap' => variable_get('islandora_solr_facet_date_gap' , '+1YEAR'),
       );
+
+      // date date facets to parameters
       $params_array = array_merge($params_array, $params_date_facets);
+      
+      // if date range fields are set, don't include them in the normal facet list. Results in unexpected behaviour
+      $facet_date_arr = array_keys($facet_date_arr);
+      if (isset($params_array['facet.field'])) {
+        $p_facet_field['facet.field'] = array_diff($params_array['facet.field'], $facet_date_arr);
+        $params_array = array_merge($params_array, $p_facet_field);
+      }
     }
     // add parameters
     $this->solrParams = array_merge($this->solrParams, $params_array);
