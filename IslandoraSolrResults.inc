@@ -617,7 +617,12 @@ class IslandoraSolrResults {
     
     // get date facet values
     $date_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_dates) ? $solrQueryProcessor->solrResult->facet_counts->facet_dates : array();
-  
+
+    // check if we need to set a variable range gap
+    if (variable_get('islandora_solr_facet_date_gap_variable', 0) == 1) {
+      $this->variableRangeGap($solrQueryProcessor, $facet_min_count);
+    }
+    
     // object to json
     $date_facets_json  = json_encode($date_facets);
     // json to array
@@ -847,6 +852,140 @@ class IslandoraSolrResults {
       $facet_count++;
     }
   }
+  
+  
+  function variableRangeGap($solrQueryProcessor, $facet_min_count) {
+    
+    // 1. gather info
+    // 2. calculate and render range gap
+    // 3. execute
+    // 4. prepare for return
+    // 5. return
+    
+    // 1. gather info
+    dsm($solrQueryProcessor);
+    
+    // get date facet values
+    $date_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_dates) ? $solrQueryProcessor->solrResult->facet_counts->facet_dates : array();
+    // object to json
+    $date_facets_json  = json_encode($date_facets);
+    // json to array
+    $date_facets_arr = json_decode($date_facets_json, true);
+    
+    $date_facets_range = array();
+    // loop over all date facets
+    foreach($date_facets_arr as $term => $buckets) {
+      $end = $buckets['end'];
+      $gap = $buckets['gap'];
+      unset($buckets['gap']);
+      unset($buckets['end']);
+      
+      $values = array();
+      // loop over single date facet
+      foreach ($buckets as $bucket => $bucket_size) {
+        
+        if ($bucket_size >= $facet_min_count) {
+          // logic to get the next range key (next date)
+          $field_keys = array_keys($buckets);
+          $field_key = array_search($date, $field_keys);
+          $field_key = array_search($bucket, $field_keys);
+          $field_key++;
+          $bucket_next = (isset($field_keys[$field_key])) ? $field_keys[$field_key] : $end;
+
+          $values[] = $bucket;
+          $values[] = $bucket_next;
+        }
+      }
+      $from = array_shift($values);
+      $to = array_pop($values);
+      $from_unix = strtotime(trim($from));
+      $to_unix = strtotime(trim($to));
+      
+      // 2. calculate and render range gap
+      // calculate difference between from and to date
+      $diff = abs($from_unix - $to_unix);
+      
+      // @TODO: all code below this needs a lot of work !!!!
+      
+      // difference in years/months/days
+      $years = floor($diff / (365 * 60 * 60 * 24));
+      $months = floor(($diff - $years * 365 * 60 * 60 * 24) / (30 * 60 * 60 * 24));
+      $days = floor(($diff - $years * 365 * 60 * 60 * 24 - $months * 30 * 60 * 60 * 24) / (60 * 60 * 24));
+      
+      
+      
+      
+      $years = 11;
+      $months = 4;
+      
+      if ($years > 10) {
+        $date_facets_range[$term]['gap'] = '+' . $this->calculateGap($years, 'year') . 'YEARS';
+      }
+      elseif ($years >= 2) {
+        $date_facets_range[$term]['gap'] = '+1YEAR';
+      }
+      elseif ($years <= 1 AND $months > 3) {
+        $date_facets_range[$term]['gap'] = '+' . $this->calculateGap($months, 'month') . 'MONTHS';
+      }
+      elseif ($months <= 3) {
+        $total_days = ($months * 30) + $days;
+        $weeks = floor($total_days / 7);
+        
+        if ($total_days > 14) {
+          $date_facets_range[$term]['gap'] = '+' . $this->calculateGap(floor($total_days / 7), 'day') . 'DAYS';
+        }
+        else {
+          $date_facets_range[$term]['gap'] = '+' . $this->calculateGap($total_days, 'day') . 'DAYS';
+        }
+      }
+      
+      $date_facets_range[$term]['years'] = $years;
+      $date_facets_range[$term]['months'] = $months;
+      $date_facets_range[$term]['days'] = $days;
+      
+      $date_facets_range[$term]['from'] = $from;
+      $date_facets_range[$term]['to'] = $to;
+      
+    }
+    
+    dsm($date_facets_range);
+    
+    
+    
+    // 3. execute
+    // 4. prepare for return
+    // 5. return
+    
+  }
+  
+  
+  
+  function calculateGap($number, $type) {
+    
+    switch ($type) {
+      case 'year':
+        $num = $number / 10;
+        if ($number > 10) {
+          $num = round($num / 5) * 5;
+        }
+dsm($num);
+        return $num;
+        
+        break;
+      case 'month':
+        
+        
+        break;
+      case 'day':
+        
+        break;
+    }
+    
+  }
+  
+
+  
+  
   
 
   
