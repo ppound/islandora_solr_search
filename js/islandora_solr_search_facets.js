@@ -21,19 +21,32 @@ Drupal.behaviors.shownToggle = function (context) {
 // Show/hide date range filter
 Drupal.behaviors.dateRangeFilter = function (context) {
  
- if (!$('.toggle-date-range-filter').hasClass('processed')) {
+  // set variables
+  var stringHide = Drupal.t('Hide');
+  var stringShow = Drupal.t('Show');
+ 
+  if (!$('.toggle-date-range-filter').hasClass('processed')) {
    
-   // hide all regions that should be collapsed
-   $('.date-range-collapsed').next('.date-range-filter-wrapper').css({'display': 'none'});
+    // hide all regions that should be collapsed
+    $('.date-range-collapsed').next('.date-range-filter-wrapper').css({'display': 'none'});
    
-   $('.toggle-date-range-filter').click(function() {
-     $(this).next('.date-range-filter-wrapper').slideToggle('fast');
+    $('.toggle-date-range-filter').click(function() {
+      // toggle strings
+      if ($(this).html() == stringHide) {
+        $(this).html(stringShow);
+      }
+      else {
+        $(this).html(stringHide);
+      }
+   
+      // toggle wrapper
+      $(this).next('.date-range-filter-wrapper').slideToggle('fast');
      
-     return false;
-   });
+      return false;
+    });
 
-   $('.toggle-date-range-filter').addClass('processed');
- }
+    $('.toggle-date-range-filter').addClass('processed');
+  }
 }
 
 
