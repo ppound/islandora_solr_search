@@ -598,6 +598,7 @@ class IslandoraSolrResults {
    * @return string
    */
   function displayFacets($solrQueryProcessor) {
+
     // set variables
     $facet_output = $output = '';
     $date_filter_key = 0;
@@ -616,11 +617,13 @@ class IslandoraSolrResults {
     
     // get date facet values
     $date_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_dates) ? $solrQueryProcessor->solrResult->facet_counts->facet_dates : array();
+  
     // object to json
     $date_facets_json  = json_encode($date_facets);
     // json to array
     $date_facets_arr = json_decode($date_facets_json, true);
-    // clean up facet dates array
+  
+    // get date format
     $format = variable_get('islandora_solr_facet_date_format' , 'Y');
     // set variable
     $date_facets = array();
@@ -628,12 +631,12 @@ class IslandoraSolrResults {
     foreach ($date_facets_arr as $key => $fields) {
       // loop over each field
       $date_facets[$key] = array();
-      foreach ($fields as $date => $number) {
+      foreach ($fields as $date => $bucket_size) {
         // facet.date includes other values in the facet results - excluding these
         // we're turning the facet results in an array with multiple values
         if (!in_array($date, array('gap', 'end', 'other', 'hardend', 'include'))) {
-          // set number or documents
-          $date_facets[$key][$date]['number'] = $number;
+          // set bucket size or documents
+          $date_facets[$key][$date]['bucket_size'] = $bucket_size;
           // logic to get the next range key (next date)
           $field_keys = array_keys($fields);
           $field_key = array_search($date, $field_keys);
@@ -777,7 +780,7 @@ class IslandoraSolrResults {
       // set filter to include in url
       $filter = $key . ':' . $data['range'];
       // set number of found solr documents
-      $data = $data['number'];
+      $data = $data['bucket_size'];
       // don't include facet fields with a document count lower than the configured minimum
       if ($data < $min_result) {
         return;
