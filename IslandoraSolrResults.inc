@@ -620,7 +620,7 @@ class IslandoraSolrResults {
 
     // check if we need to set a variable range gap
     if (variable_get('islandora_solr_facet_date_gap_variable', 0) == 1 AND isset($solrQueryProcessor->solrResult->facet_counts->facet_dates)) {
-      $date_facets = $this->variableRangeGap($solrQueryProcessor, $facet_min_count);
+      $date_facets = $this->variableRangeGap($solrQueryProcessor);
     }
     
     // object to json
@@ -854,24 +854,24 @@ class IslandoraSolrResults {
   }
   
   
-  function variableRangeGap($solrQueryProcessor, $facet_min_count) {
+  function variableRangeGap($solrQueryProcessor) {
     
     // 1. gather info
     // 2. calculate and render range gap
     // 3. execute
     // 4. prepare for return
     // 5. return
-    
+
     // 1. gather info
     $fq = isset($solrQueryProcessor->solrParams['fq']) ? $solrQueryProcessor->solrParams['fq'] : array();    
     // get date facet values
     $date_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_dates) ? $solrQueryProcessor->solrResult->facet_counts->facet_dates : array();
     // object to json
-    $date_facets_json  = json_encode($date_facets);
+    $date_facets_json = json_encode($date_facets);
     // json to array
     $date_facets_arr = json_decode($date_facets_json, true);
 
-    $date_facets_range = array();
+    $solr_call = FALSE;
     // loop over all date facets
     foreach ($date_facets_arr as $term => $buckets) {
         
@@ -891,7 +891,7 @@ class IslandoraSolrResults {
           $filter_array = explode(' TO ', $filter_str);
           // collect values in array: timestamp => ISO8601
           $values['from'][strtotime(trim($filter_array[0]))] = trim($filter_array[0]);
-          $values['to'][strtotime(trim($filter_array[1]))] = trim($filter_array[1]);
+          $values['to'][strtotime(strtolower(trim($filter_array[1])))] = trim($filter_array[1]);
         }
       }
 
@@ -949,33 +949,45 @@ class IslandoraSolrResults {
         $solrQueryProcessor->solrParams["f.$term.facet.date.start"] = $from;
         $solrQueryProcessor->solrParams["f.$term.facet.date.end"] = $to;
         $solrQueryProcessor->solrParams["f.$term.facet.date.gap"] = $gap;
+        
+        // update variable
+        $solr_call = TRUE;
       }
     }
     
     // 3. execute
-    // new query processor class
-    $islandoraSolrQuery = new IslandoraSolrQueryProcessor();
+    // if an extra solr call is necessary
+    if ($solr_call) {
+      // new query processor class
+      $islandoraSolrQuery = new IslandoraSolrQueryProcessor();
 
-    // add solr limit
-    $islandoraSolrQuery->solrLimit = 0;
-    // add solr start
-    $islandoraSolrQuery->solrStart = 0;
-    // add query (defaults to *:*)
-    $islandoraSolrQuery->solrQuery = $solrQueryProcessor->solrQuery;
-    // add solr parameters
-    $islandoraSolrQuery->solrParams = $solrQueryProcessor->solrParams;
+      // internal solr query
+      $islandoraSolrQuery->internalSolrQuery = $solrQueryProcessor->internalSolrQuery;
+      // add solr limit
+      $islandoraSolrQuery->solrLimit = 0;
+      // add solr start
+      $islandoraSolrQuery->solrStart = 0;
+      // add query (defaults to *:*)
+      $islandoraSolrQuery->solrQuery = $solrQueryProcessor->solrQuery;
+      // add solr parameters
+      $islandoraSolrQuery->solrParams = $solrQueryProcessor->solrParams;
 
-    // excecute query
-    $islandoraSolrQuery->executeQuery();
+      // excecute query
+      $islandoraSolrQuery->executeQuery();
 
-    // 4. prepare for return
-    // solr results
-    $results = $islandoraSolrQuery->solrResult;
-    $raw_response = $results->getRawResponse();
-    $response_array = json_decode($raw_response, TRUE);
+      // 4. prepare for return
+      // solr results
+      $results = $islandoraSolrQuery->solrResult;
+      $raw_response = $results->getRawResponse();
+      $response_array = json_decode($raw_response, TRUE);
+      
+      // update date_facets
+      $date_facets = $response_array['facet_counts']['facet_dates'];
+      
+    }
 
     // 5. return
-    return $response_array['facet_counts']['facet_dates'];
+    return $date_facets;
   }
   
 
