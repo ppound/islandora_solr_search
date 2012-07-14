@@ -345,7 +345,7 @@ class IslandoraSolrResults {
           $filter_str = trim($filter_str, '[');
           $filter_str = trim($filter_str, ']');
           $filter_array = explode(' TO ', $filter_str);
-          $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])) + (60 * 60 * 24), 'custom', $format);
+          $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])), 'custom', $format);
         }
 
         // pull out filter (for exclude link)
@@ -433,7 +433,7 @@ class IslandoraSolrResults {
           $filter_str = trim($filter_str, '[');
           $filter_str = trim($filter_str, ']');
           $filter_array = explode(' TO ', $filter_str);
-          $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])) + (60 * 60 * 24), 'custom', $format);
+          $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])), 'custom', $format);
         }
 
         // increment filter array with current filter (for breadcrumb link)
@@ -619,8 +619,8 @@ class IslandoraSolrResults {
     $date_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_dates) ? $solrQueryProcessor->solrResult->facet_counts->facet_dates : array();
 
     // check if we need to set a variable range gap
-    if (variable_get('islandora_solr_facet_date_gap_variable', 0) == 1) {
-      $this->variableRangeGap($solrQueryProcessor, $facet_min_count);
+    if (variable_get('islandora_solr_facet_date_gap_variable', 0) == 1 AND isset($solrQueryProcessor->solrResult->facet_counts->facet_dates)) {
+      $date_facets = $this->variableRangeGap($solrQueryProcessor, $facet_min_count);
     }
     
     // object to json
@@ -650,7 +650,7 @@ class IslandoraSolrResults {
           // set date range filter for facet url
           $date_facets[$key][$date]['range'] = '[' . $date . ' TO ' . $date_next . ']';
           // set formatted value for facet link
-          $date_facets[$key][$date]['value'] = format_date(strtotime(trim($date)) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($date_next)) + (60 * 60 * 24), 'custom', $format);
+          $date_facets[$key][$date]['value'] = format_date(strtotime(trim($date)) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($date_next)), 'custom', $format);
         }
       }
     }
@@ -863,7 +863,7 @@ class IslandoraSolrResults {
     // 5. return
     
     // 1. gather info
-    dsm($solrQueryProcessor);
+//    dsm($solrQueryProcessor);
     
     // get date facet values
     $date_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_dates) ? $solrQueryProcessor->solrResult->facet_counts->facet_dates : array();
@@ -896,6 +896,7 @@ class IslandoraSolrResults {
           $values[] = $bucket_next;
         }
       }
+
       $from = array_shift($values);
       $to = array_pop($values);
       $from_unix = strtotime(trim($from));
@@ -912,75 +913,83 @@ class IslandoraSolrResults {
       $months = floor(($diff - $years * 365 * 60 * 60 * 24) / (30 * 60 * 60 * 24));
       $days = floor(($diff - $years * 365 * 60 * 60 * 24 - $months * 30 * 60 * 60 * 24) / (60 * 60 * 24));
       
+      $total_days = floor($diff / 60 / 60 / 24) + 1;
       
-      
-      
-      $years = 11;
-      $months = 4;
-      
-      if ($years > 10) {
-        $date_facets_range[$term]['gap'] = '+' . $this->calculateGap($years, 'year') . 'YEARS';
+
+      // for maximum 15 buckets
+      // @TODO: make max buckets variable
+      // @TOTO: fine tune this: it's not very precise.
+      if ($total_days <= 15) {
+        $gap = '+1DAY';
       }
-      elseif ($years >= 2) {
-        $date_facets_range[$term]['gap'] = '+1YEAR';
+      elseif ($total_days <= 105) {
+        $gap = '+7DAYS';
       }
-      elseif ($years <= 1 AND $months > 3) {
-        $date_facets_range[$term]['gap'] = '+' . $this->calculateGap($months, 'month') . 'MONTHS';
+      elseif ($total_days <= 450) {
+        $gap = '+1MONTH';
       }
-      elseif ($months <= 3) {
-        $total_days = ($months * 30) + $days;
-        $weeks = floor($total_days / 7);
-        
-        if ($total_days > 14) {
-          $date_facets_range[$term]['gap'] = '+' . $this->calculateGap(floor($total_days / 7), 'day') . 'DAYS';
-        }
-        else {
-          $date_facets_range[$term]['gap'] = '+' . $this->calculateGap($total_days, 'day') . 'DAYS';
-        }
+      elseif ($total_days <= 5475) {
+        $gap = '+1YEAR';
+      }
+      elseif ($total_days <= 10950) {
+        $gap = '+2YEARS';
+      }
+      elseif ($total_days <= 18250) {
+        $gap = '+5YEARS';
+      }
+      elseif ($total_days <= 54750) {
+        $gap = '+10YEARS';
+      }
+      elseif ($total_days <= 547500) {
+        $gap = '+100YEARS';
+      }
+      elseif ($total_days <= 5475000) {
+        $gap = '+1000YEARS';
       }
       
+      // assign values
+      $date_facets_range[$term]['gap'] = $gap;
       $date_facets_range[$term]['years'] = $years;
       $date_facets_range[$term]['months'] = $months;
       $date_facets_range[$term]['days'] = $days;
+      $date_facets_range[$term]['total_days'] = $total_days;
       
       $date_facets_range[$term]['from'] = $from;
       $date_facets_range[$term]['to'] = $to;
       
+      $solrQueryProcessor->solrParams["f.$term.facet.date.start"] = $from;
+      $solrQueryProcessor->solrParams["f.$term.facet.date.end"] = $to;
+      $solrQueryProcessor->solrParams["f.$term.facet.date.gap"] = $gap;
     }
-    
-    dsm($date_facets_range);
     
     
     
     // 3. execute
+
+    
+    
+    // new query processor class
+    $islandoraSolrQuery = new IslandoraSolrQueryProcessor();
+
+    // add solr limit
+    $islandoraSolrQuery->solrLimit = $solrQueryProcessor->solrLimit;
+    // add solr start
+    $islandoraSolrQuery->solrStart = $solrQueryProcessor->solrStart;
+    // add query (defaults to *:*)
+    $islandoraSolrQuery->solrQuery = $solrQueryProcessor->solrQuery;
+    // add solr parameters
+    $islandoraSolrQuery->solrParams = $solrQueryProcessor->solrParams;
+
+    // excecute query
+    $islandoraSolrQuery->executeQuery();
+
+    // solr results
+    $results = $islandoraSolrQuery->solrResult;
+    $raw_response = $results->getRawResponse();
+    $response_array = json_decode($raw_response, TRUE);
     // 4. prepare for return
     // 5. return
-    
-  }
-  
-  
-  
-  function calculateGap($number, $type) {
-    
-    switch ($type) {
-      case 'year':
-        $num = $number / 10;
-        if ($number > 10) {
-          $num = round($num / 5) * 5;
-        }
-dsm($num);
-        return $num;
-        
-        break;
-      case 'month':
-        
-        
-        break;
-      case 'day':
-        
-        break;
-    }
-    
+    return $response_array['facet_counts']['facet_dates'];
   }
   
 
