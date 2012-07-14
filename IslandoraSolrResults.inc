@@ -863,118 +863,103 @@ class IslandoraSolrResults {
     // 5. return
     
     // 1. gather info
-//    dsm($solrQueryProcessor);
-    
+    $fq = isset($solrQueryProcessor->solrParams['fq']) ? $solrQueryProcessor->solrParams['fq'] : array();    
     // get date facet values
     $date_facets = isset($solrQueryProcessor->solrResult->facet_counts->facet_dates) ? $solrQueryProcessor->solrResult->facet_counts->facet_dates : array();
     // object to json
     $date_facets_json  = json_encode($date_facets);
     // json to array
     $date_facets_arr = json_decode($date_facets_json, true);
-    
+
     $date_facets_range = array();
     // loop over all date facets
-    foreach($date_facets_arr as $term => $buckets) {
-      $end = $buckets['end'];
-      $gap = $buckets['gap'];
-      unset($buckets['gap']);
-      unset($buckets['end']);
-      
-      $values = array();
-      // loop over single date facet
-      foreach ($buckets as $bucket => $bucket_size) {
+    foreach ($date_facets_arr as $term => $buckets) {
         
-        if ($bucket_size >= $facet_min_count) {
-          // logic to get the next range key (next date)
-          $field_keys = array_keys($buckets);
-          $field_key = array_search($date, $field_keys);
-          $field_key = array_search($bucket, $field_keys);
-          $field_key++;
-          $bucket_next = (isset($field_keys[$field_key])) ? $field_keys[$field_key] : $end;
-
-          $values[] = $bucket;
-          $values[] = $bucket_next;
+      $values = array();
+      // loop over all filters
+      foreach ($fq as $key => $filter) {
+        // check for enabled range filters
+        if (strpos($filter, $term) !== FALSE) {
+          // split the filter into field and value
+          $filter_split = explode(':', $filter, 2);
+          // trim brackets
+          $filter_split[1] = trim($filter_split[1], "\"");
+          // split range filter string to return formatted date values
+          $filter_str = $filter_split[1];
+          $filter_str = trim($filter_str, '[');
+          $filter_str = trim($filter_str, ']');
+          $filter_array = explode(' TO ', $filter_str);
+          // collect values in array: timestamp => ISO8601
+          $values['from'][strtotime(trim($filter_array[0]))] = trim($filter_array[0]);
+          $values['to'][strtotime(trim($filter_array[1]))] = trim($filter_array[1]);
         }
       }
 
-      $from = array_shift($values);
-      $to = array_pop($values);
-      $from_unix = strtotime(trim($from));
-      $to_unix = strtotime(trim($to));
-      
-      // 2. calculate and render range gap
-      // calculate difference between from and to date
-      $diff = abs($from_unix - $to_unix);
-      
-      // @TODO: all code below this needs a lot of work !!!!
-      
-      // difference in years/months/days
-      $years = floor($diff / (365 * 60 * 60 * 24));
-      $months = floor(($diff - $years * 365 * 60 * 60 * 24) / (30 * 60 * 60 * 24));
-      $days = floor(($diff - $years * 365 * 60 * 60 * 24 - $months * 30 * 60 * 60 * 24) / (60 * 60 * 24));
-      
-      $total_days = floor($diff / 60 / 60 / 24) + 1;
-      
+      // if the date facet field is found as at least one range filter, calculate gap
+      if (!empty($values)) {
 
-      // for maximum 15 buckets
-      // @TODO: make max buckets variable
-      // @TOTO: fine tune this: it's not very precise.
-      if ($total_days <= 15) {
-        $gap = '+1DAY';
+        // from max value & to min value
+        $from_unix = max(array_keys($values['from']));
+        $to_unix = min(array_keys($values['to']));
+
+        // get ISO8601 values
+        $from = $values['from'][$from_unix];
+        $to = $values['to'][$to_unix];
+
+        // 2. calculate and render range gap
+        // calculate difference between from and to date
+        $diff = abs($from_unix - $to_unix);
+
+        // total difference in days
+        $total_days = floor($diff / 60 / 60 / 24);
+ 
+        // for maximum 15 buckets
+        // @TODO: make max buckets variable
+        // @TOTO: fine tune this: it's not very precise.
+        if ($total_days <= 15) {
+          $gap = '+1DAY';
+        }
+        elseif ($total_days <= 105) {
+          $gap = '+7DAYS';
+        }
+        elseif ($total_days <= 450) {
+          $gap = '+1MONTH';
+        }
+        elseif ($total_days <= 5475) {
+          $gap = '+1YEAR';
+        }
+        elseif ($total_days <= 10950) {
+          $gap = '+2YEARS';
+        }
+        elseif ($total_days <= 18250) {
+          $gap = '+5YEARS';
+        }
+        elseif ($total_days <= 54750) {
+          $gap = '+10YEARS';
+        }
+        elseif ($total_days <= 547500) {
+          $gap = '+100YEARS';
+        }
+        elseif ($total_days <= 5475000) {
+          $gap = '+1000YEARS';
+        }
+
+        // update range facet values
+        // @TODO: try to find a way to clone this object, because it's passed by reference throughout the entire page call.
+        $solrQueryProcessor->solrParams["f.$term.facet.date.start"] = $from;
+        $solrQueryProcessor->solrParams["f.$term.facet.date.end"] = $to;
+        $solrQueryProcessor->solrParams["f.$term.facet.date.gap"] = $gap;
       }
-      elseif ($total_days <= 105) {
-        $gap = '+7DAYS';
-      }
-      elseif ($total_days <= 450) {
-        $gap = '+1MONTH';
-      }
-      elseif ($total_days <= 5475) {
-        $gap = '+1YEAR';
-      }
-      elseif ($total_days <= 10950) {
-        $gap = '+2YEARS';
-      }
-      elseif ($total_days <= 18250) {
-        $gap = '+5YEARS';
-      }
-      elseif ($total_days <= 54750) {
-        $gap = '+10YEARS';
-      }
-      elseif ($total_days <= 547500) {
-        $gap = '+100YEARS';
-      }
-      elseif ($total_days <= 5475000) {
-        $gap = '+1000YEARS';
-      }
-      
-      // assign values
-      $date_facets_range[$term]['gap'] = $gap;
-      $date_facets_range[$term]['years'] = $years;
-      $date_facets_range[$term]['months'] = $months;
-      $date_facets_range[$term]['days'] = $days;
-      $date_facets_range[$term]['total_days'] = $total_days;
-      
-      $date_facets_range[$term]['from'] = $from;
-      $date_facets_range[$term]['to'] = $to;
-      
-      $solrQueryProcessor->solrParams["f.$term.facet.date.start"] = $from;
-      $solrQueryProcessor->solrParams["f.$term.facet.date.end"] = $to;
-      $solrQueryProcessor->solrParams["f.$term.facet.date.gap"] = $gap;
     }
     
-    
-    
     // 3. execute
-
-    
-    
     // new query processor class
     $islandoraSolrQuery = new IslandoraSolrQueryProcessor();
 
     // add solr limit
-    $islandoraSolrQuery->solrLimit = $solrQueryProcessor->solrLimit;
+    $islandoraSolrQuery->solrLimit = 0;
     // add solr start
-    $islandoraSolrQuery->solrStart = $solrQueryProcessor->solrStart;
+    $islandoraSolrQuery->solrStart = 0;
     // add query (defaults to *:*)
     $islandoraSolrQuery->solrQuery = $solrQueryProcessor->solrQuery;
     // add solr parameters
@@ -983,11 +968,12 @@ class IslandoraSolrResults {
     // excecute query
     $islandoraSolrQuery->executeQuery();
 
+    // 4. prepare for return
     // solr results
     $results = $islandoraSolrQuery->solrResult;
     $raw_response = $results->getRawResponse();
     $response_array = json_decode($raw_response, TRUE);
-    // 4. prepare for return
+
     // 5. return
     return $response_array['facet_counts']['facet_dates'];
   }
