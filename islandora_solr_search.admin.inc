@@ -378,6 +378,7 @@ function islandora_solr_admin_settings(&$form_state) {
       '#default_value' => variable_get('islandora_solr_range_slider_enabled', 0),
       '#description' => t('When checked, the normal range facet will be replaced by a date slider widget.'),
     );
+    // @TODO: add a textfield with colorpicker to select the color of the graphs.
   }
   else {
     $form['facet_settings']['facet_dates']['date_filter']['islandora_solr_date_filter_not_available'] = array(

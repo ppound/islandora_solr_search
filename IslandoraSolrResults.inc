@@ -351,7 +351,12 @@ class IslandoraSolrResults {
           $from_str = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format);
           $to_str = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format);
           
-          $filter_value = $from_str . ' - ' . $to_str;
+          if ($from_str == $to_str) {
+            $filter_value = $from_str;
+          }
+          else {
+            $filter_value = $from_str . ' - ' . $to_str;
+          }
         }
 
         // pull out filter (for exclude link)
@@ -443,7 +448,12 @@ class IslandoraSolrResults {
           $from_str = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format);
           $to_str = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format);
           
-          $filter_value = $from_str . ' - ' . $to_str;
+          if ($from_str == $to_str) {
+            $filter_value = $from_str;
+          }
+          else {
+            $filter_value = $from_str . ' - ' . $to_str;
+          }
         }
 
         // increment filter array with current filter (for breadcrumb link)
@@ -660,7 +670,15 @@ class IslandoraSolrResults {
           // set date range filter for facet url
           $date_facets[$key][$date]['range'] = '[' . $date . ' TO ' . $date_next . ']';
           // set formatted value for facet link
-          $date_facets[$key][$date]['value'] = format_date(strtotime(trim($date)) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($date_next)), 'custom', $format);
+          $from_str = format_date(strtotime(trim($date)) + (60 * 60 * 24), 'custom', $format);
+          $to_str = format_date(strtotime(trim($date_next)), 'custom', $format);
+          if ($from_str == $to_str) {
+            $filter_value = $from_str;
+          }
+          else {
+            $filter_value = $from_str . ' - ' . $to_str;
+          }
+          $date_facets[$key][$date]['value'] = $filter_value;
         }
       }
     }
