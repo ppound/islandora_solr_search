@@ -765,11 +765,15 @@ function islandora_solr_search_date_filter_form(&$form_state, $form_key, $solr_f
         $filter_split[1] = trim($filter_split[1], "\"");
         // split range filter string to return formatted date values
         $filter_str = $filter_split[1];
+        
         $filter_str = trim($filter_str, '[');
         $filter_str = trim($filter_str, ']');
         $filter_array = explode(' TO ', $filter_str);
-        $from_default = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format);
-        $to_default = format_date(strtotime(trim($filter_array[1])) + (60 * 60 * 24), 'custom', $format);
+
+        $from_default = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format);
+        $to_default = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format);
+
+        $filter_value = $from_str . ' - ' . $to_str;
       }
     }
   }
@@ -842,36 +846,45 @@ function islandora_solr_search_date_filter_form(&$form_state, $form_key, $solr_f
 }
 
 function islandora_solr_search_date_filter_form_validate($form, &$form_state) {
-
+  // set variables
   $form_key = $form_state['clicked_button']['#array_parents'][0];
   $from = explode('/', $form_state['values'][$form_key]['date_filter_from']);
   $to = explode('/', $form_state['values'][$form_key]['date_filter_to']);
 
-  // Apply some defaults
+  // default for month and day
   $default = '01';
-  if (!isset($from[1])) {
-    $from[1] = $default;
+  
+  // if the 'from' value is '*' just skip all checks
+  if (trim($from[0]) != '*' ) {
+    // Apply some defaults
+    if (!isset($from[1])) {
+      $from[1] = $default;
+    }
+    if (!isset($from[2])) {
+      $from[2] = $default;
+    }
+    
+    // check from date
+    if (!checkdate(intval($from[1]), intval($from[2]), intval($from[0]))) {
+      form_set_error($form_key . '][date_filter_from', t('From date isn\'t formatted correctly.'));
+    }
   }
-  if (!isset($from[2])) {
-    $from[2] = $default;
+  
+  // if the 'to' value is '*' just skip all checks
+  if (trim($to[0]) != '*' ) {
+    // Apply some defaults
+    if (!isset($to[1])) {
+      $to[1] = $default;
+    }
+    if (!isset($to[2])) {
+      $to[2] = $default;
+    }
+    
+    // check to date
+    if (!checkdate(intval($to[1]), intval($to[2]), intval($to[0]))) {
+      form_set_error($form_key . '][date_filter_to', t('To date isn\'t formatted correctly.'));
+    }
   }
-  if (!isset($to[1])) {
-    $to[1] = $default;
-  }
-  if (!isset($to[2])) {
-    $to[2] = $default;
-  }
-
-  // check from date
-  if (!checkdate(intval($from[1]), intval($from[2]), intval($from[0]))) {
-    form_set_error($form_key . '][date_filter_from', t('From date isn\'t formatted correctly.'));
-  }
-
-  // check to date
-  if (!checkdate(intval($to[1]), intval($to[2]), intval($to[0]))) {
-    form_set_error($form_key . '][date_filter_to', t('To date isn\'t formatted correctly.'));
-  }
-
 }
 
 function islandora_solr_search_date_filter_form_submit($form, &$form_state) {
@@ -892,24 +905,45 @@ function islandora_solr_search_date_filter_form_submit($form, &$form_state) {
   $from = explode('/', $form_state['values'][$form_key]['date_filter_from']);
   $to = explode('/', $form_state['values'][$form_key]['date_filter_to']);
 
-  // Apply some defaults
-  $default = '01';
-  if (!isset($from[1])) {
-    $from[1] = $default;
+  // if the 'from' value is '*' just skip all checks
+  if (trim($from[0]) != '*' ) {
+    // Apply some defaults
+    $default = '01';
+    if (!isset($from[1])) {
+      $from[1] = $default;
+    }
+    if (!isset($from[2])) {
+      $from[2] = $default;
+    }
+    // create date string
+    // example:
+    // timestamp:[1900-01-01T00:00:00Z TO 1990-01-01T00:00:00Z]
+    $from_str = "$from[0]-$from[1]-$from[2]T00:00:00Z";  
   }
-  if (!isset($from[2])) {
-    $from[2] = $default;
-  }
-  if (!isset($to[1])) {
-    $to[1] = $default;
-  }
-  if (!isset($to[2])) {
-    $to[2] = $default;
+  else {
+    $from_str = $from[0];
   }
 
+  // if the 'to' value is '*' just skip all checks
+  if (trim($to[0]) != '*' ) {
+    // Apply some defaults
+    if (!isset($to[1])) {
+      $to[1] = $default;
+    }
+    if (!isset($to[2])) {
+      $to[2] = $default;
+    }
+    // create date string
+    // example:
+    // timestamp:[1900-01-01T00:00:00Z TO 1990-01-01T00:00:00Z]
+    $to_str = "$to[0]-$to[1]-$to[2]T00:00:00Z";
+  }
+  else {
+    $to_str = $to[0];
+  }
+  
   // create filter
-  // timestamp:[1900-01-01T00:00:00Z TO 1990-01-01T00:00:00Z]
-  $filter = "$term:[$from[0]-$from[1]-$from[2]T00:00:00Z TO $to[0]-$to[1]-$to[2]T00:00:00Z]";
+  $filter = "$term:[$from_str TO $to_str]";
 
   // set date filter key if there are no date filters included
   if (isset($params['f'])) {

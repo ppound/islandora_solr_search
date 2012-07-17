@@ -336,16 +336,22 @@ class IslandoraSolrResults {
         // split the filter into field and value
         $filter_split = explode(':', $filter, 2);
         // trim brackets
-        $filter_split[1] = trim($filter_split[1], "\"");
-
+//        $filter_split[1] = trim($filter_split[1], "\"");
+        $filter_value = trim($filter_split[1], "\"");
+        
+        
         // if value is date
         if (isset($solrQueryProcessor->solrParams['facet.date']) AND in_array(ltrim($filter_split[0], '-'), $solrQueryProcessor->solrParams['facet.date'])) {
           // split range filter string to return formatted date values
-          $filter_str = $filter_split[1];
+          $filter_str = $filter_value;
           $filter_str = trim($filter_str, '[');
           $filter_str = trim($filter_str, ']');
           $filter_array = explode(' TO ', $filter_str);
-          $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])), 'custom', $format);
+          
+          $from_str = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format);
+          $to_str = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format);
+          
+          $filter_value = $from_str . ' - ' . $to_str;
         }
 
         // pull out filter (for exclude link)
@@ -372,7 +378,7 @@ class IslandoraSolrResults {
 
         // create link
         // we're not using l() because of active classes: http://drupal.org/node/41595
-        $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . $filter_split[1];
+        $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . $filter_value;
       }
       // return filter list
       $output .= '<div class="islandora_solr_search_filter_wrap">';
@@ -424,16 +430,20 @@ class IslandoraSolrResults {
         // split the filter into field and value
         $filter_split = explode(':', $filter, 2);
         // trim brackets
-        $filter_split[1] = trim($filter_split[1], "\"");
+        $filter_value = trim($filter_split[1], "\"");
 
         // if value is date
         if (isset($solrQueryProcessor->solrParams['facet.date']) AND in_array(ltrim($filter_split[0], '-'), $solrQueryProcessor->solrParams['facet.date'])) {
           // split range filter string to return formatted date values
-          $filter_str = $filter_split[1];
+          $filter_str = $filter_value;
           $filter_str = trim($filter_str, '[');
           $filter_str = trim($filter_str, ']');
           $filter_array = explode(' TO ', $filter_str);
-          $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])), 'custom', $format);
+          
+          $from_str = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format);
+          $to_str = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format);
+          
+          $filter_value = $from_str . ' - ' . $to_str;
         }
 
         // increment filter array with current filter (for breadcrumb link)
@@ -479,7 +489,7 @@ class IslandoraSolrResults {
 
         // create links
         // we're not using l() because of active classes: http://drupal.org/node/41595
-        $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $filter_split[1] . '</a>'
+        $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $filter_value . '</a>'
               . '<span class="islandora_solr_search_breadcrumb_super"> <a' . drupal_attributes($attr_x) . '>(' . t('x') . ')</a></span>';
 
       }
@@ -852,8 +862,19 @@ class IslandoraSolrResults {
       $facet_count++;
     }
   }
+
   
   
+  /**
+   * Calculates date ranges based on enabled date range filters. Based on the
+   * range it recalculates date range gaps and from/to dates.
+   * 
+   * @param object $solrQueryProcessor
+   *   current query object.
+   * @return array $date_facets
+   *   An array with the recalculated date range facets. If no filters are
+   *   present, this will return the default date range results.
+   */
   function variableRangeGap($solrQueryProcessor) {
     
     // 1. gather info
@@ -872,6 +893,7 @@ class IslandoraSolrResults {
     $date_facets_arr = json_decode($date_facets_json, true);
 
     $solr_call = FALSE;
+
     // loop over all date facets
     foreach ($date_facets_arr as $term => $buckets) {
         
@@ -890,8 +912,21 @@ class IslandoraSolrResults {
           $filter_str = trim($filter_str, ']');
           $filter_array = explode(' TO ', $filter_str);
           // collect values in array: timestamp => ISO8601
-          $values['from'][strtotime(trim($filter_array[0]))] = trim($filter_array[0]);
-          $values['to'][strtotime(strtolower(trim($filter_array[1])))] = trim($filter_array[1]);
+          $from_str = trim($filter_array[0]);
+          $to_str = trim($filter_array[1]);
+          $field = trim($filter_split[0], ' -');
+          
+          // if a star is given, we need to perform an extra query to find out
+          // what the minimum or maximum value is that 'star' would return.
+          if (strpos($from_str, '*') !== FALSE) {
+            $from_str = $this->findMinMaxValue($solrQueryProcessor, $field, 'asc');
+          }
+          if (strpos($to_str, '*') !== FALSE) {
+            $to_str = $this->findMinMaxValue($solrQueryProcessor, $field, 'desc');
+          }
+
+          $values['from'][strtotime(strtolower($from_str))] = $from_str;
+          $values['to'][strtotime(strtolower($to_str))] = $to_str;
         }
       }
 
@@ -902,6 +937,11 @@ class IslandoraSolrResults {
         $from_unix = max(array_keys($values['from']));
         $to_unix = min(array_keys($values['to']));
 
+        // if the from date is bigger than the to date, abort.
+        if ($from_unix >= $to_unix) {
+          continue;
+        }
+        
         // get ISO8601 values
         $from = $values['from'][$from_unix];
         $to = $values['to'][$to_unix];
@@ -954,7 +994,7 @@ class IslandoraSolrResults {
         $solr_call = TRUE;
       }
     }
-    
+
     // 3. execute
     // if an extra solr call is necessary
     if ($solr_call) {
@@ -990,7 +1030,49 @@ class IslandoraSolrResults {
     return $date_facets;
   }
   
+  
+  /**
+   * Finds the maximum or minimum value of a date field in a query. Called when
+   * one of the values in a date range filter equals to '*'.
+   * 
+   * @param object $solrQueryProcessor
+   *   current solr query object.
+   * @param string $field
+   *   solr field to sort on.
+   * @param string $order
+   *   sort order (asc or desc). Defaults to ascending.
+   * @return string
+   *   maximum or minimum value of a date field in the current query
+   */
+  function findMinMaxValue($solrQueryProcessor, $field, $order = 'asc') {
 
+    // new query processor class
+    $islandoraSolrQuery = new IslandoraSolrQueryProcessor();
+
+    // internal solr query
+    $islandoraSolrQuery->internalSolrQuery = $solrQueryProcessor->internalSolrQuery;
+    // add solr limit
+    $islandoraSolrQuery->solrLimit = 5;
+    // add solr start
+    $islandoraSolrQuery->solrStart = 0;
+    // add query (defaults to *:*)
+    $islandoraSolrQuery->solrQuery = $solrQueryProcessor->solrQuery;
+    // add solr parameters
+    $islandoraSolrQuery->solrParams = $solrQueryProcessor->solrParams;
+ 
+    // add the right sorting
+    $islandoraSolrQuery->solrParams['sort'] = $field . ' ' . $order;
+
+    // excecute query
+    $islandoraSolrQuery->executeQuery();
+
+    // solr results
+    $results = $islandoraSolrQuery->solrResult;
+    $raw_response = $results->getRawResponse();
+    $response_array = json_decode($raw_response, TRUE);
+
+    return $response_array['response']['docs'][0][$field];    
+  }
   
   
   
