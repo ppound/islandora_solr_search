@@ -1011,6 +1011,8 @@ class IslandoraSolrResults {
       $islandoraSolrQuery->solrQuery = $solrQueryProcessor->solrQuery;
       // add solr parameters
       $islandoraSolrQuery->solrParams = $solrQueryProcessor->solrParams;
+      // no need to include normal facets
+      unset($islandoraSolrQuery->solrParams['facet.field']);
 
       // excecute query
       $islandoraSolrQuery->executeQuery();
@@ -1059,7 +1061,9 @@ class IslandoraSolrResults {
     $islandoraSolrQuery->solrQuery = $solrQueryProcessor->solrQuery;
     // add solr parameters
     $islandoraSolrQuery->solrParams = $solrQueryProcessor->solrParams;
- 
+
+    // no need to include normal facets
+    unset($islandoraSolrQuery->solrParams['facet.field']);
     // add the right sorting
     $islandoraSolrQuery->solrParams['sort'] = $field . ' ' . $order;
 
