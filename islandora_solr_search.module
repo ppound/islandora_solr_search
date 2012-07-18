@@ -731,6 +731,16 @@ function islandora_solr_search_forms($form_id, $args) {
     return $forms;
   }
 
+  // Check if the form_id passed to drupal_get_form() contains the string 'islandora_solr_search_date_filter_form'
+  if (strpos($form_id, 'islandora_solr_search_range_slider_form') !== FALSE) {
+    // Lets attach islandora_solr_search_date_filter_form to $forms[$form_id].  This effectively allows you to use the same form builder function to build a form with any form_id of your choice.
+    $forms[$form_id] = array(
+      'callback' => 'islandora_solr_search_range_slider_form',
+      'callback arguments' => array($args[0], $args[1], $args[2]),
+    );
+    return $forms;
+  }
+
 }
 
 
@@ -967,7 +977,70 @@ function islandora_solr_search_date_filter_form_submit($form, &$form_state) {
 
 
 
-
+function islandora_solr_search_range_slider_form(&$form_state, $form_key, $solr_field, $facet_data) {
+  global $queryClass;
+//dsm($form_key);
+//dsm($solr_field);
+//dsm($facet_data);
+  // set variables
+  $form = array();
+ 
+  $form['#tree'] = TRUE;
+  
+  // Field
+  $form[$form_key] = array(
+    '#type' => 'markup',
+    '#value' => '<div>from - to</div><div>(gap)</div><div id="slider-amount-' . $form_key . '"></div><canvas></canvas><div id="date-range-slider-' . $form_key . '"></div>', // call theme function instead
+  );
+  // total from - to
+  // gap
+  // canvas
+  // slider
+  // tooltip over slider with current date
+  
+  // hidden from
+  $from_default = current($facet_data);
+  $form[$form_key]['range_slider_hidden_from'] = array(
+    '#type' => 'hidden',
+    '#default_value' => $from_default['date'], // lowest value
+    '#attributes' => array('class' => 'range-slider-hidden-from-' . $form_key),
+  );
+  $to_default = end($facet_data);
+  // hidden to
+  $form[$form_key]['range_slider_hidden_to'] = array(
+    '#type' => 'hidden',
+    '#default_value' => $to_default['date'], // highest value
+    '#attributes' => array('class' => 'range-slider-hidden-to-' . $form_key),
+  );
+      
+  
+  
+  
+  
+  // Submit
+  $form[$form_key]['range_slider_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Filter'),
+    '#name' => 'range_slider_submit_' . $form_key,
+  );
+  
+  
+  
+  
+  $form['#submit'][] = 'islandora_solr_search_range_slider_form_submit';
+  
+  // Validate
+  $form['#validate'][] = 'islandora_solr_search_range_slider_form_validate';
+  
+  // include jquery ui slider
+  jquery_ui_add(array('ui.slider'));
+  // include jquery ui css
+  drupal_add_css('sites/all/libraries/jquery.ui/themes/default/ui.all.css');
+  // include slider settings
+  drupal_add_js(array('islandora_solr_search_range_slider' => array($solr_field => array('solr_field' => $solr_field, 'form_key' => $form_key, 'data' => $facet_data))), 'setting');
+  
+  return $form;  
+}
 
 
 

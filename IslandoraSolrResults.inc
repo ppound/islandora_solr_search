@@ -621,6 +621,7 @@ class IslandoraSolrResults {
 
     // set variables
     $facet_output = $output = '';
+    $range_slider_key = 0;
     $date_filter_key = 0;
     // shown limit
     $facet_min_count = 1;
@@ -647,7 +648,7 @@ class IslandoraSolrResults {
     $date_facets_json  = json_encode($date_facets);
     // json to array
     $date_facets_arr = json_decode($date_facets_json, true);
-  
+
     // get date format
     $format = variable_get('islandora_solr_facet_date_format' , 'Y');
     // set variable
@@ -749,9 +750,69 @@ class IslandoraSolrResults {
           $facet_output .='</div>'; //div.islandora_solr_search_facet
         }
       }
-      
+
       // check if we need range filter form.
-      if (variable_get('islandora_solr_date_filter_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr)) {
+      if (variable_get('islandora_solr_range_slider_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr)) {
+        // opening facet div // @TODO: this should go in theme function
+        $facet_output .='<div class="islandora_solr_search_range_slider">';
+        // facet data
+        // @TODO: this is pretty bad code. Clean this up.
+        // From here
+        $facet_data = $date_facets_arr[$facet_key];
+        $facet_gap = $facet_data['gap'];
+        $facet_end = $facet_data['end'];
+        unset($facet_data['gap']);
+        unset($facet_data['end']); // 'gap', 'end', 'other', 'hardend', 'include'
+        unset($facet_data['other']);
+        unset($facet_data['hardend']);
+        unset($facet_data['include']);
+        foreach ($facet_data as $key => $value) {
+          if ($value == 0) {
+            unset($facet_data[$key]);
+          }
+          else {
+            break;
+          }
+        }
+        $facet_data = array_reverse($facet_data);
+        $end = array();
+
+        foreach ($facet_data as $date => $bucket_size) {
+          if ($bucket_size == 0) {
+            unset($facet_data[$date]);
+            $end = array('date' => $date, 'bucket_size' => $bucket_size);
+          }
+          else {
+            break;
+          }
+        }
+        $facet_data = array_reverse($facet_data);
+
+        // add end date
+        if (isset($end['bucket_size']) AND $end['bucket_size'] == 0) {
+          $end_date = $end['date'];
+          $facet_data[$end_date] = NULL;
+        }
+        else {
+          $facet_data[$facet_end] = NULL;
+        }
+
+        $data = array();
+        foreach ($facet_data as $date => $bucket_size) {
+          $data[] = array(
+            'date' => $date,
+            'bucket_size' => $bucket_size,
+          );
+        }
+        // To here
+
+        // render form
+        $facet_output .= drupal_get_form('islandora_solr_search_range_slider_form_' . $range_slider_key, $range_slider_key, $facet_key, $data);
+        $range_slider_key++;
+        $facet_output .='</div>';
+      }
+      
+      if (variable_get('islandora_solr_date_filter_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr) AND module_exists('jquery_ui')) {
         // opening facet div // @TODO: this should go in theme function
         $facet_output .='<div class="islandora_solr_search_date_filter">';
 
@@ -768,8 +829,12 @@ class IslandoraSolrResults {
 
     // include jquery ui datepicker
     if ($date_filter_key > 0 AND module_exists('jquery_ui')) {
+      // include datepicker js
       jquery_ui_add(array('ui.datepicker'));
+      // add datepicker css
+      drupal_add_css(drupal_get_path('module', 'islandora_solr_search') . '/css/islandora_solr_search_datepicker.css');
       $date_range = variable_get('islandora_solr_search_datepicker_range', '-100:+3');
+      // add js settings
       drupal_add_js(array('islandora_solr_search_datepicker_range' => trim($date_range)), 'setting');
     }
     
