@@ -234,7 +234,8 @@ dl.solr-fields {
   display: inline-block;  
 }
 
-.islandora_solr_search_date_filter input
+.islandora_solr_search_date_filter input,
+.islandora_solr_search_range_slider input
 {
   float: right;  
 }
