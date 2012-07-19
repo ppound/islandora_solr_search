@@ -80,8 +80,8 @@ Drupal.behaviors.dateRangeSlider = function (context) {
     var form_key = this.form_key;
     var sliderId = '#date-range-slider-' + form_key;
     var amountId = '#slider-amount-' + form_key;
+    var canvasId = '#date-range-slider-canvas-' + form_key;
     
-    var sliderValue = 0;
     var sliderMax = sliderData.length - 1;
     var sliderMin = 0;
     var sliderStep = 1;
@@ -111,7 +111,14 @@ console.log(ui.value);
       }
     });
 
-    $(amountId).html($(sliderId).slider("value"));
+    var canvasWidth = $(sliderId).width();
+    console.log(canvasWidth);
+    $(canvasId).width(canvasWidth);
+
+//    $('.range-slider-hidden-to-' + form_key).val(toDate);
+//    $(amountId).html($(sliderId).slider("value"));
   });
+  
+  
 }
 

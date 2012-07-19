@@ -240,7 +240,8 @@ dl.solr-fields {
   float: right;  
 }
 
-.islandora_solr_search_date_filter form
+.islandora_solr_search_date_filter form,
+.islandora_solr_search_range_slider form
 {
   float: left;
   width: 100%;
@@ -273,4 +274,9 @@ table.ui-datepicker tbody td.ui-datepicker-current-day a
 table.ui-datepicker tbody td.ui-datepicker-today a
 {
   background: #cbe5fc;
+}
+
+.islandora_solr_search_range_slider .ui-slider
+{
+  margin-bottom: 10px;
 }
