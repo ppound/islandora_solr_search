@@ -104,21 +104,32 @@ Drupal.behaviors.dateRangeSlider = function (context) {
     });
 
     function sliderUpdate(ui) {
+      
+      // get values
+      var fromVal = ui.values[0];
+      var toVal = ui.values[1];
+
       // get dates
-      var fromDate = sliderData[ui.values[0]].date;
-      var toDate = sliderData[ui.values[1]].date;
+      var fromDate = sliderData[fromVal].date;
+      var toDate = sliderData[toVal].date;
 
       // assign to hidden field
       $('.range-slider-hidden-from-' + form_key).val(fromDate);
       $('.range-slider-hidden-to-' + form_key).val(toDate);
 
       // get formatted dates
-      var formatFromDate = sliderData[ui.values[0]].format_date;
-      var formatToDate = sliderData[ui.values[1]].format_date;
+      var formatFromDate = sliderData[fromVal].format_date;
+      var formatToDate = sliderData[toVal].format_date;
 
       // assign to popup
       $(sliderId + ' .slider-popup-from').html(formatFromDate);
       $(sliderId + ' .slider-popup-to').html(formatToDate);
+
+      // update plots
+      plot.unhighlight();
+      for (i = fromVal; i < toVal; i++) {
+        plot.highlight(0, i);
+      }
     }
 
     // set canvas width equal to slider width
@@ -187,11 +198,10 @@ Drupal.behaviors.dateRangeSlider = function (context) {
     $(canvasId).bind("plotclick", function (event, pos, item) {
       if (item !== null) {
         var dataIndexValue = item.dataIndex;
+        plot.unhighlight();
         $(sliderId).slider('values', 0, dataIndexValue);
         $(sliderId).slider('values', 1, dataIndexValue + 1);
-        console.log(item);
         plot.highlight(item.series, item.datapoint);
-//        plot.highlight(0, 2);
       }
     });
 
