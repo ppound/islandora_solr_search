@@ -702,7 +702,8 @@ class IslandoraSolrResults {
       $list_title = NULL;
 
       // if the facet contains the minimum amount of values
-      if (count($facet) >= $facet_min_count) {
+      // @TODO: added the range slider rule, but should be solved more elegantly
+      if (count($facet) >= $facet_min_count AND !(variable_get('islandora_solr_range_slider_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr))) {
         // set facet count
         $facet_count = 0;
 
@@ -755,6 +756,9 @@ class IslandoraSolrResults {
       if (variable_get('islandora_solr_range_slider_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr)) {
         // opening facet div // @TODO: this should go in theme function
         $facet_output .='<div class="islandora_solr_search_range_slider">';
+        // add title
+        $facet_output .='<h3>' . $this->facetFieldArray[$facet_key] . '</h3>';
+        
         // facet data
         // @TODO: this is pretty bad code. Clean this up.
         // From here
@@ -813,11 +817,13 @@ class IslandoraSolrResults {
         $facet_output .='</div>';
       }
       
+      // add datefilter
       if (variable_get('islandora_solr_date_filter_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr) AND module_exists('jquery_ui')) {
         // opening facet div // @TODO: this should go in theme function
         $facet_output .='<div class="islandora_solr_search_date_filter">';
 
-        if (count($list_items) < $facet_min_count) {
+        // @TODO: set title when the range slider isn't active
+        if (count($list_items) < $facet_min_count AND !(variable_get('islandora_solr_range_slider_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr))) {
           // add title
           $facet_output .='<h3>' . $this->facetFieldArray[$facet_key] . '</h3>';
         }
