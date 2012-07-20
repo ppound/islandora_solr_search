@@ -96,40 +96,30 @@ Drupal.behaviors.dateRangeSlider = function (context) {
       max: sliderMax,
       step: sliderStep,
       slide: function(event, ui) {
-        // get dates
-        var fromDate = sliderData[ui.values[0]].date;
-        var toDate = sliderData[ui.values[1]].date;
-        
-        // get formatted dates
-        var formatFromDate = sliderData[ui.values[0]].format_date;
-        var formatToDate = sliderData[ui.values[1]].format_date;
-        
-        // assign to hidden field
-        $('.range-slider-hidden-from-' + form_key).val(fromDate);
-        $('.range-slider-hidden-to-' + form_key).val(toDate);
-        
-        // assign to popup
-        $(sliderId + ' .slider-popup-from').html(formatFromDate);
-        $(sliderId + ' .slider-popup-to').html(formatToDate);
+        sliderUpdate(ui);
       },
       slide: function(event, ui) {
-        // get dates
-        var fromDate = sliderData[ui.values[0]].date;
-        var toDate = sliderData[ui.values[1]].date;
-        
-        // get formatted dates
-        var formatFromDate = sliderData[ui.values[0]].format_date;
-        var formatToDate = sliderData[ui.values[1]].format_date;
-        
-        // assign to hidden field
-        $('.range-slider-hidden-from-' + form_key).val(fromDate);
-        $('.range-slider-hidden-to-' + form_key).val(toDate);
-        
-        // assign to popup
-        $(sliderId + ' .slider-popup-from').html(formatFromDate);
-        $(sliderId + ' .slider-popup-to').html(formatToDate);
+        sliderUpdate(ui);
       }
     });
+
+    function sliderUpdate(ui) {
+      // get dates
+      var fromDate = sliderData[ui.values[0]].date;
+      var toDate = sliderData[ui.values[1]].date;
+
+      // assign to hidden field
+      $('.range-slider-hidden-from-' + form_key).val(fromDate);
+      $('.range-slider-hidden-to-' + form_key).val(toDate);
+
+      // get formatted dates
+      var formatFromDate = sliderData[ui.values[0]].format_date;
+      var formatToDate = sliderData[ui.values[1]].format_date;
+
+      // assign to popup
+      $(sliderId + ' .slider-popup-from').html(formatFromDate);
+      $(sliderId + ' .slider-popup-to').html(formatToDate);
+    }
 
     // set canvas width equal to slider width
     var canvasWidth = $(sliderId).width();
@@ -159,33 +149,52 @@ Drupal.behaviors.dateRangeSlider = function (context) {
     }
     
     // render Flot graph
-    function plotWithOptions() {
-      $.plot($(canvasId), [d1], {
-        colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
-        series: {
-          stack: false,
-          lines: {
-            show: false
-          },
-          bars: {
-            show: true,
-            lineWidth: 1, // in pixels
-            barWidth: 0.8, // in units of the x axis
-            fill: true,
-            fillColor: null,
-            align: "center", // or "center" 
-            horizontal: false
-          }
-        },
-        grid: {
+    var plot = $.plot($(canvasId), [d1], {
+      colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
+      xaxis: {  ticks: [], min: 0, autoscaleMargin: 0},
+      yaxis: {  ticks: [], min: 0, autoscaleMargin: 0},
+      series: {
+        stack: false,
+        lines: {
           show: false
+        },
+        bars: {
+          show: true,
+          lineWidth: 1, // in pixels
+          barWidth: 0.8, // in units of the x axis
+          fill: true,
+          fillColor: null,
+          align: "left", // or "center" 
+          horizontal: false
         }
-      });
-    }
+      },
+      grid: {
+        show: true,
+        labelMargin: null, // in pixels
+        axisMargin: null, // in pixels
+        borderWidth: null, // in pixels
+        markingsLineWidth: null,
+        // interactive stuff
+        clickable: true,
+        hoverable: false,
+        autoHighlight: true, // highlight in case mouse is near
+        mouseActiveRadius: 10 // how far the mouse can be away to activate an item
+      }
+    });
 
-    // execute Flot function
-    plotWithOptions();
-    
+
+    // add plotclick event to update the sliders
+    $(canvasId).bind("plotclick", function (event, pos, item) {
+      if (item !== null) {
+        var dataIndexValue = item.dataIndex;
+        $(sliderId).slider('values', 0, dataIndexValue);
+        $(sliderId).slider('values', 1, dataIndexValue + 1);
+        console.log(item);
+        plot.highlight(item.series, item.datapoint);
+//        plot.highlight(0, 2);
+      }
+    });
+
   }); // end $.each()
   
   
