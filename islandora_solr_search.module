@@ -987,6 +987,7 @@ function islandora_solr_search_range_slider_form(&$form_state, $form_key, $solr_
   $from_default = current($facet_data);
   $to_default = end($facet_data);
   $format = 'Y/m/d'; // @TODO: should be dynamic + nicer format
+  $gap = ($gap) ? "($gap)" : $gap;
   
   $form = array();
  
@@ -1008,7 +1009,7 @@ function islandora_solr_search_range_slider_form(&$form_state, $form_key, $solr_
   // tooltip over slider with current date
   $form[$form_key] = array(
     '#type' => 'markup',
-    '#value' => '<div class="range-slider-fromto" id="range-slider-fromto-' . $form_key . '"><span class="range-slider-from">' . format_date(strtotime(trim($from_default['date'])) + (60 * 60 * 24), 'custom', $format) . '</span> - <span class="range-slider-to">' . format_date(strtotime(trim($to_default['date'])), 'custom', $format) . '</span></div><div class="date-range-slider-gap">(' . $gap . ')</div><div id="slider-amount-' . $form_key . '"></div><div id="date-range-slider-canvas-' . $form_key . '" class="date-range-slider-canvas-wrapper"></div><div id="date-range-slider-' . $form_key . '"></div>', // call theme function instead
+    '#value' => '<div class="range-slider-fromto" id="range-slider-fromto-' . $form_key . '"><span class="range-slider-from">' . format_date(strtotime(trim($from_default['date'])) + (60 * 60 * 24), 'custom', $format) . '</span> - <span class="range-slider-to">' . format_date(strtotime(trim($to_default['date'])), 'custom', $format) . '</span></div><div class="date-range-slider-gap">' . $gap . '</div><div id="slider-amount-' . $form_key . '"></div><div id="date-range-slider-canvas-' . $form_key . '" class="date-range-slider-canvas-wrapper"></div><div id="date-range-slider-' . $form_key . '"></div>', // call theme function instead
   );
   
   // hidden from

@@ -820,6 +820,7 @@ class IslandoraSolrResults {
         // total difference in days
         $calc_total_days = floor($calc_diff / 60 / 60 / 24);
         
+        $gap = NULL;
         if ($calc_total_days == 1) {
           $gap = t('days');
         }
