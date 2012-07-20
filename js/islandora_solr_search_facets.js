@@ -97,18 +97,14 @@ Drupal.behaviors.dateRangeSlider = function (context) {
         max: sliderMax,
         step: sliderStep,
         slide: function(event, ui) {
-          sliderUpdate(ui);
+          sliderUpdate(ui.values[0], ui.values[1]);
         },
         slide: function(event, ui) {
-          sliderUpdate(ui);
+          sliderUpdate(ui.values[0], ui.values[1]);
         }
       });
 
-      function sliderUpdate(ui) {
-
-        // get values
-        var fromVal = ui.values[0];
-        var toVal = ui.values[1];
+      function sliderUpdate(fromVal, toVal) {
 
         // get dates
         var fromDate = sliderData[fromVal].date;
@@ -121,6 +117,10 @@ Drupal.behaviors.dateRangeSlider = function (context) {
         // get formatted dates
         var formatFromDate = sliderData[fromVal].format_date;
         var formatToDate = sliderData[toVal].format_date;
+
+        // update slider values
+        $(sliderId).slider('values', 0, fromVal);
+        $(sliderId).slider('values', 1, toVal);
 
         // assign to popup
         $(sliderId + ' .slider-popup-from').html(formatFromDate);
@@ -198,14 +198,12 @@ Drupal.behaviors.dateRangeSlider = function (context) {
       // add plotclick event to update the sliders
       $(canvasId).bind("plotclick", function (event, pos, item) {
         if (item !== null) {
+          // get variable
           var dataIndexValue = item.dataIndex;
-          plot.unhighlight();
-          $(sliderId).slider('values', 0, dataIndexValue);
-          $(sliderId).slider('values', 1, dataIndexValue + 1);
-          plot.highlight(item.series, item.datapoint);
+          // update the slider and form values
+          sliderUpdate(dataIndexValue, dataIndexValue + 1);
         }
       });
-
     }); // end $.each()
   }
 }
