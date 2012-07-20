@@ -801,6 +801,7 @@ class IslandoraSolrResults {
         foreach ($facet_data as $date => $bucket_size) {
           $data[] = array(
             'date' => $date,
+            'format_date' => format_date(strtotime(trim($date)) + (60 * 60 * 24), 'custom', $format),
             'bucket_size' => $bucket_size,
           );
         }
@@ -832,7 +833,7 @@ class IslandoraSolrResults {
       // include datepicker js
       jquery_ui_add(array('ui.datepicker'));
       // add datepicker css
-      drupal_add_css(drupal_get_path('module', 'islandora_solr_search') . '/css/islandora_solr_search_datepicker.css');
+      drupal_add_css('sites/all/libraries/jquery.ui/themes/base/ui.all.css');
       $date_range = variable_get('islandora_solr_search_datepicker_range', '-100:+3');
       // add js settings
       drupal_add_js(array('islandora_solr_search_datepicker_range' => trim($date_range)), 'setting');

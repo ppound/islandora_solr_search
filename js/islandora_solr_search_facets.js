@@ -94,35 +94,71 @@ Drupal.behaviors.dateRangeSlider = function (context) {
       values: [sliderMin, sliderMax],
       min: sliderMin,
       max: sliderMax,
-      stepping: sliderStep, // this is named 'step' in newer versions of jquery ui
-      change: function(event, ui) {
-        // assign values to form fields. // @TODO: this is done differently in newer versions of jquery ui        
-        // min handler: assign to 'from' field
-        if (ui.handle[0].id == 'range-slider-handle-min-' + form_key) {
-          var fromDate = sliderData[ui.value].date;
-          $('.range-slider-hidden-from-' + form_key).val(fromDate);
-        }
-        // max handler: assign to 'to' field
-        if (ui.handle[0].id == 'range-slider-handle-max-' + form_key) {
-          var toDate = sliderData[ui.value].date;
-          $('.range-slider-hidden-to-' + form_key).val(toDate);
-        }
+      step: sliderStep,
+      slide: function(event, ui) {
+        // get dates
+        var fromDate = sliderData[ui.values[0]].date;
+        var toDate = sliderData[ui.values[1]].date;
+        
+        // get formatted dates
+        var formatFromDate = sliderData[ui.values[0]].format_date;
+        var formatToDate = sliderData[ui.values[1]].format_date;
+        
+        // assign to hidden field
+        $('.range-slider-hidden-from-' + form_key).val(fromDate);
+        $('.range-slider-hidden-to-' + form_key).val(toDate);
+        
+        // assign to popup
+        $(sliderId + ' .slider-popup-from').html(formatFromDate);
+        $(sliderId + ' .slider-popup-to').html(formatToDate);
+      },
+      slide: function(event, ui) {
+        // get dates
+        var fromDate = sliderData[ui.values[0]].date;
+        var toDate = sliderData[ui.values[1]].date;
+        
+        // get formatted dates
+        var formatFromDate = sliderData[ui.values[0]].format_date;
+        var formatToDate = sliderData[ui.values[1]].format_date;
+        
+        // assign to hidden field
+        $('.range-slider-hidden-from-' + form_key).val(fromDate);
+        $('.range-slider-hidden-to-' + form_key).val(toDate);
+        
+        // assign to popup
+        $(sliderId + ' .slider-popup-from').html(formatFromDate);
+        $(sliderId + ' .slider-popup-to').html(formatToDate);
       }
-
     });
 
     // set canvas width equal to slider width
     var canvasWidth = $(sliderId).width();
-    $(canvasId).width(canvasWidth - 24).height('120px');
-console.log(this.data);
-    // flot
+    $(canvasId).width(canvasWidth - 0).height('120px');
+
+    // add classes to slider handles
+    $(sliderId + ' > a:eq(0)').addClass('handle-min').prepend('<div class="slider-popup-from">' + sliderData[0].format_date + '</div>').hover(function() {
+      $(this).find('.slider-popup-from').stop(false, true).fadeIn(0);
+    }, function() {
+      $(this).find('.slider-popup-from').stop(false, true).fadeOut('slow');
+    });
+    
+    $(sliderId + ' > a:eq(1)').addClass('handle-max').prepend('<div class="slider-popup-to">' + sliderData[sliderData.length-1].format_date + '</div>').hover(function() {
+      $(this).find('.slider-popup-to').stop(false, true).fadeIn(0);
+    }, function() {
+      $(this).find('.slider-popup-to').stop(false, true).fadeOut('slow');
+    });
+
+
+
+
+    // Flot
     // prepare flot data
     var d1 = [];
     for (var i = 0; i <= sliderMax - 1; i += 1) {
       d1.push([i, this.data[i].bucket_size]);
     }
     
-    // render flot graph
+    // render Flot graph
     function plotWithOptions() {
       $.plot($(canvasId), [d1], {
         colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
@@ -147,7 +183,12 @@ console.log(this.data);
       });
     }
 
+    // execute Flot function
     plotWithOptions();
-  });
+    
+  }); // end $.each()
+  
+  
+
 }
 

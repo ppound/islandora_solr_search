@@ -1046,7 +1046,7 @@ function islandora_solr_search_range_slider_form(&$form_state, $form_key, $solr_
   //drupal_add_js(drupal_get_path('module', 'islandora_solr_search') . '/js/flot/excanvas.min.js');
   
   // include jquery ui css
-  drupal_add_css('sites/all/libraries/jquery.ui/themes/default/ui.all.css');
+  drupal_add_css('sites/all/libraries/jquery.ui/themes/base/ui.slider.css');
   // include slider settings
   drupal_add_js(array('islandora_solr_search_range_slider' => array($solr_field => array('solr_field' => $solr_field, 'form_key' => $form_key, 'data' => $facet_data))), 'setting');
   

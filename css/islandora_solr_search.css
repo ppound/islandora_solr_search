@@ -278,7 +278,7 @@ table.ui-datepicker tbody td.ui-datepicker-today a
 
 .islandora_solr_search_range_slider .ui-slider
 {
-  height: 1px;
+  height: 2px;
   border: 0px;
   background: #ccc;
   margin-bottom: 20px;
@@ -286,15 +286,19 @@ table.ui-datepicker tbody td.ui-datepicker-today a
 
 .islandora_solr_search_range_slider .ui-slider-range
 {
+  background: #edc240;
   height: 1px;
 }
 
+
+.islandora_solr_search_range_slider .ui-state-default,
+.islandora_solr_search_range_slider .ui-widget-content .ui-state-default,
 .islandora_solr_search_range_slider .ui-slider-handle
 {
-/*  width: 5px;*/
   background: url('../images/slider-handle.png') top center no-repeat transparent;
   border: 0px;
-  top: 2px;
+  top: 2px; 
+  cursor: pointer;
 }
 
 .islandora_solr_search_range_slider .ui-slider-handle:hover {
@@ -305,7 +309,7 @@ table.ui-datepicker tbody td.ui-datepicker-today a
 
 .islandora_solr_search_range_slider .date-range-slider-canvas-wrapper
 {
-  margin-left: 12px;
+
 }
 
 .islandora_solr_search_range_slider .range-slider-fromto
@@ -316,4 +320,30 @@ table.ui-datepicker tbody td.ui-datepicker-today a
 .islandora_solr_search_range_slider .date-range-slider-gap
 {
   text-align: center;
+}
+
+
+#ui-datepicker-div {
+  z-index: 9999; /*must have*/
+}
+
+.slider-popup-from,
+.slider-popup-to
+{
+  display: none;
+  
+  position: absolute;
+  top: -40px;
+  left: -30px;
+  height: 20px;
+  min-width: 50px;
+  
+  padding: 0px 10px 1px 10px;
+  
+  font-size: 11px;
+  color: #333;
+  
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px 10px 10px 10px;
 }
