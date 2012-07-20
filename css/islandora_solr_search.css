@@ -290,6 +290,10 @@ table.ui-datepicker tbody td.ui-datepicker-today a
   height: 1px;
 }
 
+.islandora_solr_search_date_filter label
+{
+  display: inline-block;
+}
 
 .islandora_solr_search_range_slider .ui-state-default,
 .islandora_solr_search_range_slider .ui-widget-content .ui-state-default,

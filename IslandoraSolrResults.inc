@@ -809,10 +809,48 @@ class IslandoraSolrResults {
             'bucket_size' => $bucket_size,
           );
         }
+        
+        // calculate gap
+        $calc_from = strtotime($data[0]['date']);
+        $calc_to = strtotime($data[1]['date']);
+        
+        // calculate difference between from and to date
+        $calc_diff = abs($calc_from - $calc_to);
+
+        // total difference in days
+        $calc_total_days = floor($calc_diff / 60 / 60 / 24);
+        
+        if ($calc_total_days == 1) {
+          $gap = t('days');
+        }
+        elseif ($calc_total_days == 7) {
+          $gap = t('weeks');
+        }
+        elseif ($calc_total_days >= 28 AND $calc_total_days <= 32) {
+          $gap = t('months');
+        }
+        elseif ($calc_total_days >= 360 AND $calc_total_days <= 370) {
+          $gap = t('years');
+        }
+        elseif ($calc_total_days >= 720 AND $calc_total_days <= 740) {
+          $gap = t('2 years');
+        }
+        elseif ($calc_total_days >= 1800 AND $calc_total_days <= 1850) {
+          $gap = t('5 years');
+        }
+        elseif ($calc_total_days >= 3600 AND $calc_total_days <= 3700) {
+          $gap = t('decades');
+        }
+        elseif ($calc_total_days >= 36000 AND $calc_total_days <= 37000) {
+          $gap = t('centuries');
+        }
+        elseif ($calc_total_days >= 360000 AND $calc_total_days <= 370000) {
+          $gap = t('millennia');
+        }
         // To here
 
         // render form
-        $facet_output .= drupal_get_form('islandora_solr_search_range_slider_form_' . $range_slider_key, $range_slider_key, $facet_key, $data);
+        $facet_output .= drupal_get_form('islandora_solr_search_range_slider_form_' . $range_slider_key, $range_slider_key, $facet_key, $data, $gap);
         $range_slider_key++;
         $facet_output .='</div>';
       }
