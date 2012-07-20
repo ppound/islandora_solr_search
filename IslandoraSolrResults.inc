@@ -801,18 +801,10 @@ class IslandoraSolrResults {
           $facet_data[$facet_end] = NULL;
         }
 
-        $data = array();
-        foreach ($facet_data as $date => $bucket_size) {
-          $data[] = array(
-            'date' => $date,
-            'format_date' => format_date(strtotime(trim($date)) + (60 * 60 * 24), 'custom', $format),
-            'bucket_size' => $bucket_size,
-          );
-        }
-        
         // calculate gap
-        $calc_from = strtotime($data[0]['date']);
-        $calc_to = strtotime($data[1]['date']);
+        $calc_from = strtotime(key($facet_data));
+        next($facet_data);
+        $calc_to = strtotime(key($facet_data));
         
         // calculate difference between from and to date
         $calc_diff = abs($calc_from - $calc_to);
@@ -848,10 +840,32 @@ class IslandoraSolrResults {
         elseif ($calc_total_days >= 360000 AND $calc_total_days <= 370000) {
           $gap = t('millennia');
         }
+        
+        if (strpos($gap, t('year')) !== FALSE OR strpos($gap, t('decades')) !== FALSE OR strpos($gap, t('centuries')) !== FALSE OR strpos($gap, t('millennia')) !== FALSE) {
+          $date_format = 'Y';
+        }
+        elseif (strpos($gap, t('months')) !== FALSE) {
+          $date_format = 'M Y';
+        }
+        else {
+          $date_format = 'M j, Y';
+        }
+        
+        // create a nice array with our data
+        $data = array();
+        foreach ($facet_data as $date => $bucket_size) {
+          $format_date_str = format_date(strtotime(trim($date)) + (60 * 60 * 24), 'custom', $date_format);
+          $format_date_str = str_replace(' ', '&nbsp;', $format_date_str);
+          $data[] = array(
+            'date' => $date,
+            'format_date' => $format_date_str,
+            'bucket_size' => $bucket_size,
+          );
+        }
         // To here
 
         // render form
-        $facet_output .= drupal_get_form('islandora_solr_search_range_slider_form_' . $range_slider_key, $range_slider_key, $facet_key, $data, $gap);
+        $facet_output .= drupal_get_form('islandora_solr_search_range_slider_form_' . $range_slider_key, $range_slider_key, $facet_key, $data, $gap, $date_format);
         $range_slider_key++;
         $facet_output .='</div>';
       }

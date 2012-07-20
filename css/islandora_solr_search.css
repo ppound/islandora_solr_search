@@ -331,17 +331,22 @@ table.ui-datepicker tbody td.ui-datepicker-today a
   z-index: 9999; /*must have*/
 }
 
-.slider-popup-from,
-.slider-popup-to
+.slider-popup-from-wrapper,
+.slider-popup-to-wrapper
 {
   display: none;
   
   position: absolute;
+  width: 120px;
   top: -40px;
-  left: -30px;
-  height: 20px;
-  min-width: 50px;
-  
+  left: 50%;
+  margin-left: -60px;
+  text-align: center;
+}
+
+.slider-popup-from,
+.slider-popup-to
+{
   padding: 0px 10px 1px 10px;
   
   font-size: 11px;

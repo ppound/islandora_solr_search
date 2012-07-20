@@ -138,16 +138,16 @@ Drupal.behaviors.dateRangeSlider = function (context) {
       $(canvasId).width(canvasWidth - 0).height('120px');
 
       // add classes to slider handles
-      $(sliderId + ' > a:eq(0)').addClass('handle-min').prepend('<div class="slider-popup-from">' + sliderData[0].format_date + '</div>').hover(function() {
-        $(this).find('.slider-popup-from').stop(false, true).fadeIn(0);
+      $(sliderId + ' > a:eq(0)').addClass('handle-min').prepend('<div class="slider-popup-from-wrapper"><span class="slider-popup-from">' + sliderData[0].format_date + '</span></div>').hover(function() {
+        $(this).find('.slider-popup-from-wrapper').stop(false, true).fadeIn(0);
       }, function() {
-        $(this).find('.slider-popup-from').stop(false, true).fadeOut('slow');
+        $(this).find('.slider-popup-from-wrapper').stop(false, true).fadeOut('slow');
       });
 
-      $(sliderId + ' > a:eq(1)').addClass('handle-max').prepend('<div class="slider-popup-to">' + sliderData[sliderData.length-1].format_date + '</div>').hover(function() {
-        $(this).find('.slider-popup-to').stop(false, true).fadeIn(0);
+      $(sliderId + ' > a:eq(1)').addClass('handle-max').prepend('<div class="slider-popup-to-wrapper"><span class="slider-popup-to">' + sliderData[sliderData.length-1].format_date + '</span></div>').hover(function() {
+        $(this).find('.slider-popup-to-wrapper').stop(false, true).fadeIn(0);
       }, function() {
-        $(this).find('.slider-popup-to').stop(false, true).fadeOut('slow');
+        $(this).find('.slider-popup-to-wrapper').stop(false, true).fadeOut('slow');
       });
 
 
