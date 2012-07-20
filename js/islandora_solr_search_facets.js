@@ -74,8 +74,9 @@ Drupal.behaviors.dateRangeSlider = function (context) {
   // get year range variable
   var rangeSliderVals = Drupal.settings.islandora_solr_search_range_slider;
 
-  
+  // loop over each range slider facet
   $.each(rangeSliderVals, function() {
+    // set variables
     var sliderData = this.data;
     var form_key = this.form_key;
     var sliderId = '#date-range-slider-' + form_key;
@@ -86,7 +87,7 @@ Drupal.behaviors.dateRangeSlider = function (context) {
     var sliderMin = 0;
     var sliderStep = 1;
 
-
+    // add jquery ui slider
     $(sliderId).slider({
       range: true,
       handles: [{start:sliderMin, min:sliderMin, max:sliderMax, id:'range-slider-handle-min-' + form_key}, {start:sliderMax, min:sliderMin, max:sliderMax, id:'range-slider-handle-max-' + form_key}],
@@ -106,19 +107,47 @@ Drupal.behaviors.dateRangeSlider = function (context) {
           var toDate = sliderData[ui.value].date;
           $('.range-slider-hidden-to-' + form_key).val(toDate);
         }
-console.log(ui.value);
-//        $(amountId).html(ui.value);
       }
+
     });
 
+    // set canvas width equal to slider width
     var canvasWidth = $(sliderId).width();
-    console.log(canvasWidth);
-    $(canvasId).width(canvasWidth);
+    $(canvasId).width(canvasWidth - 24).height('120px');
+console.log(this.data);
+    // flot
+    // prepare flot data
+    var d1 = [];
+    for (var i = 0; i <= sliderMax - 1; i += 1) {
+      d1.push([i, this.data[i].bucket_size]);
+    }
+    
+    // render flot graph
+    function plotWithOptions() {
+      $.plot($(canvasId), [d1], {
+        colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
+        series: {
+          stack: false,
+          lines: {
+            show: false
+          },
+          bars: {
+            show: true,
+            lineWidth: 1, // in pixels
+            barWidth: 0.8, // in units of the x axis
+            fill: true,
+            fillColor: null,
+            align: "center", // or "center" 
+            horizontal: false
+          }
+        },
+        grid: {
+          show: false
+        }
+      });
+    }
 
-//    $('.range-slider-hidden-to-' + form_key).val(toDate);
-//    $(amountId).html($(sliderId).slider("value"));
+    plotWithOptions();
   });
-  
-  
 }
 

@@ -278,5 +278,42 @@ table.ui-datepicker tbody td.ui-datepicker-today a
 
 .islandora_solr_search_range_slider .ui-slider
 {
-  margin-bottom: 10px;
+  height: 1px;
+  border: 0px;
+  background: #ccc;
+  margin-bottom: 20px;
+}
+
+.islandora_solr_search_range_slider .ui-slider-range
+{
+  height: 1px;
+}
+
+.islandora_solr_search_range_slider .ui-slider-handle
+{
+/*  width: 5px;*/
+  background: url('../images/slider-handle.png') top center no-repeat transparent;
+  border: 0px;
+  top: 2px;
+}
+
+.islandora_solr_search_range_slider .ui-slider-handle:hover {
+  background: url('../images/slider-handle.png') top center no-repeat transparent;
+  border: 0px;
+  top: 2px;
+}
+
+.islandora_solr_search_range_slider .date-range-slider-canvas-wrapper
+{
+  margin-left: 12px;
+}
+
+.islandora_solr_search_range_slider .range-slider-fromto
+{
+  text-align: center;
+}
+
+.islandora_solr_search_range_slider .date-range-slider-gap
+{
+  text-align: center;
 }
