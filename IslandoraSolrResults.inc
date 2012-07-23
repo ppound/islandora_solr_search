@@ -763,7 +763,7 @@ class IslandoraSolrResults {
     else {
       // @TODO: Should be changed to format_string for Drupal 7
       // @TODO: does this check for exclude filters? -PID:"foo"
-      $filter = $key . ':"' . replaceSlashes($value) . '"'; // PID:"foo"
+      $filter = $key . ':"' . $value . '"'; // PID:"foo"
     }
     
     //FIXME:  This isn't quite right...  It can make sense to facet on 
