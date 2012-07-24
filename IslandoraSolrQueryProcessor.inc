@@ -62,7 +62,7 @@ class IslandoraSolrQueryProcessor {
       }
     }
     $this->buildQuery($query, $params);
-
+    
     return $this->executeQuery();
   }
 
@@ -82,8 +82,12 @@ class IslandoraSolrQueryProcessor {
     if ($this->internalSolrParams['type'] == 'dismax') {
       $this->solrDefType = $this->internalSolrParams['type'];
       $this->solrParams['defType'] = $this->internalSolrParams['type'];
+      
+      if (isset($this->internalSolrParams['sort'])) {
+        $this->solrParams['sort'] = $this->internalSolrParams['sort'];
+      }
     }
-
+    
     // Set query
     // fix the query as some characters will break the search : and / slash are examples
     $this->solrQuery = urldecode(restoreSlashes($query));
@@ -254,6 +258,7 @@ class IslandoraSolrQueryProcessor {
     try {
       // solrQuery
       $solr_query = ($this->internalSolrQuery) ? $this->internalSolrQuery : $this->solrQuery;
+      
       // execute query
       $results = $solr->search($solr_query, $this->solrStart, $this->solrLimit, $this->solrParams);
     } catch (Exception $e) {
