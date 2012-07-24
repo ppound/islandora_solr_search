@@ -688,9 +688,12 @@ class IslandoraSolrResults {
           $list_attributes = array('class' => 'islandora_solr_search_facet_list facet_list');
 
           // check if facet value amount is larger than the initial limit
-          $split_facet = $facet_count > $initial_limit AND
-              $initial_limit < $facet_limit AND
-              $initial_limit > $facet_min_count;
+          if ($facet_count > $initial_limit AND $initial_limit < $facet_limit AND $initial_limit > $facet_min_count) {
+            $split_facet = TRUE;
+          }
+          else {
+            $split_facet = FALSE;
+          }
 
           if ($split_facet) {
             $show_more = TRUE; //There exists a split array...
