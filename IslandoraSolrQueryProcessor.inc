@@ -168,7 +168,9 @@ class IslandoraSolrQueryProcessor {
       'qt' => variable_get("islandora_solr_search_block_request_handler", "standard"),
       'hl' => isset($keys[0]) ? 'true' : NULL,
       'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,
-      'hl.fragsize' => 400,
+      'hl.fragsize' => 150,
+      'hl.simple.pre' => '<strong>',
+      'hl.simple.post' => '</strong>',
     );
     // check for date facets
     if (variable_get('islandora_solr_facet_date' , NULL) != NULL) {
