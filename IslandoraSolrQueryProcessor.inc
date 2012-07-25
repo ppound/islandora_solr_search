@@ -82,10 +82,6 @@ class IslandoraSolrQueryProcessor {
     if ($this->internalSolrParams['type'] == 'dismax') {
       $this->solrDefType = $this->internalSolrParams['type'];
       $this->solrParams['defType'] = $this->internalSolrParams['type'];
-      
-      if (isset($this->internalSolrParams['sort'])) {
-        $this->solrParams['sort'] = $this->internalSolrParams['sort'];
-      }
     }
     
     // Set query
