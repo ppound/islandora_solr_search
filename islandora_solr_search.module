@@ -780,9 +780,19 @@ function islandora_solr_search_date_filter_form(&$form_state, $form_key, $solr_f
         $filter_str = trim($filter_str, ']');
         $filter_array = explode(' TO ', $filter_str);
 
-        $from_default = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + 1, 'custom', $format, 0);
-        $to_default = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format, 0);
-        $filter_value = $from_str . ' - ' . $to_str;
+        // get timestamps
+        $from_unix = strtotime(trim($filter_array[0]));
+        $to_unix = strtotime(trim($filter_array[1]));
+
+        // only set default times if from date is lower than to date
+        if ($from_unix < $to_unix) {
+          $from_default = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date($from_unix  + 1, 'custom', $format, 0);
+          $to_default = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date($to_unix, 'custom', $format, 0);
+        }
+        else {
+          $from_default = NULL;
+          $to_default = NULL;
+        }
       }
     }
   }

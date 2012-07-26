@@ -753,7 +753,7 @@ class IslandoraSolrResults {
       }
 
       // check if we need range filter form.
-      if (variable_get('islandora_solr_range_slider_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr)) {
+      if (variable_get('islandora_solr_range_slider_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr) AND $solrQueryProcessor->solrResult->response->numFound > 0) {
         // opening facet div // @TODO: this should go in theme function
         $facet_output .='<div class="islandora_solr_search_range_slider">';
         // add title
@@ -871,7 +871,7 @@ class IslandoraSolrResults {
       }
       
       // add datefilter
-      if (variable_get('islandora_solr_date_filter_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr) AND module_exists('jquery_ui')) {
+      if (variable_get('islandora_solr_date_filter_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr) AND module_exists('jquery_ui') AND $solrQueryProcessor->solrResult->response->numFound > 0) {
         // opening facet div // @TODO: this should go in theme function
         $facet_output .='<div class="islandora_solr_search_date_filter">';
 
