@@ -138,18 +138,19 @@ Drupal.behaviors.dateRangeSlider = function (context) {
       $(canvasId).width(canvasWidth - 0).height('120px');
 
       // add classes to slider handles
-      $(sliderId + ' > a:eq(0)').addClass('handle-min').prepend('<div class="slider-popup-from-wrapper"><span class="slider-popup-from">' + sliderData[0].format_date + '</span></div>').hover(function() {
+      $(sliderId + ' > a:eq(0)').addClass('handle-min').prepend('<div class="slider-popup-from-wrapper slider-popup"><span class="slider-popup-from">' + sliderData[0].format_date + '</span></div>').hover(function() {
+        $('#range-slider-tooltip').remove();
         $(this).find('.slider-popup-from-wrapper').stop(false, true).fadeIn(0);
       }, function() {
         $(this).find('.slider-popup-from-wrapper').stop(false, true).fadeOut('slow');
       });
 
-      $(sliderId + ' > a:eq(1)').addClass('handle-max').prepend('<div class="slider-popup-to-wrapper"><span class="slider-popup-to">' + sliderData[sliderData.length-1].format_date + '</span></div>').hover(function() {
+      $(sliderId + ' > a:eq(1)').addClass('handle-max').prepend('<div class="slider-popup-to-wrapper slider-popup"><span class="slider-popup-to">' + sliderData[sliderData.length-1].format_date + '</span></div>').hover(function() {
+        $('#range-slider-tooltip').remove();
         $(this).find('.slider-popup-to-wrapper').stop(false, true).fadeIn(0);
       }, function() {
         $(this).find('.slider-popup-to-wrapper').stop(false, true).fadeOut('slow');
       });
-
 
 
 
@@ -188,9 +189,9 @@ Drupal.behaviors.dateRangeSlider = function (context) {
           markingsLineWidth: null,
           // interactive stuff
           clickable: true,
-          hoverable: false,
-          autoHighlight: true, // highlight in case mouse is near
-          mouseActiveRadius: 10 // how far the mouse can be away to activate an item
+          hoverable: true,
+          autoHighlight: false, // highlight in case mouse is near
+          mouseActiveRadius: 0 // how far the mouse can be away to activate an item
         }
       });
 
@@ -202,6 +203,49 @@ Drupal.behaviors.dateRangeSlider = function (context) {
           var dataIndexValue = item.dataIndex;
           // update the slider and form values
           sliderUpdate(dataIndexValue, dataIndexValue + 1);
+        }
+      });
+      
+      // show tooltip      
+      function showTooltip(x, y, contents) {
+        //  hide or remove all other popups
+        $('#range-slider-tooltip').remove();
+        $('.slider-popup').hide();
+        $('<div id="range-slider-tooltip"></div>').css( {
+            top: y - 50,
+            left: x - 125,
+        }).html('<span>' + contents + '</span>').appendTo("body").fadeIn(0);
+      }
+
+      var previousPoint = null;
+      // bind plothover
+      $(canvasId).bind("plothover", function (event, pos, item) {
+        if (item) {
+            previousPoint = item.dataIndex;
+ 
+            // fadeout and remove
+            $('#range-slider-tooltip').fadeOut('slow', function() {
+              $(this).remove();
+            });
+
+            // update mouse position
+            var x = pos.pageX,
+                y = pos.pageY;
+
+            // get variable
+            var dataIndexValue = item.dataIndex;
+            var dataIndexValueNext = dataIndexValue + 1;
+            var tooltipContent = sliderData[dataIndexValue].format_date + ' - ' + sliderData[dataIndexValueNext].format_date + ' (<em>' + sliderData[dataIndexValue].bucket_size + '</em>)';
+            
+            // call show tooltip function
+            showTooltip(pos.pageX, pos.pageY, tooltipContent);
+        }
+        else {
+          // fadeout and remove
+          $('#range-slider-tooltip').fadeOut('slow', function() {
+            $(this).remove();
+          });
+          previousPoint = null;            
         }
       });
     }); // end $.each()

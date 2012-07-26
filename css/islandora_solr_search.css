@@ -356,3 +356,26 @@ table.ui-datepicker tbody td.ui-datepicker-today a
   border: 1px solid #ccc;
   border-radius: 10px 10px 10px 10px;
 }
+
+#range-slider-tooltip
+{
+  display: none;
+  position: absolute;
+  width: 250px;
+
+  text-align: center;
+  z-index: 9999;
+}
+
+#range-slider-tooltip span
+{
+  padding: 0px 10px 1px 10px;
+
+  
+  font-size: 11px;
+  color: #333;
+  
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px 10px 10px 10px;
+}
