@@ -83,12 +83,15 @@ Drupal.behaviors.dateRangeSlider = function (context) {
       var sliderId = '#date-range-slider-' + form_key;
       var amountId = '#slider-amount-' + form_key;
       var canvasId = '#date-range-slider-canvas-' + form_key;
-
+      var rangeSliderColor = this.slider_color;
+      if (!rangeSliderColor) {
+        rangeSliderColor = '#edc240';
+      }
       var sliderMax = sliderData.length - 1;
       var sliderMin = 0;
       var sliderStep = 1;
 
-      // add jquery ui slider
+      // set jquery ui slider
       $(sliderId).slider({
         range: true,
         handles: [{start:sliderMin, min:sliderMin, max:sliderMax, id:'range-slider-handle-min-' + form_key}, {start:sliderMax, min:sliderMin, max:sliderMax, id:'range-slider-handle-max-' + form_key}],
@@ -104,8 +107,8 @@ Drupal.behaviors.dateRangeSlider = function (context) {
         }
       });
 
+      // function to update the slider values and position
       function sliderUpdate(fromVal, toVal) {
-
         // get dates
         var fromDate = sliderData[fromVal].date;
         var toDate = sliderData[toVal].date;
@@ -137,6 +140,9 @@ Drupal.behaviors.dateRangeSlider = function (context) {
       var canvasWidth = $(sliderId).width();
       $(canvasId).width(canvasWidth - 0).height('120px');
 
+      // set color for the slider.
+      $(sliderId + ' .ui-slider-range').css({'background': rangeSliderColor});
+
       // add classes to slider handles
       $(sliderId + ' > a:eq(0)').addClass('handle-min').prepend('<div class="slider-popup-from-wrapper slider-popup"><span class="slider-popup-from">' + sliderData[0].format_date + '</span></div>').hover(function() {
         $('#range-slider-tooltip').remove();
@@ -163,7 +169,7 @@ Drupal.behaviors.dateRangeSlider = function (context) {
 
       // render Flot graph
       var plot = $.plot($(canvasId), [d1], {
-        colors: ["#edc240", "#afd8f8", "#cb4b4b", "#4da74d", "#9440ed"],
+        colors: [rangeSliderColor],
         xaxis: {  ticks: [], min: 0, autoscaleMargin: 0},
         yaxis: {  ticks: [], min: 0, autoscaleMargin: 0},
         series: {

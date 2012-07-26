@@ -752,8 +752,8 @@ class IslandoraSolrResults {
         }
       }
 
-      // check if we need range filter form.
-      if (variable_get('islandora_solr_range_slider_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr) AND $solrQueryProcessor->solrResult->response->numFound > 0) {
+      // check if we need range slider.
+      if (variable_get('islandora_solr_range_slider_enabled', 0) == 1 AND array_key_exists($facet_key, $date_facets_arr) AND $solrQueryProcessor->solrResult->response->numFound > 0 AND module_exists('jquery_ui')  AND jquery_ui_get_version() >= 1.7) {
         // opening facet div // @TODO: this should go in theme function
         $facet_output .='<div class="islandora_solr_search_range_slider">';
         // add title
@@ -862,10 +862,13 @@ class IslandoraSolrResults {
             'bucket_size' => $bucket_size,
           );
         }
+        
+        // add range slider color
+        $slider_color = variable_get('islandora_solr_range_slider_color', '#edc240');
         // To here
 
         // render form
-        $facet_output .= drupal_get_form('islandora_solr_search_range_slider_form_' . $range_slider_key, $range_slider_key, $facet_key, $data, $gap, $date_format);
+        $facet_output .= drupal_get_form('islandora_solr_search_range_slider_form_' . $range_slider_key, $range_slider_key, $facet_key, $data, $slider_color, $gap, $date_format);
         $range_slider_key++;
         $facet_output .='</div>';
       }

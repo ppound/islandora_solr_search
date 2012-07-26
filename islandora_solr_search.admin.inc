@@ -370,7 +370,7 @@ function islandora_solr_admin_settings(&$form_state) {
     '#collapsed' => FALSE,
   );
   // only expose when jquery_ui is installed
-  if (module_exists('jquery_ui')) {
+  if (module_exists('jquery_ui') AND jquery_ui_get_version() >= 1.7) {
     $form['facet_settings']['facet_dates']['range_slider']['islandora_solr_range_slider_enabled'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enable range slider'),
@@ -378,12 +378,17 @@ function islandora_solr_admin_settings(&$form_state) {
       '#default_value' => variable_get('islandora_solr_range_slider_enabled', 0),
       '#description' => t('When checked, the normal range facet will be replaced by a date slider widget.'),
     );
-    // @TODO: add a textfield with colorpicker to select the color of the graphs.
+    $form['facet_settings']['facet_dates']['range_slider']['islandora_solr_range_slider_color'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Slider color'),
+      '#description' => t('A color for the range slider. Defaults to #edc240'),
+      '#default_value' => variable_get('islandora_solr_range_slider_color' , '#edc240'),
+    );
   }
   else {
-    $form['facet_settings']['facet_dates']['date_filter']['islandora_solr_date_filter_not_available'] = array(
+    $form['facet_settings']['facet_dates']['range_slider']['islandora_solr_date_filter_not_available'] = array(
       '#type' => 'markup',
-      '#value' => t('In order to use the date range slider you need to install the <a href="!url">jquery_ui</a> module.', array('!url', 'http://drupal.org/project/jquery_ui')),
+      '#value' => t('The date range slider requires jQuery UI 1.7.3 or higher. Please download and enable the <a href="!jqueryupdate">jQuery Update</a> and <a href="!jqueryui">jQuery UI</a> modules and include jQuery UI 1.7.3.', array('!jqueryupdate' => 'http://drupal.org/project/jquery_update', '!jqueryui' => 'http://drupal.org/project/jquery_ui')),
       '#prefix' => '<p>',
       '#suffix' => '</p>',
     );
@@ -419,7 +424,7 @@ function islandora_solr_admin_settings(&$form_state) {
   else {
     $form['facet_settings']['facet_dates']['date_filter']['islandora_solr_date_filter_not_available'] = array(
       '#type' => 'markup',
-      '#value' => t('In order to use a calendar popup with the date filter you need to install the <a href="!url">jquery_ui</a> module.', array('!url', 'http://drupal.org/project/jquery_ui')),
+      '#value' => t('In order to use a calendar popup with the date filter you need to install the <a href="!jqueryui">jQuery UI</a> module.', array('!jqueryui', 'http://drupal.org/project/jquery_ui')),
       '#prefix' => '<p>',
       '#suffix' => '</p>',
     );

@@ -736,7 +736,7 @@ function islandora_solr_search_forms($form_id, $args) {
     // Lets attach islandora_solr_search_date_filter_form to $forms[$form_id].  This effectively allows you to use the same form builder function to build a form with any form_id of your choice.
     $forms[$form_id] = array(
       'callback' => 'islandora_solr_search_range_slider_form',
-      'callback arguments' => array($args[0], $args[1], $args[2], $args[3], $args[4]),
+      'callback arguments' => array($args[0], $args[1], $args[2], $args[3], $args[4], $args[5]),
     );
     return $forms;
   }
@@ -986,7 +986,7 @@ function islandora_solr_search_date_filter_form_submit($form, &$form_state) {
 
 
 
-function islandora_solr_search_range_slider_form(&$form_state, $form_key, $solr_field, $facet_data, $gap, $date_format) {
+function islandora_solr_search_range_slider_form(&$form_state, $form_key, $solr_field, $facet_data, $slider_color, $gap, $date_format) {
   global $queryClass;
 
   // set variables
@@ -1047,7 +1047,6 @@ function islandora_solr_search_range_slider_form(&$form_state, $form_key, $solr_
   jquery_ui_add(array('ui.slider'));
   // include flot
   drupal_add_js(drupal_get_path('module', 'islandora_solr_search') . '/js/flot/jquery.flot.min.js');
-  drupal_add_js(drupal_get_path('module', 'islandora_solr_search') . '/js/flot/jquery.flot.selection.min.js');
   // @TODO: find a good way to call this for IE8 and lower
   // <!--[if lte IE 8]><![endif]-->
   //drupal_add_js(drupal_get_path('module', 'islandora_solr_search') . '/js/flot/excanvas.min.js');
@@ -1055,9 +1054,9 @@ function islandora_solr_search_range_slider_form(&$form_state, $form_key, $solr_
   // include jquery ui css
   drupal_add_css('sites/all/libraries/jquery.ui/themes/base/ui.slider.css');
   // include slider settings
-  drupal_add_js(array('islandora_solr_search_range_slider' => array($solr_field => array('solr_field' => $solr_field, 'form_key' => $form_key, 'data' => $facet_data))), 'setting');
+  drupal_add_js(array('islandora_solr_search_range_slider' => array($solr_field => array('solr_field' => $solr_field, 'form_key' => $form_key, 'data' => $facet_data, 'slider_color' => $slider_color))), 'setting');
   
-  return $form;  
+  return $form;
 }
 
 function islandora_solr_search_range_slider_form_validate($form, &$form_state) {
