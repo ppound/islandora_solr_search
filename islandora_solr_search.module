@@ -780,9 +780,8 @@ function islandora_solr_search_date_filter_form(&$form_state, $form_key, $solr_f
         $filter_str = trim($filter_str, ']');
         $filter_array = explode(' TO ', $filter_str);
 
-        $from_default = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format);
-        $to_default = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format);
-
+        $from_default = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + 1, 'custom', $format, 0);
+        $to_default = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format, 0);
         $filter_value = $from_str . ' - ' . $to_str;
       }
     }
@@ -1006,7 +1005,7 @@ function islandora_solr_search_range_slider_form(&$form_state, $form_key, $solr_
   // tooltip over slider with current date
   $form[$form_key] = array(
     '#type' => 'markup',
-    '#value' => '<div class="range-slider-fromto" id="range-slider-fromto-' . $form_key . '"><span class="range-slider-from">' . format_date(strtotime(trim($from_default['date'])) + (60 * 60 * 24), 'custom', $date_format) . '</span> - <span class="range-slider-to">' . format_date(strtotime(trim($to_default['date'])), 'custom', $date_format) . '</span></div><div class="date-range-slider-gap">' . $gap . '</div><div id="slider-amount-' . $form_key . '"></div><div id="date-range-slider-canvas-' . $form_key . '" class="date-range-slider-canvas-wrapper"></div><div id="date-range-slider-' . $form_key . '"></div>', // call theme function instead
+    '#value' => '<div class="range-slider-fromto" id="range-slider-fromto-' . $form_key . '"><span class="range-slider-from">' . format_date(strtotime(trim($from_default['date'])) + 1, 'custom', $date_format, 0) . '</span> - <span class="range-slider-to">' . format_date(strtotime(trim($to_default['date'])), 'custom', $date_format, 0) . '</span></div><div class="date-range-slider-gap">' . $gap . '</div><div id="slider-amount-' . $form_key . '"></div><div id="date-range-slider-canvas-' . $form_key . '" class="date-range-slider-canvas-wrapper"></div><div id="date-range-slider-' . $form_key . '"></div>', // call theme function instead
   );
   
   // hidden from

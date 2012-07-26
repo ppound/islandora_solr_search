@@ -348,8 +348,8 @@ class IslandoraSolrResults {
           $filter_str = trim($filter_str, ']');
           $filter_array = explode(' TO ', $filter_str);
           
-          $from_str = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format);
-          $to_str = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format);
+          $from_str = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + 1, 'custom', $format, 0);
+          $to_str = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format, 0);
           
           if ($from_str == $to_str) {
             $filter_value = $from_str;
@@ -445,8 +445,8 @@ class IslandoraSolrResults {
           $filter_str = trim($filter_str, ']');
           $filter_array = explode(' TO ', $filter_str);
           
-          $from_str = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format);
-          $to_str = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format);
+          $from_str = (strpos($filter_array[0], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[0])) + 1, 'custom', $format, 0);
+          $to_str = (strpos($filter_array[1], '*') !== FALSE) ? '*' : format_date(strtotime(trim($filter_array[1])), 'custom', $format, 0);
           
           if ($from_str == $to_str) {
             $filter_value = $from_str;
@@ -671,8 +671,8 @@ class IslandoraSolrResults {
           // set date range filter for facet url
           $date_facets[$key][$date]['range'] = '[' . $date . ' TO ' . $date_next . ']';
           // set formatted value for facet link
-          $from_str = format_date(strtotime(trim($date)) + (60 * 60 * 24), 'custom', $format);
-          $to_str = format_date(strtotime(trim($date_next)), 'custom', $format);
+          $from_str = format_date(strtotime(trim($date)) + 1, 'custom', $format, 0);
+          $to_str = format_date(strtotime(trim($date_next)), 'custom', $format, 0);
           if ($from_str == $to_str) {
             $filter_value = $from_str;
           }
@@ -854,7 +854,7 @@ class IslandoraSolrResults {
         // create a nice array with our data
         $data = array();
         foreach ($facet_data as $date => $bucket_size) {
-          $format_date_str = format_date(strtotime(trim($date)) + (60 * 60 * 24), 'custom', $date_format);
+          $format_date_str = format_date(strtotime(trim($date)) + 1, 'custom', $date_format, 0);
           $format_date_str = str_replace(' ', '&nbsp;', $format_date_str);
           $data[] = array(
             'date' => $date,
@@ -1087,8 +1087,13 @@ class IslandoraSolrResults {
         
         // get ISO8601 values
         $from = $values['from'][$from_unix];
+        // if the hour is 00:00:00, subtract one second. If we always subtract
+        // one second we keep eating away seconds after every filter
+        if (strpos($from, '00:00:00') !== FALSE) {
+          $from .= '-1SECOND';
+        }
         $to = $values['to'][$to_unix];
-
+        
         // 2. calculate and render range gap
         // calculate difference between from and to date
         $diff = abs($from_unix - $to_unix);
@@ -1098,7 +1103,7 @@ class IslandoraSolrResults {
  
         // for maximum 15 buckets
         // @TODO: make max buckets variable
-        // @TOTO: fine tune this: it's not very precise.
+        // @TODO: fine tune this: it's not very precise.
         if ($total_days <= 15) {
           $gap = '+1DAY';
         }
@@ -1165,7 +1170,7 @@ class IslandoraSolrResults {
       $results = $islandoraSolrQuery->solrResult;
       $raw_response = $results->getRawResponse();
       $response_array = json_decode($raw_response, TRUE);
-      
+
       // update date_facets
       $date_facets = $response_array['facet_counts']['facet_dates'];
       
