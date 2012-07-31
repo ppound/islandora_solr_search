@@ -11,6 +11,8 @@ High priority
 - add a check to see if the context is the search results page. Currently we
 check if IslandoraSolrQueryProcessor::display is set, which is not ideal.
 
+- processor object alter call in executeQuery() might conflict with 2nd query calls from the variable date range gap functionality.
+
 - we could save us some code by storing the primary display settings in a DB table
 
 - add luke check for date fields (breaks if not)
@@ -34,6 +36,7 @@ http://wiki.apache.org/solr/CommonQueryParameters#sort
 Low Priority
 ------------
 
+- hook_alter instead of module invoke all for object manipulation
 - provide integration with display suite
 - expose result limit controls
 - put object url's in one variable?
@@ -65,4 +68,3 @@ islandora_solr_fields
 id  -  machine_name  - label  -  snippet  -  range  -  options
 
 
-- Too much code duplication in the form function !!!! Needs to be fixed !
