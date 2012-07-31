@@ -62,7 +62,7 @@ class IslandoraSolrQueryProcessor {
       }
     }
     $this->buildQuery($query, $params);
-
+    
     return $this->executeQuery();
   }
 
@@ -83,7 +83,7 @@ class IslandoraSolrQueryProcessor {
       $this->solrDefType = $this->internalSolrParams['type'];
       $this->solrParams['defType'] = $this->internalSolrParams['type'];
     }
-
+    
     // Set query
     // fix the query as some characters will break the search : and / slash are examples
     $this->solrQuery = urldecode(restoreSlashes($query));
@@ -181,7 +181,9 @@ class IslandoraSolrQueryProcessor {
       'qt' => variable_get("islandora_solr_search_block_request_handler", "standard"),
       'hl' => isset($keys[0]) ? 'true' : NULL,
       'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,
-      'hl.fragsize' => 400,
+      'hl.fragsize' => 150,
+      'hl.simple.pre' => '<strong>',
+      'hl.simple.post' => '</strong>',
     );
     // check for date facets
     if (variable_get('islandora_solr_facet_date', NULL) != NULL) {
@@ -276,6 +278,7 @@ class IslandoraSolrQueryProcessor {
     try {
       // solrQuery
       $solr_query = ($this->internalSolrQuery) ? $this->internalSolrQuery : $this->solrQuery;
+      
       // execute query
       $results = $solr->search($solr_query, $this->solrStart, $this->solrLimit, $this->solrParams);
     } catch (Exception $e) {
