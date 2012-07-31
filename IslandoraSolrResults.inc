@@ -641,7 +641,9 @@ class IslandoraSolrResults {
 
     // check if we need to set a variable range gap
     if (variable_get('islandora_solr_facet_date_gap_variable', 0) == 1 AND isset($solrQueryProcessor->solrResult->facet_counts->facet_dates)) {
-      $date_facets = $this->variableRangeGap($solrQueryProcessor);
+      $variable_range_data = $this->variableRangeGap($solrQueryProcessor);
+      $date_facets = $variable_range_data['date_facets'];
+      $solr_call = $variable_range_data['solr_call'];
     }
     
     // object to json
@@ -770,34 +772,43 @@ class IslandoraSolrResults {
         unset($facet_data['other']);
         unset($facet_data['hardend']);
         unset($facet_data['include']);
-        foreach ($facet_data as $key => $value) {
-          if ($value == 0) {
-            unset($facet_data[$key]);
+        
+        // strip empty buckets left and right when no date filters are set
+        if (isset($solr_call) AND !in_array($facet_key, $solr_call)) {
+          foreach ($facet_data as $key => $value) {
+            if ($value == 0) {
+              unset($facet_data[$key]);
+            }
+            else {
+              break;
+            }
+          }
+          $facet_data = array_reverse($facet_data);
+          $end = array();
+
+          foreach ($facet_data as $date => $bucket_size) {
+            if ($bucket_size == 0) {
+              unset($facet_data[$date]);
+              $end = array('date' => $date, 'bucket_size' => $bucket_size);
+            }
+            else {
+              break;
+            }
+          }
+          $facet_data = array_reverse($facet_data);
+
+          // add end date
+          if (isset($end['bucket_size']) AND $end['bucket_size'] == 0) {
+            $end_date = $end['date'];
+            $facet_data[$end_date] = NULL;
           }
           else {
-            break;
+            $facet_data[$facet_end] = NULL;
           }
         }
-        $facet_data = array_reverse($facet_data);
-        $end = array();
-
-        foreach ($facet_data as $date => $bucket_size) {
-          if ($bucket_size == 0) {
-            unset($facet_data[$date]);
-            $end = array('date' => $date, 'bucket_size' => $bucket_size);
-          }
-          else {
-            break;
-          }
-        }
-        $facet_data = array_reverse($facet_data);
-
-        // add end date
-        if (isset($end['bucket_size']) AND $end['bucket_size'] == 0) {
-          $end_date = $end['date'];
-          $facet_data[$end_date] = NULL;
-        }
+        // do not strip empty buckets left and right when filters are set
         else {
+          // add end date
           $facet_data[$facet_end] = NULL;
         }
 
@@ -1038,8 +1049,9 @@ class IslandoraSolrResults {
     // json to array
     $date_facets_arr = json_decode($date_facets_json, true);
 
-    $solr_call = FALSE;
-
+    // populate with terms that needed a second solr call to update facets
+    $solr_call = array();
+    
     // loop over all date facets
     foreach ($date_facets_arr as $term => $buckets) {
         
@@ -1142,13 +1154,13 @@ class IslandoraSolrResults {
         $solrQueryProcessor->solrParams["f.$term.facet.date.gap"] = $gap;
         
         // update variable
-        $solr_call = TRUE;
+        $solr_call[] = $term;
       }
     }
 
     // 3. execute
     // if an extra solr call is necessary
-    if ($solr_call) {
+    if (!empty($solr_call)) {
       // new query processor class
       $islandoraSolrQuery = new IslandoraSolrQueryProcessor();
 
@@ -1180,7 +1192,7 @@ class IslandoraSolrResults {
     }
 
     // 5. return
-    return $date_facets;
+    return array('date_facets' => $date_facets, 'solr_call' => $solr_call);
   }
   
   
