@@ -5,6 +5,8 @@ TODO:
 High priority
 -------------
 
+- tabledrag should update the table with ajax.
+
 - update README.txt
 - update hook_help functions
 - check if islandora_solr.install is doing the right things.

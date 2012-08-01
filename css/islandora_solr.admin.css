@@ -61,3 +61,8 @@ html.js .islandora-solr-remove-link
 {
   display: block;
 }
+
+html.js span.tabledrag-changed
+{
+  position: absolute;
+}

@@ -221,8 +221,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     );
   }
 
-  
-  
+    
   // default display settings
   $form['islandora_solr_tabs']['default_display_settings'] = array(
     '#type' => 'fieldset',
@@ -252,7 +251,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $form['islandora_solr_tabs']['default_display_settings']['add_more'] = array(
     '#type' => 'button',
     '#value' => t('Add another item'),
-    '#attributes' => array('class' => array('islandora-solr-result-add-more-submit')),
+    '#attributes' => array('class' => array('islandora-solr-add-more-submit')),
     '#submit' => array('_islandora_solr_update_fields_submit'),
     '#name' => 'result_fields_add_more',
     '#field_type' => 'result_fields',
@@ -321,7 +320,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       'effect' => 'none',
     ),
   );
-  
+
 
 
   
@@ -367,7 +366,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       'effect' => 'none',
     ),
   );
-  
+
 
   $form['islandora_solr_tabs']['facet_settings']['islandora_solr_facet_min_limit'] = array(
     '#type' => 'textfield',
@@ -587,13 +586,14 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
 
   // Ways to populate the fields table
   // 1. Saved values from the DB
-  // 2. Triggered element (Add another item or remove)
+  // 2. Triggered element (Add another item or remove or reorder)
 
   // 2. Triggered element (Add another item or remove)
   if (isset($form_state['triggering_element']) AND $form_state['triggering_element']['#field_type'] == $field_type) {
     
     // unset terms from input array
     // http://drupal.stackexchange.com/questions/14855/how-do-i-dynamically-fill-a-textfield-with-ajax/16576#16576
+    $form_state['values']['islandora_solr_' . $field_type] = $form_state['input']['islandora_solr_' . $field_type];
     unset($form_state['input']['islandora_solr_' . $field_type]);
     // add field
     if ($form_state['triggering_element']['#name'] == $field_type . '_add_more') {

@@ -1,8 +1,8 @@
 /* Script for islandora_solr admin */
 (function ($) {
-console.log('js');
+
   // function to trigger a form buttom when clicking on a link element.
-  Drupal.behaviors.islandora_solr_remove = {
+  Drupal.behaviors.islandoraSolrRemove = {
     attach: function(context, settings) {
       // show more
       $(".islandora-solr-remove-link").each(function () {
@@ -19,5 +19,5 @@ console.log('js');
       
     }
   };
-
+  
 })(jQuery);
