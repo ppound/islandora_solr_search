@@ -654,6 +654,31 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
       '#delta' => $count >= 10 ? $count : 10,
       '#attributes' => array('class' => array('solr-weight-' . $field_type_class)),
     );  
+    if ($field_type == 'facet_fields') {
+      $term['configure'] = array(
+        '#type' => 'link',
+        '#title' => t('configure'),
+        '#href' => '#',
+        '#options' => array('attributes' => array('class' => 'islandora-solr-configure-link')), 
+      );
+      $term['configure_button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Configure'),
+  //      '#name' => $field_type . '_remove',
+        '#field' => $key,
+        '#field_type' => $field_type,
+        '#attributes' => array('class' => array('islandora-solr-configure-submit')),
+        '#submit' => array('_islandora_solr_update_fields_submit'),
+        '#name' => $field_type . '_configure_' . $key,
+        '#ajax' => array(
+          'callback' => '_islandora_solr_update_fields',
+          'wrapper' => 'islandora-solr-' . $field_type_class . '-wrapper',
+          'effect' => 'none',
+          'event' => 'click',
+          'progress' => array('message' => '', 'type' => 'throbber'),
+        ),
+      );
+    }
     $term['remove'] = array(
       '#type' => 'link',
       '#title' => t('remove'),
@@ -709,9 +734,12 @@ function theme_islandora_solr_admin_fields($variables) {
       if ($field_type == 'result_fields') { $row[] = array('data' => drupal_render($form[$key]['snippet'])); }
       if ($field_type == 'facet_fields') { $row[] = array('data' => drupal_render($form[$key]['range_facet'])); }
       $row[] = array('data' => drupal_render($form[$key]['weight']));
-//      $row[] = array('data' => drupal_render($form['configure'][$key]));
+      if ($field_type == 'facet_fields') {
+        $row[] = array('data' => drupal_render($form[$key]['configure']), 'class' => 'islandora-solr-operations');
+        $row[] = array('data' => drupal_render($form[$key]['configure_button']), 'class' => 'islandora-solr-operations islandora-solr-operations-hidden');
+      }
       $row[] = array('data' => drupal_render($form[$key]['remove']), 'class' => 'islandora-solr-operations');
-      $row[] = array('data' => drupal_render($form[$key]['remove_button']), 'class' => 'islandora-solr-operations');
+      $row[] = array('data' => drupal_render($form[$key]['remove_button']), 'class' => 'islandora-solr-operations islandora-solr-operations-hidden');
       // add to rows
       $rows[] = array('data' => $row, 'class' => array('draggable'));
     }
@@ -723,7 +751,7 @@ function theme_islandora_solr_admin_fields($variables) {
   if ($field_type == 'result_fields') { $header[] = array('data' => t('Snippet')); }
   if ($field_type == 'facet_fields') { $header[] = array('data' => t('Range facet')); }
   $header[] = array('data' => t('Weight'));
-  $header[] = array('data' => t('Operations'), 'colspan' => 2);
+  $header[] = array('data' => t('Operations'), 'colspan' => 4);
 
   // render form
   $output = '';

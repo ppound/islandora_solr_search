@@ -19,5 +19,24 @@
       
     }
   };
+
+// function to trigger a form buttom when clicking on a link element.
+  Drupal.behaviors.islandoraSolrConfigure = {
+    attach: function(context, settings) {
+      // show more
+      $(".islandora-solr-configure-link").each(function () {
+
+        if (!$(this).hasClass('processed')) {
+          $('.islandora-solr-configure-link').click(function() {
+            $(this).parent('.islandora-solr-operations').next('td').find('input').trigger('click');
+            return false;
+          });
+          $(".islandora-solr-configure-link").addClass('processed');
+        }
+
+      });
+      
+    }
+  };
   
 })(jQuery);

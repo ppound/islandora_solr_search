@@ -16,6 +16,11 @@ html.js .refresh-button {
   width: 60px;
 }
 
+html.js .islandora-solr-operations-hidden
+{
+  width: 20px;
+}
+
 /* autocomplete styling */
 #autocomplete
 {
@@ -47,22 +52,25 @@ html.js .refresh-button {
 
 /* result fields js */
 
-html.js .islandora-solr-remove-submit
+html.js .islandora-solr-remove-submit,
+html.js .islandora-solr-configure-submit
 {
   display: none;
 }
 
-.islandora-solr-remove-link
+.islandora-solr-remove-link,
+.islandora-solr-configure-link
 {
   display: none;
 }
 
-html.js .islandora-solr-remove-link
+html.js .islandora-solr-remove-link,
+html.js .islandora-solr-configure-link
 {
   display: block;
 }
 
-html.js span.tabledrag-changed
+html.js table span.tabledrag-changed
 {
   position: absolute;
 }
