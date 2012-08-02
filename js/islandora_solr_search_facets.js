@@ -53,7 +53,7 @@ Drupal.behaviors.dateRangeFilter = function (context) {
 // Datepicker
 Drupal.behaviors.dateRangeFilterDatepicker = function (context) {
   if (!Drupal.settings.islandora_solr_search_datepicker_range) {
-        return;
+    return;
   }
   // get year range variable
   var yearRangeVal = Drupal.settings.islandora_solr_search_datepicker_range;
