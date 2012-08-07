@@ -318,16 +318,16 @@
         <field name="dc.creator" type="text" indexed="true" stored="false" multiValued="true"/>
         <field name="dc.creator_s" type="string" maxChars="300" indexed="true" stored="true"
             multiValued="true"/>
-        <copyField source="dc:contributor" dest="dc.contributor_s" />
-        <field name="dc:contributor" type="text" indexed="true" stored="false" multiValued="true"/>
+        <copyField source="dc.contributor" dest="dc.contributor_s" />
+        <field name="dc.contributor" type="text" indexed="true" stored="false" multiValued="true"/>
         <field name="dc.contributor_s" type="string" maxChars="300" indexed="true" stored="true"
             multiValued="true"/>
         <copyField source="dc.date" dest="dc.date_s" />
         <field name="dc.date" type="text" indexed="true" stored="false" multiValued="true"/>
         <field name="dc.date_s" type="string" maxChars="300" indexed="true" stored="true"
             multiValued="true"/>
-        <copyField source="dc:source" dest="dc.source_s" />
-        <field name="dc:source" type="text" indexed="true" stored="false" multiValued="true"/>
+        <copyField source="dc.source" dest="dc.source_s" />
+        <field name="dc.source" type="text" indexed="true" stored="false" multiValued="true"/>
         <field name="dc.source_s" type="string" maxChars="300" indexed="true" stored="true"
             multiValued="true"/>
         
