@@ -1019,7 +1019,7 @@ class IslandoraSolrResults {
       
       // create links
       // we're not using l() because of active classes: http://drupal.org/node/41595
-      $list[] = '<a' . drupal_attributes($attr) . '>' . $value . '</a>' . ' (' . $data . ')' .
+      $list[] = '<a' . drupal_attributes($attr) . '>' . check_plain($value) . '</a>' . ' (' . $data . ')' .
           '<span class="plusminus">' .
           '<a' . drupal_attributes($attr_plus) . '>+</a>'
           . ' ' .
