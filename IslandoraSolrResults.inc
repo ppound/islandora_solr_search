@@ -297,7 +297,7 @@ class IslandoraSolrResults {
       // set attributes variable for remove link
       $attr_minus = array();
       // set title
-      $attr_minus['title'] = t('Remove') . ' ' . $query_value;
+      $attr_minus['title'] = t('Remove') . ' ' . check_plain($query_value);
       // set rel
       $attr_minus['rel'] = 'nofollow';      
       // set url
@@ -305,8 +305,8 @@ class IslandoraSolrResults {
       
       // create link
       // we're not using l() because of active classes: http://drupal.org/node/41595
-      $query_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $query_value;
-      
+      $query_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . check_plain($query_value);
+
       // add wrap and list
       $output .= '<div class="islandora_solr_search_query_wrap">';
       $output .= theme_item_list($query_list, t('Query'), "ul", array('class' => 'islandora_solr_search_query_list query_list'));
@@ -375,7 +375,7 @@ class IslandoraSolrResults {
         // set attributes variable for remove link
         $attr_minus = array();
         // set title
-        $attr_minus['title'] = t('Remove') . ' ' . $filter;
+        $attr_minus['title'] = t('Remove') . ' ' . check_plain($filter);
         // set rel
         $attr_minus['rel'] = 'nofollow';      
         // set url
@@ -383,7 +383,7 @@ class IslandoraSolrResults {
 
         // create link
         // we're not using l() because of active classes: http://drupal.org/node/41595
-        $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . $filter_value;
+        $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . check_plain($filter_value);
       }
       // return filter list
       $output .= '<div class="islandora_solr_search_filter_wrap">';
@@ -491,7 +491,7 @@ class IslandoraSolrResults {
         // set attributes variable for remove link
         $attr_x = array();
         // set title
-        $attr_x['title'] = t('Remove') . ' ' . $filter;
+        $attr_x['title'] = t('Remove') . ' ' . check_plain($filter);
         // set rel
         $attr_x['rel'] = 'nofollow';      
         // set url
@@ -499,7 +499,7 @@ class IslandoraSolrResults {
 
         // create links
         // we're not using l() because of active classes: http://drupal.org/node/41595
-        $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $filter_value . '</a>'
+        $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . check_plain($filter_value) . '</a>'
               . '<span class="islandora_solr_search_breadcrumb_super"> <a' . drupal_attributes($attr_x) . '>(' . t('x') . ')</a></span>';
 
       }
@@ -530,7 +530,7 @@ class IslandoraSolrResults {
       // set attributes variable
       $attr = array();
       // set title
-      $attr['title'] = $query_value;
+      $attr['title'] = check_plain($query_value);
       // set rel
       $attr['rel'] = 'nofollow';
       // set url
@@ -539,7 +539,7 @@ class IslandoraSolrResults {
       // set attributes variable for remove link
       $attr_x = array();
       // set title
-      $attr_x['title'] = t('Remove') . ' ' . $query_value;
+      $attr_x['title'] = t('Remove') . ' ' . check_plain($query_value);
       // set rel
       $attr_x['rel'] = 'nofollow';      
       // set url
@@ -569,7 +569,7 @@ class IslandoraSolrResults {
       $query_value = implode(" ", $query_implode);
       // create links
       // we're not using l() because of active classes: http://drupal.org/node/41595
-      $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $query_value . '</a>'
+      $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . check_plain($query_value) . '</a>'
             . '<span class="islandora_solr_search_breadcrumb_super"> <a' . drupal_attributes($attr_x) . '>(' . t('x') . ')</a></span>';
     }
     
