@@ -297,7 +297,7 @@ class IslandoraSolrResults {
       // set attributes variable for remove link
       $attr_minus = array();
       // set title
-      $attr_minus['title'] = t('Remove') . ' ' . check_plain($query_value);
+      $attr_minus['title'] = t('Remove') . ' ' . $query_value;
       // set rel
       $attr_minus['rel'] = 'nofollow';      
       // set url
@@ -375,7 +375,7 @@ class IslandoraSolrResults {
         // set attributes variable for remove link
         $attr_minus = array();
         // set title
-        $attr_minus['title'] = t('Remove') . ' ' . check_plain($filter);
+        $attr_minus['title'] = t('Remove') . ' ' . $filter;
         // set rel
         $attr_minus['rel'] = 'nofollow';      
         // set url
@@ -491,7 +491,7 @@ class IslandoraSolrResults {
         // set attributes variable for remove link
         $attr_x = array();
         // set title
-        $attr_x['title'] = t('Remove') . ' ' . check_plain($filter);
+        $attr_x['title'] = t('Remove') . ' ' . $filter;
         // set rel
         $attr_x['rel'] = 'nofollow';      
         // set url
@@ -530,7 +530,7 @@ class IslandoraSolrResults {
       // set attributes variable
       $attr = array();
       // set title
-      $attr['title'] = check_plain($query_value);
+      $attr['title'] = $query_value;
       // set rel
       $attr['rel'] = 'nofollow';
       // set url
@@ -539,7 +539,7 @@ class IslandoraSolrResults {
       // set attributes variable for remove link
       $attr_x = array();
       // set title
-      $attr_x['title'] = t('Remove') . ' ' . check_plain($query_value);
+      $attr_x['title'] = t('Remove') . ' ' . $query_value;
       // set rel
       $attr_x['rel'] = 'nofollow';      
       // set url
