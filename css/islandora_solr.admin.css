@@ -84,8 +84,18 @@ html.js table span.tabledrag-changed
   display: inline-block;
 }
 
-.form-item .add-item-controls div
+.form-item .add-item-controls div.form-item
 {
   min-width: 400px;
   margin-right: 10px;
+}
+
+.form-item .islandora-solr-solr-field-header
+{
+  width: 35%;
+}
+
+.form-item .islandora-solr-solr-field-render
+{
+  width: 32%;
 }

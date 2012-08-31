@@ -719,7 +719,7 @@ function theme_islandora_solr_admin_fields($variables) {
 
         $row = array();
         $row[] = array('data' => drupal_render($form['terms'][$key]['draggable_handler']), 'class' => 'islandora-solr-multiple-drag');
-        $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_render']));
+        $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_render']), 'class' => 'islandora-solr-solr-field-render');
         $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_label']));
         if ($field_type == 'result_fields') { $row[] = array('data' => drupal_render($form['terms'][$key]['snippet'])); }
         if ($field_type == 'facet_fields') { $row[] = array('data' => drupal_render($form['terms'][$key]['range_facet'])); }
@@ -754,7 +754,7 @@ function theme_islandora_solr_admin_fields($variables) {
   
   // create header array
   $header = array();
-  $header[] = array('data' => t('Solr field'), 'colspan' => 2);
+  $header[] = array('data' => t('Solr field'), 'colspan' => 2, 'class' => 'islandora-solr-solr-field-header');
   $header[] = array('data' => t('Label'));
   if ($field_type == 'result_fields') { $header[] = array('data' => t('Snippet')); }
   if ($field_type == 'facet_fields') { $header[] = array('data' => t('Range facet')); }
