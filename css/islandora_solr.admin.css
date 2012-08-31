@@ -74,3 +74,18 @@ html.js table span.tabledrag-changed
 {
   position: absolute;
 }
+
+
+/* add more controls */
+
+.form-item .add-item-controls div,
+.form-item .add-item-controls input
+{
+  display: inline-block;
+}
+
+.form-item .add-item-controls div
+{
+  min-width: 400px;
+  margin-right: 10px;
+}
