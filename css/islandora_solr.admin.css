@@ -99,3 +99,14 @@ html.js table span.tabledrag-changed
 {
   width: 32%;
 }
+
+.islandora-solr-fields-table
+{
+  margin-bottom: 0px;
+  border-bottom: 0px;
+}
+
+.islandora-solr-table-controls
+{
+  border-top: 0px;
+}

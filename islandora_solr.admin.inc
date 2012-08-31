@@ -736,21 +736,6 @@ function theme_islandora_solr_admin_fields($variables) {
     }
   }
 
-  // add another item
-  $rows[] = array(
-    'data' => array(
-      array('data' => drupal_render($form['add_another_item']), 'colspan' => 10)
-    ),
-    'no_striping' => 1
-  );
-  // add another item form elements
-  $rows[] = array(
-    'data' => array(
-      array('data' => drupal_render($form['add_solr_field']) . drupal_render($form['add_more']), 'colspan' => 10),
-    ),
-    'no_striping' => 1,
-    'class' => array('add-item-controls')
-  );
   
   // create header array
   $header = array();
@@ -761,9 +746,27 @@ function theme_islandora_solr_admin_fields($variables) {
   $header[] = array('data' => t('Weight'));
   $header[] = array('data' => t('Operations'), 'colspan' => 4);
 
+  // Controls table
+  $rows_controls = array();
+  $rows_controls[] = array(
+    'data' => array(
+      array('data' => drupal_render($form['add_another_item']), 'colspan' => 10)
+    ),
+    'no_striping' => 1
+  );
+  // add another item form elements
+  $rows_controls[] = array(
+    'data' => array(
+      array('data' => drupal_render($form['add_solr_field']) . drupal_render($form['add_more']), 'colspan' => 10),
+    ),
+    'no_striping' => 1,
+    'class' => array('add-item-controls')
+  );
+
   // render form
   $output = '';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'islandora-solr-' . $field_type_class)));
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'islandora-solr-' . $field_type_class, 'class' => array('islandora-solr-fields-table'))));
+  $output .= theme('table', array('header' => array(), 'rows' => $rows_controls, 'attributes' => array('class' => array('islandora-solr-table-controls'))));
   $output .= drupal_render_children($form);
 
   // add tabledrag features
