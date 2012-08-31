@@ -110,3 +110,60 @@ html.js table span.tabledrag-changed
 {
   border-top: 0px;
 }
+
+
+
+/* admin dialog */
+
+/* @group Modal dialog box */
+
+.islandora-solr-admin-dialog {
+  /* We need this so the button is visible. */
+  overflow: visible;
+  position: fixed;
+  font-size: small;
+  padding: 0;
+}
+
+.islandora-solr-admin-dialog .ui-dialog-titlebar-close {
+  /* based on Seven */
+  
+  position: absolute;
+  display: block;
+  right: -27px;
+  top: -1px;
+
+  height: 22px;
+  width: 26px;
+  margin: 0;
+  padding: 0;
+
+  -moz-border-radius: 0 10px 12px 0;
+  -webkit-border-radius: 0 10px 12px 0;
+  border-radius: 0 10px 12px 0;
+  border-style: solid;
+  border-width: 1px 1px 1px 0;
+  border-color: #ccc;
+
+  /* Make sure this is in front of the modal backdrop. */
+  z-index: 1002;
+  
+  box-shadow: none;
+
+  background: url("../images/close.png") no-repeat scroll 6px 3px #F3F4EE;
+}
+
+.islandora-solr-admin-dialog .ui-dialog-titlebar
+{
+  
+}
+
+.islandora-solr-admin-dialog .ui-dialog-titlebar-close {
+
+}
+
+.islandora-solr-admin-dialog .ui-dialog-titlebar-close span {
+  display: none;
+}
+
+

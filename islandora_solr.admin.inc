@@ -17,8 +17,9 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
   // add admin form css
   drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
+  drupal_add_library('system','ui.dialog');
   drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
-
+  
   // Solr connect
   // triggering handler is dismax check or no trigger at all (page load)
   if ((isset($form_state['triggering_element']) AND $form_state['triggering_element']['#name'] == 'islandora_solr_url') OR !isset($form_state['triggering_element'])) {
@@ -478,6 +479,20 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#value' => $dismax_allowed,
   );
 
+  
+  // The content of the popup dialog.
+  $form['islandora_solr_admin_dialog'] = array(
+    '#theme_wrappers' => array('container'),
+    '#id' => 'islandora-solr-admin-dialog',
+  );
+  $form['islandora_solr_admin_dialog']['title'] = array(
+    '#markup' => '<h2 id="islandora-solr-admin-dialog-title"></h2>',
+  );
+  $form['islandora_solr_admin_dialog']['body'] = array(
+    '#theme_wrappers' => array('container'),
+    '#id' => 'islandora-solr-admin-dialog-body',
+    '#markup' => t('Default dialog text'),
+  );
 
   // actions
   $form['actions'] = array(
@@ -500,6 +515,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   if (!empty($_POST) && form_get_errors()) {
     drupal_set_message(t('The settings have not been saved because of the errors.'), 'error');
   }
+
 
   return $form;
 }

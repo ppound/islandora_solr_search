@@ -28,7 +28,8 @@
 
         if (!$(this).hasClass('processed')) {
           $('.islandora-solr-configure-link').click(function() {
-            $(this).parent('.islandora-solr-operations').next('td').find('input').trigger('click');
+//            $(this).parent('.islandora-solr-operations').next('td').find('input').trigger('click');
+$('#islandora-solr-admin-dialog').dialog('open');
             return false;
           });
           $(".islandora-solr-configure-link").addClass('processed');
@@ -36,6 +37,37 @@
 
       });
       
+    }
+  };
+
+  // function for the  dialog box
+  Drupal.behaviors.islandoraSolrDialog = {
+    attach: function(context, settings) {
+      
+//      if (!settings.views) {
+//        return;
+//      }
+      // Create a jQuery UI dialog, but leave it closed.
+      var dialog_area = $('#islandora-solr-admin-dialog', context);
+      dialog_area.dialog({
+        'autoOpen': false,
+        'dialogClass': 'islandora-solr-admin-dialog',
+        'modal': true,
+        'position': 'center',
+        'resizable': false,
+        'width': 750,
+        'draggable': false
+      });
+      
+      
+//      $(".example").each(function () {
+//
+//        if (!$(this).hasClass('processed')) {
+//          // stuff
+//          
+//          $(".example").addClass('processed');
+//        }
+//      });
     }
   };
   
