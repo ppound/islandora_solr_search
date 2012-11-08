@@ -493,6 +493,26 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#id' => 'islandora-solr-admin-dialog-body',
     '#markup' => t('Default dialog text'),
   );
+  $form['islandora_solr_admin_dialog']['textfield'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Textfield'),
+    '#default_value' => t('Default value'),
+  );
+  $form['islandora_solr_admin_dialog']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Popup submit'),
+    '#weight' => 5,
+    '#submit' => array('_islandora_solr_admin_settings_submit'),
+    '#validate' => array('_islandora_solr_admin_settings_validate'),
+    '#ajax' => array(
+      'callback' => '_islandora_solr_update_fields',
+      'wrapper' => 'islandora-solr-blahblah',
+      'effect' => 'none',
+      'event' => 'click',
+      'progress' => array('message' => '', 'type' => 'throbber'),
+    ),
+  );
+
 
   // actions
   $form['actions'] = array(
@@ -520,9 +540,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
   return $form;
 }
 
-
-
-
 /**
  * Generates fields for the admin fields table.
  * 
@@ -542,7 +559,11 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
 
   // Ways to populate the fields table
   // 1. Saved values from the DB
-  // 2. Triggered element (Add item or remove or reorder)
+  // 2. Triggered element
+  // 2.a. Add field
+  // 2.b. Remove field
+  // 2.c. Configure field // create form api array to populate dialog
+  // 2.d. Popup submit // call form ajax style: add variables to form_state array and update the table info
 
   // 2. Triggered element (Add item or remove)
   if (isset($form_state['triggering_element']) AND $form_state['triggering_element']['#field_type'] == $field_type) {
@@ -551,14 +572,14 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
     // http://drupal.stackexchange.com/questions/14855/how-do-i-dynamically-fill-a-textfield-with-ajax/16576#16576
     $form_state['values']['islandora_solr_' . $field_type]['terms'] = $form_state['input']['islandora_solr_' . $field_type]['terms'];
     unset($form_state['input']['islandora_solr_' . $field_type]);
-    
-    // add field
+    dsm($form_state);
+    // 2.a add field
     if ($form_state['triggering_element']['#name'] == $field_type . '_add_more') {
       // get new solr field value
       $add_solr_field = $form_state['values']['islandora_solr_' . $field_type]['add_solr_field'];
       $form_state['values']['islandora_solr_' . $field_type]['terms'][] = array('solr_field' => $add_solr_field);
     }
-    // remove field
+    // 2.b. remove field
     if ($form_state['triggering_element']['#value'] == t('Remove')) {
       $field = $form_state['triggering_element']['#field'];
       array_splice($form_state['values']['islandora_solr_' . $field_type]['terms'], $field, 1);
@@ -618,7 +639,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
         '#delta' => $count >= 10 ? $count : 10,
         '#attributes' => array('class' => array('solr-weight-' . $field_type_class)),
       );  
-      if ($field_type == 'facet_fields') {
+      if ($field_type == 'result_fields' OR $field_type == 'sort_fields' OR $field_type == 'facet_fields') { // @TODO: ugly, fix later
         $term['configure'] = array(
           '#type' => 'link',
           '#title' => t('configure'),
@@ -700,9 +721,6 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   );
 }
 
-
-
-
 /**
  * Theme function to create an admin table for result fields
  * @param array $variables
@@ -740,7 +758,7 @@ function theme_islandora_solr_admin_fields($variables) {
         if ($field_type == 'result_fields') { $row[] = array('data' => drupal_render($form['terms'][$key]['snippet'])); }
         if ($field_type == 'facet_fields') { $row[] = array('data' => drupal_render($form['terms'][$key]['range_facet'])); }
         $row[] = array('data' => drupal_render($form['terms'][$key]['weight']));
-        if ($field_type == 'facet_fields') {
+        if ($field_type == 'result_fields' OR $field_type == 'sort_fields' OR $field_type == 'facet_fields') { // @TODO: this is ugly, remove later
           $row[] = array('data' => drupal_render($form['terms'][$key]['configure']), 'class' => 'islandora-solr-operations');
           $row[] = array('data' => drupal_render($form['terms'][$key]['configure_button']), 'class' => 'islandora-solr-operations islandora-solr-operations-hidden');
         }
@@ -790,8 +808,6 @@ function theme_islandora_solr_admin_fields($variables) {
 
   return $output;
 }
-
-
 
 /**
  * Theme function for the admin primary display table
@@ -853,8 +869,6 @@ function theme_islandora_solr_admin_primary_display($variables) {
 
   return $output;
 }
-
-
 
 /**
  * Form validator
@@ -939,10 +953,6 @@ function _islandora_solr_admin_settings_submit($form, &$form_state) {
   drupal_theme_rebuild();
 }
 
-
-
-
-
 /**
  * Get available handlers
  *
@@ -1001,11 +1011,6 @@ function _islandora_solr_admin_refresh($form, &$form_state) {
   form_execute_handlers('submit', $form, $form_state);
   $form_state['rebuild'] = TRUE;
 }
-
-
-
-
-
 
 /**
  * Checks for dismax
@@ -1097,6 +1102,56 @@ function _islandora_solr_update_fields($form, &$form_state) {
       break;
     default:
       break;
-    
   }
 }
+
+
+
+function islandora_solr_admin_settings_field($form_id = NULL, $ajax = NULL) {
+  
+  $variables = array('textfield' => 'Default value');
+  
+  if (!empty($form_id)) {
+    switch ($form_id) {
+      case 'result_field':
+        $form_callback = 'islandora_solr_admin_settings_result_field'; // result field
+        break;
+      case 'sort_field':
+        $form_callback = 'islandora_solr_admin_settings_sort_field'; // sort field
+        break;
+      case 'facet_field':
+        $form_callback = 'islandora_solr_admin_settings_facet_field'; // facet field
+        break;
+      case 'search_field':
+        $form_callback = 'islandora_solr_admin_settings_search_field'; // search field
+        break;
+      default:
+        $form_callback = NULL;
+        break;
+    }
+    if ($form_callback !== NULL) {
+      $form = drupal_get_form($form_callback, $variables);
+      if ($ajax == 'ajax') {
+        echo render($form);
+        drupal_exit();
+      }
+      return $form;
+    }
+  }
+  return '';
+}
+
+
+function islandora_solr_admin_settings_facet_field($form, &$form_state, $variables) {
+
+  $form = array();
+  $form['textfield'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Textfield'),
+    '#default_value' => $variables['textfield'],
+  );
+  return $form;
+}
+
+
+

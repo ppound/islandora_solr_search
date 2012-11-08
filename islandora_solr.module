@@ -67,6 +67,15 @@ function islandora_solr_menu() {
     'file' => 'islandora_solr.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
+  $items['islandora_solr/field'] = array(
+    'title' => 'Result field',
+    'description' => 'Configuration for result field',
+    'page callback' => 'islandora_solr_admin_settings_field',
+    'page arguments' => array(2, 3),
+    'access arguments' => array('administer islandora solr'),
+    'file' => 'islandora_solr.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
   $items['islandora_solr/autocomplete_luke'] = array(
     'title' => 'Islandora Solr Luke autocomplete',
     'description' => t('Autocomplete callback to populate solr text fields.'),

@@ -2,21 +2,30 @@
 TODO:
 =====
 
+Sprint 6
+--------
+
+- populate popup with forms
+- pass values from form to popup
+- pass values from popup back to form
+- save the form variables in a DB table
+- in the rest of the module change how we get variables
+
+- clean up table headers
+
+
+admin/islandora/search/islandora_solr/result_fields?ajax
+admin/islandora/search/islandora_solr/sort_fields
+admin/islandora/search/islandora_solr/facet_fields
+admin/islandora/search/islandora_solr/search_fields
+
+
 High priority
 -------------
 
-- tabledrag should update the table with ajax.
-
-- update README.txt
-- update hook_help functions
 - check if islandora_solr.install is doing the right things.
-- add a check to see if the context is the search results page. Currently we
-check if IslandoraSolrQueryProcessor::display is set, which is not ideal.
-
 - processor object alter call in executeQuery() might conflict with 2nd query calls from the variable date range gap functionality.
-
 - we could save us some code by storing the primary display settings in a DB table
-
 - add luke check for date fields (breaks if not)
 - more user friendly controls + advanced option
 - settings per date field (now same settings for all fields)
@@ -25,6 +34,9 @@ check if IslandoraSolrQueryProcessor::display is set, which is not ideal.
 Normal Priority
 ---------------
 
+- add a check to see if the context is the search results page. Currently we
+check if IslandoraSolrQueryProcessor::display is set, which is not ideal.
+- update hook_help functions
 - add a parameter to the luke function to return a single document.
 - check if spaces could be replaced by + or %20 , which would simplify some functions (splitting strings)
 http://wiki.apache.org/solr/CommonQueryParameters#sort
@@ -38,6 +50,8 @@ http://wiki.apache.org/solr/CommonQueryParameters#sort
 Low Priority
 ------------
 
+- update README.txt
+- tabledrag should update the table with ajax.
 - hook_alter instead of module invoke all for object manipulation
 - provide integration with display suite
 - expose result limit controls

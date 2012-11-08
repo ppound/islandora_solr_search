@@ -18,7 +18,8 @@ html.js .refresh-button {
 
 html.js .islandora-solr-operations-hidden
 {
-  width: 20px;
+  width: 1px;
+  padding: 0; 
 }
 
 /* autocomplete styling */
