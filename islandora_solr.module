@@ -13,7 +13,6 @@
  */
 function islandora_solr_init() {
   // include inc files
-  module_load_include('inc', 'islandora_solr', 'islandora_solr.admin');
   module_load_include('inc', 'islandora_solr', 'islandora_solr.block');
   module_load_include('inc', 'islandora_solr', 'includes/common');
 

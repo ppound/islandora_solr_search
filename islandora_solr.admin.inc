@@ -243,7 +243,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   
   // create terms/fields
-  islandora_solr_admin_settings_fields(&$form_state, $terms, 'result_fields');
+  islandora_solr_admin_settings_fields($form_state, $terms, 'result_fields');
 
   // result fields
   $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_result_fields'] = $terms;
@@ -287,7 +287,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   
   // create terms/fields
-  islandora_solr_admin_settings_fields(&$form_state, $sort_terms, 'sort_fields');
+  islandora_solr_admin_settings_fields($form_state, $sort_terms, 'sort_fields');
 
   // sort fields
   $form['islandora_solr_tabs']['sort']['islandora_solr_sort_fields'] = $sort_terms;
@@ -317,7 +317,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   
   // create terms/fields
-  islandora_solr_admin_settings_fields(&$form_state, $facet_terms, 'facet_fields');
+  islandora_solr_admin_settings_fields($form_state, $facet_terms, 'facet_fields');
 
   // facet fields
   $form['islandora_solr_tabs']['facet_settings']['islandora_solr_facet_fields'] = $facet_terms;
@@ -408,7 +408,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   
   // create terms/fields
-  islandora_solr_admin_settings_fields(&$form_state, $search_terms, 'search_fields');
+  islandora_solr_admin_settings_fields($form_state, $search_terms, 'search_fields');
 
   // search fields
   $form['islandora_solr_tabs']['advanced_search_block']['islandora_solr_search_fields'] = $search_terms;
