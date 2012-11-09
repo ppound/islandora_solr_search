@@ -156,7 +156,22 @@ html.js table span.tabledrag-changed
 
 .islandora-solr-admin-dialog .ui-dialog-titlebar
 {
-  
+  padding: 0;
+}
+
+.islandora-solr-admin-dialog .ui-dialog-content
+{
+  padding: 0;
+}
+
+.islandora-solr-admin-dialog .ui-dialog-title
+{
+  display: none;
+}
+
+.islandora-solr-admin-dialog .ui-helper-clearfix:after
+{
+  display: none;
 }
 
 .islandora-solr-admin-dialog .ui-dialog-titlebar-close {

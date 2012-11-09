@@ -479,11 +479,14 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#value' => $dismax_allowed,
   );
 
-  
+
+
+
   // The content of the popup dialog.
   $form['islandora_solr_admin_dialog'] = array(
     '#theme_wrappers' => array('container'),
     '#id' => 'islandora-solr-admin-dialog',
+    '#weight' => 50,
   );
   $form['islandora_solr_admin_dialog']['title'] = array(
     '#markup' => '<h2 id="islandora-solr-admin-dialog-title"></h2>',
@@ -493,25 +496,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#id' => 'islandora-solr-admin-dialog-body',
     '#markup' => t('Default dialog text'),
   );
-  $form['islandora_solr_admin_dialog']['textfield'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Textfield'),
-    '#default_value' => t('Default value'),
-  );
-  $form['islandora_solr_admin_dialog']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Popup submit'),
-    '#weight' => 5,
-    '#submit' => array('_islandora_solr_admin_settings_submit'),
-    '#validate' => array('_islandora_solr_admin_settings_validate'),
-    '#ajax' => array(
-      'callback' => '_islandora_solr_update_fields',
-      'wrapper' => 'islandora-solr-blahblah',
-      'effect' => 'none',
-      'event' => 'click',
-      'progress' => array('message' => '', 'type' => 'throbber'),
-    ),
-  );
+
 
 
   // actions
@@ -565,6 +550,8 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   // 2.c. Configure field // create form api array to populate dialog
   // 2.d. Popup submit // call form ajax style: add variables to form_state array and update the table info
 
+  // @TODO: 1. Saved values from the DB
+
   // 2. Triggered element (Add item or remove)
   if (isset($form_state['triggering_element']) AND $form_state['triggering_element']['#field_type'] == $field_type) {
 
@@ -572,7 +559,8 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
     // http://drupal.stackexchange.com/questions/14855/how-do-i-dynamically-fill-a-textfield-with-ajax/16576#16576
     $form_state['values']['islandora_solr_' . $field_type]['terms'] = $form_state['input']['islandora_solr_' . $field_type]['terms'];
     unset($form_state['input']['islandora_solr_' . $field_type]);
-    dsm($form_state);
+
+
     // 2.a add field
     if ($form_state['triggering_element']['#name'] == $field_type . '_add_more') {
       // get new solr field value
@@ -584,6 +572,23 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
       $field = $form_state['triggering_element']['#field'];
       array_splice($form_state['values']['islandora_solr_' . $field_type]['terms'], $field, 1);
     }
+    // 2.c. configure field
+    if ($form_state['triggering_element']['#value'] == t('Configure')) {
+      $field = $form_state['triggering_element']['#field'];
+      //array_splice($form_state['values']['islandora_solr_' . $field_type]['terms'], $field, 1);
+//      dsm('configure');
+//      dsm($form_state['values']['islandora_solr_' . $field_type]['terms']);
+      $values = $form_state['values']['islandora_solr_' . $field_type]['terms'][$field];
+      $form_state['dialog'] = array(
+        'field_type' => $field_type,
+        'default_values' => array(
+          'field' => $field,
+        ),
+        'values' => $values,
+      );
+
+    }
+    // @TODO: 2.d. Popup submit
   }
 
   // assign values to array
@@ -656,7 +661,8 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
           '#submit' => array('_islandora_solr_update_fields_submit'),
           '#name' => $field_type . '_configure_' . $key,
           '#ajax' => array(
-            'callback' => '_islandora_solr_update_fields',
+/*             'callback' => '_islandora_solr_update_fields', */
+            'callback' => '_islandora_solr_admin_settings_field_configure',
             'wrapper' => 'islandora-solr-' . $field_type_class . '-wrapper',
             'effect' => 'none',
             'event' => 'click',
@@ -1106,7 +1112,33 @@ function _islandora_solr_update_fields($form, &$form_state) {
 }
 
 
+function _islandora_solr_admin_settings_field_configure($form, &$form_state) {
+  $commands = array();
+  // open dialog
+  $commands[] = ajax_command_invoke('#islandora-solr-admin-dialog', 'dialog', array('open'));
+  // dialog title
+  $title = t('Configure field:') . ' ' . $form_state['dialog']['values']['solr_field'];
+  $commands[] = ajax_command_invoke('#islandora-solr-admin-dialog-title', 'html', array($title));
+  // dialog body
+  
+  $body = drupal_render(drupal_get_form('islandora_solr_admin_settings_result_field', $form_state['dialog'])); // @TODO: make flexible
+  
+  $commands[] = ajax_command_invoke('#islandora-solr-admin-dialog-body', 'html', array($body));
 
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+
+function _islandora_solr_admin_settings_dialog($form, &$form_state) {
+
+  $commands = array();
+  // close dialog
+  $commands[] = ajax_command_invoke('#islandora-solr-admin-dialog', 'dialog', array('close'));
+
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/*
 function islandora_solr_admin_settings_field($form_id = NULL, $ajax = NULL) {
   
   $variables = array('textfield' => 'Default value');
@@ -1131,6 +1163,9 @@ function islandora_solr_admin_settings_field($form_id = NULL, $ajax = NULL) {
     }
     if ($form_callback !== NULL) {
       $form = drupal_get_form($form_callback, $variables);
+      
+      // use drupal_build_form($form_id, $form_state), to also pass form state?
+      
       if ($ajax == 'ajax') {
         echo render($form);
         drupal_exit();
@@ -1140,18 +1175,54 @@ function islandora_solr_admin_settings_field($form_id = NULL, $ajax = NULL) {
   }
   return '';
 }
-
-
-function islandora_solr_admin_settings_facet_field($form, &$form_state, $variables) {
+*/
+// @TODO: make flexible
+function islandora_solr_admin_settings_result_field($form, &$form_state, $variables) {
+  // include this file in build_info
+  form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
 
   $form = array();
-  $form['textfield'] = array(
+  $form['result'] = array(
+    '#theme_wrappers' => array('container'),
+    '#id' => 'example-wrapper',
+  );
+  $form['wrapper']['textfield'] = array(
     '#type' => 'textfield',
     '#title' => t('Textfield'),
-    '#default_value' => $variables['textfield'],
+    '#default_value' => $variables['values']['solr_field'],
   );
+  $form['wrapper']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Popup submit'),
+    '#weight' => 5,
+    '#field' => 'popup_submit',
+    '#field_type' => 'result_fields', // result_fields
+    '#name' => 'result-fields-popup-submit',
+    '#id' => 'blahblah-submit',
+    '#submit' => array('_islandora_solr_update_fields_submit'),
+    '#ajax' => array(
+      'callback' => '_islandora_solr_admin_settings_dialog', // _islandora_solr_admin_settings_dialog // _islandora_solr_update_fields
+      'wrapper' => 'example-wrapper', // 'wrapper' => 'islandora-solr-' . $field_type_class . '-wrapper',
+      'effect' => 'none',
+      'event' => 'click',
+      'progress' => array('message' => '', 'type' => 'throbber'),
+    ),
+  );
+
   return $form;
 }
 
 
 
+
+/*
+  drupal_add_js('(function ($) { jQuery(document).ready(function () {
+    $('#islandora-solr-admin-dialog').dialog('open');
+    $('#islandora-solr-admin-dialog-body').load('http://192.168.56.195/drupal7/islandora_solr/field/facet_field/ajax');
+  }); })(jQuery);',
+    array(
+      'type' => 'inline',
+      'scope' => 'footer'
+    )
+  );
+*/

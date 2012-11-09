@@ -29,20 +29,7 @@
           });
           $(".islandora-solr-configure-link").addClass('processed');
         }
-/*
-        if (!$(this).hasClass('processed')) {
-          $('.islandora-solr-configure-link').click(function() {
-//            $(this).parent('.islandora-solr-operations').next('td').find('input').trigger('click');
-          $('#islandora-solr-admin-dialog').dialog('open');
-          //$('#islandora-solr-admin-dialog-body').load('http://192.168.56.195/drupal7/islandora_solr/field/facet_field/ajax');
-            return false;
-          });
-          $(".islandora-solr-configure-link").addClass('processed');
-        }
-*/
-
       });
-      
     }
   };
 

@@ -5,14 +5,18 @@ TODO:
 Sprint 6
 --------
 
-- populate popup with forms
-- pass values from form to popup
+- populate popup with forms, including (default) values
 - pass values from popup back to form
+
+- create all forms and apply to configure callbacks (includes permissions by role)
+
 - save the form variables in a DB table
 - in the rest of the module change how we get variables
 
+- theme popup / make resizable /
 - clean up table headers
 
+- clean up code
 
 admin/islandora/search/islandora_solr/result_fields?ajax
 admin/islandora/search/islandora_solr/sort_fields
