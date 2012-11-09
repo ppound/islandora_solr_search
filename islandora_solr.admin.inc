@@ -1130,7 +1130,7 @@ function _islandora_solr_admin_settings_field_configure($form, &$form_state) {
 
 
 function _islandora_solr_admin_settings_dialog($form, &$form_state) {
-
+dsm($form_state);
   $commands = array();
   // close dialog
   $commands[] = ajax_command_invoke('#islandora-solr-admin-dialog', 'dialog', array('close'));
@@ -1198,7 +1198,6 @@ function islandora_solr_admin_settings_result_field($form, &$form_state, $variab
     '#field' => 'popup_submit',
     '#field_type' => 'result_fields', // result_fields
     '#name' => 'result-fields-popup-submit',
-    '#id' => 'blahblah-submit',
     '#submit' => array('_islandora_solr_update_fields_submit'),
     '#ajax' => array(
       'callback' => '_islandora_solr_admin_settings_dialog', // _islandora_solr_admin_settings_dialog // _islandora_solr_update_fields

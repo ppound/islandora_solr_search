@@ -36,10 +36,6 @@
   // function for the  dialog box
   Drupal.behaviors.islandoraSolrDialog = {
     attach: function(context, settings) {
-      
-//      if (!settings.views) {
-//        return;
-//      }
       // Create a jQuery UI dialog, but leave it closed.
       var dialog_area = $('#islandora-solr-admin-dialog', context);
       dialog_area.dialog({
@@ -51,17 +47,6 @@
         'width': 750,
         'draggable': false
       });
-      
-      
-//      $(".example").each(function () {
-//
-//        if (!$(this).hasClass('processed')) {
-//          // stuff
-//          
-//          $(".example").addClass('processed');
-//        }
-//      });
     }
   };
-  
 })(jQuery);
