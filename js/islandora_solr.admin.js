@@ -56,11 +56,8 @@
   $.fn.islandoraSolrDialogValues = function(data) {
     // dialog ajax id
     var dialogAjaxId = data.id;
-    // loop through values and add them to ajax settings
-    // @TODO: make possible to create a deeper nested array. Nested arrays get lost in conversion to php array somehow.
-    for (var key in data.values) {
-      Drupal.ajax[dialogAjaxId].options.data['_dialog_values[' + key + ']'] = data.values[key];
-    }
+    // add values as JSON, so we can pass multi dimensional arrays
+    Drupal.ajax[dialogAjaxId].options.data._dialog_values = JSON.stringify(data.values);
 	};
   
 })(jQuery);

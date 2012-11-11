@@ -18,6 +18,8 @@ Sprint 6
 
 - clean up code
 
+- add ajax_command_changed() to the vertical tabs to show something has changed.
+
 admin/islandora/search/islandora_solr/result_fields?ajax
 admin/islandora/search/islandora_solr/sort_fields
 admin/islandora/search/islandora_solr/facet_fields

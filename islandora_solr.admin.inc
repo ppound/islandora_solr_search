@@ -591,6 +591,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
     // @TODO: 2.d. Dialog submit
     if ($form_state['triggering_element']['#value'] == t('Dialog')) {
 //      dsm('Dialog');
+      $form_state['input']['_dialog_values'] = json_decode($form_state['input']['_dialog_values'], TRUE);
 //      dsm($form_state);
     }
   }
@@ -1170,6 +1171,8 @@ function _islandora_solr_admin_settings_dialog($form, &$form_state) {
 
   // trigger dialog button
   $commands[] = ajax_command_invoke('#' . $dialog_id, 'trigger', array('click'));
+
+  $commands[] = ajax_command_data('#' . $dialog_id, 'datatest', 'datatestvalue');
 
   return array('#type' => 'ajax', '#commands' => $commands);
 }
