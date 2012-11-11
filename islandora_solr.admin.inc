@@ -548,7 +548,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   // 2.a. Add field
   // 2.b. Remove field
   // 2.c. Configure field // create form api array to populate dialog
-  // 2.d. Popup submit // call form ajax style: add variables to form_state array and update the table info
+  // 2.d. Dialog submit // call form ajax style: add variables to form_state array and update the table info
 
   // @TODO: 1. Saved values from the DB
 
@@ -588,7 +588,11 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
       );
 
     }
-    // @TODO: 2.d. Popup submit
+    // @TODO: 2.d. Dialog submit
+    if ($form_state['triggering_element']['#value'] == t('Dialog')) {
+//      dsm('Dialog');
+//      dsm($form_state);
+    }
   }
 
   // assign values to array
@@ -693,6 +697,23 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
           'progress' => array('message' => '', 'type' => 'throbber'),
         ),
       );
+      $term['dialog_button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Dialog'),
+  //      '#name' => $field_type . '_remove',
+        '#field' => $key,
+        '#field_type' => $field_type,
+        '#attributes' => array('class' => array('islandora-solr-dialog-submit')),
+        '#submit' => array('_islandora_solr_update_fields_submit'),
+        '#name' => $field_type . '_dialog_' . $key,
+        '#ajax' => array(
+          'callback' => '_islandora_solr_update_fields',
+          'wrapper' => 'islandora-solr-' . $field_type_class . '-wrapper',
+          'effect' => 'none',
+          'event' => 'click',
+          'progress' => array('message' => '', 'type' => 'throbber'),
+        ),
+      );
       $terms['terms'][] = $term;
     }
   }
@@ -770,6 +791,7 @@ function theme_islandora_solr_admin_fields($variables) {
         }
         $row[] = array('data' => drupal_render($form['terms'][$key]['remove']), 'class' => 'islandora-solr-operations');
         $row[] = array('data' => drupal_render($form['terms'][$key]['remove_button']), 'class' => 'islandora-solr-operations islandora-solr-operations-hidden');
+        $row[] = array('data' => drupal_render($form['terms'][$key]['dialog_button']), 'class' => 'islandora-solr-operations'); // @TODO: add class to hide
         // add to rows
         $rows[] = array('data' => $row, 'class' => array('draggable'));
       }
@@ -1130,10 +1152,24 @@ function _islandora_solr_admin_settings_field_configure($form, &$form_state) {
 
 
 function _islandora_solr_admin_settings_dialog($form, &$form_state) {
-dsm($form_state);
+
+  $dialog_id = 'edit-islandora-solr-result-fields-terms-0-dialog-button';
+
   $commands = array();
   // close dialog
   $commands[] = ajax_command_invoke('#islandora-solr-admin-dialog', 'dialog', array('close'));
+
+  // Call function which attaches the dialog form values to Drupal.ajax.{dialog-button-id}.options.data.
+  // After triggering the dialog ajax callback, the dialog values will be added to the $form_state of
+  // the main form
+  $data = array(
+    'id' => $dialog_id,
+    'values' => $form_state['input'],
+  );
+  $commands[] = ajax_command_invoke(NULL, 'islandoraSolrDialogValues', array($data));
+
+  // trigger dialog button
+  $commands[] = ajax_command_invoke('#' . $dialog_id, 'trigger', array('click'));
 
   return array('#type' => 'ajax', '#commands' => $commands);
 }

@@ -49,4 +49,18 @@
       });
     }
   };
+  
+  // Add dialog form values to the drupal ajax settings
+  // @see http://drupal.org/node/1028410#comment-4301262
+  // @TODO: check if this might be a better approach: http://drupal.stackexchange.com/questions/9920/how-to-extend-or-hook-drupal-form-ajax/10191#10191
+  $.fn.islandoraSolrDialogValues = function(data) {
+    // dialog ajax id
+    var dialogAjaxId = data.id;
+    // loop through values and add them to ajax settings
+    // @TODO: make possible to create a deeper nested array. Nested arrays get lost in conversion to php array somehow.
+    for (var key in data.values) {
+      Drupal.ajax[dialogAjaxId].options.data['_dialog_values[' + key + ']'] = data.values[key];
+    }
+	};
+  
 })(jQuery);
