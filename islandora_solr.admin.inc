@@ -538,7 +538,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
  *   An identifier for the field table which is being created.
  */
 function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type) {
-  
+
   // set variables
   $field_type_class = str_replace('_', '-', $field_type);
 
@@ -575,24 +575,20 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
     // 2.c. configure field
     if ($form_state['triggering_element']['#value'] == t('Configure')) {
       $field = $form_state['triggering_element']['#field'];
-      //array_splice($form_state['values']['islandora_solr_' . $field_type]['terms'], $field, 1);
-//      dsm('configure');
-//      dsm($form_state['values']['islandora_solr_' . $field_type]['terms']);
+//dsm($form_state);
+//dsm($form);
       $values = $form_state['values']['islandora_solr_' . $field_type]['terms'][$field];
+      $dialog_id = 'edit-islandora-solr-' . $field_type_class . '-terms-' . $field . '-dialog-button';
       $form_state['dialog'] = array(
         'field_type' => $field_type,
-        'default_values' => array(
-          'field' => $field,
-        ),
+        'dialog_id' => $dialog_id,
         'values' => $values,
       );
-
     }
-    // @TODO: 2.d. Dialog submit
+    // 2.d. Dialog submit
     if ($form_state['triggering_element']['#value'] == t('Dialog')) {
-//      dsm('Dialog');
       $form_state['input']['_dialog_values'] = json_decode($form_state['input']['_dialog_values'], TRUE);
-//      dsm($form_state);
+//dsm($form_state);
     }
   }
 
@@ -665,9 +661,10 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
           '#attributes' => array('class' => array('islandora-solr-configure-submit')),
           '#submit' => array('_islandora_solr_update_fields_submit'),
           '#name' => $field_type . '_configure_' . $key,
+          '#id' => 'edit-islandora-solr-' . $field_type_class . '-terms-' . $key . '-configure-button',
           '#ajax' => array(
-/*             'callback' => '_islandora_solr_update_fields', */
             'callback' => '_islandora_solr_admin_settings_field_configure',
+/*             'callback' => '_islandora_solr_update_fields', // */
             'wrapper' => 'islandora-solr-' . $field_type_class . '-wrapper',
             'effect' => 'none',
             'event' => 'click',
@@ -690,6 +687,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
         '#attributes' => array('class' => array('islandora-solr-remove-submit')),
         '#submit' => array('_islandora_solr_update_fields_submit'),
         '#name' => $field_type . '_remove_' . $key,
+        '#id' => 'edit-islandora-solr-' . $field_type_class . '-terms-' . $key . '-remove-button',
         '#ajax' => array(
           'callback' => '_islandora_solr_update_fields',
           'wrapper' => 'islandora-solr-' . $field_type_class . '-wrapper',
@@ -707,6 +705,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
         '#attributes' => array('class' => array('islandora-solr-dialog-submit')),
         '#submit' => array('_islandora_solr_update_fields_submit'),
         '#name' => $field_type . '_dialog_' . $key,
+        '#id' => 'edit-islandora-solr-' . $field_type_class . '-terms-' . $key . '-dialog-button',
         '#ajax' => array(
           'callback' => '_islandora_solr_update_fields',
           'wrapper' => 'islandora-solr-' . $field_type_class . '-wrapper',
@@ -740,6 +739,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
     '#submit' => array('_islandora_solr_update_fields_submit'),
     '#name' => $field_type . '_add_more',
     '#field_type' => $field_type,
+    '#id' => 'edit-islandora-solr-' . $field_type_class . '-add-more',
     '#ajax' => array(
       'callback' => '_islandora_solr_update_fields',
       'wrapper' => 'islandora-solr-' . $field_type_class . '-wrapper',
@@ -1136,16 +1136,20 @@ function _islandora_solr_update_fields($form, &$form_state) {
 
 
 function _islandora_solr_admin_settings_field_configure($form, &$form_state) {
+  // set variables
+  $variables = $form_state['dialog'];
+  $field_type = $form_state['dialog']['field_type'];
+  $solr_field = $form_state['dialog']['values']['solr_field'];
+  $form_function = _islandora_solr_admin_get_form_function($field_type);
+
   $commands = array();
   // open dialog
   $commands[] = ajax_command_invoke('#islandora-solr-admin-dialog', 'dialog', array('open'));
   // dialog title
-  $title = t('Configure field:') . ' ' . $form_state['dialog']['values']['solr_field'];
+  $title = t('Configure field:') . ' ' . $solr_field;
   $commands[] = ajax_command_invoke('#islandora-solr-admin-dialog-title', 'html', array($title));
   // dialog body
-  
-  $body = drupal_render(drupal_get_form('islandora_solr_admin_settings_result_field', $form_state['dialog'])); // @TODO: make flexible
-  
+  $body = drupal_render(drupal_get_form($form_function, $variables));
   $commands[] = ajax_command_invoke('#islandora-solr-admin-dialog-body', 'html', array($body));
 
   return array('#type' => 'ajax', '#commands' => $commands);
@@ -1154,7 +1158,7 @@ function _islandora_solr_admin_settings_field_configure($form, &$form_state) {
 
 function _islandora_solr_admin_settings_dialog($form, &$form_state) {
 
-  $dialog_id = 'edit-islandora-solr-result-fields-terms-0-dialog-button';
+  $dialog_id = $form_state['dialog']['dialog_id'];
 
   $commands = array();
   // close dialog
@@ -1172,39 +1176,17 @@ function _islandora_solr_admin_settings_dialog($form, &$form_state) {
   // trigger dialog button
   $commands[] = ajax_command_invoke('#' . $dialog_id, 'trigger', array('click'));
 
-  $commands[] = ajax_command_data('#' . $dialog_id, 'datatest', 'datatestvalue');
-
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 /*
-function islandora_solr_admin_settings_field($form_id = NULL, $ajax = NULL) {
+function islandora_solr_admin_settings_field($field_type = NULL, $ajax = NULL) {
   
   $variables = array('textfield' => 'Default value');
   
-  if (!empty($form_id)) {
-    switch ($form_id) {
-      case 'result_field':
-        $form_callback = 'islandora_solr_admin_settings_result_field'; // result field
-        break;
-      case 'sort_field':
-        $form_callback = 'islandora_solr_admin_settings_sort_field'; // sort field
-        break;
-      case 'facet_field':
-        $form_callback = 'islandora_solr_admin_settings_facet_field'; // facet field
-        break;
-      case 'search_field':
-        $form_callback = 'islandora_solr_admin_settings_search_field'; // search field
-        break;
-      default:
-        $form_callback = NULL;
-        break;
-    }
-    if ($form_callback !== NULL) {
+  $form_callback = _islandora_solr_admin_get_form_function($field_type);
+    if ($form_callback) {
       $form = drupal_get_form($form_callback, $variables);
-      
-      // use drupal_build_form($form_id, $form_state), to also pass form state?
-      
       if ($ajax == 'ajax') {
         echo render($form);
         drupal_exit();
@@ -1215,10 +1197,37 @@ function islandora_solr_admin_settings_field($form_id = NULL, $ajax = NULL) {
   return '';
 }
 */
+
+function _islandora_solr_admin_get_form_function($field_type = NULL) {
+  if (!empty($field_type)) {
+    switch ($field_type) {
+      case 'result_fields':
+        $form_callback = '_islandora_solr_admin_settings_result_field'; // result field
+        break;
+      case 'sort_fields':
+        $form_callback = '_islandora_solr_admin_settings_sort_field'; // sort field
+        break;
+      case 'facet_fields':
+        $form_callback = '_islandora_solr_admin_settings_facet_field'; // facet field
+        break;
+      case 'search_fields':
+        $form_callback = '_islandora_solr_admin_settings_search_field'; // search field
+        break;
+      default:
+        return FALSE;
+        break;
+    }
+    return $form_callback;
+  }
+  return FALSE;
+}
+
 // @TODO: make flexible
-function islandora_solr_admin_settings_result_field($form, &$form_state, $variables) {
+function _islandora_solr_admin_settings_result_field($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
+
+  $form_state['dialog'] = $variables;
 
   $form = array();
   $form['result'] = array(
