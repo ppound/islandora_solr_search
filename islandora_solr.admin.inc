@@ -462,9 +462,15 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#wysiwyg' => FALSE,
   );
 
-
+  // more
+  $form['islandora_solr_tabs']['other'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Other'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
   // debug mode
-  $form['islandora_solr_debug_mode'] = array(
+  $form['islandora_solr_tabs']['other']['islandora_solr_debug_mode'] = array(
     '#type' => 'checkbox',
     '#title' => t('Debug mode?'),
     '#return_value' => 1,
@@ -622,30 +628,12 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
         '#type' => 'hidden',
         '#value' => isset($value['solr_field']) ? $value['solr_field'] : '',
       );
-      $term['solr_field_label'] = array(
-        '#type' => 'textfield',
-        '#size' => 10,
-        '#default_value' => isset($value['solr_field_label']) ? $value['solr_field_label'] : '',
-      );
-      if ($field_type == 'result_fields') {
-        $term['snippet'] = array(
-          '#type' => 'checkbox',
-          '#default_value' => isset($value['snippet']) ? $value['snippet'] : '',
-        );
-      }
-      if ($field_type == 'facet_fields') {
-        $term['range_facet'] = array(
-          '#type' => 'checkbox',
-          '#default_value' => isset($value['range_facet']) ? $value['range_facet'] : '',
-        );
-      }
       $term['weight'] = array(
         '#type' => 'weight',
         '#default_value' => isset($value['weight']) ? $value['weight'] : $key,
         '#delta' => $count >= 10 ? $count : 10,
         '#attributes' => array('class' => array('solr-weight-' . $field_type_class)),
       );  
-      if ($field_type == 'result_fields' OR $field_type == 'sort_fields' OR $field_type == 'facet_fields') { // @TODO: ugly, fix later
         $term['configure'] = array(
           '#type' => 'link',
           '#title' => t('configure'),
@@ -671,7 +659,6 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
             'progress' => array('message' => '', 'type' => 'throbber'),
           ),
         );
-      }
       $term['remove'] = array(
         '#type' => 'link',
         '#title' => t('remove'),
@@ -782,17 +769,13 @@ function theme_islandora_solr_admin_fields($variables) {
         $row = array();
         $row[] = array('data' => drupal_render($form['terms'][$key]['draggable_handler']), 'class' => 'islandora-solr-multiple-drag');
         $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_render']), 'class' => 'islandora-solr-solr-field-render');
-        $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_label']));
-        if ($field_type == 'result_fields') { $row[] = array('data' => drupal_render($form['terms'][$key]['snippet'])); }
-        if ($field_type == 'facet_fields') { $row[] = array('data' => drupal_render($form['terms'][$key]['range_facet'])); }
+        $row[] = array('data' => 'render settings here', 'class' => 'islandora-solr-settings-render');
         $row[] = array('data' => drupal_render($form['terms'][$key]['weight']));
-        if ($field_type == 'result_fields' OR $field_type == 'sort_fields' OR $field_type == 'facet_fields') { // @TODO: this is ugly, remove later
-          $row[] = array('data' => drupal_render($form['terms'][$key]['configure']), 'class' => 'islandora-solr-operations');
-          $row[] = array('data' => drupal_render($form['terms'][$key]['configure_button']), 'class' => 'islandora-solr-operations islandora-solr-operations-hidden');
-        }
+        $row[] = array('data' => drupal_render($form['terms'][$key]['configure']), 'class' => 'islandora-solr-operations');
+        $row[] = array('data' => drupal_render($form['terms'][$key]['configure_button']), 'class' => 'islandora-solr-operations islandora-solr-operations-hidden');
         $row[] = array('data' => drupal_render($form['terms'][$key]['remove']), 'class' => 'islandora-solr-operations');
         $row[] = array('data' => drupal_render($form['terms'][$key]['remove_button']), 'class' => 'islandora-solr-operations islandora-solr-operations-hidden');
-        $row[] = array('data' => drupal_render($form['terms'][$key]['dialog_button']), 'class' => 'islandora-solr-operations'); // @TODO: add class to hide
+        $row[] = array('data' => drupal_render($form['terms'][$key]['dialog_button']), 'class' => 'islandora-solr-operations islandora-solr-operations-hidden');
         // add to rows
         $rows[] = array('data' => $row, 'class' => array('draggable'));
       }
@@ -803,10 +786,8 @@ function theme_islandora_solr_admin_fields($variables) {
   // create header array
   $header = array();
   $header[] = array('data' => t('Solr field'), 'colspan' => 2, 'class' => 'islandora-solr-solr-field-header');
-  $header[] = array('data' => t('Label'));
-  if ($field_type == 'result_fields') { $header[] = array('data' => t('Snippet')); }
-  if ($field_type == 'facet_fields') { $header[] = array('data' => t('Range facet')); }
-  $header[] = array('data' => t('Weight'));
+  $header[] = array('data' => t('Settings'));
+  $header[] = array('data' => t('Weight'), 'class' => 'islandora-solr-solr-field-weight');
   $header[] = array('data' => t('Operations'), 'colspan' => 4);
 
   // Controls table
@@ -1151,6 +1132,8 @@ function _islandora_solr_admin_settings_field_configure($form, &$form_state) {
   // dialog body
   $body = drupal_render(drupal_get_form($form_function, $variables));
   $commands[] = ajax_command_invoke('#islandora-solr-admin-dialog-body', 'html', array($body));
+  // attach behaviors (re-attaches javascript)
+  $commands[] = ajax_command_invoke(NULL, 'islandoraSolrAttachBehaviors', array());
 
   return array('#type' => 'ajax', '#commands' => $commands);
 }
@@ -1202,16 +1185,16 @@ function _islandora_solr_admin_get_form_function($field_type = NULL) {
   if (!empty($field_type)) {
     switch ($field_type) {
       case 'result_fields':
-        $form_callback = '_islandora_solr_admin_settings_result_field'; // result field
+        $form_callback = '_islandora_solr_admin_settings_result_fields'; // result field
         break;
       case 'sort_fields':
-        $form_callback = '_islandora_solr_admin_settings_sort_field'; // sort field
+        $form_callback = '_islandora_solr_admin_settings_sort_fields'; // sort field
         break;
       case 'facet_fields':
-        $form_callback = '_islandora_solr_admin_settings_facet_field'; // facet field
+        $form_callback = '_islandora_solr_admin_settings_facet_fields'; // facet field
         break;
       case 'search_fields':
-        $form_callback = '_islandora_solr_admin_settings_search_field'; // search field
+        $form_callback = '_islandora_solr_admin_settings_search_fields'; // search field
         break;
       default:
         return FALSE;
@@ -1223,42 +1206,229 @@ function _islandora_solr_admin_get_form_function($field_type = NULL) {
 }
 
 // @TODO: make flexible
-function _islandora_solr_admin_settings_result_field($form, &$form_state, $variables) {
+function _islandora_solr_admin_settings_result_fields($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
 
   $form_state['dialog'] = $variables;
 
   $form = array();
-  $form['result'] = array(
-    '#theme_wrappers' => array('container'),
-    '#id' => 'example-wrapper',
+  $form['options'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('scroll')),
+    '#id' => 'islandora-solr-admin-dialog-form',
   );
-  $form['wrapper']['textfield'] = array(
+  $form['options']['label'] = array(
     '#type' => 'textfield',
-    '#title' => t('Textfield'),
+    '#title' => t('Label'),
     '#default_value' => $variables['values']['solr_field'],
+    '#description' => t('A human readable name.'),
   );
-  $form['wrapper']['submit'] = array(
+  $form['options']['snippet'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Snippet'),
+    '#default_value' => $variables['values']['snippet'],
+    '#description' => t('If a match is found on this field, a snippet of text will be returned, with the search term highlighted.<br /><strong>Note:</strong> this feature is not supported by all display profiles.'),
+  );
+  $form['options']['permissions_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Permissions'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['options']['permissions_fieldset']['permissions'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Permissions'),
+    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
+    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
+  );
+  $form['actions'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('form-buttons')),
+  );
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Popup submit'),
+    '#value' => t('Apply'),
     '#weight' => 5,
-    '#field' => 'popup_submit',
+    '#field' => 'dialog_submit',
     '#field_type' => 'result_fields', // result_fields
-    '#name' => 'result-fields-popup-submit',
+    '#name' => 'result-fields-dialog-submit',
     '#submit' => array('_islandora_solr_update_fields_submit'),
     '#ajax' => array(
-      'callback' => '_islandora_solr_admin_settings_dialog', // _islandora_solr_admin_settings_dialog // _islandora_solr_update_fields
-      'wrapper' => 'example-wrapper', // 'wrapper' => 'islandora-solr-' . $field_type_class . '-wrapper',
+      'callback' => '_islandora_solr_admin_settings_dialog',
+      'wrapper' => 'islandora-solr-admin-dialog-form',
       'effect' => 'none',
       'event' => 'click',
       'progress' => array('message' => '', 'type' => 'throbber'),
     ),
   );
-
   return $form;
 }
 
+function _islandora_solr_admin_settings_sort_fields($form, &$form_state, $variables) {
+  // include this file in build_info
+  form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
+
+  $form_state['dialog'] = $variables;
+
+  $form = array();
+  $form['options'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('scroll')),
+    '#id' => 'islandora-solr-admin-dialog-form',
+  );
+  $form['options']['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#default_value' => $variables['values']['solr_field'],
+    '#description' => t('A human readable name.'),
+  );
+  $form['options']['permissions_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Permissions'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['options']['permissions_fieldset']['permissions'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Permissions'),
+    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
+    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
+  );
+  $form['actions'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('form-buttons')),
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Apply'),
+    '#weight' => 5,
+    '#field' => 'dialog_submit',
+    '#field_type' => 'result_fields', // result_fields
+    '#name' => 'result-fields-dialog-submit',
+    '#submit' => array('_islandora_solr_update_fields_submit'),
+    '#ajax' => array(
+      'callback' => '_islandora_solr_admin_settings_dialog',
+      'wrapper' => 'islandora-solr-admin-dialog-form',
+      'effect' => 'none',
+      'event' => 'click',
+      'progress' => array('message' => '', 'type' => 'throbber'),
+    ),
+  );
+  return $form;
+}
+
+function _islandora_solr_admin_settings_facet_fields($form, &$form_state, $variables) {
+  // include this file in build_info
+  form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
+
+  $form_state['dialog'] = $variables;
+
+  $form = array();
+  $form['options'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('scroll')),
+    '#id' => 'islandora-solr-admin-dialog-form',
+  );
+  $form['options']['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#default_value' => $variables['values']['solr_field'],
+    '#description' => t('A human readable name.'),
+  );
+  $form['options']['range_facet'] = array( // @TODO: grey out if LUKE says it's not possible to use as a range field? Add AJAX callback to show more options?
+    '#type' => 'checkbox',
+    '#title' => t('Range facet'),
+    '#default_value' => $variables['values']['range_facet'],
+    '#description' => t('Whether this facet field should be configured as a Solr range facet.'),
+  );
+  $form['options']['permissions_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Permissions'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['options']['permissions_fieldset']['permissions'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Permissions'),
+    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
+    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
+  );
+  $form['actions'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('form-buttons')),
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Apply'),
+    '#weight' => 5,
+    '#field' => 'dialog_submit',
+    '#field_type' => 'result_fields', // result_fields
+    '#name' => 'result-fields-dialog-submit',
+    '#submit' => array('_islandora_solr_update_fields_submit'),
+    '#ajax' => array(
+      'callback' => '_islandora_solr_admin_settings_dialog',
+      'wrapper' => 'islandora-solr-admin-dialog-form',
+      'effect' => 'none',
+      'event' => 'click',
+      'progress' => array('message' => '', 'type' => 'throbber'),
+    ),
+  );
+  return $form;
+}
+
+function _islandora_solr_admin_settings_search_fields($form, &$form_state, $variables) {
+  // include this file in build_info
+  form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
+
+  $form_state['dialog'] = $variables;
+
+  $form = array();
+  $form['options'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('scroll')),
+    '#id' => 'islandora-solr-admin-dialog-form',
+  );
+  $form['options']['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Apply'),
+    '#default_value' => $variables['values']['solr_field'],
+    '#description' => t('A human readable name.'),
+  );
+  $form['options']['permissions_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Permissions'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['options']['permissions_fieldset']['permissions'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Permissions'),
+    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
+    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
+  );
+  $form['actions'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('form-buttons')),
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    '#weight' => 5,
+    '#field' => 'dialog_submit',
+    '#field_type' => 'result_fields', // result_fields
+    '#name' => 'result-fields-dialog-submit',
+    '#submit' => array('_islandora_solr_update_fields_submit'),
+    '#ajax' => array(
+      'callback' => '_islandora_solr_admin_settings_dialog',
+      'wrapper' => 'islandora-solr-admin-dialog-form',
+      'effect' => 'none',
+      'event' => 'click',
+      'progress' => array('message' => '', 'type' => 'throbber'),
+    ),
+  );
+  return $form;
+}
 
 
 

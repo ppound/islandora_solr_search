@@ -59,5 +59,10 @@
     // add values as JSON, so we can pass multi dimensional arrays
     Drupal.ajax[dialogAjaxId].options.data._dialog_values = JSON.stringify(data.values);
 	};
+
+  // attach behaviors to make sure all javascript is added to the form in the dialog	
+	$.fn.islandoraSolrAttachBehaviors = function() {
+    Drupal.attachBehaviors();
+	};
   
 })(jQuery);

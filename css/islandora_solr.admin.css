@@ -54,7 +54,8 @@ html.js .islandora-solr-operations-hidden
 /* result fields js */
 
 html.js .islandora-solr-remove-submit,
-html.js .islandora-solr-configure-submit
+html.js .islandora-solr-configure-submit,
+html.js .islandora-solr-dialog-submit
 {
   display: none;
 }
@@ -76,6 +77,15 @@ html.js table span.tabledrag-changed
   position: absolute;
 }
 
+html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight
+{
+  display: none;
+}
+
+html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag-hide
+{
+  display: table-cell;
+}
 
 /* add more controls */
 
@@ -183,3 +193,38 @@ html.js table span.tabledrag-changed
 }
 
 
+.islandora-solr-admin-dialog #islandora-solr-admin-dialog-title
+{
+  padding: 8px 13px;
+  margin: 0;
+  font-size: 15px;
+  background-color: #f3f4ee;
+}
+
+.islandora-solr-admin-dialog .form-buttons
+{
+  background-color: #f3f4ee;
+  padding: 8px 13px;
+}
+
+.islandora-solr-admin-dialog .form-buttons input
+{
+  margin: 0 1em 0 0;
+}
+
+.islandora-solr-admin-dialog .scroll
+{
+  padding: 8px 13px;
+  overflow: auto;
+
+  border-style: solid;
+  border-color: #ccc;
+  border-width: 1px 0;
+  border-image: none;
+
+  -moz-border-bottom-colors: none;
+  -moz-border-left-colors: none;
+  -moz-border-right-colors: none;
+  -moz-border-top-colors: none;
+
+}
