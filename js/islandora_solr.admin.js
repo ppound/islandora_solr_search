@@ -44,9 +44,40 @@
         'modal': true,
         'position': 'center',
         'resizable': false,
-        'width': 750,
+        'width': 900,
+        'height': 500,
         'draggable': false
       });
+    }
+  };
+  
+  // function for the dialog box window resize event
+  Drupal.behaviors.islandoraSolrDialogResize = {
+    attach: function(context, settings) {
+      // resize dialog box
+            
+      var resizeModal = function() {
+        // calculate dimensions
+        var $modal = $('#islandora-solr-admin-dialog', context);
+        var $scroll = $('#islandora-solr-admin-dialog-form', context);
+        var windowWidth = $(window).width();
+        var windowHeight = $(window).height();
+        var dialogWidth = parseInt(windowWidth * .6); // 60%
+        var dialogHeight, maxDialogHeight = parseInt(windowHeight * .8); // 80%
+        dialogHeight = $scroll.height() + 100;
+
+        // apply dimensions
+        $modal.dialog('option', 'width', dialogWidth);
+        // $modal.dialog('option', 'height', dialogHeight);
+        $modal.dialog('option', 'position', 'center');        
+      }
+      // apply dialog dimensions on load
+      resizeModal();
+      // apply dialog dimensions on resize
+      $(window).resize(function() {
+        resizeModal();
+      });
+
     }
   };
   

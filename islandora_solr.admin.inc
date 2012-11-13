@@ -234,7 +234,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $terms = array(
     '#type' => 'item',
     '#title' => t('Display fields'),
-    '#description' => t('Set labels for Solr fields to be included in the search results. If snippet is checked, a snippet of text with the search term highlighted will be returned if a match is found on this field.<br /> <strong>Note:</strong><em> This feature is not supported by all display profiles.</em>'),
+    '#description' => t('Set labels for Solr fields to be included in the search results.<br /><strong>Note:</strong> it is recommended to use non-tokenized solr fields (full literal strings).'),
     '#tree' => TRUE,
     '#prefix' => '<div id="islandora-solr-result-fields-wrapper">',
     '#suffix' => '</div>',
@@ -254,7 +254,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#title' => t('Limit results to fields listed above?'),
     '#return_value' => 1,
     '#default_value' => variable_get('islandora_solr_limit_result_fields', 0),
-    '#description' => t('If checked, results displayed will be limited to the fields specified above.<br /><strong>Note:</strong> Some display profiles may not honour this value.'),
+    '#description' => t('If checked, results displayed will be limited to the fields specified above.<br /><strong>Note:</strong> some display profiles may not honour this value.'),
   );
   $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_num_of_results'] = array(
     '#type' => 'textfield',
@@ -278,7 +278,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $sort_terms = array(
     '#type' => 'item',
     '#title' => t('Sort fields'),
-    '#description' => t('Indicate what fields should appear in the <strong>Islandora sort block</strong>.<br /><strong>Note:</strong> <em>Not all fields are sortable. For more info check the <a href="!url">Solr documentation</a>.</em>', array('!url' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
+    '#description' => t('Indicate what fields should appear in the <strong>Islandora sort block</strong>.<br /><strong>Note:</strong> not all fields are sortable. For more info check the <a href="!url">Solr documentation</a>.', array('!url' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
     '#tree' => TRUE,
     '#prefix' => '<div id="islandora-solr-sort-fields-wrapper">',
     '#suffix' => '</div>',
@@ -308,7 +308,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $facet_terms = array(
     '#type' => 'item',
     '#title' => t('Facet fields'),
-    '#description' => t('Indicate what fields should appear in as <strong>facets</strong>.<br /><strong>Note:</strong> <em>It is recommended to use non-tokenized solr fields (full literal strings).</em>'),
+    '#description' => t('Indicate what fields should appear in as <strong>facets</strong>.<br /><strong>Note:</strong> it is recommended to use non-tokenized solr fields (full literal strings).'),
     '#tree' => TRUE,
     '#prefix' => '<div id="islandora-solr-facet-fields-wrapper">',
     '#suffix' => '</div>',
@@ -342,50 +342,10 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Maximum limit'),
     '#size' => 5,
-    '#description' => t('Set the maximum number of terms that should be returned to the user.<br />
-      For example, if there are 100 possible subjects in a faceted result, you may wish to return only the top 10.'),
+    '#description' => t('Set the maximum number of terms that should be returned to the user. For example, if there are 100 possible subjects in a faceted result, you may wish to return only the top 10.'),
     '#default_value' => variable_get('islandora_solr_facet_max_limit', '20'),
   );
 
-  $form['islandora_solr_tabs']['facet_settings']['facet_dates'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Date facets'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['islandora_solr_tabs']['facet_settings']['facet_dates']['islandora_solr_facet_date'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Date field'),
-    '#description' => t("Indicate which date field will appear in the <strong>Islandora Facet Block</strong>.<br />
-      Enter terms on separate lines using the following pattern: field [tilde] preferred label. ie <strong>dc.date ~ Date</strong> "),
-    '#default_value' => variable_get('islandora_solr_facet_date' , NULL),
-  );
-  $form['islandora_solr_tabs']['facet_settings']['facet_dates']['islandora_solr_facet_date_start'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Date start'),
-    '#description' => t('The lower bound for the first date range for all Date Faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-    '#default_value' => variable_get('islandora_solr_facet_date_start' , 'NOW/YEAR-20YEARS'),
-  );
-  $form['islandora_solr_tabs']['facet_settings']['facet_dates']['islandora_solr_facet_date_end'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Date end'),
-    '#description' => t('The minimum upper bound for the last date range for all Date Faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-    '#default_value' => variable_get('islandora_solr_facet_date_end' , 'NOW'),
-  );
-  $form['islandora_solr_tabs']['facet_settings']['facet_dates']['islandora_solr_facet_date_gap'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Date gap'),
-    '#description' => t('The size of each date range expressed as an interval to be added to the lower bound using the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-    '#default_value' => variable_get('islandora_solr_facet_date_gap' , '+1YEAR'),
-  );
-  $form['islandora_solr_tabs']['facet_settings']['facet_dates']['islandora_solr_facet_date_format'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Date format'),
-    '#description' => t('The format of the date as it will be displayed in the facet block. Use the <a href="!url">PHP date()</a> formatting.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-    '#default_value' => variable_get('islandora_solr_facet_date_format' , 'Y'),
-  );
-  
-  
 
 
   // advanced search block
@@ -399,7 +359,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $search_terms = array(
     '#type' => 'item',
     '#title' => t('Search terms'),
-    '#description' => t('Indicate what fields should appear in the dropdown menu of terms for the <strong>Advanced Search Block</strong>.<br /><strong>Note:</strong> <em>It is recommended to use tokenized fields</em>'),
+    '#description' => t('Indicate what fields should appear in the dropdown menu of terms for the <strong>Advanced Search Block</strong>.<br /><strong>Note:</strong> It is recommended to use tokenized fields.'),
     '#tree' => TRUE,
     '#prefix' => '<div id="islandora-solr-search-fields-wrapper">',
     '#suffix' => '</div>',
@@ -450,7 +410,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#description' => t('A default query to use to browse solr results when no explicit user query is set.
       Setting a useful default query allows users to use solr to browse, without entering a query themselves.
       May be used in conjunction with a background filter, below.<br />
-      Consider <strong><em>timestamp:[* TO NOW]</em></strong> or <strong><em>*:*</em></strong><br />'),
+      Consider <strong>timestamp:[* TO NOW]</strong> or <strong>*:*</strong><br />'),
     '#default_value' => variable_get('islandora_solr_base_query', 'timestamp:[* TO NOW]'),
   );
   $form['islandora_solr_tabs']['query_defaults']['islandora_solr_base_filter'] = array(
@@ -511,7 +471,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save Solr Configuration'),
+    '#value' => t('Save Solr configuration'),
     '#weight' => 0,
     '#submit' => array('_islandora_solr_admin_settings_submit'),
     '#validate' => array('_islandora_solr_admin_settings_validate'),
@@ -1185,16 +1145,16 @@ function _islandora_solr_admin_get_form_function($field_type = NULL) {
   if (!empty($field_type)) {
     switch ($field_type) {
       case 'result_fields':
-        $form_callback = '_islandora_solr_admin_settings_result_fields'; // result field
+        $form_callback = 'islandora_solr_admin_settings_result_fields'; // result field
         break;
       case 'sort_fields':
-        $form_callback = '_islandora_solr_admin_settings_sort_fields'; // sort field
+        $form_callback = 'islandora_solr_admin_settings_sort_fields'; // sort field
         break;
       case 'facet_fields':
-        $form_callback = '_islandora_solr_admin_settings_facet_fields'; // facet field
+        $form_callback = 'islandora_solr_admin_settings_facet_fields'; // facet field
         break;
       case 'search_fields':
-        $form_callback = '_islandora_solr_admin_settings_search_fields'; // search field
+        $form_callback = 'islandora_solr_admin_settings_search_fields'; // search field
         break;
       default:
         return FALSE;
@@ -1206,7 +1166,7 @@ function _islandora_solr_admin_get_form_function($field_type = NULL) {
 }
 
 // @TODO: make flexible
-function _islandora_solr_admin_settings_result_fields($form, &$form_state, $variables) {
+function islandora_solr_admin_settings_result_fields($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
 
@@ -1265,7 +1225,7 @@ function _islandora_solr_admin_settings_result_fields($form, &$form_state, $vari
   return $form;
 }
 
-function _islandora_solr_admin_settings_sort_fields($form, &$form_state, $variables) {
+function islandora_solr_admin_settings_sort_fields($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
 
@@ -1318,7 +1278,7 @@ function _islandora_solr_admin_settings_sort_fields($form, &$form_state, $variab
   return $form;
 }
 
-function _islandora_solr_admin_settings_facet_fields($form, &$form_state, $variables) {
+function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
 
@@ -1342,6 +1302,41 @@ function _islandora_solr_admin_settings_facet_fields($form, &$form_state, $varia
     '#default_value' => $variables['values']['range_facet'],
     '#description' => t('Whether this facet field should be configured as a Solr range facet.'),
   );
+
+  $form['options']['facet_settings']['facet_dates'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Date facets'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['options']['facet_settings']['facet_dates']['islandora_solr_facet_date_start'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date start'),
+    '#description' => t('The lower bound for the first date range for all Date Faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+    '#default_value' => variable_get('islandora_solr_facet_date_start' , 'NOW/YEAR-20YEARS'),
+  );
+  $form['options']['facet_settings']['facet_dates']['islandora_solr_facet_date_end'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date end'),
+    '#description' => t('The minimum upper bound for the last date range for all Date Faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+    '#default_value' => variable_get('islandora_solr_facet_date_end' , 'NOW'),
+  );
+  $form['options']['facet_settings']['facet_dates']['islandora_solr_facet_date_gap'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date gap'),
+    '#description' => t('The size of each date range expressed as an interval to be added to the lower bound using the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+    '#default_value' => variable_get('islandora_solr_facet_date_gap' , '+1YEAR'),
+  );
+  $form['options']['facet_settings']['facet_dates']['islandora_solr_facet_date_format'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date format'),
+    '#description' => t('The format of the date as it will be displayed in the facet block. Use the <a href="!url">PHP date()</a> formatting.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+    '#default_value' => variable_get('islandora_solr_facet_date_format' , 'Y'),
+  );
+
+
+  
+  
   $form['options']['permissions_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Permissions'),
@@ -1377,7 +1372,7 @@ function _islandora_solr_admin_settings_facet_fields($form, &$form_state, $varia
   return $form;
 }
 
-function _islandora_solr_admin_settings_search_fields($form, &$form_state, $variables) {
+function islandora_solr_admin_settings_search_fields($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
 

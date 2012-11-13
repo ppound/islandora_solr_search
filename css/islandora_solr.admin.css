@@ -172,6 +172,7 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
 .islandora-solr-admin-dialog .ui-dialog-content
 {
   padding: 0;
+  overflow: hidden;
 }
 
 .islandora-solr-admin-dialog .ui-dialog-title
@@ -203,8 +204,13 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
 
 .islandora-solr-admin-dialog .form-buttons
 {
-  background-color: #f3f4ee;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
   padding: 8px 13px;
+  background-color: #f3f4ee;
 }
 
 .islandora-solr-admin-dialog .form-buttons input
@@ -212,8 +218,23 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
   margin: 0 1em 0 0;
 }
 
+#islandora-solr-admin-dialog-body
+{
+
+}
+
 .islandora-solr-admin-dialog .scroll
 {
+  position: absolute;
+  top: 35px;
+  left: 0;
+  right: 0;
+  bottom: 45px;
+
+/*
+  height: auto;
+  max-height: 402px;
+*/
   padding: 8px 13px;
   overflow: auto;
 
@@ -226,5 +247,4 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
   -moz-border-left-colors: none;
   -moz-border-right-colors: none;
   -moz-border-top-colors: none;
-
 }
