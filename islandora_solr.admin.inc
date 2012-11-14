@@ -526,7 +526,6 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
     $form_state['values']['islandora_solr_' . $field_type]['terms'] = $form_state['input']['islandora_solr_' . $field_type]['terms'];
     unset($form_state['input']['islandora_solr_' . $field_type]);
 
-
     // 2.a add field
     if ($form_state['triggering_element']['#name'] == $field_type . '_add_more') {
       // get new solr field value
@@ -541,8 +540,6 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
     // 2.c. configure field
     if ($form_state['triggering_element']['#value'] == t('Configure')) {
       $field = $form_state['triggering_element']['#field'];
-//dsm($form_state);
-//dsm($form);
       $values = $form_state['values']['islandora_solr_' . $field_type]['terms'][$field];
       $dialog_id = 'edit-islandora-solr-' . $field_type_class . '-terms-' . $field . '-dialog-button';
       $form_state['dialog'] = array(
@@ -1296,47 +1293,58 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
     '#default_value' => $variables['values']['solr_field'],
     '#description' => t('A human readable name.'),
   );
-  $form['options']['range_facet'] = array( // @TODO: grey out if LUKE says it's not possible to use as a range field? Add AJAX callback to show more options?
+
+  $form['options']['range_facet'] = array(
+    '#type' => 'fieldset',
+//    '#title' => t('Range facet'),
+    '#id' => 'range-facet-wrapper',
+    '#collapsible' => FALSE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['options']['range_facet']['range_facet_select'] = array( // @TODO: grey out if LUKE says it's not possible to use as a range field? Add AJAX callback to show more options?
     '#type' => 'checkbox',
     '#title' => t('Range facet'),
     '#default_value' => $variables['values']['range_facet'],
     '#description' => t('Whether this facet field should be configured as a Solr range facet.'),
+    '#ajax' => array(
+      'callback' => '_islandora_solr_admin_settings_facet_fields_callback',
+      'wrapper' => 'range-facet-wrapper',
+      'effect' => 'none',
+      'event' => 'click',
+      'progress' => array('message' => '', 'type' => 'throbber'),
+    ),
   );
 
-  $form['options']['facet_settings']['facet_dates'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Date facets'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['options']['facet_settings']['facet_dates']['islandora_solr_facet_date_start'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Date start'),
-    '#description' => t('The lower bound for the first date range for all Date Faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-    '#default_value' => variable_get('islandora_solr_facet_date_start' , 'NOW/YEAR-20YEARS'),
-  );
-  $form['options']['facet_settings']['facet_dates']['islandora_solr_facet_date_end'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Date end'),
-    '#description' => t('The minimum upper bound for the last date range for all Date Faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-    '#default_value' => variable_get('islandora_solr_facet_date_end' , 'NOW'),
-  );
-  $form['options']['facet_settings']['facet_dates']['islandora_solr_facet_date_gap'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Date gap'),
-    '#description' => t('The size of each date range expressed as an interval to be added to the lower bound using the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-    '#default_value' => variable_get('islandora_solr_facet_date_gap' , '+1YEAR'),
-  );
-  $form['options']['facet_settings']['facet_dates']['islandora_solr_facet_date_format'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Date format'),
-    '#description' => t('The format of the date as it will be displayed in the facet block. Use the <a href="!url">PHP date()</a> formatting.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-    '#default_value' => variable_get('islandora_solr_facet_date_format' , 'Y'),
-  );
+  // @TODO: check for non-ajax values
+  if (isset($form_state['triggering_element']) AND $form_state['triggering_element']['#name'] == 'range_facet_select' AND $form_state['input']['range_facet_select'] == 1) {
 
+    $form['options']['range_facet']['islandora_solr_range_facet_start'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Start'),
+      '#description' => t('The lower bound for the first date range for all Date Faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+      '#default_value' => 'NOW/YEAR-20YEARS',
+    );
+    $form['options']['range_facet']['islandora_solr_range_facet_end'] = array(
+      '#type' => 'textfield',
+      '#title' => t('End'),
+      '#description' => t('The minimum upper bound for the last date range for all Date Faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+      '#default_value' => 'NOW',
+    );
+    $form['options']['range_facet']['islandora_solr_range_facet_gap'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Gap'),
+      '#description' => t('The size of each date range expressed as an interval to be added to the lower bound using the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+      '#default_value' => '+1YEAR',
+    );
+    $form['options']['range_facet']['islandora_solr_date_facet_format'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Date format'),
+      '#description' => t('The format of the date as it will be displayed in the facet block. Use the <a href="!url">PHP date()</a> formatting.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+      '#default_value' => 'Y',
+    );
+  }
 
-  
-  
   $form['options']['permissions_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Permissions'),
@@ -1372,6 +1380,24 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
   return $form;
 }
 
+function _islandora_solr_admin_settings_facet_fields_callback($form, &$form_state) {
+  $commands = array();
+
+  $commands[] = ajax_command_invoke(NULL, 'islandoraSolrResizeModal', array());
+
+//  $facet_setttings = $form['options']['facet_settings'];
+
+/*
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+*/
+
+
+  return $form['options']['range_facet'];
+}
+
 function islandora_solr_admin_settings_search_fields($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
@@ -1386,7 +1412,7 @@ function islandora_solr_admin_settings_search_fields($form, &$form_state, $varia
   );
   $form['options']['label'] = array(
     '#type' => 'textfield',
-    '#title' => t('Apply'),
+    '#title' => t('Label'),
     '#default_value' => $variables['values']['solr_field'],
     '#description' => t('A human readable name.'),
   );
@@ -1408,7 +1434,7 @@ function islandora_solr_admin_settings_search_fields($form, &$form_state, $varia
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Apply'),
     '#weight' => 5,
     '#field' => 'dialog_submit',
     '#field_type' => 'result_fields', // result_fields

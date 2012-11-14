@@ -243,7 +243,6 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
   max-height: 402px;
 */
 
-
   padding: 8px 13px;
   overflow: auto;
 
@@ -256,4 +255,13 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
   -moz-border-left-colors: none;
   -moz-border-right-colors: none;
   -moz-border-top-colors: none;
+}
+
+
+
+/* facet field dialog */
+
+#range-facet-wrapper
+{
+  padding: 1em 0 0 0;
 }

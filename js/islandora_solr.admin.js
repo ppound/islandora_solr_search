@@ -51,62 +51,62 @@
     }
   };
   
+  // resize dialog box
+  // @TODO: some small bugs in here.
+  Drupal.islandoraSolr = {};
+  Drupal.islandoraSolr.resizeModal = function() {
+    // calculate dimensions
+    // dom elements
+    var $modal = $('#islandora-solr-admin-dialog');
+    var $scroll = $('#islandora-solr-admin-dialog-form');
+    // window
+    var windowWidth = $(window).width();
+    var windowHeight = $(window).height();
+    // max modal values
+    var maxWidth = parseInt(windowWidth * .6); // 60%
+    var maxHeight = parseInt(windowHeight * .8); // 80%
+    // get scroll height
+    var scrollHeight = $scroll.height();
+    // get modal height
+    var modalHeight = $modal.height();
+    // get modal height
+    var modalHeightCalc = scrollHeight + 98; // scroll + header & footer
+
+    // if maximum height is smaller than the calculated height
+    if (maxHeight < modalHeightCalc) {
+      // @TODO, when fieldset is larger than $scroll, this gets set correctly and stays that way. When fieldset isn't quite that big and doesn't get this assigned, collapsing and expanding again, will cause the dialog to jump, because no fixed height is set.
+      if (scrollHeight > maxHeight - 98) {
+        scrollHeight = maxHeight - 98;
+      }
+      
+      $scroll.css({
+        'height': scrollHeight + 'px', // 1) 494 2) 465
+        'max-height': scrollHeight + 'px'
+      });          
+    }
+
+    // set dialogHeight
+    var dialogHeight = modalHeightCalc;
+    // make sure the dialogHeight is never more than the maximum height
+    if (dialogHeight > maxHeight) {
+      dialogHeight = modalHeightCalc;
+    }
+
+    // apply dimensions
+    $modal.dialog('option', 'width', maxWidth);
+    $modal.dialog('option', 'height', dialogHeight);
+    $modal.dialog('option', 'position', 'center');        
+
+  }
+  
   // function for the dialog box window resize event
   Drupal.behaviors.islandoraSolrDialogResize = {
     attach: function(context, settings) {
-      // resize dialog box
-            
-      // @TODO: lots of small bugs in here.
-            
-      var resizeModal = function() {
-        // calculate dimensions
-        // dom elements
-        var $modal = $('#islandora-solr-admin-dialog', context);
-        var $scroll = $('#islandora-solr-admin-dialog-form', context);
-        // window
-        var windowWidth = $(window).width();
-        var windowHeight = $(window).height();
-        // max modal values
-        var maxWidth = parseInt(windowWidth * .6); // 60%
-        var maxHeight = parseInt(windowHeight * .8); // 80%
-        // get scroll height
-        var scrollHeight = $scroll.height();
-        // get modal height
-        var modalHeight = $modal.height();
-        // get modal height
-        var modalHeightCalc = scrollHeight + 98; // scroll + header & footer
-        // if maximum height is larger than the calculated height, we use the calculated height
-        if (maxHeight > modalHeightCalc) {
-        
-        }
-        else { // else we use the maximum height
-          // @TODO, when fieldset is larger than $scroll, this gets set correctly and stays that way. When fieldset isn't quite that big and doesn't get this assigned, collapsing and expanding again, will cause the dialog to jump, because no fixed height is set.
-          $scroll.css({
-            'height': scrollHeight + 'px', // 1) 494 2) 465
-            'max-height': scrollHeight + 'px'
-          });
-         
-        }
-        // set dialogHeight
-        var dialogHeight = modalHeightCalc;
-        if (dialogHeight > maxHeight) {
-          dialogHeight = maxHeight;
-          $scroll.css({
-            // @TODO: when the max height is reached and window is made smaller, this will indeed make the $scroll height smaller, but when stretching out again, it doesn't gain size.
-            'height': (dialogHeight - 98) + 'px', // 1) 494 2) 465
-            'max-height': (dialogHeight - 98) + 'px'
-          });
-        }
-        // apply dimensions
-        $modal.dialog('option', 'width', maxWidth);
-        $modal.dialog('option', 'height', dialogHeight);
-        $modal.dialog('option', 'position', 'center');        
-      }
       // apply dialog dimensions on load
-      resizeModal();
+      Drupal.islandoraSolr.resizeModal();
       // apply dialog dimensions on resize
       $(window).resize(function() {
-        resizeModal();
+        Drupal.islandoraSolr.resizeModal();
       });
 
       // on fieldset collapse event
@@ -120,7 +120,7 @@
                 // If the modal is already at the max height, don't bother with
                 // this since the only reason to do it is to grow the modal.
                 if ($('.views-ui-dialog').height() < parseInt($(window).height() * .8)) {
-                  resizeModal();
+                  Drupal.islandoraSolr.resizeModal();
                 }
               return;
             }
@@ -139,6 +139,8 @@
           }
         };
       }
+      
+      
     }
   };
   
@@ -155,6 +157,11 @@
   // attach behaviors to make sure all javascript is added to the form in the dialog	
 	$.fn.islandoraSolrAttachBehaviors = function() {
     Drupal.attachBehaviors();
+	};
+
+  // resize modal dialog
+	$.fn.islandoraSolrResizeModal = function() {
+    Drupal.islandoraSolr.resizeModal();
 	};
   
 })(jQuery);
