@@ -56,19 +56,50 @@
     attach: function(context, settings) {
       // resize dialog box
             
+      // @TODO: lots of small bugs in here.
+            
       var resizeModal = function() {
         // calculate dimensions
+        // dom elements
         var $modal = $('#islandora-solr-admin-dialog', context);
         var $scroll = $('#islandora-solr-admin-dialog-form', context);
+        // window
         var windowWidth = $(window).width();
         var windowHeight = $(window).height();
-        var dialogWidth = parseInt(windowWidth * .6); // 60%
-        var dialogHeight, maxDialogHeight = parseInt(windowHeight * .8); // 80%
-        dialogHeight = $scroll.height() + 100;
-
+        // max modal values
+        var maxWidth = parseInt(windowWidth * .6); // 60%
+        var maxHeight = parseInt(windowHeight * .8); // 80%
+        // get scroll height
+        var scrollHeight = $scroll.height();
+        // get modal height
+        var modalHeight = $modal.height();
+        // get modal height
+        var modalHeightCalc = scrollHeight + 98; // scroll + header & footer
+        // if maximum height is larger than the calculated height, we use the calculated height
+        if (maxHeight > modalHeightCalc) {
+        
+        }
+        else { // else we use the maximum height
+          // @TODO, when fieldset is larger than $scroll, this gets set correctly and stays that way. When fieldset isn't quite that big and doesn't get this assigned, collapsing and expanding again, will cause the dialog to jump, because no fixed height is set.
+          $scroll.css({
+            'height': scrollHeight + 'px', // 1) 494 2) 465
+            'max-height': scrollHeight + 'px'
+          });
+         
+        }
+        // set dialogHeight
+        var dialogHeight = modalHeightCalc;
+        if (dialogHeight > maxHeight) {
+          dialogHeight = maxHeight;
+          $scroll.css({
+            // @TODO: when the max height is reached and window is made smaller, this will indeed make the $scroll height smaller, but when stretching out again, it doesn't gain size.
+            'height': (dialogHeight - 98) + 'px', // 1) 494 2) 465
+            'max-height': (dialogHeight - 98) + 'px'
+          });
+        }
         // apply dimensions
-        $modal.dialog('option', 'width', dialogWidth);
-        // $modal.dialog('option', 'height', dialogHeight);
+        $modal.dialog('option', 'width', maxWidth);
+        $modal.dialog('option', 'height', dialogHeight);
         $modal.dialog('option', 'position', 'center');        
       }
       // apply dialog dimensions on load
@@ -78,6 +109,36 @@
         resizeModal();
       });
 
+      // on fieldset collapse event
+      // snippet from views ui, which has taken part of a snippet from collapse.js. Yo dawg..
+      if (!this.collapseReplaced && Drupal.collapseScrollIntoView) {
+        this.collapseReplaced = true;
+        Drupal.collapseScrollIntoView = function (node) {
+          for (var $parent = $(node); $parent.get(0) != document && $parent.size() != 0; $parent = $parent.parent()) {
+            if ($parent.css('overflow') == 'scroll' || $parent.css('overflow') == 'auto') {
+
+                // If the modal is already at the max height, don't bother with
+                // this since the only reason to do it is to grow the modal.
+                if ($('.views-ui-dialog').height() < parseInt($(window).height() * .8)) {
+                  resizeModal();
+                }
+              return;
+            }
+          }
+          var h = document.documentElement.clientHeight || document.body.clientHeight || 0;
+          var offset = document.documentElement.scrollTop || document.body.scrollTop || 0;
+          var posY = $(node).offset().top;
+          var fudge = 55;
+          if (posY + node.offsetHeight + fudge > h + offset) {
+            if (node.offsetHeight > h) {
+              window.scrollTo(0, posY);
+            }
+            else {
+              window.scrollTo(0, posY + node.offsetHeight - h + fudge);
+            }
+          }
+        };
+      }
     }
   };
   

@@ -209,6 +209,11 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
   right: 0;
   bottom: 0;
 
+  border-style: solid;
+  border-color: #ccc;
+  border-width: 1px 0 0 0;
+  border-image: none;
+
   padding: 8px 13px;
   background-color: #f3f4ee;
 }
@@ -225,22 +230,26 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
 
 .islandora-solr-admin-dialog .scroll
 {
+/*
   position: absolute;
   top: 35px;
   left: 0;
   right: 0;
   bottom: 45px;
+*/
 
 /*
   height: auto;
   max-height: 402px;
 */
+
+
   padding: 8px 13px;
   overflow: auto;
 
   border-style: solid;
   border-color: #ccc;
-  border-width: 1px 0;
+  border-width: 1px 0 0 0;
   border-image: none;
 
   -moz-border-bottom-colors: none;
