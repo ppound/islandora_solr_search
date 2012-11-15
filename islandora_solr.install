@@ -90,3 +90,42 @@ function islandora_solr_uninstall() {
     variable_del($variable);
   }
 }
+
+/**
+ * Implements hook_schema().
+ */
+function islandora_solr_schema() {
+  $schema['islandora_solr_fields'] = array(
+    'description' => 'Table that stores Islandora Solr field settings.',
+    'fields' => array(
+      'solr_field' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The field name as indexed in Solr',
+      ),
+      'field_type' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The type of the field settings.',
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Weight of the field within field type.',
+      ),
+      'solr_field_settings' => array(
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'A serialized array of name value pairs that store additional field settings.',
+      ),
+    ),
+    'primary key' => array('solr_field', 'field_type'),
+  );
+  return $schema;
+}

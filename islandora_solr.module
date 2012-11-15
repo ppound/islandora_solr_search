@@ -13,8 +13,9 @@
  */
 function islandora_solr_init() {
   // include inc files
-  module_load_include('inc', 'islandora_solr', 'islandora_solr.block');
+  module_load_include('inc', 'islandora_solr', 'includes/islandora_solr.db');
   module_load_include('inc', 'islandora_solr', 'includes/common');
+  module_load_include('inc', 'islandora_solr', 'islandora_solr.block');
 
   static $islandora_solr_init = FALSE;
   if (!$islandora_solr_init) {

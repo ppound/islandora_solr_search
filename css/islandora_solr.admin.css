@@ -111,6 +111,11 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
   width: 32%;
 }
 
+.form-item .islandora-solr-solr-field-settings
+{
+  font-size: 0.9em;
+}
+
 .islandora-solr-fields-table
 {
   margin-bottom: 0px;
@@ -264,4 +269,9 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
 #range-facet-wrapper
 {
   padding: 1em 0 0 0;
+}
+
+#range-facet-wrapper #edit-wrapper
+{
+/*   display: none; */
 }
