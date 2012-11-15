@@ -926,86 +926,91 @@ function _islandora_solr_admin_settings_submit($form, &$form_state) {
 
   // Exclude unnecessary elements. // @TODO: remove once we assigned the values manually.
   unset($form_state['values']['submit'],
-        $form_state['values']['reset'],
-        $form_state['values']['form_id'],
-        $form_state['values']['op'],
-        $form_state['values']['form_token'],
-        $form_state['values']['form_build_id']);
+    $form_state['values']['reset'],
+    $form_state['values']['form_id'],
+    $form_state['values']['op'],
+    $form_state['values']['form_token'],
+    $form_state['values']['form_build_id'],
+    $form_state['values']['refresh_page']);
 
   // if the operation is 'Reset'
-  if ($op == t('Reset to defaults')) {
-    // loop over all submitted values // @TODO: specify, don't loop.
-    foreach ($form_state['values'] as $key => $value) {
-      // remove all values
-      variable_del($key);
-    }
-    // also remove the default display
-    variable_del('islandora_solr_primary_display');
-    // also remove the request handler variable. Form item isn't always loaded
-    variable_del('islandora_solr_request_handler');
-
-    // clear the db fields table
-    db_delete('islandora_solr_fields')->execute();
-
-    // set reset message
-    drupal_set_message(t('The configuration options have been reset to their default values.')); // @TODO: these don't seem to work anymore
-  }
-  else {
-    // save primary display table
-    // old_default variable
-    $old_default = variable_get('islandora_solr_primary_display', 'default');
-    // new_default variable
-    $new_default = $form_state['values']['islandora_solr_primary_display_table']['default'];
-    // make default enabled
-    $form_state['values']['islandora_solr_primary_display_table']['enabled'][$new_default] = $new_default;
-    $form_state['values']['islandora_solr_primary_display_table']['enabled'][$old_default] = $old_default;
-    variable_set('islandora_solr_primary_display', $new_default);
-
-    // loop over all submitted values
-    foreach ($form_state['values'] as $key => $value) {
-      // prepare variables in array
-      if (is_array($value) && isset($form_state['values']['array_filter'])) {
-        $value = array_keys(array_filter($value));
-      }
-      // set variables
-      variable_set($key, $value);
-    }
-
-    // prepare all field variables to be saved to the DB.
-    $insert_values = array();
-    $field_types = array('result_fields', 'sort_fields', 'facet_fields', 'search_fields');
-    foreach ($field_types as $field_type) {
-      if (isset($form_state['values']['islandora_solr_' . $field_type]['terms'])) {
-        $result_fields = $form_state['values']['islandora_solr_' . $field_type]['terms'];
-        foreach ($result_fields as $key => $value) {
-          $solr_field = $value['solr_field'];
-          $solr_field_settings = array();
-          if (isset($form_state['solr_field_settings']['islandora_solr_' . $field_type][$solr_field])) {
-            $solr_field_settings = $form_state['solr_field_settings']['islandora_solr_' . $field_type][$solr_field];
+  switch ($op) {
+    case t('Save Solr configuration'):
+      // save primary display table
+      // old_default variable
+      $old_default = variable_get('islandora_solr_primary_display', 'default');
+      // new_default variable
+      $new_default = $form_state['values']['islandora_solr_primary_display_table']['default'];
+      // make default enabled
+      $form_state['values']['islandora_solr_primary_display_table']['enabled'][$new_default] = $new_default;
+      $form_state['values']['islandora_solr_primary_display_table']['enabled'][$old_default] = $old_default;
+      variable_set('islandora_solr_primary_display', $new_default);
+  
+      // prepare all field variables to be saved to the DB.
+      $insert_values = array();
+      $field_types = array('result_fields', 'sort_fields', 'facet_fields', 'search_fields');
+      foreach ($field_types as $field_type) {
+        if (isset($form_state['values']['islandora_solr_' . $field_type]['terms'])) {
+          $result_fields = $form_state['values']['islandora_solr_' . $field_type]['terms'];
+          foreach ($result_fields as $key => $value) {
+            $solr_field = $value['solr_field'];
+            $solr_field_settings = array();
+            if (isset($form_state['solr_field_settings']['islandora_solr_' . $field_type][$solr_field])) {
+              $solr_field_settings = $form_state['solr_field_settings']['islandora_solr_' . $field_type][$solr_field];
+            }
+            $insert_values[] = array(
+              'solr_field' => $solr_field,
+              'field_type' => $field_type,
+              'weight' => $value['weight'],
+              'solr_field_settings' => serialize($solr_field_settings),
+            );
           }
-          $insert_values[] = array(
-            'solr_field' => $solr_field,
-            'field_type' => $field_type,
-            'weight' => $value['weight'],
-            'solr_field_settings' => serialize($solr_field_settings),
-          );
         }
       }
-    }
+  
+      // clear the db fields table // @TODO: merge delete and save in one query.
+      db_delete('islandora_solr_fields')->execute();
+      // then populate them
+      $insert = db_insert('islandora_solr_fields')->fields(array('solr_field', 'field_type', 'weight', 'solr_field_settings'));
+      foreach ($insert_values as $record) {
+        $insert->values($record);
+      }
+      $insert->execute();
 
-    // clear the db fields table // @TODO: merge delete and save in one query.
-    db_delete('islandora_solr_fields')->execute();
-    // then populate them
-    $insert = db_insert('islandora_solr_fields')->fields(array('solr_field', 'field_type', 'weight', 'solr_field_settings'));
-    foreach ($insert_values as $record) {
-      $insert->values($record);
-    }
-    $insert->execute();
+      // loop over all submitted values
+      unset($form_state['values']['islandora_solr_result_fields']);
+      unset($form_state['values']['islandora_solr_sort_fields']);
+      unset($form_state['values']['islandora_solr_facet_fields']);
+      unset($form_state['values']['islandora_solr_search_fields']);
+      foreach ($form_state['values'] as $key => $value) {
+        // prepare variables in array
+        if (is_array($value) && isset($form_state['values']['array_filter'])) {
+          $value = array_keys(array_filter($value));
+        }
+        // set variables
+        variable_set($key, $value);
+      }
 
-
-    // set save message
-    drupal_set_message(t('The solr configuration options have been saved.'));
-
+      // set save message
+      drupal_set_message(t('The solr configuration options have been saved.'));
+    break;
+    case t('Reset to defaults'):
+      // loop over all submitted values
+      foreach ($form_state['values'] as $key => $value) {
+        // remove all values
+        variable_del($key);
+      }
+      // also remove the default display
+      variable_del('islandora_solr_primary_display');
+      // also remove the request handler variable. Form item isn't always loaded
+      variable_del('islandora_solr_request_handler');
+  
+      // clear the db fields table
+      db_delete('islandora_solr_fields')->execute();
+  
+      // set reset message
+      drupal_set_message(t('The configuration options have been reset to their default values.')); // @TODO: these don't seem to work anymore
+    break;
   }
 
   // clear caches
