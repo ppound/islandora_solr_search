@@ -1145,11 +1145,18 @@ function _islandora_solr_autocomplete_luke($string = '') {
   exit();
 }
 
+/**
+ * Submit callback function for fields. Used by 'Add field', 'Configure', 'Remove' and 'Dialog'.
+ */
 function _islandora_solr_update_fields_submit($form, &$form_state) {
 
   $form_state['rebuild'] = TRUE;
 }
 
+/**
+ * Ajax callback function for fields. Used by 'Add field', 'Remove' and 'Dialog' links/buttons.
+ * Returns part of the form array that needs asynchronous updating.
+ */
 function _islandora_solr_update_fields($form, &$form_state) {
 
   // check what section the call is from
@@ -1171,7 +1178,11 @@ function _islandora_solr_update_fields($form, &$form_state) {
   }
 }
 
-
+/**
+ * Ajax callback function for 'Configure' link/button.
+ *
+ * Passes values from the field, loads the right form and populates and triggers the modal dialog.
+ */
 function _islandora_solr_admin_settings_field_configure($form, &$form_state) {
   // set variables
   $variables = $form_state['dialog'];
@@ -1194,7 +1205,11 @@ function _islandora_solr_admin_settings_field_configure($form, &$form_state) {
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
-
+/**
+ * Ajax callback function for the modal dialog submit button.
+ *
+ * Closes the modal dialog and passes the values to the main form.
+ */
 function _islandora_solr_admin_settings_dialog($form, &$form_state) {
 
   $dialog_id = $form_state['dialog']['dialog_id'];
@@ -1211,7 +1226,6 @@ function _islandora_solr_admin_settings_dialog($form, &$form_state) {
     'values' => $form_state['input'],
   );
   $commands[] = ajax_command_invoke(NULL, 'islandoraSolrDialogValues', array($data));
-
   // trigger dialog button
   $commands[] = ajax_command_invoke('#' . $dialog_id, 'trigger', array('click'));
 
@@ -1237,6 +1251,12 @@ function islandora_solr_admin_settings_field($field_type = NULL, $ajax = NULL) {
 }
 */
 
+/**
+ * Function that selects the fields from the raw input values the modal form processes through the dialog button
+ * Ajax call.
+ * @TODO: this should probably be removed and values we don't need maybe should be filtered out before sending it back
+ *   to the main form.
+ */
 function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL, $field_type = NULL) {
   if (!empty($solr_field_settings) AND !empty($field_type)) {
     switch ($field_type) {
@@ -1281,6 +1301,15 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
   
 }
 
+/**
+ * Function which returns the form function name associated with a field type.
+ *
+ * @param string $field_type
+ *   Field type to get the form function name for.
+ * @return
+ *   A form function name associated with the field type, or FALSE if field type is not
+ *   given or does not exist.
+ */
 function _islandora_solr_admin_get_form_function($field_type = NULL) {
   if (!empty($field_type)) {
     switch ($field_type) {
@@ -1305,7 +1334,12 @@ function _islandora_solr_admin_get_form_function($field_type = NULL) {
   return FALSE;
 }
 
-// @TODO: make flexible
+/**
+ * Form for result field settings.
+ *
+ * @params array $variables
+ *   This parameter contains default values to be passed from the main form.
+ */
 function islandora_solr_admin_settings_result_fields($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
@@ -1370,6 +1404,12 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
   return $form;
 }
 
+/**
+ * Form for sort field settings.
+ *
+ * @params array $variables
+ *   This parameter contains default values to be passed from the main form.
+ */
 function islandora_solr_admin_settings_sort_fields($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
@@ -1427,6 +1467,12 @@ function islandora_solr_admin_settings_sort_fields($form, &$form_state, $variabl
   return $form;
 }
 
+/**
+ * Form for facet field settings.
+ *
+ * @params array $variables
+ *   This parameter contains default values to be passed from the main form.
+ */
 function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
@@ -1498,7 +1544,6 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
       '#default_value' => $values['date_facet_format'] ? $values['date_facet_format'] : 'Y',
     );
 
-
   $form['options']['permissions_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Permissions'),
@@ -1535,14 +1580,25 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
   return $form;
 }
 
+/**
+ * Ajax callback function for range facet checkbox.
+ */
+/*
 function _islandora_solr_admin_settings_facet_fields_callback($form, &$form_state) {
 
   // resize modal
   ajax_command_invoke(NULL, 'islandoraSolrResizeModal', array());
 
-/*   return $form['options']['range_facet']; */
+  return $form['options']['range_facet'];
 }
+*/
 
+/**
+ * Form for search field settings.
+ *
+ * @params array $variables
+ *   This parameter contains default values to be passed from the main form.
+ */
 function islandora_solr_admin_settings_search_fields($form, &$form_state, $variables) {
   // include this file in build_info
   form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
@@ -1600,16 +1656,3 @@ function islandora_solr_admin_settings_search_fields($form, &$form_state, $varia
   return $form;
 }
 
-
-
-/*
-  drupal_add_js('(function ($) { jQuery(document).ready(function () {
-    $('#islandora-solr-admin-dialog').dialog('open');
-    $('#islandora-solr-admin-dialog-body').load('http://192.168.56.195/drupal7/islandora_solr/field/facet_field/ajax');
-  }); })(jQuery);',
-    array(
-      'type' => 'inline',
-      'scope' => 'footer'
-    )
-  );
-*/
