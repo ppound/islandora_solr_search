@@ -98,3 +98,6 @@ function _islandora_solr_filter_fields_permissions($records = array()) {
   }
   return $filtered_records;
 }
+
+
+

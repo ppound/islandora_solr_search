@@ -18,6 +18,8 @@ Sprint 6
 - create doxygen code + wrapper doxygen
 - clean up code
 
+- make labels translatable
+
 - make nojs fallback
 admin/islandora/search/islandora_solr/result_fields?ajax
 admin/islandora/search/islandora_solr/sort_fields

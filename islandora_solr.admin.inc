@@ -715,7 +715,6 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
       $terms['terms'][] = $term;
     }
   }
-
   $terms['add_another_item'] = array(
     '#prefix' => '<strong>',
     '#suffix' => '</strong>',
@@ -728,7 +727,6 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
     '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
     '#default_value' => '',
   );
-  
   // add more button
   $terms['add_more'] = array(
     '#type' => 'button',
@@ -757,7 +755,6 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
 function theme_islandora_solr_admin_fields($variables) {
   // set form variable
   $form = $variables['form'];
-
   // get field type
   $field_type = $form['#field_type'];
   // render class name from field type
@@ -776,7 +773,6 @@ function theme_islandora_solr_admin_fields($variables) {
     // loop over values
     foreach ($form['terms'] as $key => $element) {
       if (is_array($element) && element_child($key)) {
-
         $row = array();
         $row[] = array('data' => drupal_render($form['terms'][$key]['draggable_handler']), 'class' => 'islandora-solr-multiple-drag');
         $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_render']), 'class' => 'islandora-solr-solr-field-render');
@@ -792,15 +788,12 @@ function theme_islandora_solr_admin_fields($variables) {
       }
     }
   }
-
-  
   // create header array
   $header = array();
   $header[] = array('data' => t('Solr field'), 'colspan' => 2, 'class' => 'islandora-solr-solr-field-header');
   $header[] = array('data' => t('Settings'));
   $header[] = array('data' => t('Weight'), 'class' => 'islandora-solr-solr-field-weight');
   $header[] = array('data' => t('Operations'), 'colspan' => 4);
-
   // Controls table
   $rows_controls = array();
   $rows_controls[] = array(
@@ -817,13 +810,11 @@ function theme_islandora_solr_admin_fields($variables) {
     'no_striping' => 1,
     'class' => array('add-item-controls')
   );
-
   // render form
   $output = '';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'islandora-solr-' . $field_type_class, 'class' => array('islandora-solr-fields-table'))));
   $output .= theme('table', array('header' => array(), 'rows' => $rows_controls, 'attributes' => array('class' => array('islandora-solr-table-controls'))));
   $output .= drupal_render_children($form);
-
   // add tabledrag features
   drupal_add_tabledrag('islandora-solr-' . $field_type_class, 'order', 'sibling', 'solr-weight-' . $field_type_class);
 
@@ -856,7 +847,6 @@ function theme_islandora_solr_admin_primary_display($variables) {
         $form['enabled'][$key]['#attributes']['disabled'] = 'disabled';
         $form['enabled'][$key]['#checked'] = TRUE;
       }
-
       $row = array();
       $row[] = array('data' => drupal_render($form['default'][$key]));
       $row[] = array('data' => drupal_render($form['enabled'][$key]));
@@ -864,12 +854,10 @@ function theme_islandora_solr_admin_primary_display($variables) {
       $row[] = array('data' => drupal_render($form['machine_name'][$key]));
       $row[] = array('data' => drupal_render($form['weight'][$key]));
       $row[] = array('data' => drupal_render($form['configuration'][$key]));
-
       // add to rows
       $rows[] = array('data' => $row, 'class' => array('draggable'));
     }
   }
-
   // Individual table headers.
   // default | enabled | name | Machine readable name |  weight | configuration
   $header = array();
@@ -879,12 +867,10 @@ function theme_islandora_solr_admin_primary_display($variables) {
   $header[] = array('data' => t('Machine readable name'));
   $header[] = array('data' => t('Weight'));
   $header[] = array('data' => t('Configuration'));
-
   // render form
   $output = '';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'solr-primary-display-table')));
   $output .= drupal_render_children($form);
-
   // add tabledrag features
   drupal_add_tabledrag('solr-primary-display-table', 'order', 'sibling', 'solr-weight');
 
