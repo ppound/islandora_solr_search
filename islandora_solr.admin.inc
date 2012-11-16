@@ -520,26 +520,21 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   if ($form_state['rebuild'] == FALSE) {
 
     // get values from DB
-    $query = db_select('islandora_solr_fields', 'isf');
-    $query->fields('isf'); // all fields
-    $query->condition('isf.field_type', $field_type, '=');
-    $query->orderBy('isf.weight', 'ASC');
-    $result = $query->execute();
-    $records = $result->fetchAll(PDO::FETCH_ASSOC);
+    $records = islandora_solr_get_fields($field_type, FALSE); // FALSE means we don't filter fields by user role
 
     // set fields to populate the admin table
     $fields = array();
-    foreach ($records as $key => $value) {
+    foreach ($records as $key => $record) {
       $fields[$key] = array(
-        'solr_field' => $value['solr_field'],
-        'field_type' => $value['field_type'],
-        'weight' => $value['weight'],
+        'solr_field' => $record['solr_field'],
+        'field_type' => $record['field_type'],
+        'weight' => $record['weight'],
       );
     }
     // move solr_field_settings into the form state
     foreach ($records as $key => $value) {
       $solr_field = $value['solr_field'];
-      $solr_field_settings = unserialize($value['solr_field_settings']);
+      $solr_field_settings = $value['solr_field_settings'];
       $form_state['solr_field_settings']['islandora_solr_' . $field_type][$solr_field] = $solr_field_settings;
     }
   }
@@ -1125,7 +1120,6 @@ function _islandora_solr_autocomplete_luke($string = '') {
   
   $luke = islandora_solr_get_luke();
   $result = array();
-  
   // loop over luke fields
   foreach ($luke['fields'] as $term => $value) {
     // if string is found in the solr term
@@ -1137,7 +1131,6 @@ function _islandora_solr_autocomplete_luke($string = '') {
       $result[$term] = $term_str . '<strong style="position: absolute; right: 5px;">(' . $value['type'] . ')</strong>';
     }
   }
-
   // sort alphabetically
   ksort($result);
   
@@ -1232,25 +1225,6 @@ function _islandora_solr_admin_settings_dialog($form, &$form_state) {
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
-/*
-function islandora_solr_admin_settings_field($field_type = NULL, $ajax = NULL) {
-  
-  $variables = array('textfield' => 'Default value');
-  
-  $form_callback = _islandora_solr_admin_get_form_function($field_type);
-    if ($form_callback) {
-      $form = drupal_get_form($form_callback, $variables);
-      if ($ajax == 'ajax') {
-        echo render($form);
-        drupal_exit();
-      }
-      return $form;
-    }
-  }
-  return '';
-}
-*/
-
 /**
  * Function that selects the fields from the raw input values the modal form processes through the dialog button
  * Ajax call.
@@ -1297,8 +1271,6 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
     return $form_callback;
   }
   return FALSE;
-  
-  
 }
 
 /**
@@ -1333,6 +1305,12 @@ function _islandora_solr_admin_get_form_function($field_type = NULL) {
   }
   return FALSE;
 }
+
+/**
+ * @defgroup dialog-forms
+ * @{
+ * Form functions for the modal dialogs.
+ */
 
 /**
  * Form for result field settings.
@@ -1656,3 +1634,6 @@ function islandora_solr_admin_settings_search_fields($form, &$form_state, $varia
   return $form;
 }
 
+/**
+ * @} End of "defgroup dialog-forms".
+ */

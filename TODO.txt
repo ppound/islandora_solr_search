@@ -7,8 +7,6 @@ Sprint 6
 
 - populate popup with forms, including (default) values
 
-- create all forms and apply to configure callbacks (includes permissions by role)
-
 - make sure you can't add an empty or duplicate field!
 
 - in the rest of the module change how we get variables
@@ -29,6 +27,7 @@ admin/islandora/search/islandora_solr/search_fields
 Done:
 - pass values from popup back to form
 - save the form variables in a DB table
+- create all forms and apply to configure callbacks (includes permissions by role)
 
 High priority
 -------------
