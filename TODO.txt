@@ -6,25 +6,29 @@ Sprint 6
 --------
 
 - populate popup with forms, including (default) values
-- pass values from popup back to form
 
 - create all forms and apply to configure callbacks (includes permissions by role)
 
-- save the form variables in a DB table
+- make sure you can't add an empty or duplicate field!
+
 - in the rest of the module change how we get variables
+
+- create upgrade path !!
 
 - theme popup / make resizable /
 - clean up table headers
-
+- create doxygen code + wrapper doxygen
 - clean up code
 
-- add ajax_command_changed() to the vertical tabs to show something has changed.
-
+- make nojs fallback
 admin/islandora/search/islandora_solr/result_fields?ajax
 admin/islandora/search/islandora_solr/sort_fields
 admin/islandora/search/islandora_solr/facet_fields
 admin/islandora/search/islandora_solr/search_fields
 
+Done:
+- pass values from popup back to form
+- save the form variables in a DB table
 
 High priority
 -------------
@@ -48,7 +52,7 @@ check if IslandoraSolrQueryProcessor::display is set, which is not ideal.
 http://wiki.apache.org/solr/CommonQueryParameters#sort
 - don't hardcode php solr library, instead override it.
 - table display works but should be rendered through a template file.
-
+- - add ajax_command_changed() to the vertical tabs to show something has changed.
 - add watchdog messages on error.
 - on query without filter parameters the delete link adds a ? or &
 - some snippets of markup could go in theme functions

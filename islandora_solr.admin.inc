@@ -582,6 +582,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
       // prepare dialog values
       $dialog_id = 'edit-islandora-solr-' . $field_type_class . '-terms-' . $field . '-dialog-button';
       $form_state['dialog'] = array(
+        'solr_field' => $solr_field,
         'field_type' => $field_type,
         'dialog_id' => $dialog_id,
         'values' => $values,
@@ -1175,7 +1176,7 @@ function _islandora_solr_admin_settings_field_configure($form, &$form_state) {
   // set variables
   $variables = $form_state['dialog'];
   $field_type = $form_state['dialog']['field_type'];
-  $solr_field = $form_state['dialog']['values']['solr_field'];
+  $solr_field = $form_state['dialog']['solr_field'];
   $form_function = _islandora_solr_admin_get_form_function($field_type);
 
   $commands = array();

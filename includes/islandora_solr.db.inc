@@ -4,7 +4,7 @@
  * @file
  * This file contains DB query functions
  */
- 
+
 function islandora_solr_get_result_fields() {
   $records = islandora_solr_get_fields('result_fields');
   return $records;
