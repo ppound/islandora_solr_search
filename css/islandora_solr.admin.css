@@ -127,6 +127,11 @@ html.js .islandora-solr-fields-table .islandora-solr-solr-field-weight.tabledrag
   border-top: 0px;
 }
 
+.solr-admin-error
+{
+  color: #ff0000;
+  font-weight: normal;
+}
 
 
 /* admin dialog */

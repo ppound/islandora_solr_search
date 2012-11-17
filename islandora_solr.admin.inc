@@ -516,7 +516,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   // 2.c. Configure field // prepare array to populate dialog
   // 2.d. Dialog submit // process values from modal dialog: add variables to form_state array and update the table info
 
-  // @TODO: 1. Saved values from the DB
+  // 1. Saved values from the DB
   if ($form_state['rebuild'] == FALSE) {
 
     // get values from DB
@@ -548,12 +548,25 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
     unset($form_state['input']['islandora_solr_' . $field_type]);
 
     // 2.a add field
-    // @TODO: can't be empty and can't have a duplicate in the field !!
     if ($form_state['triggering_element']['#name'] == $field_type . '_add_more') {
       // get new solr field value
       $add_solr_field = $form_state['values']['islandora_solr_' . $field_type]['add_solr_field'];
-      // add new field to values // @TODO: maybe this shouldn't be added to 'values' ?
-      $form_state['values']['islandora_solr_' . $field_type]['terms'][] = array('solr_field' => $add_solr_field);
+      // check if the value is empty
+      $solr_field_error = NULL;
+      if (empty($add_solr_field)) {
+        $solr_field_error = t('Field cannot be empty.');
+      }
+      // check if value is already added
+      $check_terms = $form_state['values']['islandora_solr_' . $field_type]['terms'];
+      foreach ($check_terms as $key => $term) {
+        if ($term['solr_field'] == $add_solr_field) {
+          $solr_field_error = t('Solr term can only be added once.');
+        }
+      }
+      // add new field to values
+      if ($solr_field_error == NULL) {
+        $form_state['values']['islandora_solr_' . $field_type]['terms'][] = array('solr_field' => $add_solr_field);        
+      }
     }
     // 2.b. remove field
     if ($form_state['triggering_element']['#value'] == t('Remove')) {
@@ -715,18 +728,19 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
       $terms['terms'][] = $term;
     }
   }
-  $terms['add_another_item'] = array(
-    '#prefix' => '<strong>',
-    '#suffix' => '</strong>',
-    '#markup' => t('Add another item'),
-  );
   // add solr field
   $terms['add_solr_field'] = array(
     '#type' => 'textfield',
+    '#title' => t('Add another item'),
     '#size' => 45,
     '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
     '#default_value' => '',
   );
+  if (isset($solr_field_error) AND !empty($solr_field_error)) {
+    $terms['add_solr_field']['#title'] .= '<br /><span class="solr-admin-error">' . $solr_field_error . '</span>';
+    $terms['add_solr_field']['#attributes'] = array('class' => array('error'));
+  }
+  
   // add more button
   $terms['add_more'] = array(
     '#type' => 'button',
@@ -796,12 +810,6 @@ function theme_islandora_solr_admin_fields($variables) {
   $header[] = array('data' => t('Operations'), 'colspan' => 4);
   // Controls table
   $rows_controls = array();
-  $rows_controls[] = array(
-    'data' => array(
-      array('data' => drupal_render($form['add_another_item']), 'colspan' => 10)
-    ),
-    'no_striping' => 1
-  );
   // add another item form elements
   $rows_controls[] = array(
     'data' => array(
