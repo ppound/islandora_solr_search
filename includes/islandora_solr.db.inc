@@ -90,7 +90,7 @@ function _islandora_solr_filter_fields_permissions($records = array()) {
       // get field permissions
       $field_roles = $record['solr_field_settings']['permissions'];
       // check field permissions agains user roles
-      $check = array_intersect($field_roles, array_values($user->roles));
+      $check = array_intersect($field_roles, array_keys($user->roles));
       if (!empty($check)) {
         $filtered_records[] = $record;
       }
