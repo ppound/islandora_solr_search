@@ -5,6 +5,9 @@ TODO:
 Sprint 6
 --------
 
+- permissions: gray out roles that have no permission to search solr.
+  dsm(user_roles(FALSE, 'search islandora solr'));
+
 - populate popup with forms, including (default) values
 
 - make sure you can't add an empty or duplicate field!
@@ -18,7 +21,7 @@ Sprint 6
 - create doxygen code + wrapper doxygen
 - clean up code
 
-- make labels translatable
+- make labels translatable: http://drupal.org/node/1114010
 
 - make nojs fallback
 admin/islandora/search/islandora_solr/result_fields?ajax

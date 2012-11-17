@@ -1341,7 +1341,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
   $form['options']['permissions_fieldset']['permissions'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Permissions'),
-    '#options' => drupal_map_assoc(user_roles()), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
+    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
     '#default_value' => $permissions,
     '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
   );
@@ -1404,7 +1404,7 @@ function islandora_solr_admin_settings_sort_fields($form, &$form_state, $variabl
   $form['options']['permissions_fieldset']['permissions'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Permissions'),
-    '#options' => drupal_map_assoc(user_roles()), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
+    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
     '#default_value' => $permissions,
     '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
   );
@@ -1517,7 +1517,7 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
   $form['options']['permissions_fieldset']['permissions'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Permissions'),
-    '#options' => drupal_map_assoc(user_roles()), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
+    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
     '#default_value' => $permissions,
     '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
   );
@@ -1593,7 +1593,7 @@ function islandora_solr_admin_settings_search_fields($form, &$form_state, $varia
   $form['options']['permissions_fieldset']['permissions'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Permissions'),
-    '#options' => drupal_map_assoc(user_roles()), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
+    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
     '#default_value' => $permissions,
     '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
   );
