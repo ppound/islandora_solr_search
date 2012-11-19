@@ -563,13 +563,13 @@ class IslandoraSolrResults {
     $facets_json  = json_encode($facets);
     // json  to array
     $facets = json_decode($facets_json, true);
-    
     // get date facet values
     $date_facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_dates) ? $islandoraSolrQuery->solrResult->facet_counts->facet_dates : array();
     // object to json
     $date_facets_json  = json_encode($date_facets);
     // json to array
     $date_facets_arr = json_decode($date_facets_json, true);
+dsm($date_facets_arr);
     // clean up facet dates array
     $format = variable_get('islandora_solr_facet_date_format' , 'Y');
     // set variable
@@ -816,21 +816,12 @@ class IslandoraSolrResults {
    * as set in the admin form.
    */
   function prepFieldSubstitutions() {
-    $rawFacetVals = variable_get("islandora_solr_facets", 'dc.subject ~ Subject,dc.type ~ Type');
-    $this->facetFieldArray = islandora_build_substitution_list($rawFacetVals);
 
-    // populate with date facet readable names
-    $rawDateFacetVals = variable_get('islandora_solr_facet_date' , NULL);
-    $rawDateFacetVals = islandora_build_substitution_list($rawDateFacetVals);
-    if ($rawDateFacetVals != NULL) {
-      $this->facetFieldArray = array_merge($this->facetFieldArray, $rawDateFacetVals);
-    }
+    $this->facetFieldArray = islandora_solr_get_facet_fields();
     
-    $rawSearchTerms = variable_get('islandora_solr_searchterms', 'dc.title ~ Title');
-    $this->searchFieldArray = islandora_build_substitution_list($rawSearchTerms);
+    $this->searchFieldArray = islandora_solr_get_search_fields();
 
-    $rawResultFields = variable_get('islandora_solr_result_fields', 'dc.subject ~ Subject,dc.type ~ Type');
-    $this->resultFieldArray = islandora_build_substitution_list($rawResultFields);
+    $this->resultFieldArray = islandora_solr_get_result_fields();
 
     $this->allSubsArray = array_merge($this->facetFieldArray, $this->searchFieldArray, $this->resultFieldArray);
   }
@@ -851,25 +842,30 @@ class IslandoraSolrResults {
       return FALSE;
     }
 
-    $rawResponse = $results->getRawResponse();
-    $responseArray = json_decode($rawResponse, TRUE);
+    $raw_response = $results->getRawResponse();
+    $response_array = json_decode($raw_response, TRUE);
 
-    $highlights = isset($responseArray['highlighting']) ? $responseArray['highlighting'] : NULL;
-    $docs = $responseArray['response']['docs'];
+    $highlights = isset($response_array['highlighting']) ? $response_array['highlighting'] : NULL;
+    $docs = $response_array['response']['docs'];
 
+// @TODO: review/redo this.
+
+/*
     if (!is_array($highlights)) {
       return $docs;
     }
-
+    
+    $snippet_fields = islandora_solr_get_snippet_fields();
    // if highights exist, inetegrate them back into the doc array
     $label = variable_get("islandora_solr_snippet_field", '');
+    // blah~Blah,foo~Foo,bar~Bar
     if ($label) {
       $label_parts = explode('~', $label);
       $field_label = trim($label_parts[1]);
       $field_text = trim($label_parts[0]);
     }
-    $this->resultFieldArray[$field_text]= $field_label;
-    $this->allSubsArray[$field_text]= $field_label;
+    $this->resultFieldArray[$field_text] = $field_label;
+    $this->allSubsArray[$field_text] = $field_label;
     foreach ($docs as &$doc) {
       $pid = $doc['PID'];
       unset($doc[$field_text]);
@@ -878,6 +874,7 @@ class IslandoraSolrResults {
         $doc[$field_text] = implode('<br />', $value);
       }
     }
+*/
     return $docs;
   }
 

@@ -5,12 +5,11 @@ TODO:
 Sprint 6
 --------
 
+- apply field settings against site
 - permissions: gray out roles that have no permission to search solr.
   dsm(user_roles(FALSE, 'search islandora solr'));
 
 - populate popup with forms, including (default) values
-
-- make sure you can't add an empty or duplicate field!
 
 - in the rest of the module change how we get variables
 
@@ -19,7 +18,10 @@ Sprint 6
 - theme popup / make resizable /
 - clean up table headers
 - create doxygen code + wrapper doxygen
-- clean up code
+- clean up code (run through coder)
+- merge with 7.x branch
+
+- when populating fields, if a solr field has a label in another field, maybe the default label can be the one already filled out? If the current one is empty still?
 
 - make labels translatable: http://drupal.org/node/1114010
 
@@ -33,6 +35,7 @@ Done:
 - pass values from popup back to form
 - save the form variables in a DB table
 - create all forms and apply to configure callbacks (includes permissions by role)
+- make sure you can't add an empty or duplicate field!
 
 High priority
 -------------
@@ -81,20 +84,11 @@ machine name - label  -  display - search term - facet term - range/date facet t
 
 DB tables
 
-islandora_solr_primary_displays
-islandora_solr_result_fields
-islandora_solr_sort_fields
-islandora_solr_facet_fields
-islandora_solr_search_fields
-
 islandora_solr_displays
 islandora_solr_fields
 
 
 islandora_solr_displays
-id  -  machine_name  -  label   -  weight
-
-islandora_solr_fields
-id  -  machine_name  - label  -  snippet  -  range  -  options
+machine_name  -  label  -  display type  -  weight
 
 

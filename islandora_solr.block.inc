@@ -319,7 +319,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
       '#title' => t('Field'),
       '#type' => 'select',
       '#default_value' => isset($value['field']) ? $value['field'] : 'dc.title',
-      '#options' => islandora_build_substitution_list(variable_get('islandora_solr_searchterms', 'dc.title ~ Title,dc.subject ~ Subject')),
+      '#options' => islandora_solr_get_search_fields(),
     );
     $term['search'] = array(
       '#title' => t('Search terms'),
@@ -581,7 +581,7 @@ function islandora_solr_sort() {
     $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
 
     // get sort terms
-    $sort_terms = islandora_build_substitution_list(variable_get('islandora_solr_sort_terms', 'score ~ Relevance, PID ~ PID'));
+    $sort_terms = islandora_solr_get_sort_fields();
 
     // get current sort (check in the actual parameters used for the query, because modules might have altered it)
     if (isset($_islandora_solr_queryclass->solrParams['sort'])) {
