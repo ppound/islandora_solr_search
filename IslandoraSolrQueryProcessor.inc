@@ -163,39 +163,36 @@ class IslandoraSolrQueryProcessor {
     // check for date facets
     $facet_dates = islandora_solr_get_range_facets();
     if (!empty($facet_dates)) {
-      // set variables
+      // set range/date variables
       $params_date_facets = array();
       foreach($facet_dates as $key => $value) {
         $field = $value['solr_field'];
         $start = $value['solr_field_settings']['range_facet_start'];
         $end = $value['solr_field_settings']['range_facet_end'];
         $gap = $value['solr_field_settings']['range_facet_gap'];
-//        $params_date_facets["f.{$field}.date"] = $field
-        $params_date_facets["facet.date"] = array('mods_date_issued_dt ');
-/*
-        $params_date_facets["f.{$field}.facet.date.start"] = $start;
-        $params_date_facets["f.{$field}.facet.date.end"] = $end;
-        $params_date_facets["f.{$field}.facet.date.gap"] = $gap;
-*/
-
-        $params_date_facets["facet.date.start"] = '1900-01-01T00:00:00Z';
-        $params_date_facets["facet.date.end"] = 'NOW';
-        $params_date_facets["facet.date.gap"] = '+1YEAR';
-
+        // add date facet        
+        $params_date_facets["facet.date"][] = $field;
+        // custom field settings
+        if ($start) {
+          $params_date_facets["f.{$field}.facet.date.start"] = $start;
+        }
+        if ($end) {
+          $params_date_facets["f.{$field}.facet.date.end"] = $end;          
+        }
+        if ($gap) {
+          $params_date_facets["f.{$field}.facet.date.gap"] = $gap;          
+        }
+        // remove range/date field from facet.field array
+        $pos = array_search($field, $params_array['facet.field']);
+        unset ($params_array['facet.field'][$pos]);
       }
+      // default settings
+      $params_date_facets["facet.date.start"] = 'NOW/YEAR-20YEARS';
+      $params_date_facets["facet.date.end"] = 'NOW';
+      $params_date_facets["facet.date.gap"] = '+1YEAR';
 
-/*
-
-      $facet_date = islandora_build_substitution_list($facet_date);
-      $facet_date = implode(",", array_keys($facet_date));
-      $params_date_facets = array(
-        'facet.date' => explode(',', $facet_date),
-        'facet.date.start' => variable_get('islandora_solr_facet_date_start' , 'NOW/YEAR-20YEARS'),
-        'facet.date.end' => variable_get('islandora_solr_facet_date_end' , 'NOW'),
-        'facet.date.gap' => variable_get('islandora_solr_facet_date_gap' , '+1YEAR'),
-      );
-*/
-   //@TODO remove date facets from normal facet array.
+      $params_array = array_merge($params_array, $params_date_facets);
+    }
 
     // add parameters
     $this->solrParams = array_merge($this->solrParams, $params_array);
@@ -228,9 +225,6 @@ class IslandoraSolrQueryProcessor {
     if (!variable_get('islandora_solr_dismax_allowed', FALSE) AND isset($this->internalSolrParams['type']) AND $this->internalSolrParams['type'] == "dismax") {
       $this->solrParams['qf'] = 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type';
     }
-
-dsm($this);
-
     return;
   }
 

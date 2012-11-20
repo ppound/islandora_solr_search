@@ -146,55 +146,53 @@ class IslandoraSolrResults {
    * @see IslandoraSolrResults::displayResults()
    */
   function printResults($results) {
-
     // set variables
     $results_array = array();
     $elements = array();
-
+    $pid = array();
     // total
     $elements['solr_total'] = $results->response->numFound;
-
     // start
     $elements['solr_start'] = $results->response->start;
-
     // get prepared search results
     $docs = $this->prep_results($results);
-
     // optionally limit results to values given
     $limitResults = variable_get('islandora_solr_limit_result_fields', 0);
-
     // loop over results array
+
     foreach ($docs as $doc) {
       $rows = array();
       $row = 0; // keeping $row in there for now until the snippet issue is cleared out
       $snippet = NULL; // @TODO: how is this suposed to work if the $snippet always is set to NULL ?
+      $pids[] = $doc['PID'];
+      $result_field_array = $this->resultFieldArray;
 
       // loop over individual results to process fields
-      foreach ($doc as $field => $value) {
-
-        // check if this field should be included
-        if ($limitResults && empty($this->resultFieldArray[$field])) {
-          continue;
+      if ($limitResults && !empty($result_field_array)) {
+        foreach ($result_field_array as $field => $label) {
+          if (isset($doc[$field]) AND !empty($doc[$field])) {
+            $value = $doc[$field];
+            $rows[$field]['label'] = $label;
+            $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
+            $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array          
+          }
         }
-
-        // check for field label substitutions
-        $translated_field_name = isset($this->allSubsArray[$field]) ? $this->allSubsArray[$field] : $field;
-
-        // add label
-        $rows[$field]['label'] = $translated_field_name;
-
-        // add class: render solr field name to string that can be used as class name
-        $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
-
-        // split value if the result value is an array
-        if (is_array($value)) {
-          $value = implode(", ", $value);
-        }
-        // add value
-        $rows[$field]['value'] = $value;
-
-        $row++; // keeping $row in there for now until the snippet issue is cleared out
       }
+      else {
+        foreach ($doc as $field => $value) {
+          // check if this field should be included
+          if ($limitResults && empty($this->resultFieldArray[$field])) {
+            continue;
+          }
+          // add label, class and value
+          $rows[$field]['label'] = (isset($this->allSubsArray[$field])) ? $this->allSubsArray[$field] : $field; // user defined label if available.
+          $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
+          $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array
+  
+          $row++; // keeping $row in there for now until the snippet issue is cleared out
+        }        
+      }
+
       // @TODO: how is this suposed to work if the $snippet always is set to NULL ?
       if ($snippet) {
         $rows[$row][] = array(
@@ -208,7 +206,7 @@ class IslandoraSolrResults {
     }
 
     // return themed search results
-    return theme('islandora_solr', array('results' => $results_array, 'elements' => $elements));
+    return theme('islandora_solr', array('results' => $results_array, 'elements' => $elements, 'pids' => $pids));
   }
 
 
@@ -569,7 +567,6 @@ class IslandoraSolrResults {
     $date_facets_json  = json_encode($date_facets);
     // json to array
     $date_facets_arr = json_decode($date_facets_json, true);
-dsm($date_facets_arr);
     // clean up facet dates array
     $format = variable_get('islandora_solr_facet_date_format' , 'Y');
     // set variable
@@ -844,10 +841,10 @@ dsm($date_facets_arr);
 
     $raw_response = $results->getRawResponse();
     $response_array = json_decode($raw_response, TRUE);
-
+//dsm($response_array);
     $highlights = isset($response_array['highlighting']) ? $response_array['highlighting'] : NULL;
     $docs = $response_array['response']['docs'];
-
+//dsm($docs);
 // @TODO: review/redo this.
 
 /*

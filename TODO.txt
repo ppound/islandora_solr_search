@@ -6,10 +6,15 @@ Sprint 6
 --------
 
 - apply field settings against site
-- permissions: gray out roles that have no permission to search solr.
+- permissions: gray out roles that have no permission to search solr. + provide defaults.
   dsm(user_roles(FALSE, 'search islandora solr'));
+- enforce permissions. Sort: done, search: done
+
+- enforce facet order
 
 - populate popup with forms, including (default) values
+
+- throw warning if adding a sort field isn't sortable
 
 - in the rest of the module change how we get variables
 

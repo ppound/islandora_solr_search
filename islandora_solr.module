@@ -155,7 +155,7 @@ function islandora_solr_theme() {
       'path' => $path . '/theme',
       'file' => $file,
       'template' => 'islandora-solr',
-      'variables' => array('results' => NULL, 'elements' => array()),
+      'variables' => array('results' => NULL, 'elements' => array(), 'pids' => array()),
     ),
   );
 }

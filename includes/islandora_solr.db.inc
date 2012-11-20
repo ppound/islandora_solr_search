@@ -134,7 +134,8 @@ function _islandora_solr_filter_fields_permissions($records = array()) {
   }
   $filtered_records = array();
   foreach($records as $key => $record) {
-    if (isset($record['solr_field_settings']) AND !empty($record['solr_field_settings'])) { // @TODO: problem here. If a user never has set any settings in the dialog, grant or deny access? This solution denies access.
+    // if field settings are set, check permissions.
+    if (isset($record['solr_field_settings']) AND !empty($record['solr_field_settings'])) {
       // get field permissions
       $field_roles = $record['solr_field_settings']['permissions'];
       // check field permissions agains user roles
@@ -142,6 +143,9 @@ function _islandora_solr_filter_fields_permissions($records = array()) {
       if (!empty($check)) {
         $filtered_records[] = $record;
       }
+    }
+    else { // if permissions are never explicitly set, include by default
+      $filtered_records[] = $record;
     }
   }
   return $filtered_records;
@@ -165,7 +169,7 @@ function _islandora_solr_simplify_fields_array($fields = array()) {
   $records = array();
   foreach ($fields as $key => $value) {
     $term = $value['solr_field'];
-    if (isset($value['solr_field_settings']['label'])) {
+    if (isset($value['solr_field_settings']['label']) AND !empty($value['solr_field_settings']['label'])) {
       $label = $value['solr_field_settings']['label'];      
     }
     else {

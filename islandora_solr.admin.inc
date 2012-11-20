@@ -72,7 +72,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $form['solr_ajax_wrapper']['islandora_solr_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Solr url'),
-    '#size' => 40,
+    '#size' => 80,
     '#weight' => -1,
     '#description' => t('The url of the Solr installation.  Defaults to localhost:8080/solr.'),
     '#default_value' => $solr_url,
@@ -254,7 +254,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#title' => t('Limit results to fields listed above?'),
     '#return_value' => 1,
     '#default_value' => variable_get('islandora_solr_limit_result_fields', 0),
-    '#description' => t('If checked, results displayed will be limited to the fields specified above.<br /><strong>Note:</strong> some display profiles may not honour this value.'),
+    '#description' => t('If checked, results displayed will be limited to the fields specified above. The order of the display fields is only enforced when this is enabled.<br /><strong>Note:</strong> some display profiles may not honour this value.'),
   );
   $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_num_of_results'] = array(
     '#type' => 'textfield',
@@ -263,8 +263,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#description' => t('The number of results to show per page.'),
     '#default_value' => variable_get('islandora_solr_num_of_results', '20'),
   );
-  
-  
+
   
   
   // sort settings
@@ -278,7 +277,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $sort_terms = array(
     '#type' => 'item',
     '#title' => t('Sort fields'),
-    '#description' => t('Indicate what fields should appear in the <strong>Islandora sort block</strong>.<br /><strong>Note:</strong> not all fields are sortable. For more info check the <a href="!url">Solr documentation</a>.', array('!url' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
+    '#description' => t('Indicate what fields should appear in the <strong>Islandora sort block</strong>. To sort on relevancy, use the \'score\' field.<br /><strong>Note:</strong> not all fields are sortable. For more info check the <a href="!url">Solr documentation</a>.', array('!url' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
     '#tree' => TRUE,
     '#prefix' => '<div id="islandora-solr-sort-fields-wrapper">',
     '#suffix' => '</div>',
@@ -1320,6 +1319,8 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
   // get solr field values
   $values = $variables['values'];
   $permissions = $values['permissions'];
+  $permissions_disable = _islandora_solr_permissions_disable();
+  $permissions_default = _islandora_solr_permissions_default();
 
   $form = array();
   $form['options'] = array(
@@ -1345,14 +1346,18 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  
   $form['options']['permissions_fieldset']['permissions'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Permissions'),
-    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
-    '#default_value' => $permissions,
-    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
+    '#options' => user_roles(),
+    '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
+    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles who do not have permission to search the Solr index.'),
   );
+  foreach ($permissions_disable as $rid) {
+    $form['options']['permissions_fieldset']['permissions'][$rid] = array(
+      '#disabled' => TRUE,
+    );            
+  }  
   $form['actions'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('form-buttons')),
@@ -1390,6 +1395,8 @@ function islandora_solr_admin_settings_sort_fields($form, &$form_state, $variabl
   // get solr field values
   $values = $variables['values'];
   $permissions = $values['permissions'];
+  $permissions_disable = _islandora_solr_permissions_disable();
+  $permissions_default = _islandora_solr_permissions_default();
 
   $form = array();
   $form['options'] = array(
@@ -1412,10 +1419,15 @@ function islandora_solr_admin_settings_sort_fields($form, &$form_state, $variabl
   $form['options']['permissions_fieldset']['permissions'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Permissions'),
-    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
-    '#default_value' => $permissions,
-    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
+    '#options' => user_roles(),
+    '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
+    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles who do not have permission to search the Solr index.'),
   );
+  foreach ($permissions_disable as $rid) {
+    $form['options']['permissions_fieldset']['permissions'][$rid] = array(
+      '#disabled' => TRUE,
+    );            
+  } 
   $form['actions'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('form-buttons')),
@@ -1453,6 +1465,8 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
   // get solr field values
   $values = $variables['values'];
   $permissions = $values['permissions'];
+  $permissions_disable = _islandora_solr_permissions_disable();
+  $permissions_default = _islandora_solr_permissions_default();
 
   $form = array();
   $form['options'] = array(
@@ -1490,7 +1504,6 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
         ),
       ),
     );
-
     $form['options']['range_facet']['wrapper']['range_facet_start'] = array(
       '#type' => 'textfield',
       '#title' => t('Start'),
@@ -1525,10 +1538,15 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
   $form['options']['permissions_fieldset']['permissions'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Permissions'),
-    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
-    '#default_value' => $permissions,
-    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
+    '#options' => user_roles(),
+    '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
+    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles who do not have permission to search the Solr index.'),
   );
+  foreach ($permissions_disable as $rid) {
+    $form['options']['permissions_fieldset']['permissions'][$rid] = array(
+      '#disabled' => TRUE,
+    );            
+  } 
   $form['actions'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('form-buttons')),
@@ -1579,6 +1597,8 @@ function islandora_solr_admin_settings_search_fields($form, &$form_state, $varia
   // get solr field values
   $values = $variables['values'];
   $permissions = $values['permissions'];
+  $permissions_disable = _islandora_solr_permissions_disable();
+  $permissions_default = _islandora_solr_permissions_default();
 
   $form = array();
   $form['options'] = array(
@@ -1601,10 +1621,15 @@ function islandora_solr_admin_settings_search_fields($form, &$form_state, $varia
   $form['options']['permissions_fieldset']['permissions'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Permissions'),
-    '#options' => user_roles(), // @TODO: should roles that don't have permissions to search the Solr index altogether be greyed out?
-    '#default_value' => $permissions,
-    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> some settings might be obsolete if the role does not have permissions to search the Solr index.'),
+    '#options' => user_roles(),
+    '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
+    '#description' => t('Select what role can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles who do not have permission to search the Solr index.'),
   );
+  foreach ($permissions_disable as $rid) {
+    $form['options']['permissions_fieldset']['permissions'][$rid] = array(
+      '#disabled' => TRUE,
+    );            
+  } 
   $form['actions'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('form-buttons')),
@@ -1626,6 +1651,42 @@ function islandora_solr_admin_settings_search_fields($form, &$form_state, $varia
     ),
   );
   return $form;
+}
+
+/**
+ * Returns an array of role id's to disable checkboxes
+ */
+function _islandora_solr_permissions_disable() {
+  $user_roles = array_keys(user_roles());
+  $permissions_solr = array_keys(user_roles(FALSE, 'search islandora solr'));
+  $permissions_disable = array_diff($user_roles, $permissions_solr);
+  // if authenticated users have permission exclude all authenticated users fields from the disable list.  
+  if (in_array('2', $permissions_solr)) {
+    foreach($permissions_disable as $key => $rid) {
+      if ($rid != '1') {
+        unset($permissions_disable[$key]);        
+      }
+    }
+  }
+  return $permissions_disable;  
+}
+
+/**
+ * Returns an array of role id's to set default values for checkboxes
+ */
+function _islandora_solr_permissions_default() {
+  $user_roles = array_keys(user_roles());
+  $permissions_solr = array_keys(user_roles(FALSE, 'search islandora solr'));
+  $permissions_default = array_intersect($user_roles, $permissions_solr); 
+  // if authenticated users have permission include all authenticated users fields to the default list.  
+  if (in_array('2', $permissions_solr)) {
+    foreach($user_roles as $rid) {
+      if ($rid != '1' AND !in_array($rid, $permissions_default)) {
+        $permissions_default[] = $rid;
+      }
+    }
+  }
+  return $permissions_default;
 }
 
 /**
