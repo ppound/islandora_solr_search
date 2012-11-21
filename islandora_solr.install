@@ -123,6 +123,10 @@ function islandora_solr_schema() {
  * Convert old textarea variables defining solr fields and moving them into the new DB table.
  */
 function islandora_solr_update_7000() {
+  // create table
+  $schema = islandora_solr_schema();
+  db_create_table('islandora_solr_fields', $schema['islandora_solr_fields']);
+
   // old variable name => field type
   $old_variables = array(
     'islandora_solr_result_fields' => 'result_fields',
