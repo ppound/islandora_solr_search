@@ -160,7 +160,7 @@ function islandora_solr_update_7000() {
         $insert_value = array(
           'solr_field' => $term,
           'field_type' => $type,
-          'weight' => $weight--,
+          'weight' => $weight++,
           'solr_field_settings' => array(
             'label' => $label,
             'permissions' => array_keys(user_roles()),
@@ -177,7 +177,7 @@ function islandora_solr_update_7000() {
             $insert_value['solr_field_settings']['range_facet_select'] = '1';
             $insert_value['solr_field_settings']['range_facet_start'] = variable_get('islandora_solr_facet_date_start', 'NOW/YEAR-20YEARS');
             $insert_value['solr_field_settings']['range_facet_end'] = variable_get('islandora_solr_facet_date_end', 'NOW');
-            $insert_value['solr_field_settings']['range_facet_gap'] = variable_get('islandora_solr_facet_date_end', '+1YEAR');
+            $insert_value['solr_field_settings']['range_facet_gap'] = variable_get('islandora_solr_facet_date_gap', '+1YEAR');
             $insert_value['solr_field_settings']['date_facet_format'] = variable_get('islandora_solr_facet_date_format', 'Y');
           }
         }
