@@ -5,20 +5,18 @@ TODO:
 Sprint 6
 --------
 
-- apply field settings against site
-- permissions: gray out roles that have no permission to search solr. + provide defaults.
-  dsm(user_roles(FALSE, 'search islandora solr'));
-- enforce permissions. Sort: done, search: done
+- create upgrade path !!
 
-- enforce facet order
+- result permissions only enforced on default display + restrict
+-- separate preparing results from display
 
-- populate popup with forms, including (default) values
+- fix snippet field highlighting
+
+- bug when reordering field and then clicking configure
 
 - throw warning if adding a sort field isn't sortable
 
-- in the rest of the module change how we get variables
-
-- create upgrade path !!
+- improve settings display. add little icon with settings in tooltip? misc/message-16-help.png
 
 - theme popup / make resizable /
 - clean up table headers
@@ -27,6 +25,7 @@ Sprint 6
 - merge with 7.x branch
 
 - when populating fields, if a solr field has a label in another field, maybe the default label can be the one already filled out? If the current one is empty still?
+- pressing 'enter' on 'add field' results in errors and no js callback
 
 - make labels translatable: http://drupal.org/node/1114010
 
@@ -41,6 +40,13 @@ Done:
 - save the form variables in a DB table
 - create all forms and apply to configure callbacks (includes permissions by role)
 - make sure you can't add an empty or duplicate field!
+- permissions: gray out roles that have no permission to search solr. + provide defaults.
+  dsm(user_roles(FALSE, 'search islandora solr'));
+- enforce permissions. Sort: done, search: done, facet: done, display: done (default display)
+- apply field settings against site
+- populate popup with forms, including (default) values
+- in the rest of the module change how we get variables
+- enforce facet order
 
 High priority
 -------------
@@ -52,6 +58,7 @@ High priority
 - more user friendly controls + advanced option
 - settings per date field (now same settings for all fields)
 - revert order of date facet fields?
+- don't prepopulate advanced search field if dropdown does not equal the solr field in url
 
 Normal Priority
 ---------------

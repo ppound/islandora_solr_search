@@ -118,3 +118,81 @@ function islandora_solr_schema() {
   );
   return $schema;
 }
+
+/**
+ * Convert old textarea variables defining solr fields and moving them into the new DB table.
+ */
+function devel_update_7000() {
+  // old variable name => field type
+  $old_variables = array(
+    'islandora_solr_result_fields' => 'result_fields',
+    'islandora_solr_search_sortby_terms' => 'sort_fields',
+    'islandora_solr_facet_date' => 'facet_fields',
+    'islandora_solr_facets' => 'facet_fields',
+    'islandora_solr_searchterms' => 'search_fields',
+  );
+  $insert_values = array();
+  $weight = 0;
+  foreach ($old_variables as $old_variable => $type) {
+    // get and split up variable strings
+    $old_value = variable_get($old_variable, NULL);
+    $lines = preg_split('/[,|\n|\r]/', $old_value);
+    // process each value to prepare for DB insert
+    foreach ($lines as $line) {
+      if ($line) {
+        $line_array = explode('~', $line);
+        $term = trim($line_array[0]);
+        $label = trim($line_array[1]);
+        if (!$label) {
+          $label = $term;
+        }
+        // basic values
+        $insert_value = array(
+          'solr_field' => $term,
+          'field_type' => $type,
+          'weight' => $weight--,
+          'solr_field_settings' => array(
+            'label' => $label,
+            'permissions' => array_keys(user_roles()),
+          ),
+        );
+        // add aditional settings for result and facet fields
+        if ($type == 'result_fields') {
+          if (strpos($term, variable_get('islandora_solr_snippet_field')) !== FALSE) {
+            $insert_value['solr_field_settings']['snippet'] = '1';
+          }
+        }
+        if ($type == 'facet_fields') {
+          if ($old_variable == 'islandora_solr_facet_date') {
+            $insert_value['solr_field_settings']['range_facet_select'] = '1';
+            $insert_value['solr_field_settings']['range_facet_start'] = variable_get('islandora_solr_facet_date_start', 'NOW/YEAR-20YEARS');
+            $insert_value['solr_field_settings']['range_facet_end'] = variable_get('islandora_solr_facet_date_end', 'NOW');
+            $insert_value['solr_field_settings']['range_facet_gap'] = variable_get('islandora_solr_facet_date_end', '+1YEAR');
+            $insert_value['solr_field_settings']['date_facet_format'] = variable_get('islandora_solr_facet_date_format', 'Y');
+          }
+        }
+        // serialize field settings
+        $insert_value['solr_field_settings'] = serialize($insert_value['solr_field_settings']);
+        $insert_values[] = $insert_value;
+      }
+    }
+  }
+  // Populate DB table
+  $insert = db_insert('islandora_solr_fields')->fields(array('solr_field', 'field_type', 'weight', 'solr_field_settings'));
+  foreach ($insert_values as $record) {
+    $insert->values($record);
+  }
+  $insert->execute();
+
+  // remove old solr field variables
+  foreach ($old_variables as $old_variable => $type) {
+    variable_del($old_variable);
+  }
+  // remove old unused variables
+  variable_del('islandora_solr_snippet_field');
+  variable_del('islandora_solr_sort_order');
+  variable_del('islandora_solr_sort_field');
+}
+
+
+

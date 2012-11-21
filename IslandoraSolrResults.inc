@@ -149,7 +149,7 @@ class IslandoraSolrResults {
     // set variables
     $results_array = array();
     $elements = array();
-    $pid = array();
+    $pids = array();
     // total
     $elements['solr_total'] = $results->response->numFound;
     // start
@@ -544,36 +544,32 @@ class IslandoraSolrResults {
    *
    * @see islandora_solr_islandora_solr_query_blocks()
    * @see islandora_solr_block_view()
+   *
+   * // @TODO: clean this entire method up. It's really messy. Including _addFacets().
    */
   function displayFacets($islandoraSolrQuery) {
     // set variables
     $facet_output = $output = '';
-
-    // limits
     $facet_min_count = 1;
     $min_result = variable_get('islandora_solr_facet_min_limit', '2');
     $initial_limit = variable_get('islandora_solr_facet_soft_limit', '10');
     $facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
+    $format = variable_get('islandora_solr_facet_date_format' , 'Y');
+    $show_more = FALSE;
 
     // get facet values returned from solr
     $facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_fields) ? $islandoraSolrQuery->solrResult->facet_counts->facet_fields : array();
-    // object to json
     $facets_json  = json_encode($facets);
-    // json  to array
     $facets = json_decode($facets_json, true);
+
     // get date facet values
     $date_facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_dates) ? $islandoraSolrQuery->solrResult->facet_counts->facet_dates : array();
-    // object to json
     $date_facets_json  = json_encode($date_facets);
-    // json to array
     $date_facets_arr = json_decode($date_facets_json, true);
-    // clean up facet dates array
-    $format = variable_get('islandora_solr_facet_date_format' , 'Y');
-    // set variable
+
+    // loop over each date field // clean up facet dates array
     $date_facets = array();
-    // loop over each date field
     foreach ($date_facets_arr as $key => $fields) {
-      // loop over each field
       $date_facets[$key] = array();
       foreach ($fields as $date => $number) {
         // facet.date includes other values in the facet results - excluding these
@@ -594,17 +590,18 @@ class IslandoraSolrResults {
       }
     }
 
-    // merge facet fields with date facets
-    $facets = array_merge($date_facets, $facets);
-    
-    
+    // merge facet fields with date facets and order
+    $facets_unordered = array_merge($date_facets, $facets);
+    $facet_order = islandora_solr_get_facet_fields();
+    $facets = array();
+    foreach($facet_order as $term => $label) {
+      $facets[$term] = $facets_unordered[$term];
+    }
+
     // return if no facets are available
     if (empty($facets)) {
       return $output;
     }
-
-    // set show more variable
-    $show_more = FALSE;
 
     // loop over returned facet objects
     foreach ($facets as $facet_key => $facet) {
@@ -841,7 +838,7 @@ class IslandoraSolrResults {
 
     $raw_response = $results->getRawResponse();
     $response_array = json_decode($raw_response, TRUE);
-//dsm($response_array);
+dsm($response_array);
     $highlights = isset($response_array['highlighting']) ? $response_array['highlighting'] : NULL;
     $docs = $response_array['response']['docs'];
 //dsm($docs);

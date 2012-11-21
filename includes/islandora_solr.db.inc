@@ -180,6 +180,9 @@ function _islandora_solr_simplify_fields_array($fields = array()) {
   return $records;
 }
 
+/**
+ * Return display fields with snippet highlighting enabled.
+ */
 function islandora_solr_get_snippet_fields() {
   $records = islandora_solr_get_result_fields(TRUE, FALSE);
   $snippet_fields = array();
@@ -191,6 +194,9 @@ function islandora_solr_get_snippet_fields() {
   return $snippet_fields;
 }
 
+/**
+ * Return facet fields with range enabled.
+ */
 function islandora_solr_get_range_facets() {
   $records = islandora_solr_get_facet_fields(TRUE, FALSE);
   $range_facets = array();

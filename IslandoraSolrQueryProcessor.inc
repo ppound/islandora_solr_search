@@ -145,17 +145,16 @@ class IslandoraSolrQueryProcessor {
     $facet_fields = implode(",", array_keys($facet_array));
     $keys = array();
     $snippet_array = islandora_solr_get_snippet_fields();
-    if (is_array($snippet_array)) {
-      $keys = array_keys($snippet_array);
-    }
+    $snippets = implode(',', $snippet_array);
+dsm($snippet_array);
     // set params
     $params_array = array(
       'facet' => 'true',
       'facet.mincount' => variable_get('islandora_solr_facet_min_limit', '2'),
       'facet.limit' => variable_get('islandora_solr_facet_max_limit', '20'),
       'qt' => variable_get('islandora_solr_request_handler', ''),
-      'hl' => isset($keys[0]) ? 'true' : NULL,
-      'hl.fl' => isset($keys[0]) ? trim($keys[0]) : NULL,
+      'hl' => isset($snippets) ? 'true' : NULL,
+      'hl.fl' => isset($snippets) ? $snippets : NULL,
       'hl.fragsize' => 400,
       'facet.field' => explode(',', $facet_fields), //comma separated list configured in the block config
     );
@@ -214,7 +213,6 @@ class IslandoraSolrQueryProcessor {
       $this->solrParams['fq'] = $base_filters;
     }
 
-
     // restrict results based on specified namespace
     $namespace = trim(variable_get('islandora_solr_namespace_restriction', ''));
     if ($namespace) {
@@ -225,6 +223,7 @@ class IslandoraSolrQueryProcessor {
     if (!variable_get('islandora_solr_dismax_allowed', FALSE) AND isset($this->internalSolrParams['type']) AND $this->internalSolrParams['type'] == "dismax") {
       $this->solrParams['qf'] = 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type';
     }
+dsm($this);
     return;
   }
 
