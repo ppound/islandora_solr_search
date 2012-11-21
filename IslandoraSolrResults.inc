@@ -157,9 +157,13 @@ class IslandoraSolrResults {
     // get prepared search results
     $docs = $this->prep_results($results);
     // optionally limit results to values given
-    $limitResults = variable_get('islandora_solr_limit_result_fields', 0);
-    // loop over results array
+    $limit_results = variable_get('islandora_solr_limit_result_fields', 0);
+    // look for fields with no permission
+    $fields_all = islandora_solr_get_result_fields(FALSE);
+    $fields_filtered = islandora_solr_get_result_fields();
+    $fields_no_permission = array_diff($fields_all, $fields_filtered);
 
+    // loop over results
     foreach ($docs as $doc) {
       $rows = array();
       $row = 0; // keeping $row in there for now until the snippet issue is cleared out
@@ -167,32 +171,29 @@ class IslandoraSolrResults {
       $pids[] = $doc['PID'];
       $result_field_array = $this->resultFieldArray;
 
-      // loop over individual results to process fields
-      if ($limitResults && !empty($result_field_array)) {
-        foreach ($result_field_array as $field => $label) {
-          if (isset($doc[$field]) AND !empty($doc[$field])) {
-            $value = $doc[$field];
-            $rows[$field]['label'] = $label;
-            $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
-            $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array          
-          }
+      // 1. add defined fields
+      foreach ($result_field_array as $field => $label) {
+        if (isset($doc[$field]) AND !empty($doc[$field])) {
+          $value = $doc[$field];
+          $rows[$field]['label'] = $label;
+          $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
+          $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array   
         }
       }
-      else {
+      
+      // 2. if limit isn't set, add other fields
+      if ($limit_results == 0) {
         foreach ($doc as $field => $value) {
-          // check if this field should be included
-          if ($limitResults && empty($this->resultFieldArray[$field])) {
+          // skip if added by the first loop already OR if no permission
+          if (isset($rows[$field]) OR in_array($field, $fields_no_permission)) {
             continue;
           }
-          // add label, class and value
-          $rows[$field]['label'] = (isset($this->allSubsArray[$field])) ? $this->allSubsArray[$field] : $field; // user defined label if available.
+          $rows[$field]['label'] = $field;
           $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
-          $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array
-  
-          $row++; // keeping $row in there for now until the snippet issue is cleared out
+          $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array  
         }        
       }
-
+//      $row++; // keeping $row in there for now until the snippet issue is cleared out
       // @TODO: how is this suposed to work if the $snippet always is set to NULL ?
       if ($snippet) {
         $rows[$row][] = array(
@@ -201,7 +202,7 @@ class IslandoraSolrResults {
         );
         $rows[$row][] = $snippet[0];
       }
-      // append array to results array
+      // append to results array
       $results_array[] = $rows;
     }
 
@@ -838,7 +839,7 @@ class IslandoraSolrResults {
 
     $raw_response = $results->getRawResponse();
     $response_array = json_decode($raw_response, TRUE);
-dsm($response_array);
+//dsm($response_array);
     $highlights = isset($response_array['highlighting']) ? $response_array['highlighting'] : NULL;
     $docs = $response_array['response']['docs'];
 //dsm($docs);

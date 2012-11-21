@@ -146,7 +146,7 @@ class IslandoraSolrQueryProcessor {
     $keys = array();
     $snippet_array = islandora_solr_get_snippet_fields();
     $snippets = implode(',', $snippet_array);
-dsm($snippet_array);
+
     // set params
     $params_array = array(
       'facet' => 'true',
@@ -223,7 +223,7 @@ dsm($snippet_array);
     if (!variable_get('islandora_solr_dismax_allowed', FALSE) AND isset($this->internalSolrParams['type']) AND $this->internalSolrParams['type'] == "dismax") {
       $this->solrParams['qf'] = 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type';
     }
-dsm($this);
+
     return;
   }
 
