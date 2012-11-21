@@ -187,7 +187,6 @@ function islandora_solr_update_7000() {
       }
     }
   }
-  print_r($insert_values);
   // Populate DB table
   $insert = db_insert('islandora_solr_fields')->fields(array('solr_field', 'field_type', 'weight', 'solr_field_settings'));
   foreach ($insert_values as $record) {
