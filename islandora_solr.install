@@ -122,7 +122,7 @@ function islandora_solr_schema() {
 /**
  * Convert old textarea variables defining solr fields and moving them into the new DB table.
  */
-function devel_update_7000() {
+function islandora_solr_update_7000() {
   // old variable name => field type
   $old_variables = array(
     'islandora_solr_result_fields' => 'result_fields',
