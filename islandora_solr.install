@@ -137,6 +137,7 @@ function islandora_solr_update_7000() {
   );
   $insert_values = array();
   $weight = 0;
+  $duplicate_check = array();
   foreach ($old_variables as $old_variable => $type) {
     // get and split up variable strings
     $old_value = variable_get($old_variable, NULL);
@@ -150,6 +151,11 @@ function islandora_solr_update_7000() {
         if (!$label) {
           $label = $term;
         }
+        // check for duplicate entry        
+        if (in_array($term, $duplicate_check[$type])) {
+          continue;
+        }
+        $duplicate_check[$type][] = $term;
         // basic values
         $insert_value = array(
           'solr_field' => $term,
@@ -181,6 +187,7 @@ function islandora_solr_update_7000() {
       }
     }
   }
+  print_r($insert_values);
   // Populate DB table
   $insert = db_insert('islandora_solr_fields')->fields(array('solr_field', 'field_type', 'weight', 'solr_field_settings'));
   foreach ($insert_values as $record) {
