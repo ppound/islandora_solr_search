@@ -225,18 +225,17 @@ class IslandoraSolrResults {
 
     // set path
     $path = SOLR_SEARCH_PATH . '/' . $islandoraSolrQuery->solrQuery; // $_GET['q'] didn't seem to work here
-
     // get date format
     $format = variable_get('islandora_solr_facet_date_format', 'Y');
-    
     // set output variable
     $output = '';
-
     // get user provided filter parameters
     $fq = isset($islandoraSolrQuery->internalSolrParams['f']) ? $islandoraSolrQuery->internalSolrParams['f'] : array();
-
     // parameters set in url
     $params = $islandoraSolrQuery->internalSolrParams;
+    // get range facets
+    $range_facets = islandora_solr_get_range_facets();
+
 
     // Get Query values
     if (!in_array($islandoraSolrQuery->solrQuery, $islandoraSolrQuery->different_kinds_of_nothing)) {
@@ -301,6 +300,12 @@ class IslandoraSolrResults {
 
         // if value is date
         if (isset($islandoraSolrQuery->solrParams['facet.date']) AND in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
+          // check date format setting
+          foreach ($range_facets as $value) {
+            if ($value['solr_field'] == $filter_split[0] AND isset($value['solr_field_settings']['date_facet_format']) AND !empty($value['solr_field_settings']['date_facet_format'])) {
+              $format = $value['solr_field_settings']['date_facet_format'];
+            }
+          }
           // split range filter string to return formatted date values
           $filter_str = $filter_split[1];
           $filter_str = trim($filter_str, '[');
@@ -354,16 +359,14 @@ class IslandoraSolrResults {
    *   settings and the raw Solr results.
    */
   function setBreadcrumbs($islandoraSolrQuery) {
-
     // set path
     $path = SOLR_SEARCH_PATH . '/' . $islandoraSolrQuery->solrQuery; // $_GET['q'] didn't seem to work here
-
     // get date format
     $format = variable_get('islandora_solr_facet_date_format', 'Y');
-    
     // set breadcrumb variable
     $breadcrumb = array();
-
+    // get range facets
+    $range_facets = islandora_solr_get_range_facets();
     // get user provided filter parameters
     if (isset($islandoraSolrQuery->internalSolrParams['f'])) {
       $fq = $islandoraSolrQuery->internalSolrParams['f'];
@@ -398,6 +401,12 @@ class IslandoraSolrResults {
 
         // if value is date
         if (isset($islandoraSolrQuery->solrParams['facet.date']) AND in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
+          // check date format setting
+          foreach ($range_facets as $value) {
+            if ($value['solr_field'] == $filter_split[0] AND isset($value['solr_field_settings']['date_facet_format']) AND !empty($value['solr_field_settings']['date_facet_format'])) {
+              $format = $value['solr_field_settings']['date_facet_format'];
+            }
+          }
           // split range filter string to return formatted date values
           $filter_str = $filter_split[1];
           $filter_str = trim($filter_str, '[');
@@ -557,6 +566,7 @@ class IslandoraSolrResults {
     $facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
     $format = variable_get('islandora_solr_facet_date_format' , 'Y');
     $show_more = FALSE;
+    $range_facets = islandora_solr_get_range_facets();
 
     // get facet values returned from solr
     $facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_fields) ? $islandoraSolrQuery->solrResult->facet_counts->facet_fields : array();
@@ -572,6 +582,13 @@ class IslandoraSolrResults {
     $date_facets = array();
     foreach ($date_facets_arr as $key => $fields) {
       $date_facets[$key] = array();
+      // check date format setting
+      foreach ($range_facets as $value) {
+        if ($value['solr_field'] == $key AND isset($value['solr_field_settings']['date_facet_format']) AND !empty($value['solr_field_settings']['date_facet_format'])) {
+          $format = $value['solr_field_settings']['date_facet_format'];
+        }
+      }
+      // render date facet fields
       foreach ($fields as $date => $number) {
         // facet.date includes other values in the facet results - excluding these
         // we're turning the facet results in an array with multiple values
