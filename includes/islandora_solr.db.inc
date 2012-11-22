@@ -94,6 +94,7 @@ function islandora_solr_get_search_fields($filter = TRUE, $simplified = TRUE) {
  * @see islandora_solr_get_search_fields()
  */
 function islandora_solr_get_fields($field_type = NULL, $filter = TRUE) {
+  global $base_path;
   // fields query
   $query = db_select('islandora_solr_fields', 'isf');
   $query->fields('isf'); // all fields
@@ -101,8 +102,19 @@ function islandora_solr_get_fields($field_type = NULL, $filter = TRUE) {
     $query->condition('isf.field_type', $field_type, '=');
   }
   $query->orderBy('isf.weight', 'ASC');
-  $result = $query->execute();
-  $records = $result->fetchAll(PDO::FETCH_ASSOC);
+  try {
+    $result = $query->execute();
+    $records = $result->fetchAll(PDO::FETCH_ASSOC);    
+  }
+  catch (Exception $e) {
+    if ($e->errorInfo[0] == '42S02') {
+      drupal_set_message(t('Islandora solr fields table not found. Try running <a href="!update_url">update.php</a>.', array('!update_url' => $base_path . 'update.php')), 'error');
+    }
+    else {
+      drupal_set_message($e->getMessage(), 'error');      
+    }
+    $records = array();
+  }
   // unserialize solr field settings blob
   foreach ($records as $key => $value) {
     $records[$key]['solr_field_settings'] = unserialize($records[$key]['solr_field_settings']);
