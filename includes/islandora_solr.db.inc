@@ -104,14 +104,14 @@ function islandora_solr_get_fields($field_type = NULL, $filter = TRUE) {
   $query->orderBy('isf.weight', 'ASC');
   try {
     $result = $query->execute();
-    $records = $result->fetchAll(PDO::FETCH_ASSOC);    
+    $records = $result->fetchAll(PDO::FETCH_ASSOC);
   }
   catch (Exception $e) {
     if ($e->errorInfo[0] == '42S02') {
       drupal_set_message(t('Islandora solr fields table not found. Try running <a href="!update_url">update.php</a>.', array('!update_url' => $base_path . 'update.php')), 'error');
     }
     else {
-      drupal_set_message($e->getMessage(), 'error');      
+      drupal_set_message($e->getMessage(), 'error');
     }
     $records = array();
   }
