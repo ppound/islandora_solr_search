@@ -168,13 +168,20 @@ function islandora_solr_block_view($block_name = '') {
  */
 function islandora_solr_simple_search_form($form, &$form_state) {
 
-  $form["islandora_simple_search_query"] = array(
-    '#size' => '20',
+  $form['simple'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array(
+        'container-inline')
+      )
+    );
+  $form['simple']["islandora_simple_search_query"] = array(
+    '#size' => '15',
     '#type' => 'textfield',
     '#title' => '',
     '#default_value' => '', // @TODO: should this be the searched value?
   );
-  $form['submit'] = array(
+  $form['simple']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('search')
   );
@@ -485,7 +492,7 @@ function islandora_solr_display() {
     // parameters set in url
     $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
     // set path
-    $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
+    $path = SOLR_SEARCH_PATH . '/' . replace_slashes($_islandora_solr_queryclass->solrQuery);
 
     // get profiles
     $profiles = module_invoke_all("islandora_solr_primary_display");
@@ -540,7 +547,7 @@ function islandora_solr_display() {
 
           // create link
           // we're not using l() because of active classes: http://drupal.org/node/41595
-          $item = '<a' . drupal_attributes($attr) . '>' . $display_name . '</a>';
+          $item = '<a' . drupal_attributes($attr) . '>' . check_plain($display_name) . '</a>';
 
           // add link to list
           $list_items[] = $item;
@@ -578,7 +585,7 @@ function islandora_solr_sort() {
     // parameters set in url
     $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
     // set path
-    $path = SOLR_SEARCH_PATH . '/' . $_islandora_solr_queryclass->solrQuery;
+    $path = SOLR_SEARCH_PATH . '/' . replace_slashes($_islandora_solr_queryclass->solrQuery);
 
     // get sort terms
     $sort_terms = islandora_solr_get_sort_fields();

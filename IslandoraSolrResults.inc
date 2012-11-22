@@ -101,7 +101,7 @@ class IslandoraSolrResults {
     $secondary_display_profiles = module_invoke_all('islandora_solr_secondary_display');
 
     // set path
-    $path = SOLR_SEARCH_PATH . '/' . $islandoraSolrQuery->solrQuery; // $_GET['q'] didn't seem to work here
+    $path = SOLR_SEARCH_PATH . '/' . replace_slashes($islandoraSolrQuery->solrQuery); // $_GET['q'] didn't seem to work here
 
     // parameters set in url
     $params = $islandoraSolrQuery->internalSolrParams;
@@ -224,7 +224,7 @@ class IslandoraSolrResults {
   function currentQuery($islandoraSolrQuery) {
 
     // set path
-    $path = SOLR_SEARCH_PATH . '/' . $islandoraSolrQuery->solrQuery; // $_GET['q'] didn't seem to work here
+    $path = SOLR_SEARCH_PATH . '/' . replace_slashes($islandoraSolrQuery->solrQuery); // $_GET['q'] didn't seem to work here
     // get date format
     $format = variable_get('islandora_solr_facet_date_format', 'Y');
     // set output variable
@@ -265,7 +265,7 @@ class IslandoraSolrResults {
 
       // create link
       // we're not using l() because of active classes: http://drupal.org/node/41595
-      $query_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $query_value;
+      $query_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . check_plain($query_value);
 
       // add wrap and list
       $output .= '<div class="islandora-solr-query-wrap">';
@@ -311,7 +311,7 @@ class IslandoraSolrResults {
           $filter_str = trim($filter_str, '[');
           $filter_str = trim($filter_str, ']');
           $filter_array = explode(' TO ', $filter_str);
-          $filter_split[1] = date($format, strtotime(trim($filter_array[0])) + (60 * 60 * 24)) . ' - ' . date($format, strtotime(trim($filter_array[1])) + (60 * 60 * 24));
+          $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])) + (60 * 60 * 24), 'custom', $format);
         }
 
         // pull out filter (for exclude link)
@@ -340,7 +340,7 @@ class IslandoraSolrResults {
 
         // create link
         // we're not using l() because of active classes: http://drupal.org/node/41595
-        $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . $filter_split[1];
+        $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . check_plain($filter_split[1]);
       }
       // return filter list
       $output .= '<div class="islandora-solr-filter-wrap">';
@@ -360,7 +360,7 @@ class IslandoraSolrResults {
    */
   function setBreadcrumbs($islandoraSolrQuery) {
     // set path
-    $path = SOLR_SEARCH_PATH . '/' . $islandoraSolrQuery->solrQuery; // $_GET['q'] didn't seem to work here
+    $path = SOLR_SEARCH_PATH . '/' . replace_slashes($islandoraSolrQuery->solrQuery); // $_GET['q'] didn't seem to work here
     // get date format
     $format = variable_get('islandora_solr_facet_date_format', 'Y');
     // set breadcrumb variable
@@ -412,7 +412,7 @@ class IslandoraSolrResults {
           $filter_str = trim($filter_str, '[');
           $filter_str = trim($filter_str, ']');
           $filter_array = explode(' TO ', $filter_str);
-          $filter_split[1] = date($format, strtotime(trim($filter_array[0])) + (60 * 60 * 24)) . ' - ' . date($format, strtotime(trim($filter_array[1])) + (60 * 60 * 24));
+          $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])) + (60 * 60 * 24), 'custom', $format);
         }
 
         // increment filter array with current filter (for breadcrumb link)
@@ -458,7 +458,7 @@ class IslandoraSolrResults {
 
         // create links
         // we're not using l() because of active classes: http://drupal.org/node/41595
-        $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $filter_split[1] . '</a>'
+        $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . check_plain($filter_split[1]) . '</a>'
               . '<span class="islandora-solr-breadcrumb-super"> <a' . drupal_attributes($attr_x) . '>(' . t('x') . ')</a></span>';
 
       }
@@ -529,7 +529,7 @@ class IslandoraSolrResults {
 
       // create links
       // we're not using l() because of active classes: http://drupal.org/node/41595
-      $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . $query_value . '</a>'
+      $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . check_plain($query_value) . '</a>'
             . '<span class="islandora-solr-breadcrumb-super"> <a' . drupal_attributes($attr_x) . '>(' . t('x') . ')</a></span>';
     }
 
@@ -603,7 +603,7 @@ class IslandoraSolrResults {
           // set date range filter for facet url
           $date_facets[$key][$date]['range'] = '[' . $date . ' TO ' . $date_next . ']';
           // set formatted value for facet link
-          $date_facets[$key][$date]['value'] = date($format, strtotime($date) + (60 * 60 * 24)) . ' - ' . date($format, strtotime($date_next) + (60 * 60 * 24));
+          $date_facets[$key][$date]['value'] = format_date(strtotime($date) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime($date_next) + (60 * 60 * 24), 'custom', $format);
         }
       }
     }
@@ -647,9 +647,12 @@ class IslandoraSolrResults {
           $list_title = $this->facetFieldArray[$facet_key];
 
           // check if facet value amount is larger than the initial limit
-          $split_facet = $facet_count > $initial_limit AND
-              $initial_limit < $facet_limit AND
-              $initial_limit > $facet_min_count;
+          if ($facet_count > $initial_limit AND $initial_limit < $facet_limit AND $initial_limit > $facet_min_count) {
+            $split_facet = TRUE;
+          }
+          else {
+            $split_facet = FALSE;
+          }
 
           if ($split_facet) {
             $show_more = TRUE; //There exists a split array...
@@ -733,7 +736,7 @@ class IslandoraSolrResults {
     else {
       // @TODO: Should be changed to format_string for Drupal 7
       // @TODO: does this check for exclude filters? -PID:"foo"
-      $filter = $key . ':"' . replace_slashes($value) . '"'; // PID:"foo"
+      $filter = $key . ':"' . $value . '"'; // PID:"foo"
     }
 
     //FIXME:  This isn't quite right...  It can make sense to facet on
@@ -750,7 +753,7 @@ class IslandoraSolrResults {
     if (!$disable_link) {
 
       // set variables
-      $path = SOLR_SEARCH_PATH . '/' . $islandoraSolrQuery->solrQuery; // $_GET['q'] didn't seem to work here
+      $path = SOLR_SEARCH_PATH . '/' . replace_slashes($islandoraSolrQuery->solrQuery); // $_GET['q'] didn't seem to work here
 
       $query_plus = array();
       $query_minus = array();

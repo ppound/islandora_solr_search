@@ -103,5 +103,4 @@ function islandora_solr_preprocess_islandora_solr(&$variables) {
       $variables['thumbnail_path'][$key] = $path . '/images/defaultimg.png';
     }
   }
-
 }
