@@ -177,10 +177,10 @@ class IslandoraSolrResults {
           $value = $doc[$field];
           $rows[$field]['label'] = $label;
           $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
-          $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array   
+          $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array
         }
       }
-      
+
       // 2. if limit isn't set, add other fields
       if ($limit_results == 0) {
         foreach ($doc as $field => $value) {
@@ -190,8 +190,8 @@ class IslandoraSolrResults {
           }
           $rows[$field]['label'] = $field;
           $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
-          $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array  
-        }        
+          $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array
+        }
       }
 //      $row++; // keeping $row in there for now until the snippet issue is cleared out
       // @TODO: how is this suposed to work if the $snippet always is set to NULL ?
@@ -571,12 +571,12 @@ class IslandoraSolrResults {
     // get facet values returned from solr
     $facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_fields) ? $islandoraSolrQuery->solrResult->facet_counts->facet_fields : array();
     $facets_json  = json_encode($facets);
-    $facets = json_decode($facets_json, true);
+    $facets = json_decode($facets_json, TRUE);
 
     // get date facet values
     $date_facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_dates) ? $islandoraSolrQuery->solrResult->facet_counts->facet_dates : array();
     $date_facets_json  = json_encode($date_facets);
-    $date_facets_arr = json_decode($date_facets_json, true);
+    $date_facets_arr = json_decode($date_facets_json, TRUE);
 
     // loop over each date field // clean up facet dates array
     $date_facets = array();
@@ -612,7 +612,7 @@ class IslandoraSolrResults {
     $facets_unordered = array_merge($date_facets, $facets);
     $facet_order = islandora_solr_get_facet_fields();
     $facets = array();
-    foreach($facet_order as $term => $label) {
+    foreach ($facet_order as $term => $label) {
       $facets[$term] = $facets_unordered[$term];
     }
 
@@ -728,14 +728,14 @@ class IslandoraSolrResults {
       // don't include facet fields with a document count lower than the configured minimum
       if ($data < $min_result) {
         return;
-      } 
+      }
     }
     else {
       // @TODO: Should be changed to format_string for Drupal 7
       // @TODO: does this check for exclude filters? -PID:"foo"
       $filter = $key . ':"' . replace_slashes($value) . '"'; // PID:"foo"
     }
-    
+
     //FIXME:  This isn't quite right...  It can make sense to facet on
     //  the same field multiple times, provided it is multi-valued...
 
@@ -830,7 +830,7 @@ class IslandoraSolrResults {
   function prepFieldSubstitutions() {
 
     $this->facetFieldArray = islandora_solr_get_facet_fields();
-    
+
     $this->searchFieldArray = islandora_solr_get_search_fields();
 
     $this->resultFieldArray = islandora_solr_get_result_fields();
@@ -866,7 +866,7 @@ class IslandoraSolrResults {
     if (!is_array($highlights)) {
       return $docs;
     }
-    
+
     $snippet_fields = islandora_solr_get_snippet_fields();
    // if highights exist, inetegrate them back into the doc array
     $label = variable_get("islandora_solr_snippet_field", '');
@@ -886,7 +886,7 @@ class IslandoraSolrResults {
         $doc[$field_text] = implode('<br />', $value);
       }
     }
-*/
+ */
     return $docs;
   }
 

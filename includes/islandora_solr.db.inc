@@ -39,7 +39,7 @@ function islandora_solr_get_sort_fields($filter = TRUE, $simplified = TRUE) {
   if ($simplified == TRUE) {
     $records = _islandora_solr_simplify_fields_array($records);
   }
-  return $records;  
+  return $records;
 }
 
 /**
@@ -59,7 +59,7 @@ function islandora_solr_get_facet_fields($filter = TRUE, $simplified = TRUE) {
   }
   return $records;
 }
- 
+
 /**
  * Function to get search fields
  *
@@ -133,7 +133,7 @@ function _islandora_solr_filter_fields_permissions($records = array()) {
     return $records;
   }
   $filtered_records = array();
-  foreach($records as $key => $record) {
+  foreach ($records as $key => $record) {
     // if field settings are set, check permissions.
     if (isset($record['solr_field_settings']) AND !empty($record['solr_field_settings'])) {
       // get field permissions
@@ -170,7 +170,7 @@ function _islandora_solr_simplify_fields_array($fields = array()) {
   foreach ($fields as $key => $value) {
     $term = $value['solr_field'];
     if (isset($value['solr_field_settings']['label']) AND !empty($value['solr_field_settings']['label'])) {
-      $label = $value['solr_field_settings']['label'];      
+      $label = $value['solr_field_settings']['label'];
     }
     else {
       $label = $term;

@@ -5,7 +5,7 @@ TODO:
 Sprint 6
 --------
 
-- settings per date field (now same settings for all fields)
+-- really need to clean IslandoraSolrResults. All of it, but especially facets.
 
 - result permissions only enforced on default display
 -- separate preparing results from display

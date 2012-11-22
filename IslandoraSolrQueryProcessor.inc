@@ -158,32 +158,32 @@ class IslandoraSolrQueryProcessor {
       'hl.fragsize' => 400,
       'facet.field' => explode(',', $facet_fields), //comma separated list configured in the block config
     );
-    
+
     // check for date facets
     $facet_dates = islandora_solr_get_range_facets();
     if (!empty($facet_dates)) {
       // set range/date variables
       $params_date_facets = array();
-      foreach($facet_dates as $key => $value) {
+      foreach ($facet_dates as $key => $value) {
         $field = $value['solr_field'];
         $start = $value['solr_field_settings']['range_facet_start'];
         $end = $value['solr_field_settings']['range_facet_end'];
         $gap = $value['solr_field_settings']['range_facet_gap'];
-        // add date facet        
+        // add date facet
         $params_date_facets["facet.date"][] = $field;
         // custom field settings
         if ($start) {
           $params_date_facets["f.{$field}.facet.date.start"] = $start;
         }
         if ($end) {
-          $params_date_facets["f.{$field}.facet.date.end"] = $end;          
+          $params_date_facets["f.{$field}.facet.date.end"] = $end;
         }
         if ($gap) {
-          $params_date_facets["f.{$field}.facet.date.gap"] = $gap;          
+          $params_date_facets["f.{$field}.facet.date.gap"] = $gap;
         }
         // remove range/date field from facet.field array
         $pos = array_search($field, $params_array['facet.field']);
-        unset ($params_array['facet.field'][$pos]);
+        unset($params_array['facet.field'][$pos]);
       }
       // default settings
       $params_date_facets["facet.date.start"] = 'NOW/YEAR-20YEARS';

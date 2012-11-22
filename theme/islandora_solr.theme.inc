@@ -87,8 +87,8 @@ function islandora_solr_preprocess_islandora_solr(&$variables) {
   foreach ($variables['elements'] as $key => $value) {
     $variables[$key] = $value;
   }
-  // thumbnails 
-  foreach($variables['results'] as $key => $value) {
+  // thumbnails
+  foreach ($variables['results'] as $key => $value) {
     $pid = $pids[$key];
     $object = islandora_object_load($pids[$key]);
     if ($object) {
