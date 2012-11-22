@@ -2,23 +2,15 @@
 TODO:
 =====
 
-Sprint 6
---------
-
 -- really need to clean IslandoraSolrResults. All of it, but especially facets.
-
 - result permissions only enforced on default display
 -- separate preparing results from display
 
 - fix snippet field highlighting
-
 - bug when reordering field and then clicking configure
-
 - throw warning if adding a sort field isn't sortable
-
 - improve settings display. add little icon with settings in tooltip? misc/message-16-help.png
-
-- theme popup / make resizable /
+- some bugs in modal dialog resizing (facets)
 - clean up table headers
 - create doxygen code + wrapper doxygen
 - clean up code (run through coder)
@@ -29,12 +21,6 @@ Sprint 6
 
 - make labels translatable: http://drupal.org/node/1114010
 
-- make nojs fallback
-admin/islandora/search/islandora_solr/result_fields?ajax
-admin/islandora/search/islandora_solr/sort_fields
-admin/islandora/search/islandora_solr/facet_fields
-admin/islandora/search/islandora_solr/search_fields
-
 High priority
 -------------
 
@@ -43,6 +29,12 @@ High priority
 - add luke check for date fields (breaks if not)
 - more user friendly controls + advanced option
 - don't prepopulate advanced search field if dropdown does not equal the solr field in url
+
+- port from D6 to D7:
+-- limit search results (block)
+-- range facet slider + datepicker
+-- look for details (permissions, string handling, css, etc..)
+-- rss feed + config
 
 Normal Priority
 ---------------
@@ -73,18 +65,3 @@ Low Priority
 
 - when changing primary display, keep &limit in the url or should it show the default? Displays can override this though.
 - empty query with dismax seems to return the same as no dismax (maybe it's just how solrconfig is defined)
-
-machine name - label  -  display - search term - facet term - range/date facet term - sort term
-[          ]   [   ]       [x]        [x]           [x]             [x]                  [x]
-
-
-DB tables
-
-islandora_solr_displays
-islandora_solr_fields
-
-
-islandora_solr_displays
-machine_name  -  label  -  display type  -  weight
-
-
