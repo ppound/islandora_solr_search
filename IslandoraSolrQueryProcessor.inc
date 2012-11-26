@@ -89,7 +89,7 @@ class IslandoraSolrQueryProcessor {
     unset($this->internalSolrParams['page']);
 
     // Set Solr type (dismax)
-    if (isset($this->internalSolrParams['type']) AND $this->internalSolrParams['type'] == 'dismax') {
+    if (isset($this->internalSolrParams['type']) && $this->internalSolrParams['type'] == 'dismax') {
       $this->solrDefType = $this->internalSolrParams['type'];
       $this->solrParams['defType'] = $this->internalSolrParams['type'];
     }
@@ -113,7 +113,7 @@ class IslandoraSolrQueryProcessor {
     if (isset($this->internalSolrParams['sort'])) {
       $sort_explode = explode(' ', $this->internalSolrParams['sort']);
       // check if an order is given and if the order value is asc or desc
-      if (isset($sort_explode[1]) AND ($sort_explode[1] == 'asc' OR $sort_explode[1] == 'desc')) {
+      if (isset($sort_explode[1]) && ($sort_explode[1] == 'asc' || $sort_explode[1] == 'desc')) {
         $this->solrParams['sort'] = $this->internalSolrParams['sort'];
       }
       else {
@@ -203,7 +203,7 @@ class IslandoraSolrQueryProcessor {
     $base_filters = preg_split("/\\r\\n|\\n|\\r/", variable_get('islandora_solr_base_filter', ''), -1, PREG_SPLIT_NO_EMPTY);
 
     // set filter parameters - both from url and admin settings.
-    if (isset($this->internalSolrParams['f']) AND is_array($this->internalSolrParams['f'])) {
+    if (isset($this->internalSolrParams['f']) && is_array($this->internalSolrParams['f'])) {
       $this->solrParams['fq'] = $this->internalSolrParams['f'];
       if (!empty($base_filters)) {
         $this->solrParams['fq'] = array_merge($this->internalSolrParams['f'], $base_filters);
@@ -225,7 +225,7 @@ class IslandoraSolrQueryProcessor {
     }
 
     // if no qf fields are specified in the requestHandler a default list is supplied here for dismax searches
-    if (!variable_get('islandora_solr_dismax_allowed', FALSE) AND isset($this->internalSolrParams['type']) AND $this->internalSolrParams['type'] == "dismax") {
+    if (!variable_get('islandora_solr_dismax_allowed', FALSE) && isset($this->internalSolrParams['type']) && $this->internalSolrParams['type'] == "dismax") {
       $this->solrParams['qf'] = 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type';
     }
 

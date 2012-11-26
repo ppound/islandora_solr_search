@@ -173,7 +173,7 @@ class IslandoraSolrResults {
 
       // 1. add defined fields
       foreach ($result_field_array as $field => $label) {
-        if (isset($doc[$field]) AND !empty($doc[$field])) {
+        if (isset($doc[$field]) && !empty($doc[$field])) {
           $value = $doc[$field];
           $rows[$field]['label'] = $label;
           $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
@@ -185,7 +185,7 @@ class IslandoraSolrResults {
       if ($limit_results == 0) {
         foreach ($doc as $field => $value) {
           // skip if added by the first loop already OR if no permission
-          if (isset($rows[$field]) OR in_array($field, $fields_no_permission)) {
+          if (isset($rows[$field]) || in_array($field, $fields_no_permission)) {
             continue;
           }
           $rows[$field]['label'] = $field;
@@ -299,10 +299,10 @@ class IslandoraSolrResults {
         $filter_split[1] = trim($filter_split[1], "\"");
 
         // if value is date
-        if (isset($islandoraSolrQuery->solrParams['facet.date']) AND in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
+        if (isset($islandoraSolrQuery->solrParams['facet.date']) && in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
           // check date format setting
           foreach ($range_facets as $value) {
-            if ($value['solr_field'] == $filter_split[0] AND isset($value['solr_field_settings']['date_facet_format']) AND !empty($value['solr_field_settings']['date_facet_format'])) {
+            if ($value['solr_field'] == $filter_split[0] && isset($value['solr_field_settings']['date_facet_format']) && !empty($value['solr_field_settings']['date_facet_format'])) {
               $format = $value['solr_field_settings']['date_facet_format'];
             }
           }
@@ -400,10 +400,10 @@ class IslandoraSolrResults {
         $filter_split[1] = trim($filter_split[1], "\"");
 
         // if value is date
-        if (isset($islandoraSolrQuery->solrParams['facet.date']) AND in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
+        if (isset($islandoraSolrQuery->solrParams['facet.date']) && in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
           // check date format setting
           foreach ($range_facets as $value) {
-            if ($value['solr_field'] == $filter_split[0] AND isset($value['solr_field_settings']['date_facet_format']) AND !empty($value['solr_field_settings']['date_facet_format'])) {
+            if ($value['solr_field'] == $filter_split[0] && isset($value['solr_field_settings']['date_facet_format']) && !empty($value['solr_field_settings']['date_facet_format'])) {
               $format = $value['solr_field_settings']['date_facet_format'];
             }
           }
@@ -584,7 +584,7 @@ class IslandoraSolrResults {
       $date_facets[$key] = array();
       // check date format setting
       foreach ($range_facets as $value) {
-        if ($value['solr_field'] == $key AND isset($value['solr_field_settings']['date_facet_format']) AND !empty($value['solr_field_settings']['date_facet_format'])) {
+        if ($value['solr_field'] == $key && isset($value['solr_field_settings']['date_facet_format']) && !empty($value['solr_field_settings']['date_facet_format'])) {
           $format = $value['solr_field_settings']['date_facet_format'];
         }
       }
@@ -647,7 +647,7 @@ class IslandoraSolrResults {
           $list_title = $this->facetFieldArray[$facet_key];
 
           // check if facet value amount is larger than the initial limit
-          if ($facet_count > $initial_limit AND $initial_limit < $facet_limit AND $initial_limit > $facet_min_count) {
+          if ($facet_count > $initial_limit && $initial_limit < $facet_limit && $initial_limit > $facet_min_count) {
             $split_facet = TRUE;
           }
           else {

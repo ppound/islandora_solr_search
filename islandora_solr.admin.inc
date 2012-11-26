@@ -22,7 +22,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
   // Solr connect
   // triggering handler is dismax check or no trigger at all (page load)
-  if ((isset($form_state['triggering_element']) AND $form_state['triggering_element']['#name'] == 'islandora_solr_url') OR !isset($form_state['triggering_element'])) {
+  if ((isset($form_state['triggering_element']) && $form_state['triggering_element']['#name'] == 'islandora_solr_url') || !isset($form_state['triggering_element'])) {
 
     // check for the php solr lib class
     if (!class_exists('Apache_Solr_Service')) {
@@ -189,7 +189,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       // configuration url
       $form['display_profiles']['islandora_solr_primary_display_table']['configuration'][$machine_name] = array(
         '#type' => 'item',
-        '#markup' => (isset($profile['configuration']) AND $profile['configuration'] != '') ? l(t('configure'), $profile['configuration']) : '',
+        '#markup' => (isset($profile['configuration']) && $profile['configuration'] != '') ? l(t('configure'), $profile['configuration']) : '',
       );
     }
     // default display
@@ -536,7 +536,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   }
 
   // 2. Triggered element (Add item or remove)
-  if (isset($form_state['triggering_element']) AND $form_state['triggering_element']['#field_type'] == $field_type) {
+  if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#field_type'] == $field_type) {
 
     // unset terms from input array
     // http://drupal.stackexchange.com/questions/14855/how-do-i-dynamically-fill-a-textfield-with-ajax/16576#16576
@@ -732,7 +732,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
     '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
     '#default_value' => '',
   );
-  if (isset($solr_field_error) AND !empty($solr_field_error)) {
+  if (isset($solr_field_error) && !empty($solr_field_error)) {
     $terms['add_solr_field']['#title'] .= '<br /><span class="solr-admin-error">' . $solr_field_error . '</span>';
     $terms['add_solr_field']['#attributes'] = array('class' => array('error'));
   }
@@ -902,7 +902,7 @@ function _islandora_solr_admin_settings_validate($form, &$form_state) {
 function _islandora_solr_admin_settings_submit($form, &$form_state) {
 
   // if this function is called not using submit or reset buttons
-  if ($form_state['clicked_button']['#id'] != 'edit-submit' AND $form_state['clicked_button']['#id'] != 'edit-reset') {
+  if ($form_state['clicked_button']['#id'] != 'edit-submit' && $form_state['clicked_button']['#id'] != 'edit-reset') {
     $form_state['rebuild'] = TRUE;
     return;
   }
@@ -1222,7 +1222,7 @@ function _islandora_solr_admin_settings_dialog($form, &$form_state) {
  *   to the main form.
  */
 function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL, $field_type = NULL) {
-  if (!empty($solr_field_settings) AND !empty($field_type)) {
+  if (!empty($solr_field_settings) && !empty($field_type)) {
     switch ($field_type) {
       case 'result_fields':
         return array(
@@ -1678,7 +1678,7 @@ function _islandora_solr_permissions_default() {
   // if authenticated users have permission include all authenticated users fields to the default list.
   if (in_array('2', $permissions_solr)) {
     foreach ($user_roles as $rid) {
-      if ($rid != '1' AND !in_array($rid, $permissions_default)) {
+      if ($rid != '1' && !in_array($rid, $permissions_default)) {
         $permissions_default[] = $rid;
       }
     }

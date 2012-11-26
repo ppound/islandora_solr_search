@@ -75,7 +75,7 @@ function _islandora_solr_filter_fields($records = array()) {
   $filtered_records = array();
   foreach ($records as $key => $record) {
     // if field settings are set, check permissions.
-    if (isset($record['solr_field_settings']) AND !empty($record['solr_field_settings'])) {
+    if (isset($record['solr_field_settings']) && !empty($record['solr_field_settings'])) {
       // get field permissions
       $field_roles = $record['solr_field_settings']['permissions'];
       // check field permissions agains user roles
@@ -106,7 +106,7 @@ function _islandora_solr_simplify_fields($fields = array()) {
   $records = array();
   foreach ($fields as $key => $value) {
     $term = $value['solr_field'];
-    if (isset($value['solr_field_settings']['label']) AND !empty($value['solr_field_settings']['label'])) {
+    if (isset($value['solr_field_settings']['label']) && !empty($value['solr_field_settings']['label'])) {
       $label = $value['solr_field_settings']['label'];
     }
     else {
@@ -124,7 +124,7 @@ function islandora_solr_get_snippet_fields() {
   $records = islandora_solr_get_fields('result_fields', TRUE, FALSE);
   $snippet_fields = array();
   foreach ($records as $key => $value) {
-    if (isset($value['solr_field_settings']['snippet']) AND $value['solr_field_settings']['snippet'] == 1) {
+    if (isset($value['solr_field_settings']['snippet']) && $value['solr_field_settings']['snippet'] == 1) {
       $snippet_fields[] = $value['solr_field'];
     }
   }
@@ -138,7 +138,7 @@ function islandora_solr_get_range_facets() {
   $records = islandora_solr_get_fields('facet_fields', TRUE, FALSE);
   $range_facets = array();
   foreach ($records as $key => $value) {
-    if (isset($value['solr_field_settings']['range_facet_select']) AND $value['solr_field_settings']['range_facet_select'] == 1) {
+    if (isset($value['solr_field_settings']['range_facet_select']) && $value['solr_field_settings']['range_facet_select'] == 1) {
       $range_facets[] = $value;
     }
   }
