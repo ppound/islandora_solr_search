@@ -159,8 +159,8 @@ class IslandoraSolrResults {
     // optionally limit results to values given
     $limit_results = variable_get('islandora_solr_limit_result_fields', 0);
     // look for fields with no permission
-    $fields_all = islandora_solr_get_result_fields(FALSE);
-    $fields_filtered = islandora_solr_get_result_fields();
+    $fields_all = islandora_solr_get_fields('result_fields', FALSE);
+    $fields_filtered = islandora_solr_get_fields('result_fields');
     $fields_no_permission = array_diff($fields_all, $fields_filtered);
 
     // loop over results
@@ -610,7 +610,7 @@ class IslandoraSolrResults {
 
     // merge facet fields with date facets and order
     $facets_unordered = array_merge($date_facets, $facets);
-    $facet_order = islandora_solr_get_facet_fields();
+    $facet_order = islandora_solr_get_fields('facet_fields');
     $facets = array();
     foreach ($facet_order as $term => $label) {
       $facets[$term] = $facets_unordered[$term];
@@ -832,11 +832,11 @@ class IslandoraSolrResults {
    */
   function prepFieldSubstitutions() {
 
-    $this->facetFieldArray = islandora_solr_get_facet_fields();
+    $this->facetFieldArray = islandora_solr_get_fields('facet_fields');
 
-    $this->searchFieldArray = islandora_solr_get_search_fields();
+    $this->searchFieldArray = islandora_solr_get_fields('search_fields');
 
-    $this->resultFieldArray = islandora_solr_get_result_fields();
+    $this->resultFieldArray = islandora_solr_get_fields('result_fields');
 
     $this->allSubsArray = array_merge($this->facetFieldArray, $this->searchFieldArray, $this->resultFieldArray);
   }

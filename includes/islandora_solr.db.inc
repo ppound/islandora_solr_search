@@ -6,94 +6,20 @@
  */
 
 /**
- * Function to get result fields
- *
- * @params bool $filter
- *   Check if the returned values need to be filtered by permission settings.
- * @params bool $simplify
- *   Whether to return the fields array as a simple term => label array.
- * @return array
- *   An array containing fields values, sorted on weight.
- */
-function islandora_solr_get_result_fields($filter = TRUE, $simplified = TRUE) {
-  // get fields
-  $records = islandora_solr_get_fields('result_fields', $filter);
-  if ($simplified == TRUE) {
-    $records = _islandora_solr_simplify_fields_array($records);
-  }
-  return $records;
-}
-
-/**
- * Function to get sort fields
- *
- * @params bool $filter
- *   Check if the returned values need to be filtered by permission settings.
- * @params bool $simplify
- *   Whether to return the fields array as a simple term => label array.
- * @return array
- *   An array containing fields values, sorted on weight.
- */
-function islandora_solr_get_sort_fields($filter = TRUE, $simplified = TRUE) {
-  $records = islandora_solr_get_fields('sort_fields', $filter);
-  if ($simplified == TRUE) {
-    $records = _islandora_solr_simplify_fields_array($records);
-  }
-  return $records;
-}
-
-/**
- * Function to get facet fields
- *
- * @params bool $filter
- *   Check if the returned values need to be filtered by permission settings.
- * @params bool $simplify
- *   Whether to return the fields array as a simple term => label array.
- * @return array
- *   An array containing fields values, sorted on weight.
- */
-function islandora_solr_get_facet_fields($filter = TRUE, $simplified = TRUE) {
-  $records = islandora_solr_get_fields('facet_fields', $filter);
-  if ($simplified == TRUE) {
-    $records = _islandora_solr_simplify_fields_array($records);
-  }
-  return $records;
-}
-
-/**
- * Function to get search fields
- *
- * @params bool $filter
- *   Check if the returned values need to be filtered by permission settings.
- * @params bool $simplify
- *   Whether to return the fields array as a simple term => label array.
- * @return array
- *   An array containing fields values, sorted on weight.
- */
-function islandora_solr_get_search_fields($filter = TRUE, $simplified = TRUE) {
-  $records = islandora_solr_get_fields('search_fields', $filter);
-  if ($simplified == TRUE) {
-    $records = _islandora_solr_simplify_fields_array($records);
-  }
-  return $records;
-}
-
-/**
- * Generic function which performs a select query to get fields for any field type.
+ * Performs a select query to get fields for any field type.
  *
  * @params string $field_type
  *   The type of field to query for. If not passed, the query returns all fields.
  * @params bool $filter
  *   If set to TRUE, it will filter the array agains user roles. If set to FALSE, it will return all results.
+ * @params bool $simplify
+ *   Whether to return the fields array as a simple term => label array.
  * @return array
  *   The query results as an array.
  *
- * @see islandora_solr_get_result_fields()
- * @see islandora_solr_get_sort_fields()
- * @see islandora_solr_get_facet_fields()
- * @see islandora_solr_get_search_fields()
+ * @see islandora_solr_get_fields()
  */
-function islandora_solr_get_fields($field_type = NULL, $filter = TRUE) {
+function islandora_solr_get_fields($field_type = NULL, $filter = TRUE, $simplified = TRUE) {
   global $base_path;
   // fields query
   $query = db_select('islandora_solr_fields', 'isf');
@@ -119,12 +45,14 @@ function islandora_solr_get_fields($field_type = NULL, $filter = TRUE) {
   foreach ($records as $key => $value) {
     $records[$key]['solr_field_settings'] = unserialize($records[$key]['solr_field_settings']);
   }
-  // if filter is set to FALSE, then return all values (no user-role checking)
-  if ($filter == FALSE) {
-    return $records;
+  // filter
+  if ($filter == TRUE) {
+    $records = _islandora_solr_filter_fields($records);
   }
-  // else, we filter the fields permissions against the user role(s).
-  $records = _islandora_solr_filter_fields_permissions($records);
+  // simplify
+  if ($simplified == TRUE) {
+    $records = _islandora_solr_simplify_fields($records);
+  }
   return $records;
 }
 
@@ -138,7 +66,7 @@ function islandora_solr_get_fields($field_type = NULL, $filter = TRUE) {
  *
  * @see islandora_solr_get_fields()
  */
-function _islandora_solr_filter_fields_permissions($records = array()) {
+function _islandora_solr_filter_fields($records = array()) {
   global $user;
   // no checks for user 1
   if ($user->uid == 1) {
@@ -171,12 +99,9 @@ function _islandora_solr_filter_fields_permissions($records = array()) {
  * @return array
  *   Returns a cleaned up array as term => label
  *
- * @see islandora_solr_get_result_fields()
- * @see islandora_solr_get_sort_fields()
- * @see islandora_solr_get_facet_fields()
- * @see islandora_solr_get_search_fields()
+ * @see islandora_solr_get_fields()
  */
-function _islandora_solr_simplify_fields_array($fields = array()) {
+function _islandora_solr_simplify_fields($fields = array()) {
   // render as term => label
   $records = array();
   foreach ($fields as $key => $value) {
@@ -196,7 +121,7 @@ function _islandora_solr_simplify_fields_array($fields = array()) {
  * Return display fields with snippet highlighting enabled.
  */
 function islandora_solr_get_snippet_fields() {
-  $records = islandora_solr_get_result_fields(TRUE, FALSE);
+  $records = islandora_solr_get_fields('result_fields', TRUE, FALSE);
   $snippet_fields = array();
   foreach ($records as $key => $value) {
     if (isset($value['solr_field_settings']['snippet']) AND $value['solr_field_settings']['snippet'] == 1) {
@@ -210,7 +135,7 @@ function islandora_solr_get_snippet_fields() {
  * Return facet fields with range enabled.
  */
 function islandora_solr_get_range_facets() {
-  $records = islandora_solr_get_facet_fields(TRUE, FALSE);
+  $records = islandora_solr_get_fields('facet_fields', TRUE, FALSE);
   $range_facets = array();
   foreach ($records as $key => $value) {
     if (isset($value['solr_field_settings']['range_facet_select']) AND $value['solr_field_settings']['range_facet_select'] == 1) {

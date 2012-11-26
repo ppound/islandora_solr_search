@@ -141,7 +141,7 @@ class IslandoraSolrQueryProcessor {
 
     // set facet parameters
     // set variables
-    $facet_array = islandora_solr_get_facet_fields();
+    $facet_array = islandora_solr_get_fields('facet_fields');
     $facet_fields = implode(",", array_keys($facet_array));
     $keys = array();
     $snippet_array = islandora_solr_get_snippet_fields();

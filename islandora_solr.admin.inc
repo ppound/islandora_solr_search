@@ -484,8 +484,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
   if (!empty($_POST) && form_get_errors()) {
     drupal_set_message(t('The settings have not been saved because of the errors.'), 'error');
   }
-
-
   return $form;
 }
 
@@ -518,7 +516,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   if ($form_state['rebuild'] == FALSE) {
 
     // get values from DB
-    $records = islandora_solr_get_fields($field_type, FALSE); // FALSE means we don't filter fields by user role
+    $records = islandora_solr_get_fields($field_type, FALSE, FALSE); // unfiltered and not simplified
 
     // set fields to populate the admin table
     $fields = array();
