@@ -21,6 +21,12 @@ TODO:
 
 - make labels translatable: http://drupal.org/node/1114010
 
+Highest priority
+----------------
+
+- create confirmation dialog for reset button !!!!
+
+
 High priority
 -------------
 
