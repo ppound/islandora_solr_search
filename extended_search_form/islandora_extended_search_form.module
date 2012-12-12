@@ -132,25 +132,6 @@ EOT
       '#type' => 'markup',
       '#prefix' => '<div class="islandora-extended-search-controls">',
       '#suffix' => '</div>',
-      'sort' => array(
-        '#title' => t('Sort By'),
-        '#type' => 'select',
-        '#default_value' => (isset($values['sort']) ? $values['sort'] : 'score'),
-        '#options' => array( //XXX:  Need to make configurable...
-          'score' => t('Relevance'),
-          'mods_title_mlt' => t('Title'),
-          'mods_dateIssued_s' => t('Date Issued'),
-        ),
-      ),
-      'order' => array(
-        '#title' => t('Order'),
-        '#type' => 'select',
-        '#default_value' => (isset($values['order']) ? $values['order'] : 'desc'),
-        '#options' => array(
-          'desc' => t('Descending'),
-          'asc' => t('Ascending'),
-        ),
-      ),
       'submit' => array(
         '#type' => 'submit',
         '#value' => t('Search')
