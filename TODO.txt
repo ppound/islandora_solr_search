@@ -30,6 +30,10 @@ Highest priority
 High priority
 -------------
 
+- js improvements:
+http://wunderroot.com/blog/parentsiblingstimlost/2012-11-29
+http://drupal.stackexchange.com/questions/50216/how-to-trigger-a-form-and-pass-variables-to-form-state-with-jquery/53063#53063
+
 - processor object alter call in executeQuery() might conflict with 2nd query calls from the variable date range gap functionality.
 - we could save us some code by storing the primary display settings in a DB table
 - add luke check for date fields (breaks if not)
