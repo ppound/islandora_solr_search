@@ -2,24 +2,28 @@
 TODO:
 =====
 
--- really need to clean IslandoraSolrResults. All of it, but especially facets.
-- result permissions only enforced on default display
--- separate preparing results from display
+Port facet slider & datepicker to D7
+------------------------------------
+
+- Create forms in popup dialogs.
+- Save multiple settings for multiple fields.
+- Try to fix popup resizing.
+
+- Port range code.
+- Try to do it cleaner than D6.
+
+
+- really need to clean IslandoraSolrResults. All of it, but especially facets.
+
+
+Highlighting text on images
+---------------------------
 
 - fix snippet field highlighting
-- bug when reordering field and then clicking configure
-- throw warning if adding a sort field isn't sortable
-- improve settings display. add little icon with settings in tooltip? misc/message-16-help.png
-- some bugs in modal dialog resizing (facets)
-- clean up table headers
-- create doxygen code + wrapper doxygen
-- clean up code (run through coder)
-- merge with 7.x branch
 
-- when populating fields, if a solr field has a label in another field, maybe the default label can be the one already filled out? If the current one is empty still?
-- pressing 'enter' on 'add field' results in errors and no js callback
 
-- make labels translatable: http://drupal.org/node/1114010
+
+
 
 Highest priority
 ----------------
@@ -34,6 +38,24 @@ High priority
 http://wunderroot.com/blog/parentsiblingstimlost/2012-11-29
 http://drupal.stackexchange.com/questions/50216/how-to-trigger-a-form-and-pass-variables-to-form-state-with-jquery/53063#53063
 
+- create import/export functionality
+
+- bug when reordering field and then clicking configure
+- but when changing solr url and then using the autocomplete.
+- throw warning if adding a sort field isn't sortable
+
+- some bugs in modal dialog resizing (facets)
+- clean up table headers
+- create doxygen code + wrapper doxygen
+- clean up code (run through coder)
+
+- when populating fields, if a solr field has a label in another field, maybe the default label can be the one already filled out? If the current one is empty still?
+- pressing 'enter' on 'add field' results in errors and no js callback
+
+- make labels translatable: http://drupal.org/node/1114010
+
+- separate preparing results from display
+- result permissions only enforced on default display
 - processor object alter call in executeQuery() might conflict with 2nd query calls from the variable date range gap functionality.
 - we could save us some code by storing the primary display settings in a DB table
 - add luke check for date fields (breaks if not)
@@ -49,6 +71,7 @@ http://drupal.stackexchange.com/questions/50216/how-to-trigger-a-form-and-pass-v
 Normal Priority
 ---------------
 
+- improve settings display. add little icon with settings in tooltip? misc/message-16-help.png
 - split out highlighting true by default. Don't include unless at least one field is given.
 - add ability to add permission callback or permission id to solr display profiles
 - add a check to see if the context is the search results page. Currently we
