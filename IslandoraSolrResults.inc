@@ -16,13 +16,11 @@ class IslandoraSolrResults {
   public $resultFieldArray = array();
   public $allSubsArray = array();
   public $islandoraSolrQueryProcessor;
+
   /**
    * Constructor
    */
   function IslandoraSolrResults() {
-
-    // include common.inc
-    module_load_include('inc', 'islandora_solr', 'includes/common');
     $this->prepFieldSubstitutions();
   }
 
@@ -559,51 +557,31 @@ class IslandoraSolrResults {
    */
   function displayFacets($islandoraSolrQuery) {
     // set variables
+    IslandoraSolrFacets::init();
     $facet_output = $output = '';
-    $facet_min_count = 1;
     $min_result = variable_get('islandora_solr_facet_min_limit', '2');
     $initial_limit = variable_get('islandora_solr_facet_soft_limit', '10');
     $facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
     $format = variable_get('islandora_solr_facet_date_format' , 'Y');
     $show_more = FALSE;
-    $range_facets = islandora_solr_get_range_facets();
 
+    $range_facets = islandora_solr_get_range_facets();
     // get facet values returned from solr
-    $facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_fields) ? $islandoraSolrQuery->solrResult->facet_counts->facet_fields : array();
-    $facets_json  = json_encode($facets);
-    $facets = json_decode($facets_json, TRUE);
+    $facets = IslandoraSolrFacets::getFacets($islandoraSolrQuery);
 
     // get date facet values
-    $date_facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_dates) ? $islandoraSolrQuery->solrResult->facet_counts->facet_dates : array();
-    $date_facets_json  = json_encode($date_facets);
-    $date_facets_arr = json_decode($date_facets_json, TRUE);
+    $date_facets_arr = IslandoraSolrFacets::getDateFacets($islandoraSolrQuery);
 
     // loop over each date field // clean up facet dates array
     $date_facets = array();
     foreach ($date_facets_arr as $key => $fields) {
       $date_facets[$key] = array();
       // check date format setting
-      foreach ($range_facets as $value) {
-        if ($value['solr_field'] == $key && isset($value['solr_field_settings']['date_facet_format']) && !empty($value['solr_field_settings']['date_facet_format'])) {
-          $format = $value['solr_field_settings']['date_facet_format'];
-        }
-      }
+      $format = IslandoraSolrFacets::getDateFormat($range_facets, $key);
       // render date facet fields
       foreach ($fields as $date => $number) {
-        // facet.date includes other values in the facet results - excluding these
-        // we're turning the facet results in an array with multiple values
-        if (!in_array($date, array('gap', 'end', 'other', 'hardend', 'include'))) {
-          // set number or documents
-          $date_facets[$key][$date]['number'] = $number;
-          // logic to get the next range key (next date)
-          $field_keys = array_keys($fields);
-          $field_key = array_search($date, $field_keys);
-          $field_key++;
-          $date_next = (!in_array($field_keys[$field_key], array('gap', 'end', 'other', 'hardend', 'include'))) ? $field_keys[$field_key] : $fields['end'];
-          // set date range filter for facet url
-          $date_facets[$key][$date]['range'] = '[' . $date . ' TO ' . $date_next . ']';
-          // set formatted value for facet link
-          $date_facets[$key][$date]['value'] = format_date(strtotime($date) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime($date_next) + (60 * 60 * 24), 'custom', $format);
+         if (!in_array($date, array('gap', 'end', 'other', 'hardend', 'include'))) {
+         $date_facets[$key][$date] = IslandoraSolrFacets::prepareDateRange($fields, $date, $number, $format);
         }
       }
     }
@@ -615,11 +593,17 @@ class IslandoraSolrResults {
     foreach ($facet_order as $term => $label) {
       $facets[$term] = $facets_unordered[$term];
     }
-
     // return if no facets are available
     if (empty($facets)) {
       return $output;
     }
+    // filter
+    $facets = IslandoraSolrFacets::filterMinValues($facets);
+
+    $minimum_values = IslandoraSolrFacets::$minimum_values; // remove later if $minimum_values isn't used in this method anymore.
+
+    $output_array = array(); // should become an array with indiviually rendered facets. Also, rename this later.
+    
 
     // loop over returned facet objects
     foreach ($facets as $facet_key => $facet) {
@@ -627,54 +611,52 @@ class IslandoraSolrResults {
       $list_title = NULL;
 
       // if the facet contains the minimum amount of values
-      if (count($facet) >= $facet_min_count) {
-        // set facet count
-        $facet_count = 0;
-
-        // render facet values
-        foreach ($facet as $value => $data) {
-          // add facet
-          $this->_addFacets($facet_key, $value, $data, $islandoraSolrQuery, $facet_count, $list_items, $min_result);
-        }
-
-        // check for minumum returned values again, because some might have been disabled
-        if (count($list_items) >= $facet_min_count) {
-
-          // opening facet div // @TODO: this should go in theme function
-          $facet_output .='<div class="islandora-solr-facet">';
-
-          // set title
-          $list_title = $this->facetFieldArray[$facet_key];
-
-          // check if facet value amount is larger than the initial limit
-          if ($facet_count > $initial_limit && $initial_limit < $facet_limit && $initial_limit > $facet_min_count) {
-            $split_facet = TRUE;
-          }
-          else {
-            $split_facet = FALSE;
-          }
-
-          if ($split_facet) {
-            $show_more = TRUE; //There exists a split array...
-            $list_items_hidden = array_slice($list_items, $initial_limit);
-            $list_items = array_slice($list_items, 0, $initial_limit);
-          }
-
-          // theme the facet as a list
-          $facet_output .= theme('item_list', array('items' => $list_items, 'title' => $list_title, 'type' => 'ul', 'attributes' => array('class' => 'facet-list')));
-
-          // render the hidden facets
-          if ($split_facet) {
-            $facet_output .= '<a href="#" class="soft-limit">' . t('Show more') . '</a>';
-            $facet_output .= '<a href="#" class="soft-limit hidden">' . t('Show less') . '</a>';
-            $facet_output .= '<div class="toggle-wrapper hidden">';
-            $facet_output .= theme('item_list', array('items' => $list_items_hidden, 'title' => NULL, 'type' => 'ul', 'attributes' => array('class' => 'facet-list')));
-            $facet_output .= '</div>';
-          }
-
-          $facet_output .='</div>'; //div.islandora-solr-facet
-        }
+      // set facet count
+      $facet_count = 0;
+      // render facet values
+      foreach ($facet as $value => $data) {
+        // add facet
+        $this->_addFacets($facet_key, $value, $data, $islandoraSolrQuery, $facet_count, $list_items, $min_result);
       }
+
+      // check for minumum returned values again, because some might have been disabled
+      if (count($list_items) >= $minimum_values) {
+
+        // opening facet div // @TODO: this should go in theme function
+        $facet_output .='<div class="islandora-solr-facet">';
+
+        // set title
+        $list_title = $this->facetFieldArray[$facet_key];
+
+        // check if facet value amount is larger than the initial limit
+        if ($facet_count > $initial_limit && $initial_limit < $facet_limit && $initial_limit > $minimum_values) {
+          $split_facet = TRUE;
+        }
+        else {
+          $split_facet = FALSE;
+        }
+
+        if ($split_facet) {
+          $show_more = TRUE; //There exists a split array...
+          $list_items_hidden = array_slice($list_items, $initial_limit);
+          $list_items = array_slice($list_items, 0, $initial_limit);
+        }
+
+        // theme the facet as a list
+        $facet_output .= theme('item_list', array('items' => $list_items, 'title' => $list_title, 'type' => 'ul', 'attributes' => array('class' => 'facet-list')));
+
+        // render the hidden facets
+        if ($split_facet) {
+          $facet_output .= '<a href="#" class="soft-limit">' . t('Show more') . '</a>';
+          $facet_output .= '<a href="#" class="soft-limit hidden">' . t('Show less') . '</a>';
+          $facet_output .= '<div class="toggle-wrapper hidden">';
+          $facet_output .= theme('item_list', array('items' => $list_items_hidden, 'title' => NULL, 'type' => 'ul', 'attributes' => array('class' => 'facet-list')));
+          $facet_output .= '</div>';
+        }
+
+        $facet_output .='</div>'; //div.islandora-solr-facet
+      }
+
     }
 
     if ($show_more) {
@@ -841,8 +823,6 @@ class IslandoraSolrResults {
     $this->allSubsArray = array_merge($this->facetFieldArray, $this->searchFieldArray, $this->resultFieldArray);
   }
 
-
-
   /**
    * Merges highlight fields with the rest of the solr results.
    *
@@ -892,6 +872,103 @@ class IslandoraSolrResults {
  */
     return $docs;
   }
-
 }
 
+/**
+ * Islandora Solr Facets
+ */
+
+/*
+class Foo {
+  private static $bar;
+  static function init()
+  {
+    self::$bar = array(…);
+  }
+}
+Foo::init();
+*/
+
+class IslandoraSolrFacets {
+  public static $minimum_values;
+/*
+  public $facet_min_count = 1;
+  public $min_result = variable_get('islandora_solr_facet_min_limit', '2');
+  public $initial_limit = variable_get('islandora_solr_facet_soft_limit', '10');
+  public $facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
+  public $format = variable_get('islandora_solr_facet_date_format' , 'Y');
+  public $range_facets = islandora_solr_get_range_facets();
+*/
+
+  /**
+   * Constructor
+   */
+  function IslandoraSolrFacets() {
+
+  }
+
+  public static function init() {
+    self::$minimum_values = 1;
+  }
+
+  /**
+   * Returns an array with the facet results.
+   */
+  public static function getFacets($islandoraSolrQuery) {
+    $facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_fields) ? $islandoraSolrQuery->solrResult->facet_counts->facet_fields : array();
+    $facets_json  = json_encode($facets);
+    return json_decode($facets_json, TRUE);
+  }
+
+  /**
+   * Returns an array with the date facet results.
+   */
+  public static function getDateFacets($islandoraSolrQuery) {
+    $date_facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_dates) ? $islandoraSolrQuery->solrResult->facet_counts->facet_dates : array();
+    $date_facets_json  = json_encode($date_facets);
+    return json_decode($date_facets_json, TRUE);
+  }
+
+  public static function getDateFormat($range_facets, $key) {
+    $date_format = NULL;
+    foreach ($range_facets as $value) {
+      if ($value['solr_field'] == $key && isset($value['solr_field_settings']['date_facet_format']) && !empty($value['solr_field_settings']['date_facet_format'])) {
+        $date_format = $value['solr_field_settings']['date_facet_format'];
+      }
+    }
+    return $date_format;
+  }
+
+  /**
+   * Given the raw date range restults, format the array values to include value,
+   * bucket_size and ISO 8601 date range for filtering.
+   */
+  public static function prepareDateRange($fields, $date, $number, $format) {
+    $item = array();
+    // set number or documents
+    $item['number'] = $number;
+    // logic to get the next range key (next date)
+    $field_keys = array_keys($fields);
+    $field_key = array_search($date, $field_keys);
+    $field_key++;
+    $date_next = (!in_array($field_keys[$field_key], array('gap', 'end', 'other', 'hardend', 'include'))) ? $field_keys[$field_key] : $fields['end'];
+    // set date range filter for facet url
+    $item['range'] = '[' . $date . ' TO ' . $date_next . ']';
+    // set formatted value for facet link
+    $item['value'] = format_date(strtotime($date) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime($date_next) + (60 * 60 * 24), 'custom', $format);
+    
+    return $item;
+  }
+
+  public static function filterMinValues($facets) {
+    $minimum_values = self::$minimum_values;
+    foreach ($facets as $key => $facet) {
+      if (count($facet) < $minimum_values) {
+        unset($facets[$key]);
+      }
+    }
+    return $facets;
+  }
+
+
+}
