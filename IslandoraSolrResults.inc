@@ -557,20 +557,20 @@ class IslandoraSolrResults {
    */
   function displayFacets($islandoraSolrQuery) {
     // set variables
-    IslandoraSolrFacets::init();
-    $facet_output = $output = '';
-    $min_result = variable_get('islandora_solr_facet_min_limit', '2');
-    $initial_limit = variable_get('islandora_solr_facet_soft_limit', '10');
-    $facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
-    $format = variable_get('islandora_solr_facet_date_format' , 'Y');
-    $show_more = FALSE;
+    IslandoraSolrFacets::init($islandoraSolrQuery);
 
+    $facet_output = $output = '';
+
+    $min_result = IslandoraSolrFacets::$min_result;     // remove this later
+    $initial_limit = IslandoraSolrFacets::$initial_limit;    // remove this later
+    $facet_limit = IslandoraSolrFacets::$facet_limit;    // remove this later
+$show_more = FALSE;
     $range_facets = islandora_solr_get_range_facets();
     // get facet values returned from solr
-    $facets = IslandoraSolrFacets::getFacets($islandoraSolrQuery);
+    $facets = IslandoraSolrFacets::getFacetFields();
 
     // get date facet values
-    $date_facets_arr = IslandoraSolrFacets::getDateFacets($islandoraSolrQuery);
+    $date_facets_arr = IslandoraSolrFacets::getFacetDates();
 
     // loop over each date field // clean up facet dates array
     $date_facets = array();
@@ -588,7 +588,7 @@ class IslandoraSolrResults {
 
     // merge facet fields with date facets and order
     $facets_unordered = array_merge($date_facets, $facets);
-    $facet_order = islandora_solr_get_fields('facet_fields');
+    $facet_order = $this->facetFieldArray;
     $facets = array();
     foreach ($facet_order as $term => $label) {
       $facets[$term] = $facets_unordered[$term];
@@ -603,10 +603,15 @@ class IslandoraSolrResults {
     $minimum_values = IslandoraSolrFacets::$minimum_values; // remove later if $minimum_values isn't used in this method anymore.
 
     $output_array = array(); // should become an array with indiviually rendered facets. Also, rename this later.
-    
 
     // loop over returned facet objects
     foreach ($facets as $facet_key => $facet) {
+
+
+      $facet_obj = new IslandoraSolrFacets($facet_key);
+
+
+
       $list_items = array();
       $list_title = NULL;
 
@@ -890,43 +895,75 @@ Foo::init();
 */
 
 class IslandoraSolrFacets {
-  public static $minimum_values;
-/*
-  public $facet_min_count = 1;
-  public $min_result = variable_get('islandora_solr_facet_min_limit', '2');
-  public $initial_limit = variable_get('islandora_solr_facet_soft_limit', '10');
-  public $facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
-  public $format = variable_get('islandora_solr_facet_date_format' , 'Y');
-  public $range_facets = islandora_solr_get_range_facets();
-*/
+  public static $islandoraSolrQuery;
+  public static $facet_fields; // normal facet results
+  public static $facet_dates; // date range facet results (Solr 1.4)
+  public static $facet_ranges; // date or integer range facet results (Solr 3.1)
 
+  public static $facet_fields_settings;
+  public static $range_facets; // rename?
+  public static $minimum_values;
+  public static $min_result;
+  public static $initial_limit;
+  public static $facet_limit;
+
+  public $facet_field;
+  public $settings;
+  public $facet_type;
+  public $results;
+  public $title;
+  public $content = array();
   /**
    * Constructor
    */
-  function IslandoraSolrFacets() {
-
+  function IslandoraSolrFacets($facet_field) {
+    $this->facet_field = $facet_field;
+    $this->facet();
   }
 
-  public static function init() {
+  public static function init($islandoraSolrQuery) {
+    self::$islandoraSolrQuery = $islandoraSolrQuery;
+    self::$facet_fields = self::getFacetFields();
+    self::$facet_dates = self::getFacetDates();
+    self::$facet_ranges = self::getFacetRanges(); // not in place yet.
+
     self::$minimum_values = 1;
+    self::$facet_fields_settings = islandora_solr_get_fields('facet_fields', TRUE, FALSE, TRUE); // filtered, not simplified and fields as keys
+    self::$range_facets = islandora_solr_get_range_facets();
+    self::$min_result = variable_get('islandora_solr_facet_min_limit', '2');
+    self::$initial_limit = variable_get('islandora_solr_facet_soft_limit', '10');
+    self::$facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
+
+    dsm(self::$facet_fields);
+    dsm(self::$facet_dates);
+    dsm(self::$facet_ranges);
   }
 
   /**
    * Returns an array with the facet results.
    */
-  public static function getFacets($islandoraSolrQuery) {
-    $facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_fields) ? $islandoraSolrQuery->solrResult->facet_counts->facet_fields : array();
-    $facets_json  = json_encode($facets);
-    return json_decode($facets_json, TRUE);
+  public static function getFacetFields() {
+    $facet_fields = isset(self::$islandoraSolrQuery->solrResult->facet_counts->facet_fields) ? self::$islandoraSolrQuery->solrResult->facet_counts->facet_fields : array();
+    $facet_fields_json  = json_encode($facet_fields);
+    return json_decode($facet_fields_json, TRUE);
   }
 
   /**
    * Returns an array with the date facet results.
    */
-  public static function getDateFacets($islandoraSolrQuery) {
-    $date_facets = isset($islandoraSolrQuery->solrResult->facet_counts->facet_dates) ? $islandoraSolrQuery->solrResult->facet_counts->facet_dates : array();
-    $date_facets_json  = json_encode($date_facets);
-    return json_decode($date_facets_json, TRUE);
+  public static function getFacetDates() {
+    $facet_dates = isset(self::$islandoraSolrQuery->solrResult->facet_counts->facet_dates) ? self::$islandoraSolrQuery->solrResult->facet_counts->facet_dates : array();
+    $facet_dates_json  = json_encode($facet_dates);
+    return json_decode($facet_dates_json, TRUE);
+  }
+
+  /**
+   * Returns an array with the range facet results.
+   */
+  public static function getFacetRanges() {
+    $facet_ranges = isset(self::$islandoraSolrQuery->solrResult->facet_counts->facet_ranges) ? self::$islandoraSolrQuery->solrResult->facet_counts->facet_ranges : array();
+    $facet_ranges_json  = json_encode($facet_ranges);
+    return json_decode($facet_ranges_json, TRUE);
   }
 
   public static function getDateFormat($range_facets, $key) {
@@ -956,10 +993,20 @@ class IslandoraSolrFacets {
     $item['range'] = '[' . $date . ' TO ' . $date_next . ']';
     // set formatted value for facet link
     $item['value'] = format_date(strtotime($date) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime($date_next) + (60 * 60 * 24), 'custom', $format);
-    
+
     return $item;
   }
 
+  /**
+   * Filters facets by minimum values.
+   *
+   * @param array $facets
+   *   Array with facet results from solr.
+   *
+   * @return array
+   *   A filtered array with facet results, with facets excluded with less results than
+   *   the given minimum.
+   */
   public static function filterMinValues($facets) {
     $minimum_values = self::$minimum_values;
     foreach ($facets as $key => $facet) {
@@ -968,6 +1015,225 @@ class IslandoraSolrFacets {
       }
     }
     return $facets;
+  }
+
+  // @TODO: rename?
+  public function facet() {
+    // 1. get settings for field
+    // 2. based on settings decide what to do.
+    // 3. some filtering: min values, array prep for date or number range. Do another query for variable range gap.
+    // 4. render facet. Theme, form, etc.
+    // 5. return rendered facet
+
+    // 1. Get settings for field
+    $this->settings = self::$facet_fields_settings[$this->facet_field];
+    dsm($this->settings);
+
+    $this->facetType();
+
+    $this->facetRender();
+
+  }
+
+  // check facet type of facet_field
+  public function facetType() {
+    // facet_fields
+    if (array_key_exists($this->facet_field, self::$facet_fields)) {
+      $this->facet_type = 'facet_fields';
+    }
+    // facet_dates
+    if (array_key_exists($this->facet_field, self::$facet_dates)) {
+      $this->facet_type = 'facet_dates';
+    }
+    // facet_ranges (not in place yet)
+    if (array_key_exists($this->facet_field, self::$facet_ranges)) {
+      $this->facet_type = 'facet_ranges';
+    }
+  }
+
+  // facet render (maybe to be merged with ::facetType() ?) 
+  public function facetRender() {
+    $facet_type = $this->facet_type;
+    // facet_fields
+    if ($facet_type == 'facet_fields') {
+      $this->results = self::$facet_fields[$this->facet_field];
+      $this->renderFacetFields();
+    }
+    // facet_dates
+    if ($facet_type == 'facet_dates') {
+      $this->results = self::$facet_dates[$this->facet_field];
+      $this->renderFacetDates();
+    }
+    // facet_ranges (not in place yet)    
+    if ($facet_type == 'facet_ranges') {
+      $this->results = self::$facet_ranges[$this->facet_field];
+      $this->renderFacetRanges();
+    }
+  }
+
+  // render facet_fields
+  public function renderFacetFields() {
+    $this->renderText();
+  }
+
+  // render facet_dates  
+  public function renderFacetDates() {
+    
+  }
+  
+  // render facet_ranges
+  public function renderFacetRanges() {
+    
+  }
+  
+  public function renderText() {
+    $facet_field = $this->facet_field;
+    $results = $this->results;
+    $islandoraSolrQuery = self::$islandoraSolrQuery;
+    //dsm($islandoraSolrQuery->solrParams['fq']);
+    
+    $buckets = array();
+    foreach ($results as $bucket => $count) {
+      
+      // Normal text
+      // @TODO: or range
+      $filter_value = $bucket;
+      // create url fq values to add
+      $filter = $facet_field . ':"' . $filter_value . '"'; // PID:"foo"
+      $filter_minus = '-' . $filter; // -PID:"foo"
+      
+      // current url query
+      $fq = isset($islandoraSolrQuery->solrParams['fq']) ? $islandoraSolrQuery->solrParams['fq'] : array();
+      
+      // check if item should show up
+      // 1. check if the filter isn't active
+      // 2. if the results of the facet items equals the total of current returned results, that means it's useless to include or exclude the filter.
+// I'm not sure about this, skip for now.
+/*
+      if ((array_search($filter, $fq) !== FALSE) || ($data == $islandoraSolrQuery->solrResult->response->numFound)) {
+        continue;
+      }
+*/
+  
+      // current path including query. e.g. islandora/solr/query
+      $path = SOLR_SEARCH_PATH . '/' . replace_slashes($islandoraSolrQuery->solrQuery); // $_GET['q'] didn't seem to work here
+      
+/*
+      $query_plus = array();
+      $query_minus = array();
+
+      // parameters set in url
+      $params = $islandoraSolrQuery->internalSolrParams;
+      // set filter key if there are no filters included
+      if (empty($params['f'])) {
+        $params['f'] = array();
+      }
+
+      // merge recursively to add new filter parameter
+      $query_plus = array_merge_recursive($params, array('f' => array($filter)));
+      $query_minus = array_merge_recursive($params, array('f' => array('-' . $filter)));
+
+      // set basic attributes
+      $attr = array('rel' => 'nofollow');
+      $attr_plus = $attr_minus = $attr;
+       // add url
+      $attr['href'] = url($path, array('query' => $query_plus));
+      $attr_plus['href'] = url($path, array('query' => $query_plus));
+      $attr_minus['href'] = url($path, array('query' => $query_minus));
+        // add classes
+      $attr_plus['class'] = 'plus';
+      $attr_minus['class'] = 'minus';
+        // create links
+      // we're not using l() because of active classes: http://drupal.org/node/41595
+      $list[] = '<a' . drupal_attributes($attr) . '>' . $value . '</a>' . ' <span class="count">(' . $data . ')</span>' .
+          '<span class="plusminus">' .
+          '<a' . drupal_attributes($attr_plus) . '>+</a>'
+          . ' ' .
+          '<a' . drupal_attributes($attr_minus) . '>-</a>'
+          . '</span>';
+*/
+
+      
+/*
+
+      // value of date facet is an array, normal facets is a string.
+      if (is_array($data)) {
+        // set value
+        $value = $data['value'];
+        // set filter to include in url
+        $filter = $key . ':' . $data['range'];
+        // set number of found solr documents
+        $data = $data['number'];
+        // don't include facet fields with a document count lower than the configured minimum
+        if ($data < $min_result) {
+          return;
+        }
+      }
+      else {
+        // @TODO: Should be changed to format_string for Drupal 7
+        // @TODO: does this check for exclude filters? -PID:"foo"
+        $filter = $key . ':"' . $value . '"'; // PID:"foo"
+      }
+  
+      //FIXME:  This isn't quite right...  It can make sense to facet on
+      //  the same field multiple times, provided it is multi-valued...
+  
+      $fq = isset($islandoraSolrQuery->solrParams['fq']) ? $islandoraSolrQuery->solrParams['fq'] : array();
+  
+      // check if item should show up
+      // 1. check if the filter isn't active
+      // 2. if the results of the facet items equals the total of current returned results, that means it's useless to include or exclude the filter.
+      $disable_link = (array_search($filter, $fq) !== FALSE) || $data == $islandoraSolrQuery->solrResult->response->numFound;
+  
+      // if link isn't disabled
+      if (!$disable_link) {
+  
+        // set variables
+        $path = SOLR_SEARCH_PATH . '/' . replace_slashes($islandoraSolrQuery->solrQuery); // $_GET['q'] didn't seem to work here
+  
+        $query_plus = array();
+        $query_minus = array();
+  
+        // parameters set in url
+        $params = $islandoraSolrQuery->internalSolrParams;
+        // set filter key if there are no filters included
+        if (empty($params['f'])) {
+          $params['f'] = array();
+        }
+  
+        // merge recursively to add new filter parameter
+        $query_plus = array_merge_recursive($params, array('f' => array($filter)));
+        $query_minus = array_merge_recursive($params, array('f' => array('-' . $filter)));
+  
+        // set basic attributes
+        $attr = array('rel' => 'nofollow');
+  
+        $attr_plus = $attr_minus = $attr;
+  
+        // add url
+        $attr['href'] = url($path, array('query' => $query_plus));
+        $attr_plus['href'] = url($path, array('query' => $query_plus));
+        $attr_minus['href'] = url($path, array('query' => $query_minus));
+  
+        // add classes
+        $attr_plus['class'] = 'plus';
+        $attr_minus['class'] = 'minus';
+  
+        // create links
+        // we're not using l() because of active classes: http://drupal.org/node/41595
+        $list[] = '<a' . drupal_attributes($attr) . '>' . $value . '</a>' . ' <span class="count">(' . $data . ')</span>' .
+            '<span class="plusminus">' .
+            '<a' . drupal_attributes($attr_plus) . '>+</a>'
+            . ' ' .
+            '<a' . drupal_attributes($attr_minus) . '>-</a>'
+            . '</span>';
+  
+        $facet_count++;
+      }
+    */
+    
+    
+    }
   }
 
 

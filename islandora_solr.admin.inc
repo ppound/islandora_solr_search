@@ -511,7 +511,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   if ($form_state['rebuild'] == FALSE) {
 
     // get values from DB
-    $records = islandora_solr_get_fields($field_type, FALSE, FALSE); // unfiltered and not simplified
+    $records = islandora_solr_get_fields($field_type, FALSE, FALSE); // unfiltered, not simplified and incremental keys
 
     // set fields to populate the admin table
     $fields = array();
