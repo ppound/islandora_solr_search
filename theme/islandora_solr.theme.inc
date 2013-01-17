@@ -104,3 +104,13 @@ function islandora_solr_preprocess_islandora_solr(&$variables) {
     }
   }
 }
+
+/**
+ * Implements hook_preprocess().
+ */
+function islandora_solr_preprocess_islandora_solr_facet(&$variables) {
+  $buckets = $variables['buckets'];
+  if ($variables['hidden']) {
+    $variables['classes_array'][] = 'hidden';
+  }
+}

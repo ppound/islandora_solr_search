@@ -11,8 +11,16 @@
       if (!$(".soft-limit").hasClass('processed')) {
         $(".soft-limit").click(function(e) {
           // toggle class .hidden
-          $(this).siblings(".hidden, .toggle-wrapper").toggleClass('hidden');
+          $(this).prev(".islandora-solr-facet").toggleClass('hidden');
           $(this).toggleClass('hidden');
+
+/*
+.toggle(function() {
+    $(this).text('Before');
+}, function() {
+    $(this).text('After');
+});
+*/
 
           e.preventDefault();
         });

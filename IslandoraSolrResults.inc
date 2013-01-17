@@ -561,9 +561,9 @@ class IslandoraSolrResults {
 
     $facet_output = $output = '';
 
-    $min_result = IslandoraSolrFacets::$min_result;     // remove this later
-    $initial_limit = IslandoraSolrFacets::$initial_limit;    // remove this later
-    $facet_limit = IslandoraSolrFacets::$facet_limit;    // remove this later
+    $min_limit = IslandoraSolrFacets::$min_limit;     // remove this later
+    $soft_limit = IslandoraSolrFacets::$soft_limit;    // remove this later
+    $max_limit = IslandoraSolrFacets::$max_limit;    // remove this later
 $show_more = FALSE;
     $range_facets = islandora_solr_get_range_facets();
     // get facet values returned from solr
@@ -610,6 +610,7 @@ $show_more = FALSE;
       $facet_obj = new IslandoraSolrFacets($facet_key);
 /*       if (!empty($facet_obj->facet_rendered)) { */
         $facet_output .= '<h3>' . $facet_obj->title . '</h3>';
+        $facet_output .= $facet_obj->content;
 /*         $facet_output .= $facet_obj->facet_rendered; */
 /*       } */
 /*
@@ -912,9 +913,9 @@ class IslandoraSolrFacets {
   public static $facet_fields_settings_simple;
   public static $range_facets; // rename?
   public static $minimum_values;
-  public static $min_result;
-  public static $initial_limit;
-  public static $facet_limit;
+  public static $min_limit; // not used here. remove?
+  public static $soft_limit;
+  public static $max_limit; // not used here. remove?
 
   public $facet_field;
   public $settings;
@@ -941,9 +942,9 @@ class IslandoraSolrFacets {
     self::$facet_fields_settings = islandora_solr_get_fields('facet_fields', TRUE, FALSE, TRUE); // filtered, not simplified and fields as keys
     self::$facet_fields_settings_simple = _islandora_solr_simplify_fields(self::$facet_fields_settings);
     self::$range_facets = islandora_solr_get_range_facets();
-    self::$min_result = variable_get('islandora_solr_facet_min_limit', '2');
-    self::$initial_limit = variable_get('islandora_solr_facet_soft_limit', '10');
-    self::$facet_limit = variable_get('islandora_solr_facet_max_limit', '20');
+    self::$min_limit = variable_get('islandora_solr_facet_min_limit', '2');
+    self::$soft_limit = variable_get('islandora_solr_facet_soft_limit', '10');
+    self::$max_limit = variable_get('islandora_solr_facet_max_limit', '20');
 
     dsm(self::$facet_fields);
     dsm(self::$facet_dates);
@@ -1103,7 +1104,8 @@ dsm($this->title);
     $facet_field = $this->facet_field;
     $results = $this->results;
     $islandoraSolrQuery = self::$islandoraSolrQuery;
-
+    $soft_limit = self::$soft_limit;
+ 
     $buckets = array();
     foreach ($results as $bucket => $count) {
       // Normal text
@@ -1113,15 +1115,6 @@ dsm($this->title);
       $filter = $facet_field . ':"' . $filter_value . '"'; // PID:"foo"
       // current url query
       $fq = isset($islandoraSolrQuery->solrParams['fq']) ? $islandoraSolrQuery->solrParams['fq'] : array();
-      // check if item should show up
-      // 1. check if the filter isn't active
-      // 2. if the results of the facet items equals the total of current returned results, that means it's useless to include or exclude the filter.
-// I'm not sure about this, skip for now.
-/*
-      if ((array_search($filter, $fq) !== FALSE) || ($count == $islandoraSolrQuery->solrResult->response->numFound)) {
-        continue;
-      }
-*/
       // current path including query. e.g. islandora/solr/query
       $path = SOLR_SEARCH_PATH . '/' . replace_slashes($islandoraSolrQuery->solrQuery); // $_GET['q'] didn't seem to work here
       // parameters set in url
@@ -1141,19 +1134,34 @@ dsm($this->title);
         // add classes
       $attr_plus['class'] = 'plus';
       $attr_minus['class'] = 'minus';
-        // create links
+      // create links
       // we're not using l() because of active classes: http://drupal.org/node/41595
-      $link = '<a' . drupal_attributes($attr) . '>' . $bucket . '</a>' . ' <span class="count">(' . $count . ')</span>' .
-          '<span class="plusminus">' .
-          '<a' . drupal_attributes($attr_plus) . '>+</a>'
-          . ' ' .
-          '<a' . drupal_attributes($attr_minus) . '>-</a>'
-          . '</span>';
-      $buckets[] = $link;
+      $link['link'] = '<a' . drupal_attributes($attr) . '>' . $bucket . '</a>';
+      $link['count'] = $count;      
+      $link['link_plus'] = '<a' . drupal_attributes($attr_plus) . '>+</a>';
+      $link['link_minus'] = '<a' . drupal_attributes($attr_minus) . '>-</a>';
+
+      $buckets[] = $link;      
     }
-    $this->facet_rendered = theme('item_list', array('items' => $buckets));
+    if (count($buckets) > $soft_limit) {
+      $buckets = array_slice($buckets, $soft_limit);
+      $buckets_hidden = array_slice($buckets, 0, $soft_limit);
+      $this->content = theme('islandora_solr_facet', array('buckets' => $buckets));
+      $this->content .= theme('islandora_solr_facet', array('buckets' => $buckets_hidden, 'hidden' => TRUE));   
+      $this->content .= $this->showMore();      
+    }
+    else {
+      $this->content = theme('islandora_solr_facet', array('buckets' => $buckets));
+    }
+    
+//    $this->facet_rendered = theme('item_list', array('items' => $buckets));
   }
 
+  public function showMore() {
+    drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_soft_limit.js');
+    $show_more = '<a href="#" class="soft-limit">' . t('Show more') . '</a>';
+    return $show_more;
+  }
   
 
 }
