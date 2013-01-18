@@ -71,6 +71,7 @@ http://drupal.stackexchange.com/questions/50216/how-to-trigger-a-form-and-pass-v
 Normal Priority
 ---------------
 
+- Facet settings: add checkbox to display facet as a separate block. Can be nice for sliders to display in the content top or bottom.
 - improve settings display. add little icon with settings in tooltip? misc/message-16-help.png
 - split out highlighting true by default. Don't include unless at least one field is given.
 - add ability to add permission callback or permission id to solr display profiles

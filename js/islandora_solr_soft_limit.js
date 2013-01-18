@@ -5,23 +5,20 @@
 
 (function ($) {
 
-  Drupal.behaviors.islandora_solr_toggle = {
+  // Adds facet toggle functionality
+  Drupal.behaviors.islandoraSolrToggle = {
     attach: function(context, settings) {
       // show more
       if (!$(".soft-limit").hasClass('processed')) {
         $(".soft-limit").click(function(e) {
           // toggle class .hidden
           $(this).prev(".islandora-solr-facet").toggleClass('hidden');
-          $(this).toggleClass('hidden');
-
-/*
-.toggle(function() {
-    $(this).text('Before');
-}, function() {
-    $(this).text('After');
-});
-*/
-
+          if ($(this).text() == Drupal.t('Show more')) {
+            $(this).text(Drupal.t('Show less'));
+          }
+          else {
+            $(this).text(Drupal.t('Show more'));
+          }
           e.preventDefault();
         });
         $(".soft-limit").addClass('processed');
