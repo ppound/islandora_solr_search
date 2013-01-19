@@ -703,7 +703,7 @@ class IslandoraSolrFacets {
   public static $facet_fields_settings;
   public static $facet_fields_settings_simple;
   public static $range_facets; // rename?
-  public static $minimum_values;
+  public static $minimum_count = 1;
   public static $min_limit; // not used here. remove?
   public static $soft_limit;
   public static $max_limit; // not used here. remove?
@@ -732,7 +732,6 @@ class IslandoraSolrFacets {
     self::$facet_dates = self::getFacetDates();
     self::$facet_ranges = self::getFacetRanges(); // not in place yet.
 
-    self::$minimum_values = 1;
     self::$facet_fields_settings = islandora_solr_get_fields('facet_fields', TRUE, FALSE, TRUE); // filtered, not simplified and fields as keys
     self::$facet_fields_settings_simple = _islandora_solr_simplify_fields(self::$facet_fields_settings);
     self::$range_facets = islandora_solr_get_range_facets();
@@ -740,9 +739,13 @@ class IslandoraSolrFacets {
     self::$soft_limit = variable_get('islandora_solr_facet_soft_limit', '10');
     self::$max_limit = variable_get('islandora_solr_facet_max_limit', '20'); // not used here. remove?
 
+/*
     dsm(self::$facet_fields);
     dsm(self::$facet_dates);
-    dsm(self::$facet_ranges);
+*/
+    // Calculate variable date gap.
+    self::variableDateGap(); // move elsewhere
+    
   }
 
   /**
@@ -782,7 +785,7 @@ class IslandoraSolrFacets {
    *   A filtered array with facet results, with facets excluded with less results than
    *   the given minimum.
    */
-  public static function filterMinValues($facets) {
+  public static function filterMinimumValues($facets) {
     $minimum_values = self::$minimum_values;
     foreach ($facets as $key => $facet) {
       if (count($facet) < $minimum_values) {
@@ -802,7 +805,6 @@ class IslandoraSolrFacets {
 
     // 1. Get settings for field
     $this->settings = self::$facet_fields_settings[$this->facet_field];
-//    dsm($this->settings);
     $this->title = self::$facet_fields_settings_simple[$this->facet_field];
 
     $this->facetType();
@@ -940,9 +942,9 @@ class IslandoraSolrFacets {
       $count = $values['count'];
       // current url query
       $fq = isset($islandoraSolrQuery->solrParams['fq']) ? $islandoraSolrQuery->solrParams['fq'] : array();
-      // 1. check if the filter isn't active
-      // 2. if the results of the facet items equals the total of current returned results, that means it's useless to include or exclude the filter.
-      if ($count < self::$minimum_values || array_search($filter, $fq) !== FALSE) {
+      // 1. check minimum count
+      // 2. check if the filter isn't active
+      if ($count < self::$minimum_count || array_search($filter, $fq) !== FALSE) {
         continue;
       }
       // current path including query. e.g. islandora/solr/query
@@ -992,4 +994,220 @@ class IslandoraSolrFacets {
   }
 
 
+  // We're only calculating variable gaps in the verbose way using facet_dates,
+  // because statscomponent for dates isn't available until Solr 3.5 and that would be performed on facet_ranges
+  // will only be used for facet_dates in Solr 1.4 
+
+  // Should probably be static because I think it's cheaper on performance if we combine multiple date calculations.
+  public static function variableDateGap() {
+    // 1. gather info
+    // 2. calculate and render range gap
+    // 3. execute
+    // 4. prepare for return
+    // 5. update date facets
+
+    // 1. gather info
+    // check settings
+    // @TODO: move this to separate function!
+    $facet_fields_settings = self::$facet_fields_settings;
+    $variable_date_gap = array();
+    foreach ($facet_fields_settings as $key => $settings) {
+      if (isset($settings['solr_field_settings']['range_facet_variable_gap']) && $settings['solr_field_settings']['range_facet_variable_gap'] == 1) {
+        $variable_date_gap[] = $settings['solr_field'];
+      }
+    }
+
+    $islandoraSolrQuery = self::$islandoraSolrQuery;
+    $fq = isset($islandoraSolrQuery->solrParams['fq']) ? $islandoraSolrQuery->solrParams['fq'] : array();
+    $facet_dates = self::$facet_dates;
+    // populate with terms that needed a second solr call to update facets
+    $needs_solr_call = array();
+
+    // loop over all date facets
+    foreach ($facet_dates as $solr_field => $buckets) {
+      $values = array();
+      // loop over all filters
+      foreach ($fq as $key => $filter) {
+        // check for enabled range filters
+        if (strpos($filter, $solr_field) === FALSE) {
+          continue;
+        }
+        // Don't include excluded ranges for now, because it's complicated.
+        // Maybe keep it like this for Solr 1.4. Solr 3.5 and up would calculate this
+        // through the StatsComponent.
+        if (substr($filter, 0, 1) == '-') {
+          continue;
+        }
+        // Check 'variable range gap' settings for this field.
+        // @TODO: this could be done differently?
+        if (!in_array($solr_field, $variable_date_gap)) {
+          continue;
+        }
+        // split the filter into field and value
+        $filter_split = explode(':', $filter, 2);
+        // trim brackets
+        $filter_split[1] = trim($filter_split[1], "\"");
+        // split range filter string to return formatted date values
+        $filter_str = $filter_split[1];
+        $filter_str = trim($filter_str, '[');
+        $filter_str = trim($filter_str, ']');
+        $filter_array = explode(' TO ', $filter_str);
+        // collect values in array: timestamp => ISO8601
+        $from_str = trim($filter_array[0]);
+        $to_str = trim($filter_array[1]);
+        $field = trim($filter_split[0], ' -');
+        // if a star is given, we need to perform an extra query to find out
+        // what the minimum or maximum value is that 'star' would return.
+        if (strpos($from_str, '*') !== FALSE) {
+          $from_str = self::findMinMaxValue($field, 'asc');
+        }
+        if (strpos($to_str, '*') !== FALSE) {
+          $to_str = self::findMinMaxValue($field, 'desc');
+        }
+        $values['from'][strtotime(strtolower($from_str))] = $from_str;
+        $values['to'][strtotime(strtolower($to_str))] = $to_str;
+      }
+
+      // if the date facet field is found as at least one range filter, calculate gap
+      if (empty($values)) {
+        continue;
+      }
+
+      // from max value & to min value
+      $from_unix = max(array_keys($values['from']));
+      $to_unix = min(array_keys($values['to']));
+
+      // if the from date is bigger than the to date, abort.
+      if ($from_unix >= $to_unix) {
+        continue;
+      }
+
+      // get ISO8601 values
+      $from = $values['from'][$from_unix];
+      // if the hour is 00:00:00, subtract one second. If we always subtract
+      // one second we keep eating away seconds after every filter
+      if (strpos($from, '00:00:00') !== FALSE) {
+        $from .= '-1SECOND';
+      }
+      $to = $values['to'][$to_unix];
+
+      // 2. calculate and render range gap
+      // calculate difference between from and to date
+      $diff = abs($from_unix - $to_unix);
+
+      // total difference in days
+      $total_days = floor($diff / 60 / 60 / 24);
+
+      // for maximum 15 buckets
+      // @TODO: make max buckets variable
+      // @TODO: fine tune this: it's not very precise.
+      if ($total_days <= 15) {
+        $gap = '+1DAY';
+      }
+      elseif ($total_days <= 105) {
+        $gap = '+7DAYS';
+      }
+      elseif ($total_days <= 450) {
+        $gap = '+1MONTH';
+      }
+      elseif ($total_days <= 5475) {
+        $gap = '+1YEAR';
+      }
+      elseif ($total_days <= 10950) {
+        $gap = '+2YEARS';
+      }
+      elseif ($total_days <= 18250) {
+        $gap = '+5YEARS';
+      }
+      elseif ($total_days <= 54750) {
+        $gap = '+10YEARS';
+      }
+      elseif ($total_days <= 547500) {
+        $gap = '+100YEARS';
+      }
+      elseif ($total_days <= 5475000) {
+        $gap = '+1000YEARS';
+      }
+
+      // update range facet values
+      // @TODO: try to find a way to clone this object, because it's passed by reference throughout the entire page call.
+      $islandoraSolrQuery->solrParams["f.$solr_field.facet.date.start"] = $from;
+      $islandoraSolrQuery->solrParams["f.$solr_field.facet.date.end"] = $to;
+      $islandoraSolrQuery->solrParams["f.$solr_field.facet.date.gap"] = $gap;
+
+      // update variable
+      $needs_solr_call[] = $solr_field;
+    }
+
+    // 3. execute
+    // if an extra solr call is necessary
+    if (!empty($needs_solr_call)) {
+      // new query processor class
+      $rangeQuery = new IslandoraSolrQueryProcessor();
+
+      // internal solr query
+      $rangeQuery->internalSolrQuery = $islandoraSolrQuery->internalSolrQuery;
+      // add solr limit
+      $rangeQuery->solrLimit = 0;
+      // add solr start
+      $rangeQuery->solrStart = 0;
+      // add query (defaults to *:*)
+      $rangeQuery->solrQuery = $islandoraSolrQuery->solrQuery;
+      // add solr parameters
+      $rangeQuery->solrParams = $islandoraSolrQuery->solrParams;
+      // no need to include normal facets
+      unset($rangeQuery->solrParams['facet.field']);
+
+      // excecute query
+      $rangeQuery->executeQuery();
+
+      // 4. prepare for return
+      // solr results
+      $results = $rangeQuery->solrResult;
+      $raw_response = $results->getRawResponse();
+      $response_array = json_decode($raw_response, TRUE);
+
+      // new date_facets
+      $new_facet_dates = $response_array['facet_counts']['facet_dates'];
+
+      // 5. update date facets
+      self::$facet_dates = $new_facet_dates;    
+    }
+  }
+
+  /**
+   * Finds the maximum or minimum value of a date field in a query. Called when
+   * one of the values in a date range filter equals to '*'.
+   * 
+   * @param object $solrQueryProcessor
+   *   current solr query object.
+   * @param string $field
+   *   solr field to sort on.
+   * @param string $order
+   *   sort order (asc or desc). Defaults to ascending.
+   * @return string
+   *   maximum or minimum value of a date field in the current query
+   */
+  public static function findMinMaxValue($field, $order = 'asc') {
+    $islandoraSolrQuery = self::$islandoraSolrQuery;
+
+    // new query processor class
+    $minMaxQuery = new IslandoraSolrQueryProcessor();
+    $minMaxQuery->internalSolrQuery = $islandoraSolrQuery->internalSolrQuery;
+    $minMaxQuery->solrLimit = 1;
+    $minMaxQuery->solrStart = 0;
+    $minMaxQuery->solrQuery = $islandoraSolrQuery->solrQuery;
+    $minMaxQuery->solrParams = $islandoraSolrQuery->solrParams;
+    // no need to include normal facets
+    unset($minMaxQuery->solrParams['facet.field']);
+    // add the right sorting
+    $minMaxQuery->solrParams['sort'] = $field . ' ' . $order;
+    $minMaxQuery->executeQuery();
+    // solr results
+    $results = $minMaxQuery->solrResult;
+    $raw_response = $results->getRawResponse();
+    $response_array = json_decode($raw_response, TRUE);
+
+    return $response_array['response']['docs'][0][$field];
+  }
 }
