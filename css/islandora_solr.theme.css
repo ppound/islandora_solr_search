@@ -79,3 +79,158 @@ dl.solr-fields
 {
   border-top: 0;
 }
+
+
+
+/* Date filters */
+
+.islandora-solr-date-filter label
+{
+  display: inline-block;  
+}
+
+.islandora-solr-date-filter input,
+.islandora-solr-range-slider input
+{
+  float: right;  
+}
+
+.islandora-solr-date-filter form,
+.islandora-solr-range-slider form
+{
+  float: left;
+  width: 100%;
+}
+
+.islandora-solr-date-filter .description
+{
+  font-size: 0.85em;
+}
+
+.islandora-solr-date-filter .date-range-expanded-wrapper
+{
+  
+}
+
+.islandora-solr-date-filter .date-range-collapsed-wrapper
+{
+
+}
+
+.islandora-solr-date-filter .date-range-filter-wrapper
+{
+  
+}
+table.ui-datepicker tbody td.ui-datepicker-current-day a
+{
+  background: yellow;
+}
+
+table.ui-datepicker tbody td.ui-datepicker-today a
+{
+  background: #cbe5fc;
+}
+
+.islandora-solr-range-slider .ui-slider
+{
+  height: 2px;
+  border: 0px;
+  background: #ccc;
+  margin-bottom: 20px;
+}
+
+.islandora-solr-range-slider .ui-slider-range
+{
+  background: #edc240;
+  height: 1px;
+}
+
+.islandora-solr-date-filter .form-item label
+{
+  display: inline-block;
+}
+
+.islandora-solr-range-slider .ui-state-default,
+.islandora-solr-range-slider .ui-widget-content .ui-state-default,
+.islandora-solr-range-slider .ui-slider-handle
+{
+  background: url('../images/slider-handle.png') top center no-repeat transparent;
+  border: 0px;
+  top: 2px; 
+  cursor: pointer;
+}
+
+.islandora-solr-range-slider .ui-slider-handle:hover {
+  background: url('../images/slider-handle.png') top center no-repeat transparent;
+  border: 0px;
+  top: 2px;
+}
+
+.islandora-solr-range-slider .date-range-slider-canvas-wrapper
+{
+
+}
+
+.islandora-solr-range-slider .range-slider-fromto
+{
+  text-align: center;
+}
+
+.islandora-solr-range-slider .date-range-slider-gap
+{
+  text-align: center;
+}
+
+
+#ui-datepicker-div {
+  z-index: 9999; /*must have*/
+}
+
+.slider-popup-from-wrapper,
+.slider-popup-to-wrapper
+{
+  display: none;
+  
+  position: absolute;
+  width: 120px;
+  top: -40px;
+  left: 50%;
+  margin-left: -60px;
+  text-align: center;
+}
+
+.slider-popup-from,
+.slider-popup-to
+{
+  padding: 0px 10px 1px 10px;
+  
+  font-size: 11px;
+  color: #333;
+  
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px 10px 10px 10px;
+}
+
+#range-slider-tooltip
+{
+  display: none;
+  position: absolute;
+  width: 250px;
+
+  text-align: center;
+  z-index: 9999;
+}
+
+#range-slider-tooltip span
+{
+  padding: 0px 10px 1px 10px;
+
+  
+  font-size: 11px;
+  color: #333;
+  
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px 10px 10px 10px;
+}

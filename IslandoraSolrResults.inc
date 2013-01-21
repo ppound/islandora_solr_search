@@ -707,7 +707,9 @@ class IslandoraSolrFacets {
   public static $min_limit; // not used here. remove?
   public static $soft_limit;
   public static $max_limit; // not used here. remove?
-  public static $default_range_values = array('gap', 'end', 'other', 'hardend', 'include'); // include 'start'?
+  public static $exclude_range_values = array('gap', 'end', 'other', 'hardend', 'include'); // include 'start'?
+  public static $needed_solr_call;
+  public static $range_slider_key = 0;
 
   public $facet_field;
   public $settings;
@@ -743,6 +745,8 @@ class IslandoraSolrFacets {
     dsm(self::$facet_fields);
     dsm(self::$facet_dates);
 */
+/* dsm(self::$facet_fields_settings); */
+
     // Calculate variable date gap.
     self::variableDateGap(); // move elsewhere
     
@@ -856,8 +860,26 @@ class IslandoraSolrFacets {
 
   // render facet_dates
   public function renderFacetDates() {
-    $prepared_facet_dates = $this->prepareFacetDates();
-    $this->renderText($prepared_facet_dates);
+    // @TODO: make this check better. Could be pluggable in the future.
+    // checks from D6:
+/*  if (variable_get('islandora_solr_range_slider_enabled', 0) == 1 
+      AND array_key_exists($facet_key, $date_facets_arr) 
+      AND $solrQueryProcessor->solrResult->response->numFound > 0 
+      AND module_exists('jquery_ui')  
+      AND jquery_ui_get_version() >= 1.7 
+      AND !islandora_solr_is_ie_less_then(9)) { */
+    if (isset($this->settings['solr_field_settings']['range_facet_slider_enabled']) && $this->settings['solr_field_settings']['range_facet_slider_enabled'] == 1) {
+      // prepare and render facet dates as slider.
+      $facet_dates_as_slider = $this->prepareFacetDatesSlider();
+      if (!empty($facet_dates_as_slider)) {
+        $this->renderSlider($facet_dates_as_slider);              
+      }
+    }
+    else {
+      // prepare and render facet dates as text.
+      $facet_dates_as_text = $this->prepareFacetDates();
+      $this->renderText($facet_dates_as_text);
+    }
   }
 
   // render facet_ranges
@@ -865,7 +887,7 @@ class IslandoraSolrFacets {
 
   }
 
-  // get date format from settings
+  // get date format from settings (make static?)
   public function getDateFormat() {
     if (isset($this->settings['solr_field_settings']['date_facet_format']) && !empty($this->settings['solr_field_settings']['date_facet_format'])) {
       return $this->settings['solr_field_settings']['date_facet_format'];
@@ -890,39 +912,31 @@ class IslandoraSolrFacets {
     return $facet_results;
   }
 
-  /**
-   * Given the raw date range restults, format the array values to include value,
-   * bucket_size and ISO 8601 date range for filtering.
-   */
-  public static function prepareDateRange($results, $bucket, $count, $format, $facet_field) {
-
-    $item = array();
-    // set count or documents
-    $item['count'] = $count;
-    // logic to get the next range key (next date)
-    $field_keys = array_keys($results);
-    $field_key = array_search($bucket, $field_keys);
-    $field_key++;
-    $bucket_next = (!in_array($field_keys[$field_key], self::$default_range_values)) ? $field_keys[$field_key] : $results['end'];
-    // set date range filter for facet url
-    $item['filter'] = $facet_field . ':[' . $bucket . ' TO ' . $bucket_next . ']';
-    // set formatted value for facet link
-    $item['bucket'] = format_date(strtotime($bucket) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime($bucket_next) + (60 * 60 * 24), 'custom', $format);
-
-    return $item;
-  }
-
-  // prepare facet dates. calls ::prepareDateRange (name these 2 functions differently?)
+  // prepare facet dates as text (default)
   public function prepareFacetDates() {
     $facet_field = $this->facet_field;
     $results = $this->results;
     $format = self::getDateFormat();
-    $date_results = array();   
+    $date_results = array();
     // render date facet fields
     foreach ($results as $bucket => $count) {
-      if (!in_array($bucket, self::$default_range_values)) {
-        $date_results[] = IslandoraSolrFacets::prepareDateRange($results, $bucket, $count, $format, $facet_field);
+      // don't include gap, end, etc that comes with range results
+      if (in_array($bucket, self::$exclude_range_values)) {
+        continue;
       }
+      $item = array();
+      // set count or documents
+      $item['count'] = $count;
+      // logic to get the next range key (next date)
+      $field_keys = array_keys($results);
+      $field_key = array_search($bucket, $field_keys);
+      $field_key++;
+      $bucket_next = (!in_array($field_keys[$field_key], self::$exclude_range_values)) ? $field_keys[$field_key] : $results['end'];
+      // set date range filter for facet url
+      $item['filter'] = $facet_field . ':[' . $bucket . ' TO ' . $bucket_next . ']';
+      // set formatted value for facet link
+      $item['bucket'] = format_date(strtotime($bucket) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime($bucket_next) + (60 * 60 * 24), 'custom', $format);
+      $date_results[] = $item;
     }
     return $date_results;
   }
@@ -987,16 +1001,192 @@ class IslandoraSolrFacets {
     }
   }
 
+  // add link and js for to show more facet results.
   public function showMore() {
-    drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_soft_limit.js');
+    drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_facets.js');
     $show_more = '<a href="#" class="soft-limit">' . t('Show more') . '</a>';
     return $show_more;
   }
+
+  // prepare facet dates for slider
+  // @TODO: this code can use some improvement. Also a bit to long.
+  public function prepareFacetDatesSlider() {
+    $facet_field = $this->facet_field;
+    $settings = $this->settings;
+    $results = $this->results;
+    $format = self::getDateFormat();
+    $needed_solr_call = self::$needed_solr_call;
+    $range_slider_key = self::$range_slider_key;
+
+    $date_results = array();
+    // grab gap and end, and strip all non-buckets in results
+    $results_gap = $results['gap'];
+    $results_end = $results['end'];
+    foreach (self::$exclude_range_values as $exclude) {
+      unset($results[$exclude]);
+    }
+
+    // strip empty buckets top and bottom when no date range filters are set
+    if (!in_array($facet_field, $needed_solr_call)) {
+      // strip top
+      foreach ($results as $bucket => $count) {
+        if ($count == 0) {
+          unset($results[$bucket]);
+        }
+        else {
+          break;
+        }
+      }
+      // reverse and strip other side
+      $results = array_reverse($results);
+      $new_end = array();
+      foreach ($results as $bucket => $count) {
+        if ($count == 0) {
+          unset($results[$bucket]);
+          $new_end = array('bucket' => $bucket, 'count' => $count);
+        }
+        else {
+          break;
+        }
+      }
+      // reverse to normal order
+      $results = array_reverse($results);
+
+      // add end date
+      if (isset($new_end['count']) AND $new_end['count'] == 0) {
+        $end_bucket = $new_end['bucket'];
+        $results[$end_bucket] = NULL;
+      }
+      else {
+        $results[$results_end] = NULL;
+      }
+    }
+    // do not strip empty buckets left and right when filters are set
+    else {
+      // add end date
+      $results[$results_end] = NULL;
+    }
+
+    // if values are available
+    if (count($results) <= 1) {
+      return array();  
+    }
+
+    // calculate gap
+    $calc_from = strtotime(key($results));
+    next($results);
+    $calc_to = strtotime(key($results));
+
+    // calculate difference between from and to date
+    $calc_diff = abs($calc_from - $calc_to);
+
+    // total difference in days
+    $calc_total_days = floor($calc_diff / 60 / 60 / 24);
+
+    // get gap based on total days diff
+    // @TODO: could be done nicer.
+    // @TODO: date_format configurable.
+    $gap = NULL;
+    $date_format = 'Y';
+    if ($calc_total_days == 1) {
+      $gap = t('days');
+      $date_format = 'M j, Y';
+    }
+    elseif ($calc_total_days == 7) {
+      $gap = t('weeks');
+      $date_format = 'M j, Y';
+    }
+    elseif ($calc_total_days >= 28 && $calc_total_days <= 32) {
+      $gap = t('months');
+      $date_format = 'M Y';
+    }
+    elseif ($calc_total_days >= 360 && $calc_total_days <= 370) {
+      $gap = t('years');
+      $date_format = 'Y';
+    }
+    elseif ($calc_total_days >= 720 && $calc_total_days <= 740) {
+      $gap = t('2 years');
+      $date_format = 'Y';
+    }
+    elseif ($calc_total_days >= 1800 && $calc_total_days <= 1850) {
+      $gap = t('5 years');
+      $date_format = 'Y';
+    }
+    elseif ($calc_total_days >= 3600 && $calc_total_days <= 3700) {
+      $gap = t('decades');
+      $date_format = 'Y';
+    }
+    elseif ($calc_total_days >= 36000 && $calc_total_days <= 37000) {
+      $gap = t('centuries');
+      $date_format = 'Y';
+    }
+    elseif ($calc_total_days >= 360000 && $calc_total_days <= 370000) {
+      $gap = t('millennia');
+      $date_format = 'Y';
+    }
+
+    // create a nice array with our data
+    $data = array();
+    foreach ($results as $bucket => $count) {
+      $bucket_formatted = format_date(strtotime(trim($bucket)) + 1, 'custom', $date_format);
+      
+      $bucket_formatted = str_replace(' ', '&nbsp;', $bucket_formatted);
+      $data[] = array(
+        'date' => $bucket,
+        'bucket' => $bucket_formatted,
+        'count' => $count,
+      );
+    }
+
+    // add range slider color
+    if (isset($settings['solr_field_settings']['range_facet_slider_color']) && !empty($settings['solr_field_settings']['range_facet_slider_color'])) {
+      $slider_color = $settings['solr_field_settings']['range_facet_slider_color'];
+    }
+    else {
+      $slider_color = '#edc240';
+    }
+
+    $elements = array(
+      'data' => $data,
+      'facet_field' => $facet_field,
+      'slider_color' => $slider_color,
+      'gap' => $gap,
+      'date_format' => $date_format,
+      'form_key' => $range_slider_key,
+    );
+    self::$range_slider_key++;
+    
+    return $elements;
+  }
+  
+  // render date and range facets as slider
+  public function renderSlider($facet_dates_as_slider) {
+    $elements = $facet_dates_as_slider;
+    $range_slider_form = drupal_get_form('islandora_solr_range_slider_form_' . $elements['form_key'], $elements);
+    // @TODO: do this markup better
+    $this->content = '<div class="islandora-solr-range-slider">';
+    $this->content .= drupal_render($range_slider_form);
+    $this->content .= '</div>';
+  }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   // We're only calculating variable gaps in the verbose way using facet_dates,
   // because statscomponent for dates isn't available until Solr 3.5 and that would be performed on facet_ranges
   // will only be used for facet_dates in Solr 1.4 
+
+  // step 1. would be different when statsComponent is available. And step 2 should be different for normal integer ranges as well.
 
   // Should probably be static because I think it's cheaper on performance if we combine multiple date calculations.
   public static function variableDateGap() {
@@ -1171,8 +1361,9 @@ class IslandoraSolrFacets {
       $new_facet_dates = $response_array['facet_counts']['facet_dates'];
 
       // 5. update date facets
-      self::$facet_dates = $new_facet_dates;    
+      self::$facet_dates = $new_facet_dates;  
     }
+    self::$needed_solr_call = $needs_solr_call;
   }
 
   /**
