@@ -92,7 +92,13 @@ dl.solr-fields
 .islandora-solr-date-filter input,
 .islandora-solr-range-slider input
 {
-  float: right;  
+  float: right;
+}
+
+.islandora-solr-date-filter input.form-submit,
+.islandora-solr-range-slider input.form-submit
+{
+  margin-right: 0;
 }
 
 .islandora-solr-date-filter form,

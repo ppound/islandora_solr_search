@@ -710,6 +710,7 @@ class IslandoraSolrFacets {
   public static $exclude_range_values = array('gap', 'end', 'other', 'hardend', 'include'); // include 'start'?
   public static $needed_solr_call;
   public static $range_slider_key = 0;
+  public static $date_filter_key = 0;
 
   public $facet_field;
   public $settings;
@@ -811,6 +812,8 @@ class IslandoraSolrFacets {
     $this->settings = self::$facet_fields_settings[$this->facet_field];
     $this->title = self::$facet_fields_settings_simple[$this->facet_field];
 
+/* dsm($this->settings); */
+
     $this->facetType();
 
     $this->facetRender();
@@ -868,6 +871,7 @@ class IslandoraSolrFacets {
       AND module_exists('jquery_ui')  
       AND jquery_ui_get_version() >= 1.7 
       AND !islandora_solr_is_ie_less_then(9)) { */
+
     if (isset($this->settings['solr_field_settings']['range_facet_slider_enabled']) && $this->settings['solr_field_settings']['range_facet_slider_enabled'] == 1) {
       // prepare and render facet dates as slider.
       $facet_dates_as_slider = $this->prepareFacetDatesSlider();
@@ -880,6 +884,15 @@ class IslandoraSolrFacets {
       $facet_dates_as_text = $this->prepareFacetDates();
       $this->renderText($facet_dates_as_text);
     }
+    // date filter
+    if (isset($this->settings['solr_field_settings']['date_filter_datepicker_enabled']) && $this->settings['solr_field_settings']['date_filter_datepicker_enabled'] == 1) {
+      // prepare and render facet dates as slider.
+      $facet_dates_datefilter = $this->prepareFacetDatesFilter();
+      if (!empty($facet_dates_datefilter)) {
+        $this->renderFacetDatesFilter($facet_dates_datefilter);              
+      }
+    }
+    
   }
 
   // render facet_ranges
@@ -1169,8 +1182,42 @@ class IslandoraSolrFacets {
     $this->content .= '</div>';
   }
 
+  // prepare values for facet dates filter
+  public function prepareFacetDatesFilter() {
+    // datepicker range
+    if (isset($settings['solr_field_settings']['date_filter_datepicker_range']) && !empty($settings['solr_field_settings']['date_filter_datepicker_range'])) {
+      $datepicker_range = $settings['solr_field_settings']['date_filter_datepicker_range'];
+    }
+    else {
+      $datepicker_range = '-100:+3';
+    }
 
+    $elements = array(
+      'facet_field' => $this->facet_field,
+      'datepicker_range' => $datepicker_range,
+      'form_key' => self::$date_filter_key,
+    );
+    self::$date_filter_key++;
+    
+    return $elements;
+  }
 
+  public function renderFacetDatesFilter($elements) {
+    $date_filter_key = self::$date_filter_key;
+    $date_filter_form = drupal_get_form('islandora_solr_date_filter_form_' . $elements['form_key'], $elements);
+    // @TODO: this should go in a theme function
+    $this->content .= '<div class="islandora-solr-date-filter">';    
+    $this->content .= drupal_render($date_filter_form);
+    $this->content .= '</div>';
+    
+    // include datepicker js
+    drupal_add_library('system', 'ui.datepicker');
+    // add datepicker css
+    drupal_add_css('misc/ui/jquery.ui.datepicker.css');
+    $date_range = variable_get('islandora_solr_search_datepicker_range', '-100:+3');
+    // add js settings
+    drupal_add_js(array('islandoraSolrDatepickerRange' => trim($date_range)), 'setting');
+  }
 
 
 

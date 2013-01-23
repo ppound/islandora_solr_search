@@ -24,59 +24,59 @@
   }
 
 
-/*
-// Show/hide date range filter
-Drupal.behaviors.dateRangeFilter = function (context) {
- 
-  // set variables
-  var stringHide = Drupal.t('Hide');
-  var stringShow = Drupal.t('Show');
- 
-  if (!$('.toggle-date-range-filter').hasClass('processed')) {
-   
-    // hide all regions that should be collapsed
-    $('.date-range-collapsed').next('.date-range-filter-wrapper').css({'display': 'none'});
-   
-    $('.toggle-date-range-filter').click(function() {
-      // toggle strings
-      if ($(this).html() == stringHide) {
-        $(this).html(stringShow);
-      }
-      else {
-        $(this).html(stringHide);
-      }
-   
-      // toggle wrapper
-      $(this).next('.date-range-filter-wrapper').slideToggle('fast');
+  // Show/hide date filter
+  Drupal.behaviors.islandoraSolrDateFilter = {
+    attach: function(context, settings) {
+      // set variables
+      var stringHide = Drupal.t('Hide');
+      var stringShow = Drupal.t('Show');
      
-      return false;
-    });
-
-    $('.toggle-date-range-filter').addClass('processed');
+      if (!$('.toggle-date-range-filter').hasClass('processed')) {
+       
+        // hide all regions that should be collapsed
+        $('.date-range-collapsed').parent('.date-filter-toggle-text').next('.date-range-filter-wrapper').css({'display': 'none'});
+       
+        $('.toggle-date-range-filter').click(function() {
+          // toggle strings
+          if ($(this).html() == stringHide) {
+            $(this).html(stringShow);
+          }
+          else {
+            $(this).html(stringHide);
+          }
+       
+          // toggle wrapper
+          $(this).parent('.date-filter-toggle-text').next('.date-range-filter-wrapper').slideToggle('fast');
+         
+          return false;
+        });
+    
+        $('.toggle-date-range-filter').addClass('processed');
+      }
+    }
   }
-}
-*/
 
 
-/*
-// Datepicker
-Drupal.behaviors.islandoraSolrDatePicker = function (context) {
-  if (!Drupal.settings.islandoraSolrDatepicker) {
-    return;
+  // Datepicker
+  Drupal.behaviors.islandoraSolrDatepicker = {
+    attach: function(context, settings) {
+
+      if (!Drupal.settings.islandoraSolrDatepickerRange) {
+        return;
+      }
+      // get year range variable
+      var yearRangeVal = Drupal.settings.islandoraSolrDatepickerRange;
+    console.log(yearRangeVal);
+      // set datepicker
+      // @TODO: add date range functionality: http://jqueryui.com/demos/datepicker/#date-range
+      $(".islandora-solr-datepicker").datepicker({
+        changeMonth: true,
+        changeYear: true,
+        dateFormat: "yy/mm/dd",
+        yearRange: yearRangeVal
+      });
+    }
   }
-  // get year range variable
-  var yearRangeVal = Drupal.settings.islandora_solr_datepicker_range;
-
-  // set datepicker
-  // @TODO: add date range functionality: http://jqueryui.com/demos/datepicker/#date-range
-  $(".islandora-solr-search-datepicker").datepicker({
-    changeMonth: true,
-    changeYear: true,
-    dateFormat: "yy/mm/dd",
-    yearRange: yearRangeVal
-  });
-}
-*/
 
 
 
