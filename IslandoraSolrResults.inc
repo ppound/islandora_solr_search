@@ -695,6 +695,7 @@ Foo::init();
 */
 
 class IslandoraSolrFacets {
+
   public static $islandoraSolrQuery;
   public static $facet_fields; // normal facet results
   public static $facet_dates; // date range facet results (Solr 1.4)
@@ -742,10 +743,10 @@ class IslandoraSolrFacets {
     self::$soft_limit = variable_get('islandora_solr_facet_soft_limit', '10');
     self::$max_limit = variable_get('islandora_solr_facet_max_limit', '20'); // not used here. remove?
 
-/*
-    dsm(self::$facet_fields);
-    dsm(self::$facet_dates);
-*/
+
+/*    dsm(self::$facet_fields);*/
+/*     dsm(self::$facet_dates); */
+
 /* dsm(self::$facet_fields_settings); */
 
     // Calculate variable date gap.
@@ -1141,7 +1142,7 @@ class IslandoraSolrFacets {
     // create a nice array with our data
     $data = array();
     foreach ($results as $bucket => $count) {
-      $bucket_formatted = format_date(strtotime(trim($bucket)) + 1, 'custom', $date_format);
+      $bucket_formatted = format_date(strtotime(trim($bucket)) + 1, 'custom', $date_format, 'UTC');
       
       $bucket_formatted = str_replace(' ', '&nbsp;', $bucket_formatted);
       $data[] = array(
@@ -1184,6 +1185,7 @@ class IslandoraSolrFacets {
 
   // prepare values for facet dates filter
   public function prepareFacetDatesFilter() {
+    $settings = $this->settings;
     // datepicker range
     if (isset($settings['solr_field_settings']['date_filter_datepicker_range']) && !empty($settings['solr_field_settings']['date_filter_datepicker_range'])) {
       $datepicker_range = $settings['solr_field_settings']['date_filter_datepicker_range'];
@@ -1209,14 +1211,6 @@ class IslandoraSolrFacets {
     $this->content .= '<div class="islandora-solr-date-filter">';    
     $this->content .= drupal_render($date_filter_form);
     $this->content .= '</div>';
-    
-    // include datepicker js
-    drupal_add_library('system', 'ui.datepicker');
-    // add datepicker css
-    drupal_add_css('misc/ui/jquery.ui.datepicker.css');
-    $date_range = variable_get('islandora_solr_search_datepicker_range', '-100:+3');
-    // add js settings
-    drupal_add_js(array('islandoraSolrDatepickerRange' => trim($date_range)), 'setting');
   }
 
 

@@ -23,7 +23,6 @@
     }
   }
 
-
   // Show/hide date filter
   Drupal.behaviors.islandoraSolrDateFilter = {
     attach: function(context, settings) {
@@ -56,35 +55,32 @@
     }
   }
 
-
   // Datepicker
   Drupal.behaviors.islandoraSolrDatepicker = {
     attach: function(context, settings) {
-
-      if (!Drupal.settings.islandoraSolrDatepickerRange) {
+      if (!settings.islandoraSolrDatepickerRange) {
         return;
       }
-      // get year range variable
-      var yearRangeVal = Drupal.settings.islandoraSolrDatepickerRange;
-    console.log(yearRangeVal);
-      // set datepicker
-      // @TODO: add date range functionality: http://jqueryui.com/demos/datepicker/#date-range
-      $(".islandora-solr-datepicker").datepicker({
-        changeMonth: true,
-        changeYear: true,
-        dateFormat: "yy/mm/dd",
-        yearRange: yearRangeVal
+      var datepickerRange = settings.islandoraSolrDatepickerRange;
+      $.each(datepickerRange, function() {
+        var formKey = this.formKey;
+        var yearRangeVal = this.datepickerRange;
+        // set datepicker
+        $(".islandora-solr-datepicker-" + formKey).datepicker({
+          changeMonth: true,
+          changeYear: true,
+          dateFormat: "yy/mm/dd",
+          yearRange: yearRangeVal
+        });      
       });
     }
   }
-
-
 
   // Range slider
   Drupal.behaviors.islandoraSolrRangeSlider = {
     attach: function(context, settings) {
       // get year range variable
-      var rangeSliderVals = Drupal.settings.islandoraSolrRangeSlider;
+      var rangeSliderVals = settings.islandoraSolrRangeSlider;
       if (rangeSliderVals) {
         // loop over each range slider facet
         $.each(rangeSliderVals, function() {
