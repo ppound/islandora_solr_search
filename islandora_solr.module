@@ -300,8 +300,6 @@ function islandora_solr($query = NULL) {
     $results_class = new IslandoraSolrResults();
     $output = $results_class->displayResults($_islandora_solr_queryclass);
   }
-  
-  dsm($_islandora_solr_queryclass);
 
   // Fire a hook to alter the solr search results, used for book and newspaper viewers search hit highlighting
   drupal_alter('islandora_solr_search_results', $output, $_islandora_solr_queryclass);
