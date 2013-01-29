@@ -1,22 +1,5 @@
 /* Theme style sheet for islandora solr */
 
-
-/* Facets */
-
-.islandora-solr-facet-name,
-.islandora-solr-facet-title
-{
-  font-weight:bold;
-}
-
-.islandora-solr-facet-wrap ul li
-{
-  font-size:90%;
-  line-height: 1.3em;
-}
-
-
-
 /* breadcrumbs */
 
 .strikethrough
@@ -29,8 +12,6 @@
   vertical-align: super;
   font-size: 80%;
 }
-
-
 
 /* Default solr results styling (list) */
 
@@ -81,18 +62,17 @@ dl.solr-fields
 }
 
 
-
-/* Date filters */
+/* Range filter */
 
 .islandora-solr-date-filter label
 {
   display: inline-block;  
 }
 
-.islandora-solr-date-filter input,
-.islandora-solr-range-slider input
+.islandora-solr-range-slider,
+.islandora-solr-date-filter
 {
-  float: right;
+  text-align: right;
 }
 
 .islandora-solr-date-filter input.form-submit,
@@ -104,29 +84,16 @@ dl.solr-fields
 .islandora-solr-date-filter form,
 .islandora-solr-range-slider form
 {
-  float: left;
   width: 100%;
 }
 
 .islandora-solr-date-filter .description
 {
+  margin: 5px 0;
+  text-align: left;
   font-size: 0.85em;
 }
 
-.islandora-solr-date-filter .date-range-expanded-wrapper
-{
-  
-}
-
-.islandora-solr-date-filter .date-range-collapsed-wrapper
-{
-
-}
-
-.islandora-solr-date-filter .date-range-filter-wrapper
-{
-  
-}
 table.ui-datepicker tbody td.ui-datepicker-current-day a
 {
   background: yellow;
@@ -172,11 +139,6 @@ table.ui-datepicker tbody td.ui-datepicker-today a
   top: 2px;
 }
 
-.islandora-solr-range-slider .date-range-slider-canvas-wrapper
-{
-
-}
-
 .islandora-solr-range-slider .range-slider-fromto
 {
   text-align: center;
@@ -187,7 +149,6 @@ table.ui-datepicker tbody td.ui-datepicker-today a
   text-align: center;
 }
 
-
 #ui-datepicker-div {
   z-index: 9999; /*must have*/
 }
@@ -196,7 +157,6 @@ table.ui-datepicker tbody td.ui-datepicker-today a
 .slider-popup-to-wrapper
 {
   display: none;
-  
   position: absolute;
   width: 120px;
   top: -40px;
@@ -209,10 +169,8 @@ table.ui-datepicker tbody td.ui-datepicker-today a
 .slider-popup-to
 {
   padding: 0px 10px 1px 10px;
-  
   font-size: 11px;
   color: #333;
-  
   background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 10px 10px 10px 10px;
@@ -223,7 +181,6 @@ table.ui-datepicker tbody td.ui-datepicker-today a
   display: none;
   position: absolute;
   width: 250px;
-
   text-align: center;
   z-index: 9999;
 }
@@ -231,11 +188,8 @@ table.ui-datepicker tbody td.ui-datepicker-today a
 #range-slider-tooltip span
 {
   padding: 0px 10px 1px 10px;
-
-  
   font-size: 11px;
   color: #333;
-  
   background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 10px 10px 10px 10px;

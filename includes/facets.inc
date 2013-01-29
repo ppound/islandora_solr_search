@@ -35,13 +35,13 @@ function islandora_solr_forms($form_id, $args) {
  */
 function islandora_solr_date_filter_form($form, &$form_state, $elements) {
   global $_islandora_solr_queryclass;
-
   extract($elements);
-
+  
   $form = array(
     '#tree' => TRUE,
+    '#prefix' => '<div class="islandora-solr-date-filter">',
+    '#suffix' => '</div>',
   );
-
   // Field
   $form['date_filter_facet_field'] = array(
     '#type' => 'hidden',
@@ -280,10 +280,14 @@ function islandora_solr_range_slider_form($form, &$form_state, $elements) {
   extract($elements);
   $from_default = current($data);
   $to_default = end($data);
-  $gap = ($gap) ? "($gap)" : $gap;
+  if (!empty($gap)) {
+    $gap = "({$gap})";
+  }
 
   $form = array(
     '#tree' => TRUE,
+    '#prefix' => '<div class="islandora-solr-range-slider">',
+    '#suffix' => '</div>',
   );
   // Field
   $form['range_slider_term'] = array(
@@ -291,14 +295,14 @@ function islandora_solr_range_slider_form($form, &$form_state, $elements) {
     '#value' => $facet_field,
     '#name' => 'range_slider_term_' . $form_key,
   );
-  // @TODO: throw all this markup in a theme function
-  // total from - to
-  // gap
-  // canvas
-  // slider
-  // tooltip over slider with current date
+  $slider_variables = array(
+    'form_key' => $form_key,
+    'gap' => $gap,
+    'range_from' => format_date(strtotime(trim($from_default['date'])) + 1, 'custom', $date_format, 'UTC'),
+    'range_to' => format_date(strtotime(trim($to_default['date'])), 'custom', $date_format, 'UTC'),
+  );  
   $form['markup'] = array(
-    '#markup' => '<div class="range-slider-fromto" id="range-slider-fromto-' . $form_key . '"><span class="range-slider-from">' . format_date(strtotime(trim($from_default['date'])) + 1, 'custom', $date_format, 'UTC') . '</span> - <span class="range-slider-to">' . format_date(strtotime(trim($to_default['date'])), 'custom', $date_format, 'UTC') . '</span></div><div class="date-range-slider-gap">' . $gap . '</div><div id="slider-amount-' . $form_key . '"></div><div id="date-range-slider-canvas-' . $form_key . '" class="date-range-slider-canvas-wrapper"></div><div id="date-range-slider-' . $form_key . '"></div>', // call theme function instead
+    '#markup' => theme('islandora_solr_range_slider', $slider_variables),
   );
   // hidden from
   $form['range_slider_hidden_from'] = array(

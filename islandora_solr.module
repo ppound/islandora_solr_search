@@ -173,6 +173,19 @@ function islandora_solr_theme() {
       'template' => 'islandora-solr-facet',
       'variables' => array('buckets' => NULL, 'hidden' => FALSE),
     ),
+     // facet wrapper
+    'islandora_solr_facet_wrapper' => array(
+      'path' => $path . '/theme',
+      'file' => $file,
+      'variables' => array('title' => NULL, 'content' => NULL),
+    ),
+     // range slider
+    'islandora_solr_range_slider' => array(
+      'path' => $path . '/theme',
+      'file' => $file,
+      'template' => 'islandora-solr-range-slider',
+      'variables' => array('form_key' => NULL, 'gap' => NULL, 'range_from' => NULL, 'range_to' => NULL),
+    ),
   );
 }
 

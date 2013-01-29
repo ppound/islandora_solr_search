@@ -556,31 +556,19 @@ class IslandoraSolrResults {
    * // @TODO: clean this entire method up. It's really messy. Including _addFacets().
    */
   function displayFacets($islandoraSolrQuery) {
-    // set variables
     IslandoraSolrFacets::init($islandoraSolrQuery);
-
-    $facet_output = $output = '';
-
-    // merge facet fields with date facets and order
-//     $facets_unordered = array_merge($date_facets, $facets);
+    $output = '';
     $facet_order = $this->facetFieldArray;
 
-    // loop over returned facet objects
     foreach ($facet_order as $facet_key => $facet_label) {
       $facet_obj = new IslandoraSolrFacets($facet_key);
-      $facet_output .= '<h3>' . $facet_obj->title . '</h3>';
-      $facet_output .= $facet_obj->content;
+      $output .= $facet_obj->getFacet();
     }
 
     // As we add additional facets, we're repeatedly URL-encoding old facet
     // strings. when we double-encode quotation marks they're incomprehensible
     // to solr. This is a quick workaround:                                                      //
-    $facet_output = str_replace('%2B', '%252B', $facet_output);
-    if (!empty($facet_output)) {
-      $output .='<div class="islandora-solr-facet-wrap">';
-      $output .= $facet_output;
-      $output .= '</div>';
-    }
+    $output = str_replace('%2B', '%252B', $output);
 
     return $output;
   }
@@ -682,20 +670,7 @@ class IslandoraSolrResults {
 /**
  * Islandora Solr Facets
  */
-
-/*
-class Foo {
-  private static $bar;
-  static function init()
-  {
-    self::$bar = array(…);
-  }
-}
-Foo::init();
-*/
-
 class IslandoraSolrFacets {
-
   public static $islandoraSolrQuery;
   public static $facet_fields; // normal facet results
   public static $facet_dates; // date range facet results (Solr 1.4)
@@ -705,10 +680,8 @@ class IslandoraSolrFacets {
   public static $facet_fields_settings_simple;
   public static $range_facets; // rename?
   public static $minimum_count = 1;
-  public static $min_limit; // not used here. remove?
   public static $soft_limit;
-  public static $max_limit; // not used here. remove?
-  public static $exclude_range_values = array('gap', 'end', 'other', 'hardend', 'include'); // include 'start'?
+  public static $exclude_range_values;
   public static $needed_solr_call;
   public static $range_slider_key = 0;
   public static $date_filter_key = 0;
@@ -717,16 +690,14 @@ class IslandoraSolrFacets {
   public $settings;
   public $facet_type;
   public $results;
-  public $title;
-  public $content;
-//  public $facet_rendered;
+  public $title = NULL;
+  public $content = NULL;
 
   /**
    * Constructor
    */
   function IslandoraSolrFacets($facet_field) {
     $this->facet_field = $facet_field;
-    $this->facet();
   }
 
   // static init
@@ -739,19 +710,15 @@ class IslandoraSolrFacets {
     self::$facet_fields_settings = islandora_solr_get_fields('facet_fields', TRUE, FALSE, TRUE); // filtered, not simplified and fields as keys
     self::$facet_fields_settings_simple = _islandora_solr_simplify_fields(self::$facet_fields_settings);
     self::$range_facets = islandora_solr_get_range_facets();
-    self::$min_limit = variable_get('islandora_solr_facet_min_limit', '2'); // not used here. remove?
     self::$soft_limit = variable_get('islandora_solr_facet_soft_limit', '10');
-    self::$max_limit = variable_get('islandora_solr_facet_max_limit', '20'); // not used here. remove?
-
+    self::$exclude_range_values = array('gap', 'end', 'other', 'hardend', 'include'); // include 'start'?
 
 /*    dsm(self::$facet_fields);*/
 /*     dsm(self::$facet_dates); */
-
 /* dsm(self::$facet_fields_settings); */
 
     // Calculate variable date gap.
-    self::variableDateGap(); // move elsewhere
-    
+    self::variableDateGap(); // move elsewhere?
   }
 
   /**
@@ -781,43 +748,23 @@ class IslandoraSolrFacets {
     return json_decode($facet_ranges_json, TRUE);
   }
 
-  /**
-   * Filters facets by minimum values.
-   *
-   * @param array $facets
-   *   Array with facet results from solr.
-   *
-   * @return array
-   *   A filtered array with facet results, with facets excluded with less results than
-   *   the given minimum.
-   */
-  public static function filterMinimumValues($facets) {
-    $minimum_values = self::$minimum_values;
-    foreach ($facets as $key => $facet) {
-      if (count($facet) < $minimum_values) {
-        unset($facets[$key]);
-      }
-    }
-    return $facets;
-  }
-
-  // @TODO: rename?
-  public function facet() {
-    // 1. get settings for field
-    // 2. based on settings decide what to do.
-    // 3. some filtering: min values, array prep for date or number range. Do another query for variable range gap.
-    // 4. render facet. Theme, form, etc.
-    // 5. return rendered facet
-
-    // 1. Get settings for field
+  // collects settings, prepares data and renders the facet.
+  public function getFacet() {
     $this->settings = self::$facet_fields_settings[$this->facet_field];
     $this->title = self::$facet_fields_settings_simple[$this->facet_field];
-
-/* dsm($this->settings); */
 
     $this->facetType();
 
     $this->facetRender();
+
+    if (empty($this->content)) {
+      return;
+    }
+    $elements = array(
+      'title' => $this->title,
+      'content' => $this->content,
+    );
+    return theme('islandora_solr_facet_wrapper', $elements);
   }
 
   // check facet type of facet_field
@@ -842,16 +789,25 @@ class IslandoraSolrFacets {
     // facet_fields
     if ($facet_type == 'facet_fields') {
       $this->results = self::$facet_fields[$this->facet_field];
+      if (empty($this->results)) {
+        return;
+      }
       $this->renderFacetFields();
     }
     // facet_dates
     if ($facet_type == 'facet_dates') {
       $this->results = self::$facet_dates[$this->facet_field];
+      if (empty($this->results)) {
+        return;
+      }
       $this->renderFacetDates();
     }
     // facet_ranges (not in place yet)
     if ($facet_type == 'facet_ranges') {
       $this->results = self::$facet_ranges[$this->facet_field];
+      if (empty($this->results)) {
+        return;
+      }
       $this->renderFacetRanges();
     }
   }
@@ -865,15 +821,9 @@ class IslandoraSolrFacets {
   // render facet_dates
   public function renderFacetDates() {
     // @TODO: make this check better. Could be pluggable in the future.
-    // checks from D6:
-/*  if (variable_get('islandora_solr_range_slider_enabled', 0) == 1 
-      AND array_key_exists($facet_key, $date_facets_arr) 
-      AND $solrQueryProcessor->solrResult->response->numFound > 0 
-      AND module_exists('jquery_ui')  
-      AND jquery_ui_get_version() >= 1.7 
-      AND !islandora_solr_is_ie_less_then(9)) { */
-
-    if (isset($this->settings['solr_field_settings']['range_facet_slider_enabled']) && $this->settings['solr_field_settings']['range_facet_slider_enabled'] == 1) {
+    if (isset($this->settings['solr_field_settings']['range_facet_slider_enabled']) &&
+        $this->settings['solr_field_settings']['range_facet_slider_enabled'] == 1 &&
+        !islandora_solr_is_ie_less_then(9)) {
       // prepare and render facet dates as slider.
       $facet_dates_as_slider = $this->prepareFacetDatesSlider();
       if (!empty($facet_dates_as_slider)) {
@@ -886,14 +836,14 @@ class IslandoraSolrFacets {
       $this->renderText($facet_dates_as_text);
     }
     // date filter
-    if (isset($this->settings['solr_field_settings']['date_filter_datepicker_enabled']) && $this->settings['solr_field_settings']['date_filter_datepicker_enabled'] == 1) {
+    if (isset($this->settings['solr_field_settings']['date_filter_datepicker_enabled']) &&
+        $this->settings['solr_field_settings']['date_filter_datepicker_enabled'] == 1) {
       // prepare and render facet dates as slider.
       $facet_dates_datefilter = $this->prepareFacetDatesFilter();
       if (!empty($facet_dates_datefilter)) {
         $this->renderFacetDatesFilter($facet_dates_datefilter);              
       }
     }
-    
   }
 
   // render facet_ranges
@@ -903,7 +853,8 @@ class IslandoraSolrFacets {
 
   // get date format from settings (make static?)
   public function getDateFormat() {
-    if (isset($this->settings['solr_field_settings']['date_facet_format']) && !empty($this->settings['solr_field_settings']['date_facet_format'])) {
+    if (isset($this->settings['solr_field_settings']['date_facet_format']) &&
+        !empty($this->settings['solr_field_settings']['date_facet_format'])) {
       return $this->settings['solr_field_settings']['date_facet_format'];
     }
     else {
@@ -1006,7 +957,7 @@ class IslandoraSolrFacets {
     if (count($buckets) > $soft_limit) {
       $buckets_visible = array_slice($buckets, 0, $soft_limit);
       $buckets_hidden = array_slice($buckets, $soft_limit);
-      $this->content = theme('islandora_solr_facet', array('buckets' => $buckets_visible));
+      $this->content .= theme('islandora_solr_facet', array('buckets' => $buckets_visible));
       $this->content .= theme('islandora_solr_facet', array('buckets' => $buckets_hidden, 'hidden' => TRUE));
       $this->content .= $this->showMore();
     }
@@ -1090,7 +1041,6 @@ class IslandoraSolrFacets {
     $calc_from = strtotime(key($results));
     next($results);
     $calc_to = strtotime(key($results));
-
     // calculate difference between from and to date
     $calc_diff = abs($calc_from - $calc_to);
 
@@ -1098,7 +1048,7 @@ class IslandoraSolrFacets {
     $calc_total_days = floor($calc_diff / 60 / 60 / 24);
 
     // get gap based on total days diff
-    // @TODO: could be done nicer.
+    // @TODO: could be done nicer?
     // @TODO: date_format configurable.
     $gap = NULL;
     $date_format = 'Y';
@@ -1153,7 +1103,8 @@ class IslandoraSolrFacets {
     }
 
     // add range slider color
-    if (isset($settings['solr_field_settings']['range_facet_slider_color']) && !empty($settings['solr_field_settings']['range_facet_slider_color'])) {
+    if (isset($settings['solr_field_settings']['range_facet_slider_color']) &&
+        !empty($settings['solr_field_settings']['range_facet_slider_color'])) {
       $slider_color = $settings['solr_field_settings']['range_facet_slider_color'];
     }
     else {
@@ -1177,10 +1128,7 @@ class IslandoraSolrFacets {
   public function renderSlider($facet_dates_as_slider) {
     $elements = $facet_dates_as_slider;
     $range_slider_form = drupal_get_form('islandora_solr_range_slider_form_' . $elements['form_key'], $elements);
-    // @TODO: do this markup better
-    $this->content = '<div class="islandora-solr-range-slider">';
     $this->content .= drupal_render($range_slider_form);
-    $this->content .= '</div>';
   }
 
   // prepare values for facet dates filter
@@ -1207,10 +1155,9 @@ class IslandoraSolrFacets {
   public function renderFacetDatesFilter($elements) {
     $date_filter_key = self::$date_filter_key;
     $date_filter_form = drupal_get_form('islandora_solr_date_filter_form_' . $elements['form_key'], $elements);
-    // @TODO: this should go in a theme function
-    $this->content .= '<div class="islandora-solr-date-filter">';    
+/*     $this->content .= '<div class="islandora-solr-date-filter">';     */
     $this->content .= drupal_render($date_filter_form);
-    $this->content .= '</div>';
+/*     $this->content .= '</div>'; */
   }
 
 

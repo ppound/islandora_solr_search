@@ -114,3 +114,14 @@ function islandora_solr_preprocess_islandora_solr_facet(&$variables) {
     $variables['classes_array'][] = 'hidden';
   }
 }
+
+/**
+ * Theme function for facet wrapper.
+ */
+function theme_islandora_solr_facet_wrapper($variables) {
+  $output = '<div class="islandora-solr-facet-wrapper">';
+  $output .= '<h3>' . $variables['title'] . '</h3>';
+  $output .= $variables['content'];
+  $output .= '</div>';
+  return $output;
+}
