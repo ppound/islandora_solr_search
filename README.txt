@@ -1,19 +1,15 @@
 SUMMARY
 -------
 
-
-
-List example:
- * Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-   Donec pulvinar volutpat mi, in vestibulum lorem posuere vitae.
- * Donec a feugiat elit.
-   Cras faucibus volutpat quam non ornare.
+Islandora Solr provides a highly configurable interface to perform Solr queries and display
+Solr data in different ways.
 
 
 REQUIREMENTS
 ------------
 
  * Islandora
+ * Apache Solr 1.4 or higher.
 
 
 INSTALLATION

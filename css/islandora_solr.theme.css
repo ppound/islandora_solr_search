@@ -75,6 +75,12 @@ dl.solr-fields
   text-align: right;
 }
 
+.islandora-solr-date-filter label
+{
+  float: left;
+  margin: 5px 0;
+}
+
 .islandora-solr-date-filter input.form-submit,
 .islandora-solr-range-slider input.form-submit
 {

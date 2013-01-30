@@ -694,13 +694,25 @@ class IslandoraSolrFacets {
   public $content = NULL;
 
   /**
-   * Constructor
+   * Constructor method. Stores the facet field name, settings and title in a parameter.
+   *
+   * @param string $facet_field
+   *   The name of the solr field to build a facet for.
    */
   function IslandoraSolrFacets($facet_field) {
     $this->facet_field = $facet_field;
+    $this->settings = self::$facet_fields_settings[$facet_field];
+    $this->title = self::$facet_fields_settings_simple[$facet_field];
   }
 
-  // static init
+  /**
+   * Static init.
+   *
+   * Populates static variables with Solr query results and user settings.
+   *
+   * @param object $islandoraSolrQuery
+   *   Object containing the Solr query and results.
+   */
   public static function init($islandoraSolrQuery) {
     self::$islandoraSolrQuery = $islandoraSolrQuery;
     self::$facet_fields = self::getFacetFields();
@@ -712,10 +724,6 @@ class IslandoraSolrFacets {
     self::$range_facets = islandora_solr_get_range_facets();
     self::$soft_limit = variable_get('islandora_solr_facet_soft_limit', '10');
     self::$exclude_range_values = array('gap', 'end', 'other', 'hardend', 'include'); // include 'start'?
-
-/*    dsm(self::$facet_fields);*/
-/*     dsm(self::$facet_dates); */
-/* dsm(self::$facet_fields_settings); */
 
     // Calculate variable date gap.
     self::variableDateGap(); // move elsewhere?
@@ -748,15 +756,23 @@ class IslandoraSolrFacets {
     return json_decode($facet_ranges_json, TRUE);
   }
 
-  // collects settings, prepares data and renders the facet.
+  /**
+   * Prepare and render facet.
+   *
+   * Method called after a facet object is created. This will prepare the results based on
+   * the type and user settings for this facet. It also does a call to render the prepared
+   * data. This method also returns the rendered endresult.
+   * 
+   * @return string
+   *   Returns the title and rendered facet.
+   */
   public function getFacet() {
-    $this->settings = self::$facet_fields_settings[$this->facet_field];
-    $this->title = self::$facet_fields_settings_simple[$this->facet_field];
-
-    $this->facetType();
-
-    $this->facetRender();
-
+    $this->findFacetType();
+    $this->getFacetResults();
+    if (empty($this->results)) {
+      return;
+    }
+    $this->processFacets();
     if (empty($this->content)) {
       return;
     }
@@ -767,63 +783,100 @@ class IslandoraSolrFacets {
     return theme('islandora_solr_facet_wrapper', $elements);
   }
 
-  // check facet type of facet_field
-  public function facetType() {
+  /**
+   * Check facet type
+   *
+   * Depending on facet type and Solr version, Solr will return different types of facets in
+   * different arrays in the results object. Itereate where the current facet object has
+   * returned.
+   */
+  public function findFacetType() {
+    $facet_field = $this->facet_field;
     // facet_fields
-    if (array_key_exists($this->facet_field, self::$facet_fields)) {
+    if (array_key_exists($facet_field, self::$facet_fields)) {
       $this->facet_type = 'facet_fields';
     }
     // facet_dates
-    if (array_key_exists($this->facet_field, self::$facet_dates)) {
+    if (array_key_exists($facet_field, self::$facet_dates)) {
       $this->facet_type = 'facet_dates';
     }
     // facet_ranges (not in place yet)
-    if (array_key_exists($this->facet_field, self::$facet_ranges)) {
+    if (array_key_exists($facet_field, self::$facet_ranges)) {
       $this->facet_type = 'facet_ranges';
     }
   }
 
-  // facet render (maybe to be merged with ::facetType() ?)
-  public function facetRender() {
+  /**
+   * Gets facet results.
+   *
+   * Finds and stores facet results from the Solr query into a property.
+   */
+  public function getFacetResults() {
+    $facet_field = $this->facet_field;
     $facet_type = $this->facet_type;
     // facet_fields
     if ($facet_type == 'facet_fields') {
-      $this->results = self::$facet_fields[$this->facet_field];
-      if (empty($this->results)) {
-        return;
-      }
-      $this->renderFacetFields();
+      $this->results = self::$facet_fields[$facet_field];
     }
     // facet_dates
     if ($facet_type == 'facet_dates') {
-      $this->results = self::$facet_dates[$this->facet_field];
-      if (empty($this->results)) {
-        return;
-      }
-      $this->renderFacetDates();
+      $this->results = self::$facet_dates[$facet_field];
     }
     // facet_ranges (not in place yet)
     if ($facet_type == 'facet_ranges') {
-      $this->results = self::$facet_ranges[$this->facet_field];
-      if (empty($this->results)) {
-        return;
-      }
-      $this->renderFacetRanges();
+      $this->results = self::$facet_ranges[$facet_field];
     }
   }
 
-  // render facet_fields
-  public function renderFacetFields() {
+  /**
+   * Process facets.
+   *
+   * Calls a process method based on the facet type. This method exists so this
+   * process of preparing and rendering arrays can be started from one simple method
+   * call.
+   */
+  public function processFacets() {
+    $facet_type = $this->facet_type;
+    // facet_fields
+    if ($facet_type == 'facet_fields') {
+      $this->processFacetFields();
+    }
+    // facet_dates
+    if ($facet_type == 'facet_dates') {
+      $this->processFacetDates();
+    }
+    // facet_ranges (not in place yet)
+    if ($facet_type == 'facet_ranges') {
+      $this->processFacetRanges();
+    }
+  }
+
+  /**
+   * Process facet fields.
+   *
+   * Calls prepare method to prepare the array to be rendered. Then calls
+   * the method to render the prepared results.
+   */
+  public function processFacetFields() {
     $prepared_facet_fields = $this->prepareFacetFields();
     $this->renderText($prepared_facet_fields);
   }
 
-  // render facet_dates
-  public function renderFacetDates() {
+  /**
+   * Process facet dates.
+   *
+   * Depending on the way the facets need to be rendered as set in the user configuration,
+   * this method calls methods to prepare the results to be rendered. Then calls the
+   * method to render the prepared results.
+   * Currently there are 3 ways facet dates can be rendered: normal text, slider and/or
+   * datepicker.
+   * @TODO maybe there should be some better pluggable way to prepare and render facets so that contrib modules can create their own widgets.
+   */
+  public function processFacetDates() {
     // @TODO: make this check better. Could be pluggable in the future.
     if (isset($this->settings['solr_field_settings']['range_facet_slider_enabled']) &&
         $this->settings['solr_field_settings']['range_facet_slider_enabled'] == 1 &&
-        !islandora_solr_is_ie_less_then(9)) {
+        !islandora_solr_is_ie_less_than(9)) {
       // prepare and render facet dates as slider.
       $facet_dates_as_slider = $this->prepareFacetDatesSlider();
       if (!empty($facet_dates_as_slider)) {
@@ -846,12 +899,20 @@ class IslandoraSolrFacets {
     }
   }
 
-  // render facet_ranges
-  public function renderFacetRanges() {
+  /**
+   * Process facet ranges.
+   *
+   * Not in place yet.
+   */
+  public function processFacetRanges() {
 
   }
 
-  // get date format from settings (make static?)
+  /**
+   * Get date format.
+   *
+   * Finds the date formatting settings from user configuration.
+   */
   public function getDateFormat() {
     if (isset($this->settings['solr_field_settings']['date_facet_format']) &&
         !empty($this->settings['solr_field_settings']['date_facet_format'])) {
@@ -862,7 +923,9 @@ class IslandoraSolrFacets {
     }
   }
 
-  // prepare normal facet fields
+  /**
+   * Prepare facet fields for text rendering.
+   */
   public function prepareFacetFields() {
     $results = $this->results;
     $facet_field = $this->facet_field;
@@ -877,7 +940,9 @@ class IslandoraSolrFacets {
     return $facet_results;
   }
 
-  // prepare facet dates as text (default)
+  /**
+   * Prepare facet dates for text rendering.
+   */
   public function prepareFacetDates() {
     $facet_field = $this->facet_field;
     $results = $this->results;
@@ -906,16 +971,22 @@ class IslandoraSolrFacets {
     return $date_results;
   }
 
-  // render text (default)
-  // render individual links + as list. (split this?)
+  /**
+   * Render text facets.
+   *
+   * Based on a prepared array of results, this method will process and render a facet
+   * as normal text. It includes bucket value, count, include link and exclude link. If
+   * configured it also adds a 'read more' link to expose more results.
+   *
+   * @param array $results
+   *   An array with the prepared facet results.
+   */
   public function renderText($results) {
     $facet_field = $this->facet_field;
     $islandoraSolrQuery = self::$islandoraSolrQuery;
     $soft_limit = self::$soft_limit;
     $buckets = array();
     foreach ($results as $key => $values) {
-      // Normal text
-      // @TODO: or range
       $bucket = $values['bucket'];
       $filter = $values['filter'];
       $count = $values['count'];
@@ -962,19 +1033,31 @@ class IslandoraSolrFacets {
       $this->content .= $this->showMore();
     }
     else {
-      $this->content = theme('islandora_solr_facet', array('buckets' => $buckets));
+      $this->content .= theme('islandora_solr_facet', array('buckets' => $buckets));
     }
   }
 
-  // add link and js for to show more facet results.
+  /**
+   * Adds a 'show more' link.
+   *
+   * @return string
+   *   Returns a rendered 'show more' link.
+   */
   public function showMore() {
     drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_facets.js');
     $show_more = '<a href="#" class="soft-limit">' . t('Show more') . '</a>';
     return $show_more;
   }
 
-  // prepare facet dates for slider
-  // @TODO: this code can use some improvement. Also a bit to long.
+  /**
+   * Prepare facet dates for slider
+   *
+   * Preparing this array includes:
+   * - Stripping dates highest and lowest end that have no results when variable range gap is used.
+   * - Calculate the range gap based on the first two results.
+   * - Based on the calculation, name the range and assign date formatting.
+   * - Add color as set in user configuration.
+   */
   public function prepareFacetDatesSlider() {
     $facet_field = $this->facet_field;
     $settings = $this->settings;
@@ -1124,14 +1207,23 @@ class IslandoraSolrFacets {
     return $elements;
   }
   
-  // render date and range facets as slider
+  /**
+   * Render slider.
+   *
+   * Based on the prepared results array, render the slider. The rendered slider is
+   * a form. It passes the array and returns and renders the form.
+   */
   public function renderSlider($facet_dates_as_slider) {
     $elements = $facet_dates_as_slider;
     $range_slider_form = drupal_get_form('islandora_solr_range_slider_form_' . $elements['form_key'], $elements);
     $this->content .= drupal_render($range_slider_form);
   }
 
-  // prepare values for facet dates filter
+  /**
+   * Prepare facet dates filter
+   *
+   * Prepares an array with settings to render a date/range filter.
+   */
   public function prepareFacetDatesFilter() {
     $settings = $this->settings;
     // datepicker range
@@ -1141,7 +1233,6 @@ class IslandoraSolrFacets {
     else {
       $datepicker_range = '-100:+3';
     }
-
     $elements = array(
       'facet_field' => $this->facet_field,
       'datepicker_range' => $datepicker_range,
@@ -1152,38 +1243,35 @@ class IslandoraSolrFacets {
     return $elements;
   }
 
+  /**
+   * Renders a facet dates filter.
+   *
+   * Based on the prepared array with elements, this method passes the array to a form, returns it and
+   * then renders the form.
+   */
   public function renderFacetDatesFilter($elements) {
     $date_filter_key = self::$date_filter_key;
     $date_filter_form = drupal_get_form('islandora_solr_date_filter_form_' . $elements['form_key'], $elements);
-/*     $this->content .= '<div class="islandora-solr-date-filter">';     */
     $this->content .= drupal_render($date_filter_form);
-/*     $this->content .= '</div>'; */
   }
 
-
-
-
-
-
-
-
-
-
-
-  // We're only calculating variable gaps in the verbose way using facet_dates,
-  // because statscomponent for dates isn't available until Solr 3.5 and that would be performed on facet_ranges
-  // will only be used for facet_dates in Solr 1.4 
-
-  // step 1. would be different when statsComponent is available. And step 2 should be different for normal integer ranges as well.
-
-  // Should probably be static because I think it's cheaper on performance if we combine multiple date calculations.
+  /**
+   * Variable date gap.
+   *
+   * This method calculates the upper and lower ranges of a date range facet. It also performs a second Solr
+   * query execution if necessary to recalculate the date range facet with a new range gap.
+   * This is a static function because it calculates multiple date range facets, so in case multiple facets need
+   * recalculation, it can do this in one Solr call, which saves on performance. Statscomponent will be used
+   * in the future for range facets in Solr 3.5 or higher.
+   *
+   * Tasks this method performs:
+   * 1. gather info
+   * 2. calculate and render range gap
+   * 3. execute
+   * 4. prepare for return
+   * 5. update date facets
+   */
   public static function variableDateGap() {
-    // 1. gather info
-    // 2. calculate and render range gap
-    // 3. execute
-    // 4. prepare for return
-    // 5. update date facets
-
     // 1. gather info
     // check settings
     // @TODO: move this to separate function!

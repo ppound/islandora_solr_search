@@ -270,8 +270,6 @@ function islandora_solr_date_filter_form_submit($form, &$form_state) {
   drupal_goto($path, array('query' => $query));
 }
 
-
-
 /**
  * Range slider form.
  */
@@ -325,9 +323,6 @@ function islandora_solr_range_slider_form($form, &$form_state, $elements) {
   );
   $form['#submit'][] = 'islandora_solr_range_slider_form_submit';
 
-  // Validate
-  $form['#validate'][] = 'islandora_solr_range_slider_form_validate';
-
   // include jquery ui slider
   drupal_add_library('system', 'ui.slider');
   // include flot
@@ -340,18 +335,26 @@ function islandora_solr_range_slider_form($form, &$form_state, $elements) {
   // include jquery ui css
   drupal_add_css('misc/ui/jquery.ui.slider.css');
   // include slider settings
-  drupal_add_js(array('islandoraSolrRangeSlider' => array($facet_field => array('facet_field' => $facet_field, 'form_key' => $form_key, 'data' => $data, 'slider_color' => $slider_color))), 'setting');
+  $js_settings = array(
+    'islandoraSolrRangeSlider' => array(
+      $facet_field => array(
+        'facet_field' => $facet_field,
+        'form_key' => $form_key,
+        'data' => $data,
+        'slider_color' => $slider_color,
+      ),
+    ),
+  );
+  drupal_add_js($js_settings, 'setting');
 
   drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_facets.js');
 
   return $form;
 }
 
-function islandora_solr_range_slider_form_validate($form, &$form_state) {
-
-}
-
-
+/**
+ * Range slider form submit.
+ */
 function islandora_solr_range_slider_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 
