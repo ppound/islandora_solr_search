@@ -14,28 +14,6 @@ require_once dirname(__FILE__) . '/islandora_solr.block.inc';
 // Includes functions for advanced facet functionality.
 require_once dirname(__FILE__) . '/includes/facets.inc';
 
-/**
- * Implements hook_init().
- *
- * @global IslandoraSolrQueryProcessor $_islandora_solr_queryclass
- * @staticvar boolean $islandora_solr_init
- */
-function islandora_solr_init() {
-  // include inc files
-  module_load_include('inc', 'islandora_solr', 'includes/islandora_solr.db');
-  module_load_include('inc', 'islandora_solr', 'includes/common');
-  module_load_include('inc', 'islandora_solr', 'islandora_solr.block');
-
-  static $islandora_solr_init = FALSE;
-  if (!$islandora_solr_init) {
-    // single underscore followed by the module and another underscore
-    global $_islandora_solr_queryclass;
-    if (empty($_islandora_solr_queryclass)) {
-      $_islandora_solr_queryclass = new IslandoraSolrQueryProcessor();
-    }
-    $islandora_solr_init = TRUE;
-  }
-}
 
 /**
  * Implements hook_boot().
@@ -52,9 +30,12 @@ function islandora_solr_boot() {
       'islandora_solr_searchterms'
     );
 
-    $conf['i18n_variables'] = (isset($conf['i18n_variables']) && is_array($conf['i18n_variables'])) ?
-      array_merge($vars, $conf['i18n_variables']):
-      $vars;
+    if (isset($conf['i18n_variables']) && is_array($conf['i18n_variables'])) {
+      $conf['i18n_variables'] = array_merge($vars, $conf['i18n_variables']);
+    }
+    else {
+      $conf['i18n_variables'] = $vars;
+    }
   }
 }
 
@@ -237,18 +218,16 @@ function islandora_solr_islandora_solr_primary_display() {
  */
 function islandora_solr($query = NULL) {
   global $_islandora_solr_queryclass;
-
-  // add islandora solr theme css
   drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.theme.css');
 
-  // get all url parameters
+  // Url parameters.
   $params = $_GET;
 
   // get profiles
   $primary_profiles = module_invoke_all('islandora_solr_primary_display');
   $secondary_profiles = module_invoke_all('islandora_solr_secondary_display');
 
-// Get the preferred display profile
+  // Get the preferred display profile
   // Order: First choice is what's in the ?profile query var
   //        Second choice is the primary display profile
   //        Third choice is the default IslandoraSolrResults
@@ -277,6 +256,7 @@ function islandora_solr($query = NULL) {
 
 
   // Build and execute Apache Solr query
+  $_islandora_solr_queryclass = new IslandoraSolrQueryProcessor();
   $queryResult = $_islandora_solr_queryclass->buildAndExecuteQuery($query, $params);
 
   if (empty($_islandora_solr_queryclass->solrResult)) {

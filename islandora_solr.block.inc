@@ -113,9 +113,6 @@ function islandora_solr_block_view($block_name = '') {
   // get global class
   global $_islandora_solr_queryclass;
 
-  // all hook_init()
-  islandora_solr_init(); // @TODO: should we really call islandora_solr_init() again ?
-
   // get solr blocks
   $solr_blocks = module_invoke_all("islandora_solr_query_blocks");
 
@@ -220,7 +217,6 @@ function islandora_solr_simple_search_form_submit($form, &$form_state) {
  */
 function islandora_solr_advanced_search_form($form, &$form_state) {
   global $_islandora_solr_queryclass;
-  islandora_solr_init(); // @TODO: figure out why init needs to be called
 
   // include common.inc
   module_load_include('inc', 'islandora_solr', 'includes/common');
