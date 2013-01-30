@@ -875,8 +875,7 @@ class IslandoraSolrFacets {
   public function processFacetDates() {
     // @TODO: make this check better. Could be pluggable in the future.
     if (isset($this->settings['solr_field_settings']['range_facet_slider_enabled']) &&
-        $this->settings['solr_field_settings']['range_facet_slider_enabled'] == 1 &&
-        !islandora_solr_is_ie_less_than(9)) {
+        $this->settings['solr_field_settings']['range_facet_slider_enabled'] == 1) {
       // prepare and render facet dates as slider.
       $facet_dates_as_slider = $this->prepareFacetDatesSlider();
       if (!empty($facet_dates_as_slider)) {
