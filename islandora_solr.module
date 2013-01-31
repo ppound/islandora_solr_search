@@ -6,11 +6,11 @@
  */
 
 // Includes functions for common db queries.
-require_once dirname(__FILE__) . '/includes/islandora_solr.db.inc';
+require_once dirname(__FILE__) . '/includes/db.inc';
 // Includes functions for common tasks.
 require_once dirname(__FILE__) . '/includes/common.inc';
 // Includes functions to create Islandora Solr blocks.
-require_once dirname(__FILE__) . '/islandora_solr.block.inc';
+require_once dirname(__FILE__) . '/includes/blocks.inc';
 // Includes functions for advanced facet functionality.
 require_once dirname(__FILE__) . '/includes/facets.inc';
 
@@ -55,7 +55,7 @@ function islandora_solr_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_solr_admin_settings'),
     'access arguments' => array('administer islandora solr'),
-    'file' => 'islandora_solr.admin.inc',
+    'file' => 'includes/admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
   $items['islandora_solr/field'] = array(
@@ -64,7 +64,7 @@ function islandora_solr_menu() {
     'page callback' => 'islandora_solr_admin_settings_field',
     'page arguments' => array(2, 3),
     'access arguments' => array('administer islandora solr'),
-    'file' => 'islandora_solr.admin.inc',
+    'file' => 'includes/admin.inc',
     'type' => MENU_CALLBACK,
   );
   $items['islandora_solr/autocomplete_luke'] = array(
@@ -72,7 +72,7 @@ function islandora_solr_menu() {
     'description' => 'Autocomplete callback to populate solr text fields.',
     'page callback' => '_islandora_solr_autocomplete_luke',
     'access arguments' => array('administer islandora solr'),
-    'file' => 'islandora_solr.admin.inc',
+    'file' => 'includes/admin.inc',
     'type' => MENU_CALLBACK,
   );
   return $items;
@@ -112,7 +112,7 @@ function islandora_solr_permission() {
 function islandora_solr_theme() {
   // set path
   $path = drupal_get_path('module', 'islandora_solr');
-  $file = 'islandora_solr.theme.inc';
+  $file = 'theme.inc';
 
   return array(
     // advanced solr search form/block
@@ -124,13 +124,13 @@ function islandora_solr_theme() {
     // theme admin form
     'islandora_solr_admin_primary_display' => array(
       'path' => $path,
-      'file' => 'islandora_solr.admin.inc',
+      'file' => 'includes/admin.inc',
       'render element' => 'form',
     ),
     // theme admin form fields
     'islandora_solr_admin_fields' => array(
       'path' => $path,
-      'file' => 'islandora_solr.admin.inc',
+      'file' => 'includes/admin.inc',
       'render element' => 'form',
     ),
     // results page

@@ -15,6 +15,7 @@ High priority
 http://wunderroot.com/blog/parentsiblingstimlost/2012-11-29
 http://drupal.stackexchange.com/questions/50216/how-to-trigger-a-form-and-pass-variables-to-form-state-with-jquery/53063#53063
 
+- based on Solr version, use edismax by default for simple search.
 - create import/export functionality
 
 - bug when reordering field and then clicking configure

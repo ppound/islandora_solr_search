@@ -1310,7 +1310,7 @@ function _islandora_solr_admin_get_form_function($field_type = NULL) {
  */
 function islandora_solr_admin_settings_result_fields($form, &$form_state, $variables) {
   // include this file in build_info
-  form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
+  form_load_include($form_state, 'inc', 'islandora_solr', 'includes/admin');
   // pass variables to form state
   $form_state['dialog'] = $variables;
   // get solr field values
@@ -1386,7 +1386,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
  */
 function islandora_solr_admin_settings_sort_fields($form, &$form_state, $variables) {
   // include this file in build_info
-  form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
+  form_load_include($form_state, 'inc', 'islandora_solr', 'includes/admin');
 
   $form_state['dialog'] = $variables;
   // get solr field values
@@ -1456,7 +1456,7 @@ function islandora_solr_admin_settings_sort_fields($form, &$form_state, $variabl
  */
 function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variables) {
   // include this file in build_info
-  form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
+  form_load_include($form_state, 'inc', 'islandora_solr', 'includes/admin');
 
   $form_state['dialog'] = $variables;
   // get solr field values
@@ -1650,7 +1650,7 @@ function _islandora_solr_admin_settings_facet_fields_callback($form, &$form_stat
  */
 function islandora_solr_admin_settings_search_fields($form, &$form_state, $variables) {
   // include this file in build_info
-  form_load_include($form_state, 'inc', 'islandora_solr', 'islandora_solr.admin');
+  form_load_include($form_state, 'inc', 'islandora_solr', 'includes/admin');
 
   $form_state['dialog'] = $variables;
   // get solr field values
