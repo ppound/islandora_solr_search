@@ -1023,6 +1023,7 @@ class IslandoraSolrFacets {
       $link['link_minus'] = '<a' . drupal_attributes($attr_minus) . '>-</a>';
       $buckets[] = $link;
     }
+
     // Show more link.
     if (count($buckets) > $soft_limit) {
       $buckets_visible = array_slice($buckets, 0, $soft_limit);
@@ -1031,7 +1032,7 @@ class IslandoraSolrFacets {
       $this->content .= theme('islandora_solr_facet', array('buckets' => $buckets_hidden, 'hidden' => TRUE));
       $this->content .= $this->showMore();
     }
-    else {
+    elseif (!empty($buckets)) {
       $this->content .= theme('islandora_solr_facet', array('buckets' => $buckets));
     }
   }
@@ -1251,7 +1252,9 @@ class IslandoraSolrFacets {
   public function renderFacetDatesFilter($elements) {
     $date_filter_key = self::$date_filter_key;
     $date_filter_form = drupal_get_form('islandora_solr_date_filter_form_' . $elements['form_key'], $elements);
-    $this->content .= drupal_render($date_filter_form);
+    if (!empty($this->content)) {
+      $this->content .= drupal_render($date_filter_form);      
+    }
   }
 
   /**
