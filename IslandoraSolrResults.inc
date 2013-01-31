@@ -723,7 +723,7 @@ class IslandoraSolrFacets {
     self::$facet_fields_settings_simple = _islandora_solr_simplify_fields(self::$facet_fields_settings);
     self::$range_facets = islandora_solr_get_range_facets();
     self::$soft_limit = variable_get('islandora_solr_facet_soft_limit', '10');
-    self::$exclude_range_values = array('gap', 'end', 'other', 'hardend', 'include'); // include 'start'?
+    self::$exclude_range_values = array('gap', 'start', 'end', 'other', 'hardend', 'include');
 
     // Calculate variable date gap.
     self::variableDateGap(); // move elsewhere?
