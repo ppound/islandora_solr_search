@@ -11,8 +11,9 @@ DEFINE('SOLR_SEARCH_PATH', 'islandora/search');
 /**
  * Islandora Solr Query Processor.
  *
- * Used to store Solr query parameters and to connect to solr to execute the
- * query. Populates the solrResult property with the raw Solr query results.
+ * Used to store Solr query parameters and to connect to Solr to execute the
+ * query. Populates the islandoraSolrResult property with the processed Solr
+ * query results.
  */
 class IslandoraSolrQueryProcessor {
 
@@ -25,8 +26,6 @@ class IslandoraSolrQueryProcessor {
   // All other Solr parameters.
   public $solrParams = array();
 
-  // Raw Solr results returned after query execution.
-  public $solrResult;
   // Solr results tailored for Islandora's use.
   public $islandoraSolrResult;
   // the current display (for modules wanting to alter the query of a display)
@@ -34,13 +33,6 @@ class IslandoraSolrQueryProcessor {
   // parameters from url
   public $internalSolrParams;
   public $different_kinds_of_nothing = array(' ', '%20', '%252F', '%2F', '%252F-', '');
-
-  /**
-   * Constructor
-   */
-  function IslandoraSolrQueryProcessor() {
-
-  }
 
   /**
    * Build and execute a query.
@@ -53,13 +45,10 @@ class IslandoraSolrQueryProcessor {
    *   Whether or not to send out hooks to alter the islandora_solr_results.
    *
    * @return
-   *   The contents of the executeQuery() method. ExecuteQuery() stores the raw
-   *   solr results in the solrResult property.
+   *   The contents of the executeQuery() method. ExecuteQuery() stores the
+   *   processed Solr results in the islandoraSolrResult property.
    */
   function buildAndExecuteQuery($query, $params = NULL, $alter_results = TRUE) {
-    // include IslandoraSolrResults
-    module_load_include('inc', 'islandora_solr', 'IslandoraSolrResults');
-
     // set empty string
     if (variable_get('islandora_solr_request_handler', '') == 'standard') {
 
@@ -164,7 +153,8 @@ class IslandoraSolrQueryProcessor {
       'hl' => isset($snippets) ? 'true' : NULL,
       'hl.fl' => isset($snippets) ? $snippets : NULL,
       'hl.fragsize' => 400,
-      'facet.field' => explode(',', $facet_fields), //comma separated list configured in the block config
+        // Comma separated list configured in the block config.
+      'facet.field' => explode(',', $facet_fields),
     );
 
     // check for date facets
@@ -244,11 +234,11 @@ class IslandoraSolrQueryProcessor {
    * Reset Results
    */
   function resetResults() {
-    unset($this->solrResult);
+    unset($this->islandoraSolrResult);
   }
 
   /**
-   * Connects to Solr and executes the query. Populates the solrResults
+   * Connects to Solr and executes the query. Populates islandoraSolrResults
    * property with the raw Solr results.
    *
    * @param boolean $alter_results
@@ -270,8 +260,6 @@ class IslandoraSolrQueryProcessor {
     }
 
     if (isset($results)) {
-      // Save raw results in class property.
-      $this->solrResult = $results;
       $solr_results = json_decode($results->getRawResponse(), TRUE);
       // Create results tailored for Islandora's use.
       $object_results = $solr_results['response']['docs'];
@@ -300,11 +288,10 @@ class IslandoraSolrQueryProcessor {
       // Save results tailored for Islandora's use.
       unset($solr_results['response']['docs']);
       $solr_results['response']['objects'] = $object_results;
-      dsm($solr_results);
       $this->islandoraSolrResult = $solr_results;
     }
     else {
-      $this->solrResult = NULL;
+      $this->islandoraSolrResult = NULL;
     }
 
     return;

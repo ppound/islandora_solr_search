@@ -6,20 +6,23 @@
  */
 
 /**
- * Extention of IslandoraSolrResults to create an alternative display type.
+ * Extension of IslandoraSolrResults to create an alternative display type.
  */
 class IslandoraSolrResultsGrid extends IslandoraSolrResults {
 
   /**
-   * Renders the Solr results as a responsive grid view. Markup and styling is based
-   * on the Islandora collection grid view. Some styling is inherited from it.
-   *
-   * @param type $results
-   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
-   * @return
-   *   Rendered Solr results
+   * Renders the Solr results as a responsive grid view. Markup and styling is
+   * based on the Islandora collection grid view. Some styling is inherited
+   * from it.
    *
    * @see IslandoraSolrResults::displayResults()
+   *
+   * @param array $results
+   *   The processed Solr results from
+   *   IslandoraSolrQueryProcessor::islandroaSolrResult
+   *
+   * @return string
+   *   Rendered Solr results
    */
   function printResults($results) {
 
@@ -31,16 +34,17 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
     $elements = array();
 
     // total
-    $elements['solr_total'] = $results->response->numFound;
+    $elements['solr_total'] = $results['response']['numFound'];
 
     // start
-    $elements['solr_start'] = $results->response->start;
+    $elements['solr_start'] = $results['response']['start'];
 
     // get prepared search results
-    $docs = $this->prep_results($results);
+    $object_results = $this->prep_results($results);
 
     // loop over results array
-    foreach ($docs as $doc) {
+    foreach ($object_results as $object_result) {
+      $doc = $object_result['solr_doc'];
       $rows = array();
       $row = 0; // keeping $row in there for now until the snippet issue is cleared out
       $snippet = NULL; // @TODO: how is this suposed to work if the $snippet always is set to NULL ?

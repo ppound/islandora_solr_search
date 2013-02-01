@@ -249,7 +249,7 @@ function islandora_solr($query = NULL) {
   $_islandora_solr_queryclass = new IslandoraSolrQueryProcessor();
   $_islandora_solr_queryclass->buildAndExecuteQuery($query, $params);
   
-  if (empty($_islandora_solr_queryclass->solrResult)) {
+  if (empty($_islandora_solr_queryclass->islandoraSolrResult)) {
     return t('Error searching solr index.');
   }
 

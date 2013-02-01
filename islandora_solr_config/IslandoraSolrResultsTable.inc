@@ -18,24 +18,24 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
   /**
    * Renders the Solr results as a table.
    *
-   * @param type $results
-   *   The raw Solr results from IslandoraSolrQueryProcessor::solrResult
-   * @return
-   *   Rendered Solr results
-   *
    * @see IslandoraSolrResults::displayResults()
+   *
+   * @param array $results
+   *   The raw Solr results from
+   *   IslandoraSolrQueryProcessor::islandoraSolrResult
+   *
+   * @return string
+   *   Rendered Solr results
    */
   function printResults($results) {
 
-    // add islandora solr theme css
+    // add Islandora solr theme css
     drupal_add_css(drupal_get_path('module', 'islandora_solr_config') . '/css/islandora_solr_config.theme.css');
 
-    // set base_url
-    global $base_url;
     // set variable
     $output = '';
 
-    $recordStart = (int)$results->response->start;
+    $recordStart = (int)$results['response']['start'];
     if (empty($results)) {
       return t('no results');
     }
@@ -43,15 +43,14 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
     $fields = array();
     $values = array();
     $header = array();
-    $limitResults = variable_get('islandora_solr_limit_result_fields', 0);
+    $limit_results = variable_get('islandora_solr_limit_result_fields', 0);
 
-    $object_link_placeholder = "~object_href~";
-
-    foreach ($results->response->docs as $doc) {
+    foreach ($results['response']['objects'] as $object_result) {
+      $doc = $object_result['solr_doc'];
       unset($pid);
       foreach ($doc as $field => $value) {
 
-        if ($limitResults && empty($this->resultFieldArray[$field])) {
+        if ($limit_results && empty($this->resultFieldArray[$field])) {
           continue;
         }
 
@@ -81,7 +80,7 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
         //this would change 'animal_name' to the more readable 'Animal Name'
         //$field = ucwords( str_replace( '_', ' ', $field ) );
 
-        // Add this field to the master list of fields if it's not there already:
+        // Add this field to the master list of fields if it's not there.
         if (!in_array($field, $fields)) {
           $fields[] = $field;
         }
@@ -114,8 +113,6 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
       $row['data'][] = array(
         'data' => (isset($val_array['PID']) ? l($result_num, 'islandora/object/' . $val_array['PID']) : $result_num),
         'header' => TRUE,
-//        'class' => 'col-first'
-
       );
       $field_count = count($fields);
       // loop over each cell within a row
@@ -144,4 +141,3 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
   }
 
 }
-
