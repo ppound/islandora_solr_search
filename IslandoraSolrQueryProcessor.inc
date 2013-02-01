@@ -74,14 +74,11 @@ class IslandoraSolrQueryProcessor {
    * @param type $query
    *   The query string provided in the url.
    * @param array $params
-   *   All url parameters from the solr results page.
+   *   All URL parameters from the solr results page.
    */
   function buildQuery($query, $params = array() ) {
-
-    // set internal parameters gathered from the url
+    // Set internal parameters gathered from the URL but not q and page.
     $this->internalSolrParams = $params;
-
-    // don't store the q and page parameter internally
     unset($this->internalSolrParams['q']);
     unset($this->internalSolrParams['page']);
 
@@ -268,14 +265,22 @@ class IslandoraSolrQueryProcessor {
         $object_results[$object_index]['solr_doc'] = $object_result;
         $object_results[$object_index]['object_url'] = 'islandora/object/' . $object_results[$object_index]['solr_doc']['PID'];
         $object_results[$object_index]['object_url_params'] = array();
-        $object_results[$object_index]['thumbnail_url'] = $object_results[$object_index]['object_url'] . '/TN/view';
-        $object_results[$object_index]['thumbnail_params'] = array();
+        //@todo use IR query, not instanciate object
+        $fedora_object = islandora_object_load($object_results[$object_index]['solr_doc']['PID']);
+        if (isset($fedora_object['TN'])) {
+          $object_results[$object_index]['thumbnail_url'] = $object_results[$object_index]['object_url'] . '/datastream/TN/view';
+        }
+        else {
+          $object_results[$object_index]['thumbnail_url'] = drupal_get_path('module', 'islandora_solr') . '/images/defaultimg.png';
+        }
+        $object_results[$object_index]['thumbnail_url_params'] = array();
       }
       // Allow other parts of code to modify the tailored results.
       if ($alter_results) {
         // Hook to alter based on content model.
         module_load_include('inc', 'islandora', 'includes/utilities');
         $content_model_solr_field = variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_ms');
+        dsm($object_results, '$object_results');
         foreach ($object_results as $object_index => $object_result) {
           foreach ($object_result['solr_doc'][$content_model_solr_field] as $content_model_uri) {
             $hook_list = islandora_build_hook_list('islandora_solr_object_result', array(substr($content_model_uri, 12)));

@@ -25,7 +25,6 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
    *   Rendered Solr results
    */
   function printResults($results) {
-
     // add islandora solr theme css
     drupal_add_css(drupal_get_path('module', 'islandora_solr_config') . '/css/islandora_solr_config.theme.css');
 
@@ -43,14 +42,13 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
     $object_results = $this->prep_results($results);
 
     // loop over results array
-    foreach ($object_results as $object_result) {
-      $doc = $object_result['solr_doc'];
+    foreach ($object_results as $object_index=>$object_result) {
       $rows = array();
       $row = 0; // keeping $row in there for now until the snippet issue is cleared out
       $snippet = NULL; // @TODO: how is this suposed to work if the $snippet always is set to NULL ?
 
       // loop over individual results to process fields
-      foreach ($doc as $field => $value) {
+      foreach ($object_result['solr_doc'] as $field => $value) {
 
         // check for field label substitutions
         $translated_field_name = isset($this->allSubsArray[$field]) ? $this->allSubsArray[$field] : $field;
@@ -59,7 +57,7 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
         $rows[$field]['label'] = $translated_field_name;
 
         // add class: render solr field name to string that can be used as class name
-        $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
+        $rows[$field]['class'] = drupal_strtolower(preg_replace('/[^A-Za-z0-9]/', '-', $field));
 
         // split value if the result value is an array
         if (is_array($value)) {
@@ -79,14 +77,11 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
         $rows[$row][] = $snippet[0];
       }
       // append array to results array
-      $results_array[] = $rows;
+      $object_results[$object_index]['solr_doc'] = $rows;
     }
 
     // return themed search results
-    return theme('islandora_solr_grid', array('results' => $results_array, 'elements' => $elements));
+    return theme('islandora_solr_grid', array('results' => $object_results, 'elements' => $elements));
   }
 
-
-
 }
-
