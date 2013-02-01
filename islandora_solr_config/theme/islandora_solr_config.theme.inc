@@ -19,16 +19,6 @@
  * @see IslandoraSolrResultsGrid::printResults()
  */
 function islandora_solr_config_preprocess_islandora_solr_grid(&$variables) {
-  // base url
-  global $base_url;
-  // base path
-  global $base_path;
-
-  // set base url
-  $variables['base_url'] = $base_url;
-
-  // set base path
-  $variables['base_path'] = $base_path;
 
   // Default thumbnail URL.
   $variables['elements']['solr_default_img'] = url(drupal_get_path('module', 'islandora_solr') . '/images/defaultimg.png');
