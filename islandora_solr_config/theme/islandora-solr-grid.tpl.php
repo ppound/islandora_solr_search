@@ -23,12 +23,17 @@
     <?php foreach($results as $result): ?>
       <dl class="solr-grid-field">
         <dt class="solr-grid-thumb">
-          <?php $image = '<img src="' . url($result['thumbnail_url'], array('query' => $result['thumbnail_url_params'])) . '" />'; ?>
-          <?php print l($image, $result['object_url'], array('html' => TRUE, 'query' => $result['object_url_params']));?>
+          <?php
+            $image = '<img src="' . url($result['thumbnail_url'], array('query' => $result['thumbnail_url_params'])) . '" />';
+            print l($image, $result['object_url'], array('html' => TRUE, 'query' => $result['object_url_params']));
+          ?>
         </dt>
         <dd class="solr-grid-caption">
-          <?php $title = isset($result['solr_doc']['dc.title']['value']) ? $result['solr_doc']['dc.title']['value'] : ''; ?>
-          <?php print l($title, $result['object_url'], array('query' => $result['object_url_params']));?>
+          <?php
+            $label_field = variable_get('islandora_solr_object_label_field', 'fgs_label_s');
+            $object_label = isset($result['solr_doc'][$label_field]['value']) ? $result['solr_doc'][$label_field]['value'] : '';
+            print l($object_label, $result['object_url'], array('query' => $result['object_url_params']));
+          ?>
         </dd>
       </dl>
     <?php endforeach; ?>

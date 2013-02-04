@@ -2,8 +2,8 @@
 
 /**
  * @file
- * Contains methods to create rendered Solr displays from raw Solr results.
- * Depends on Apache_Solr_Php client.
+ *   Contains methods to create rendered Solr displays from raw Solr results.
+ *   Depends on Apache_Solr_Php client.
  */
 
 /**
@@ -27,14 +27,15 @@ class IslandoraSolrResults {
   /**
    * Output the main body of the search results
    *
+   * @see islandora_solr()
+   *
    * @param type $islandoraSolrQuery
    *   The IslandoraSolrQueryProcessor object which includes the current query
    *   settings and the raw Solr results.
+   *
    * @return
    *   Returns themed Solr results page, including wrapper and rendered search
    *   results.
-   *
-   * @see islandora_solr()
    */
   function displayResults($islandoraSolrQuery) {
     $this->islandoraSolrQueryProcessor = $islandoraSolrQuery;

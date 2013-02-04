@@ -2,14 +2,16 @@
 
 /**
  * @file
- * Contains all admin related functionality
+ * Contains all administration related functionality
  */
 
 /**
- * Function to return admin setting form
+ * Function to return administration setting form
  *
  * @param array $form
+ *   The form deffinition.
  * @param array $form_state
+ *   The form state.
  *
  * @return array
  *   The form array.
@@ -21,11 +23,13 @@ function islandora_solr_admin_settings($form, &$form_state) {
   drupal_add_library('system', 'ui.dialog');
   drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
 
-  // Solr connect
-  // triggering handler is dismax check or no trigger at all (page load)
-  if ((isset($form_state['triggering_element']) && (($form_state['triggering_element']['#name'] == 'islandora_solr_url') || ($form_state['triggering_element']['#name'] == 'islandora_solr_request_handler'))) || !isset($form_state['triggering_element'])) {
+  // Solr connect triggering handler is dismax or not set on page load.
+  if ((isset($form_state['triggering_element']) &&
+      (($form_state['triggering_element']['#name'] == 'islandora_solr_url') ||
+          ($form_state['triggering_element']['#name'] == 'islandora_solr_request_handler'))) ||
+      !isset($form_state['triggering_element'])) {
 
-    // check for the php solr lib class
+    // Check for the php solr lib class.
     if (!class_exists('Apache_Solr_Service')) {
       $message = t('This module requires the <a href="!url">Apache Solr php client</a>. Please install the client directory in the root directory of this module before continuing.', array('!url' => 'http://code.google.com/p/solr-php-client'));
       drupal_set_message(check_plain($message));
@@ -57,7 +61,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
         . t('Unable to connect to Solr server at !islandora_solr_url', array('!islandora_solr_url' => $solr_url));
     }
   }
-  // set form array
+  // Create form.
   $form = array();
   $form['islandora_solr_tabs'] = array(
     '#type' => 'vertical_tabs',
@@ -102,8 +106,8 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'item',
     '#markup' => $confirmation_message,
   );
-  // request handler
-  // don't show form item if no request handlers are found
+
+  // Don't show form item if no request handlers are found.
   if (!empty($handlers)) {
     $form['solr_ajax_wrapper']['islandora_solr_request_handler'] = array(
       '#type' => 'select',
@@ -298,8 +302,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
 
 
-
-
   // facet settings
   $form['islandora_solr_tabs']['facet_settings'] = array(
     '#type' => 'fieldset',
@@ -425,7 +427,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#wysiwyg' => FALSE,
   );
 
-  // more
+  // Miscillanious.
   $form['islandora_solr_tabs']['other'] = array(
     '#type' => 'fieldset',
     '#title' => t('Other'),
@@ -441,14 +443,42 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#description' => t('Dumps solr query to the screen for testing. Warning: if you have the Drupal Apache Solr module enabled alongside this one then the debug function will not work.'),
     '#weight' => 6,
   );
+
+  // Solr fields.
+  $form['islandora_solr_tabs']['solr_fields'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Solr Fields'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
   // Content Model Solr field.
-  $form['islandora_solr_tabs']['other']['islandora_solr_content_model_field'] = array(
+  $form['islandora_solr_tabs']['solr_fields']['islandora_solr_content_model_field'] = array(
     '#type' => 'textfield',
     '#title' => t('Content model Solr field'),
     '#size' => 30,
     '#weight' => -1,
     '#description' => t('The Solr field containing the content model URIs.'),
     '#default_value' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_ms'),
+    '#required' => TRUE,
+  );
+  // Label Solr field.
+  $form['islandora_solr_tabs']['solr_fields']['islandora_solr_object_label_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Object label Solr field'),
+    '#size' => 30,
+    '#weight' => -2,
+    '#description' => t('The Solr field containing object labels.'),
+    '#default_value' => variable_get('islandora_solr_object_label_field', 'fgs_label_s'),
+    '#required' => TRUE,
+  );
+  // Present datastreams Solr field.
+  $form['islandora_solr_tabs']['solr_fields']['islandora_solr_datastream_id_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Content model Solr field'),
+    '#size' => 30,
+    '#weight' => -3,
+    '#description' => t('The Solr field containing the populated datastream IDs.'),
+    '#default_value' => variable_get('islandora_solr_datastream_id_field', 'fedora_datastreams_ms'),
     '#required' => TRUE,
   );
 
