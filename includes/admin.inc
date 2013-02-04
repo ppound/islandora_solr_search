@@ -17,11 +17,11 @@
  *   The form array.
  */
 function islandora_solr_admin_settings($form, &$form_state) {
-
   // Add admin form css.
   drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
   drupal_add_library('system', 'ui.dialog');
   drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
+  $solr_url = !empty($form_state['values']['islandora_solr_url']) ? $form_state['values']['islandora_solr_url'] : variable_get('islandora_solr_url', 'localhost:8080/solr');
 
   // Solr connect triggering handler is dismax or not set on page load.
   if ((isset($form_state['triggering_element']) &&
@@ -38,9 +38,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
     // get request handler
     $handler = !empty($form_state['values']['islandora_solr_request_handler']) ? $form_state['values']['islandora_solr_request_handler'] : variable_get('islandora_solr_request_handler', '');
-    // get solr url
-    $solr_url = !empty($form_state['values']['islandora_solr_url']) ? $form_state['values']['islandora_solr_url'] : variable_get('islandora_solr_url', 'localhost:8080/solr');
-    // check if solr is available
+    // Check if Solr is available.
     $solr_avail = islandora_solr_ping($solr_url);
 
     $dismax_allowed = FALSE;
@@ -92,7 +90,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
   $form['solr_ajax_wrapper']['islandora_solr_dismax_allowed'] = array(
     '#type' => 'hidden',
-    '#default_value' => $dismax_allowed,
+    '#default_value' => isset($dismax_allowed) ? $dismax_allowed:$form_state['complete form']['solr_ajax_wrapper']['islandora_solr_dismax_allowed']['#default_value'],
   );
   // hidden submit button
   $form['solr_ajax_wrapper']['refresh_page'] = array(
@@ -101,10 +99,10 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#attributes' => array('class' => array('refresh-button')),
     '#submit' => array('_islandora_solr_admin_refresh'),
   );
-  // confirmation message
+  // Confirmation message.
   $form['solr_ajax_wrapper']['infobox'] = array(
     '#type' => 'item',
-    '#markup' => $confirmation_message,
+    '#markup' => isset($confirmation_message)? $confirmation_message:$form_state['complete form']['solr_ajax_wrapper']['infobox']['#markup'],
   );
 
   // Don't show form item if no request handlers are found.
@@ -497,7 +495,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
   // Actions.
   $form['actions'] = array(
-    '#type' => 'actions'
+    '#type' => 'actions',
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -521,8 +519,8 @@ function islandora_solr_admin_settings($form, &$form_state) {
 
 /**
  * Generates fields for the admin fields table.
- *
  * First collects values to populate the table, then render the fields.
+ *
  * @param array $form_state
  *   The form_state array of the form. Includes submitted values.
  * @param array $terms
@@ -530,6 +528,9 @@ function islandora_solr_admin_settings($form, &$form_state) {
  *   already created and new form elements are added in this function.
  * @param string $field_type
  *   An identifier for the field table which is being created.
+ *
+ * @return NULL
+ *   Nothing to return.
  */
 function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type) {
 
@@ -547,10 +548,10 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   // 1. Saved values from the DB
   if ($form_state['rebuild'] == FALSE) {
 
-    // get values from DB
-    $records = islandora_solr_get_fields($field_type, FALSE, FALSE); // unfiltered, not simplified and incremental keys
+    // Get values from DB unfiltered, not simplified and incremental keys.
+    $records = islandora_solr_get_fields($field_type, FALSE, FALSE);
 
-    // set fields to populate the admin table
+    // Set fields to populate the admin table.
     $fields = array();
     foreach ($records as $key => $record) {
       $fields[$key] = array(
@@ -559,7 +560,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
         'weight' => $record['weight'],
       );
     }
-    // move solr_field_settings into the form state
+    // Move solr_field_settings into the form state.
     foreach ($records as $key => $value) {
       $solr_field = $value['solr_field'];
       $solr_field_settings = $value['solr_field_settings'];
@@ -568,8 +569,8 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   }
 
   // 2. Triggered element (Add item or remove)
-  if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#field_type'] == $field_type) {
-
+  if (isset($form_state['triggering_element']) &&
+      $form_state['triggering_element']['#field_type'] == $field_type) {
     // unset terms from input array
     // http://drupal.stackexchange.com/questions/14855/how-do-i-dynamically-fill-a-textfield-with-ajax/16576#16576
     $form_state['values']['islandora_solr_' . $field_type]['terms'] = $form_state['input']['islandora_solr_' . $field_type]['terms'];
@@ -586,6 +587,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
       }
       // check if value is already added
       $check_terms = $form_state['values']['islandora_solr_' . $field_type]['terms'];
+
       foreach ($check_terms as $key => $term) {
         if ($term['solr_field'] == $add_solr_field) {
           $solr_field_error = t('Solr term can only be added once.');
@@ -1041,6 +1043,7 @@ function _islandora_solr_admin_settings_submit($form, &$form_state) {
  *
  * @param String $solr_url
  *   url which points to Solr
+ *
  * @return
  *   a php array with request handlers found in solrconfig.xml of the Solr
  *   instance
