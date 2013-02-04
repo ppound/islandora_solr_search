@@ -392,8 +392,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
   );
 
 
-
-
   // query defaults
   $form['islandora_solr_tabs']['query_defaults'] = array(
     '#type' => 'fieldset',
@@ -425,23 +423,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
       These filters will be applied to all queries in addition to any user-selected facet filters'),
     '#default_value' => variable_get('islandora_solr_base_filter', ''),
     '#wysiwyg' => FALSE,
-  );
-
-  // Miscillanious.
-  $form['islandora_solr_tabs']['other'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Other'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  // Debug mode.
-  $form['islandora_solr_tabs']['other']['islandora_solr_debug_mode'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Debug mode?'),
-    '#return_value' => 1,
-    '#default_value' => variable_get('islandora_solr_debug_mode', 0),
-    '#description' => t('Dumps solr query to the screen for testing. Warning: if you have the Drupal Apache Solr module enabled alongside this one then the debug function will not work.'),
-    '#weight' => 6,
   );
 
   // Solr fields.
@@ -482,6 +463,23 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
 
+  // Miscillanious.
+  $form['islandora_solr_tabs']['other'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Other'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  // Debug mode.
+  $form['islandora_solr_tabs']['other']['islandora_solr_debug_mode'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Debug mode?'),
+    '#return_value' => 1,
+    '#default_value' => variable_get('islandora_solr_debug_mode', 0),
+    '#description' => t('Dumps solr query to the screen for testing. Warning: if you have the Drupal Apache Solr module enabled alongside this one then the debug function will not work.'),
+    '#weight' => 6,
+  );
+
   // The content of the popup dialog.
   $form['islandora_solr_admin_dialog'] = array(
     '#theme_wrappers' => array('container'),
@@ -497,9 +495,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#markup' => t('Default dialog text'),
   );
 
-
-
-  // actions
+  // Actions.
   $form['actions'] = array(
     '#type' => 'actions'
   );

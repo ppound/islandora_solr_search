@@ -44,23 +44,23 @@ class IslandoraSolrQueryProcessor {
    * @param boolean $alter_results
    *   Whether or not to send out hooks to alter the islandora_solr_results.
    *
-   * @return
-   *   The contents of the executeQuery() method. ExecuteQuery() stores the
-   *   processed Solr results in the islandoraSolrResult property.
+   * @return NULL
+   *   Nothing to return.
    */
   function buildAndExecuteQuery($query, $params = NULL, $alter_results = TRUE) {
     // set empty string
     if (variable_get('islandora_solr_request_handler', '') == 'standard') {
-
       if (!$query || $query == ' ') {
         $query = '%252F';
       }
     }
-    // build the query and apply admin settings
+    // Build the query and apply admin settings.
     $this->buildQuery($query, $params);
 
-    // execute the query
-    return $this->executeQuery($alter_results);
+    // Execute the query.
+    $this->executeQuery($alter_results);
+
+    return;
   }
 
   /**
@@ -229,9 +229,13 @@ class IslandoraSolrQueryProcessor {
 
   /**
    * Reset Results
+   *
+   * @return NULL
+   *   Nothing to return.
    */
   function resetResults() {
     unset($this->islandoraSolrResult);
+    return;
   }
 
   /**
@@ -240,6 +244,9 @@ class IslandoraSolrQueryProcessor {
    *
    * @param boolean $alter_results
    *   Whether or not to send out hooks to alter the islandora_solr_results.
+   *
+   * @return NULL
+   *   Nothing to return.
    */
   function executeQuery($alter_results = TRUE) {
     // Init Apache_Solr_Service object.
@@ -299,7 +306,6 @@ class IslandoraSolrQueryProcessor {
     else {
       $this->islandoraSolrResult = NULL;
     }
-
     return;
   }
 }
