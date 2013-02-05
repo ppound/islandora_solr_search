@@ -436,7 +436,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#title' => t('Content model Solr field'),
     '#size' => 30,
     '#weight' => -1,
-    '#description' => t('The Solr field containing the content model URIs.'),
+    '#description' => t('The Solr field containing the content model URIs. This should be a multivalued string field'),
     '#default_value' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_ms'),
     '#required' => TRUE,
   );
@@ -446,7 +446,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#title' => t('Object label Solr field'),
     '#size' => 30,
     '#weight' => -2,
-    '#description' => t('The Solr field containing object labels.'),
+    '#description' => t('The Solr field containing object labels. This should be a single valued string field.'),
     '#default_value' => variable_get('islandora_solr_object_label_field', 'fgs_label_s'),
     '#required' => TRUE,
   );
@@ -456,12 +456,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#title' => t('Content model Solr field'),
     '#size' => 30,
     '#weight' => -3,
-    '#description' => t('The Solr field containing the populated datastream IDs.'),
+    '#description' => t('The Solr field containing the populated datastream IDs. This should be a multivalued string field.'),
     '#default_value' => variable_get('islandora_solr_datastream_id_field', 'fedora_datastreams_ms'),
     '#required' => TRUE,
   );
 
-  // Miscillanious.
+  // Miscellaneous.
   $form['islandora_solr_tabs']['other'] = array(
     '#type' => 'fieldset',
     '#title' => t('Other'),
