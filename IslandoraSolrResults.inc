@@ -29,7 +29,7 @@ class IslandoraSolrResults {
    *
    * @see islandora_solr()
    *
-   * @param type $islandoraSolrQuery
+   * @param IslandoraSolrQueryProcessor $islandoraSolrQuery
    *   The IslandoraSolrQueryProcessor object which includes the current query
    *   settings and the raw Solr results.
    *
@@ -138,6 +138,7 @@ class IslandoraSolrResults {
    *
    * @param type $results
    *   The raw Solr results from IslandoraSolrQueryProcessor::islandoraSolrResult
+   *
    * @return
    *   Rendered Solr results
    *
@@ -161,13 +162,12 @@ class IslandoraSolrResults {
     $fields_filtered = islandora_solr_get_fields('result_fields');
     $fields_no_permission = array_diff($fields_all, $fields_filtered);
 
-    // loop over results
-    foreach ($object_results as $object_result) {
+    // Loop over object results.
+    foreach ($object_results as $object_index => $object_result) {
       $doc = $object_result['solr_doc'];
       $rows = array();
       $row = 0; // keeping $row in there for now until the snippet issue is cleared out
       $snippet = NULL; // @TODO: how is this suposed to work if the $snippet always is set to NULL ?
-      $pids[] = $doc['PID'];
       $result_field_array = $this->resultFieldArray;
 
       // 1. add defined fields
@@ -201,12 +201,12 @@ class IslandoraSolrResults {
         );
         $rows[$row][] = $snippet[0];
       }
-      // append to results array
-      $results_array[] = $rows;
+      // Append array to object results array.
+      $object_results[$object_index]['solr_doc'] = $rows;
     }
 
-    // return themed search results
-    return theme('islandora_solr', array('results' => $results_array, 'elements' => $elements, 'pids' => $pids));
+    // Return themed search results.
+    return theme('islandora_solr', array('results' => $object_results, 'elements' => $elements));
   }
 
 
@@ -214,16 +214,17 @@ class IslandoraSolrResults {
    * Displays elements of the current solr query. Displays current query and
    * current filters. Includes a link to exclude the query/filter.
    *
-   * @param type $islandoraSolrQuery
+   * @param IslandoraSolrQueryProcessor $islandoraSolrQuery
    *   The IslandoraSolrQueryProcessor object which includes the current query
    *   settings and the raw Solr results.
+   *
    * @return
    *   Rendered lists of the currently active query and/or filters.
    */
   function currentQuery($islandoraSolrQuery) {
 
     // set path
-    $path = SOLR_SEARCH_PATH . '/' . replace_slashes($islandoraSolrQuery->solrQuery); // $_GET['q'] didn't seem to work here
+    $path = SOLR_SEARCH_PATH . '/' . replace_slashes($islandoraSolrQuery->solrQuery);
     // get date format
     $format = variable_get('islandora_solr_facet_date_format', 'Y');
     // set output variable
@@ -269,7 +270,7 @@ class IslandoraSolrResults {
       // add wrap and list
       $output .= '<div class="islandora-solr-query-wrap">';
       $output .= theme('item_list', array('items' => $query_list, 'title' => t('Query'), 'type' => 'ul', 'attributes' => array('class' => 'islandora-solr-query-list query-list')));
-      $output .= '</div>'; // 'islandora_solr_query_wrap'
+      $output .= '</div>';
 
     }
 
@@ -344,7 +345,7 @@ class IslandoraSolrResults {
       // return filter list
       $output .= '<div class="islandora-solr-filter-wrap">';
       $output .= theme('item_list', array('items' => $filter_list, 'title' => t("Enabled Filters"), 'type' => 'ul', 'attributes' => array('class' => 'islandora-solr-filter-list filter-list')));
-      $output .= '</div>'; // 'islandora_solr_filter_wrap'
+      $output .= '</div>';
     }
     return $output;
   }

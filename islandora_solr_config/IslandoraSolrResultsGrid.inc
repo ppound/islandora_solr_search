@@ -42,7 +42,7 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
     $object_results = $this->prep_results($results);
 
     // loop over results array
-    foreach ($object_results as $object_index=>$object_result) {
+    foreach ($object_results as $object_index => $object_result) {
       $rows = array();
       $row = 0; // keeping $row in there for now until the snippet issue is cleared out
       $snippet = NULL; // @TODO: how is this suposed to work if the $snippet always is set to NULL ?
@@ -76,11 +76,11 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
         );
         $rows[$row][] = $snippet[0];
       }
-      // append array to results array
+      // Append array to object results array.
       $object_results[$object_index]['solr_doc'] = $rows;
     }
 
-    // return themed search results
+    // Return themed search results.
     return theme('islandora_solr_grid', array('results' => $object_results, 'elements' => $elements));
   }
 

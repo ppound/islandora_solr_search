@@ -4,10 +4,6 @@
  *   Islandora solr primary results template file for
  *
  * Variables available:
- * - $variables: all array elements of $variables can be used as a variable.
- * - $user: The user object.
- * - $solr_default_img: default solr image. Used when no thumbnail is available.
- *
  * - $results: Primary profile results array
  *
  * @see template_preprocess_islandora_solr_grid()
