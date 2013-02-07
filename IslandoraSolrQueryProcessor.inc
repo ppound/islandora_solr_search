@@ -290,7 +290,7 @@ class IslandoraSolrQueryProcessor {
         $object_results[$object_index]['thumbnail_url_params'] = array();
       }
       // Allow other parts of code to modify the tailored results.
-      if ($alter_results) {
+      if ($alter_results && isset($object_result['solr_doc'])) {
         // Hook to alter based on content model.
         module_load_include('inc', 'islandora', 'includes/utilities');
 
