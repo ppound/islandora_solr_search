@@ -263,6 +263,7 @@ class IslandoraSolrQueryProcessor {
       drupal_set_message(check_plain(t('Error searching Solr index')) . ' ' . $e->getMessage(), 'error');
     }
 
+    $object_results = array();
     if (isset($results)) {
       $solr_results = json_decode($results->getRawResponse(), TRUE);
       // Create results tailored for Islandora's use.
@@ -306,7 +307,7 @@ class IslandoraSolrQueryProcessor {
           // Hook to alter based on content model.
           module_load_include('inc', 'islandora', 'includes/utilities');
           foreach ($object_results as $object_index => $object_result) {
-            if(!isset($object_result['content_models'])) {
+            if (!isset($object_result['content_models'])) {
               watchdog('islandora_solr', "The CModel Solr field is missing for $pid.");
             }
             else {
