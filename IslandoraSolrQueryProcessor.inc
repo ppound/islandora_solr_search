@@ -263,6 +263,7 @@ class IslandoraSolrQueryProcessor {
       drupal_set_message(check_plain(t('Error searching Solr index')) . ' ' . $e->getMessage(), 'error');
     }
 
+    $object_results = array();
     if (isset($results)) {
       $solr_results = json_decode($results->getRawResponse(), TRUE);
       // Create results tailored for Islandora's use.
