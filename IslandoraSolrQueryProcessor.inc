@@ -378,13 +378,6 @@ class IslandoraSolrQueryProcessor {
           if (isset($rows[$field]) || in_array($field, $fields_no_permission)) {
             continue;
           }
-          // Check highlighting.
-          if (isset($highlighting[$pid][$field])) {
-            $value = $highlighting[$pid][$field];
-          }
-          else {
-            $value = $doc[$field];
-          }
           $rows[$field] = is_array($value) ? implode(", ", $value) : $value;
         }
       }
