@@ -24,16 +24,16 @@ class IslandoraSolrResultsGrid extends IslandoraSolrResults {
    * @return string
    *   Rendered Solr results
    */
-  function printResults($object_results) {
+  function printResults($solr_results) {
     // add islandora solr theme css
     drupal_add_css(drupal_get_path('module', 'islandora_solr_config') . '/css/islandora_solr_config.theme.css');
-    $results = $object_results['response']['objects'];
+    $object_results = $solr_results['response']['objects'];
     $elements = array();
     // total
-    $elements['solr_total'] = $object_results['response']['numFound'];
+    $elements['solr_total'] = $solr_results['response']['numFound'];
     // start
-    $elements['solr_start'] = $object_results['response']['start'];
+    $elements['solr_start'] = $solr_results['response']['start'];
     // Return themed search results.
-    return theme('islandora_solr_grid', array('results' => $results, 'elements' => $elements));
+    return theme('islandora_solr_grid', array('results' => $object_results, 'elements' => $elements));
   }
 }

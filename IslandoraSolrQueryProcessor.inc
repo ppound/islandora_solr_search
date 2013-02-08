@@ -335,14 +335,15 @@ class IslandoraSolrQueryProcessor {
   }
   
   /**
-   * Iterates of the Solr doc of every result object and applies filters.
+   * Iterates of the Solr doc of every result object and applies filters and
+   * sort orders.
    *
    * @param array $object_results
    *   An array containing the prepared object results.
    * @return array
    *   The object results array with updated solr doc values.
    */
-  private function prepareSolrDoc($object_results) {
+  function prepareSolrDoc($object_results) {
     // optionally limit results to values given
     $limit_results = variable_get('islandora_solr_limit_result_fields', 0);
     // look for fields with no permission
@@ -354,14 +355,11 @@ class IslandoraSolrQueryProcessor {
     foreach ($object_results as $object_index => $object_result) {
       $doc = $object_result['solr_doc'];
       $rows = array();
-      $result_field_array = islandora_solr_get_fields('result_fields');
       // 1. add defined fields
-      foreach ($result_field_array as $field => $label) {
+      foreach ($fields_filtered as $field => $label) {
         if (isset($doc[$field]) && !empty($doc[$field])) {
           $value = $doc[$field];
-          $rows[$field]['label'] = $label;
-          $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
-          $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array
+          $rows[$field] = is_array($value) ? implode(", ", $value) : $value;
         }
       }
       // 2. if limit isn't set, add other fields
@@ -371,9 +369,7 @@ class IslandoraSolrQueryProcessor {
           if (isset($rows[$field]) || in_array($field, $fields_no_permission)) {
             continue;
           }
-          $rows[$field]['label'] = $field;
-          $rows[$field]['class'] = drupal_strtolower( preg_replace('/[^A-Za-z0-9]/', '-', $field));
-          $rows[$field]['value'] = (is_array($value)) ? implode(", ", $value) : $value; // split if it's an array
+          $rows[$field] = is_array($value) ? implode(", ", $value) : $value;
         }
       }
       // Append array to object results array.

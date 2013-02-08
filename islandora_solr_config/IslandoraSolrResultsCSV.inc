@@ -73,7 +73,14 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
       // This loop is just to update the maximum value counts for each field
       // because if any field in the entire resultset has multiple values,
       // we must break the field into multiple iterated fields.
-      foreach ($response_data['objects'] as $object_result) {
+      
+
+      $object_results = $response_data['objects'];
+      $object_results = islandora_solr_prepare_solr_doc($object_results);
+      foreach ($object_results as $object_result) {
+
+      
+/*       foreach ($response_data['objects'] as $object_result) { */
         $doc = $object_result['solr_doc'];
         fputs($docfile, addcslashes(serialize($doc), "\n\r\\") . "\n");
         foreach ($doc as $field => $value) {

@@ -16,23 +16,25 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
    *
    * @see IslandoraSolrResults::displayResults()
    *
-   * @param array $results
+   * @param array $solr_results
    *   The raw Solr results from
    *   IslandoraSolrQueryProcessor::islandoraSolrResult
    *
    * @return string
    *   Rendered Solr results
    */
-  function printResults($results) {
+  function printResults($solr_results) {
     drupal_add_css(drupal_get_path('module', 'islandora_solr_config') . '/css/islandora_solr_config.theme.css');
-    $record_start = (int) $results['response']['start'];
+    $object_results = $solr_results['response']['objects'];
+    $object_results = islandora_solr_prepare_solr_doc($object_results);
+    $record_start = (int) $solr_results['response']['start'];
     $fields = $this->resultFieldArray;
     $empty = array();
     foreach ($fields as $field => $label) {
       $empty[$field] = TRUE;
     }
     $rows = array();
-    foreach ($results['response']['objects'] as $key => $object_result) {
+    foreach ($object_results as $key => $object_result) {
       $row = array();
       $doc = $object_result['solr_doc'];
       $row['#'] = l(($key + 1), $object_result['object_url'], array('query' => $object_result['object_url_params']));
