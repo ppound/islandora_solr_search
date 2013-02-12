@@ -1353,6 +1353,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
   // pass variables to form state
   $form_state['dialog'] = $variables;
   // get solr field values
+  $solr_field = $variables['solr_field'];
   $values = $variables['values'];
   $permissions = $values['permissions'];
   $permissions_disable = _islandora_solr_permissions_disable();
@@ -1370,12 +1371,19 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
     '#default_value' => $values['label'],
     '#description' => t('A human readable name.'),
   );
+  
   $form['options']['snippet'] = array(
     '#type' => 'checkbox',
     '#title' => t('Snippet'),
     '#default_value' => $values['snippet'],
-    '#description' => t('If a match is found on this field, a snippet of text will be returned, with the search term highlighted.<br /><strong>Note:</strong> this feature is not supported by all display profiles.'),
+    '#description' => t('If a match is found on this field, a snippet of text will be returned, with the search term highlighted.<br /><strong>Note:</strong> Only text that has been both indexed and stored may be highlighted. The checkbox may be grayed out if the Solr field cannot be highlighted.'),
   );
+  $luke_field = islandora_solr_get_luke(NULL, $solr_field);
+  if (isset($luke_field['fields'][$solr_field]['type']) && $luke_field['fields'][$solr_field]['type'] == 'date') {
+    $form['options']['snippet']['#default_value'] = 0;
+    $form['options']['snippet']['#disabled'] = TRUE;
+  }
+  
   $form['options']['permissions_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Permissions'),

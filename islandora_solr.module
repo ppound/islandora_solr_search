@@ -14,7 +14,6 @@ require_once dirname(__FILE__) . '/includes/blocks.inc';
 // Includes functions for advanced facet functionality.
 require_once dirname(__FILE__) . '/includes/facets.inc';
 
-
 /**
  * Implements hook_boot().
  * @global type $conf
@@ -78,7 +77,6 @@ function islandora_solr_menu() {
   return $items;
 }
 
-
 /**
  * Implements hook_admin_paths().
  */
@@ -104,7 +102,6 @@ function islandora_solr_permission() {
     ),
   );
 }
-
 
 /**
  * Implements hook_theme().
@@ -338,10 +335,6 @@ function islandora_solr_help($path, $arg) {
   }
 }
 
-
-
-
-
 /**
  * Pings a solr instance for availability.
  *
@@ -382,7 +375,6 @@ function islandora_solr_ping($solr_url) {
   return FALSE;
 }
 
-
 /**
  * Check for url scheme
  *
@@ -400,8 +392,6 @@ function islandora_solr_check_http($url) {
   }
   return $url;
 }
-
-
 
 /**
  * Function to get Solr luke as a php array.
@@ -457,7 +447,6 @@ function islandora_solr_get_luke($solr_url = NULL, $field = NULL, $num_terms = 0
     return FALSE;
   }
 }
-
 
 /**
  * Returns an array containing all fields in Luke that are sortable.
@@ -528,9 +517,6 @@ function islandora_solr_check_sortable($solr_url = NULL, $field = NULL) {
   }
   return $sortable;
 }
-
-
-
 
 /**
  * Check if the current context is the search results page.
