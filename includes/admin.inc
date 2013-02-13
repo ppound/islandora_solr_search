@@ -92,7 +92,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'hidden',
     '#default_value' => isset($dismax_allowed) ? $dismax_allowed:$form_state['complete form']['solr_ajax_wrapper']['islandora_solr_dismax_allowed']['#default_value'],
   );
-//dsm($form['solr_ajax_wrapper']['islandora_solr_dismax_allowed']);
 
   // hidden submit button
   $form['solr_ajax_wrapper']['refresh_page'] = array(
