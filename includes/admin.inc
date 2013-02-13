@@ -1383,14 +1383,14 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
   
   $form['options']['snippet'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Snippet'),
+    '#title' => t('Highlight'),
     '#default_value' => $values['snippet'],
-    '#description' => t('If a match is found on this field, a snippet of text will be returned, with the search term highlighted.<br /><strong>Note:</strong> Only text that has been both indexed and stored may be highlighted. The checkbox may be grayed out if the Solr field cannot be highlighted.'),
+    '#description' => t('If a match is found on this field, the search term will be highlighted.<br /><strong>Note:</strong> Only text that has been both indexed and stored may be highlighted. While highlighting on non-tokenized fields is possible, the best results are achieved using tokenized fields. The checkbox may be grayed out if the Solr field cannot be highlighted.'),
   );
-  $luke_field = islandora_solr_get_luke(NULL, $solr_field);
-  if (isset($luke_field['fields'][$solr_field]['type']) && $luke_field['fields'][$solr_field]['type'] == 'date') {
+  $highlighting_allowed = islandora_solr_check_highlighting_allowed($solr_field);
+  if ($highlighting_allowed == FALSE) {
     $form['options']['snippet']['#default_value'] = 0;
-    $form['options']['snippet']['#disabled'] = TRUE;
+    $form['options']['snippet']['#disabled'] = TRUE;    
   }
   
   $form['options']['permissions_fieldset'] = array(
