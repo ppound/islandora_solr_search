@@ -26,7 +26,20 @@
           <dt>
             <?php
               $image = '<img src="' . url($result['thumbnail_url'], array('query' => $result['thumbnail_url_params'])) . '" />';
-              print l($image, $result['object_url'], array('html' => TRUE, 'query' => $result['object_url_params']));
+              // Construct options array for l() function call.  Only include
+              // what is needed.  Can accept standard url parameters and a single
+              // anchor tag (fragment) at the end
+              $options = array(
+                'html' => TRUE,
+              );
+              if (isset($result['object_url_params'])) {
+                $options['query'] = $result['object_url_params'];
+              }
+              if (isset($result['object_url_fragment'])) {
+                $options['fragment'] = $result['object_url_fragment'];
+              }
+              // Construct the thumbnail link
+              print l($image, $result['object_url'], $options);
             ?>
           </dt>
           <dd></dd>
