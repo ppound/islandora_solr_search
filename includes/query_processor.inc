@@ -352,7 +352,7 @@ class IslandoraSolrQueryProcessor {
     // look for fields with no permission
     $fields_all = islandora_solr_get_fields('result_fields', FALSE);
     $fields_to_filter = islandora_solr_get_fields('result_fields');
-    $filtered_fields = array_diff($fields_all, $fields_filtered);
+    $filtered_fields = array_diff($fields_all, $fields_to_filter);
 
     // Loop over object results.
     foreach ($object_results as $object_index => $object_result) {
