@@ -415,6 +415,13 @@ function islandora_solr_admin_settings($form, &$form_state) {
       Consider <strong>timestamp:[* TO NOW]</strong> or <strong>*:*</strong><br />'),
     '#default_value' => variable_get('islandora_solr_base_query', 'timestamp:[* TO NOW]'),
   );
+  $form['islandora_solr_tabs']['query_defaults']['islandora_solr_base_sort'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Sort field for default query'),
+    '#size' => 30,
+    '#description' => t('Indicate which field should define the sort order for the default query.<br />Consider <strong>timestamp desc</strong>.<br /><strong>Note:</strong> not all fields are sortable. For more info check the <a href="!url">Solr documentation</a>.', array('!url' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
+    '#default_value' => variable_get('islandora_solr_base_sort', 'score desc'),
+  );
   $form['islandora_solr_tabs']['query_defaults']['islandora_solr_base_filter'] = array(
     '#type' => 'textarea',
     '#title' => t('Solr base filter'),

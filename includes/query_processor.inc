@@ -95,6 +95,15 @@ class IslandoraSolrQueryProcessor {
       $this->solrQuery = ' '; //so we can allow empty queries to dismax
       // set base query
       $this->internalSolrQuery = variable_get('islandora_solr_base_query', 'timestamp:[* TO NOW]');
+
+      // set base sort if empty
+      if (!isset($this->internalSolrParams['sort'])) {
+        $this->internalSolrParams['sort'] = variable_get('islandora_solr_base_sort', 'score desc');
+        if (trim($this->internalSolrParams['sort']) == '') {
+          $this->internalSolrParams['sort'] = 'score desc'; 
+        }
+      }
+
       // we must also undo dismax if it's been set
       $this->solrDefType = NULL;
       $this->solrParams['defType'] = NULL;
