@@ -23,7 +23,6 @@ class IslandoraSolrQueryProcessor {
   public $solrDefType;
   // All other Solr parameters.
   public $solrParams = array();
-
   // Solr results tailored for Islandora's use.
   public $islandoraSolrResult;
   // the current display (for modules wanting to alter the query of a display)
@@ -74,8 +73,9 @@ class IslandoraSolrQueryProcessor {
    * @param array $params
    *   All URL parameters from the solr results page.
    */
-  function buildQuery($query, $params = array() ) {
+  function buildQuery($query, $params = array()) {
     // Set internal parameters gathered from the URL but not q and page.
+
     $this->internalSolrParams = $params;
     unset($this->internalSolrParams['q']);
     unset($this->internalSolrParams['page']);
@@ -93,7 +93,6 @@ class IslandoraSolrQueryProcessor {
     // if the query is empty
     if (empty($this->solrQuery) || in_array($this->solrQuery, $this->different_kinds_of_nothing)) {
       $this->solrQuery = ' '; //so we can allow empty queries to dismax
-
       // set base query
       $this->internalSolrQuery = variable_get('islandora_solr_base_query', 'timestamp:[* TO NOW]');
       // we must also undo dismax if it's been set
@@ -150,7 +149,7 @@ class IslandoraSolrQueryProcessor {
       'hl.fragsize' => 400,
       'hl.simple.pre' => '<span class="islandora-solr-highlight">',
       'hl.simple.post' => '</span>',
-        // Comma separated list configured in the block config.
+      // Comma separated list configured in the block config.
       'facet.field' => explode(',', $facet_fields),
     );
 
@@ -194,9 +193,16 @@ class IslandoraSolrQueryProcessor {
     // Set base filters.
     $base_filters = preg_split("/\\r\\n|\\n|\\r/", variable_get('islandora_solr_base_filter', ''), -1, PREG_SPLIT_NO_EMPTY);
 
+    // adds ability for modules to include facets which will not show up in breadcrumb trail
+    if (isset($params['hidden_filter'])) {
+      $base_filters = array_merge($base_filters, $params['hidden_filter']);
+    }
     // Set filter parameters - both from url and admin settings.
     if (isset($this->internalSolrParams['f']) && is_array($this->internalSolrParams['f'])) {
       $this->solrParams['fq'] = $this->internalSolrParams['f'];
+      if (!empty($base_filters)) {
+        $this->solrParams['fq'] = array_merge($this->internalSolrParams['f'], $base_filters);
+      }
       if (!empty($base_filters)) {
         $this->solrParams['fq'] = array_merge($this->internalSolrParams['f'], $base_filters);
       }
@@ -258,8 +264,7 @@ class IslandoraSolrQueryProcessor {
     try {
       $solr_query = ($this->internalSolrQuery) ? $this->internalSolrQuery : $this->solrQuery;
       $results = $solr->search($solr_query, $this->solrStart, $this->solrLimit, $this->solrParams);
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       drupal_set_message(check_plain(t('Error searching Solr index')) . ' ' . $e->getMessage(), 'error');
     }
 
@@ -387,4 +392,5 @@ class IslandoraSolrQueryProcessor {
     }
     return $object_results;
   }
+
 }
