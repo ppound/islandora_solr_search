@@ -38,7 +38,7 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
       $row = array();
       $doc = $object_result['solr_doc'];
       $row['#'] = l(($key + 1), $object_result['object_url'], array('query' => $object_result['object_url_params']));
-      foreach($fields as $field => $field_label) {
+      foreach ($fields as $field => $field_label) {
         if (isset($doc[$field]['value'])) {
           $value = $doc[$field]['value'];
           // @TODO: this should probably a config option to truncate the value.
@@ -69,4 +69,5 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
     $output = theme('islandora_solr_table', array('header' => $header, 'rows' => $rows));
     return $output;
   }
+
 }
