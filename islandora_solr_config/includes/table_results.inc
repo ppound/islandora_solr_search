@@ -70,4 +70,5 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
     $output = theme('islandora_solr_table', array('header' => $header, 'rows' => $rows));
     return $output;
   }
+
 }
