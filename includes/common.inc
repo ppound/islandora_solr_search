@@ -1,11 +1,9 @@
 <?php
 
-/*
+/**
  * @file
  * Contains some non-class-specific methods and things I'm not sure where to put.
  */
-
-$values = array("/", "+");
 
 /**
  * Initialize a pager for theme('pager') without running an SQL query.
@@ -112,7 +110,9 @@ function lesser_escape($value) {
   return preg_replace($pattern, $replace, $value);
 }
 
-//escape characters in field names of facets
+/**
+ * Escape characters in field names of facets.
+ */
 function solr_escape($facets) {
   $return_facets = array();
   foreach ($facets as $facet) {
@@ -191,7 +191,7 @@ function islandora_solr_prepare_solr_doc($object_results) {
 }
 
 /**
- * Prepares Solr results before rendering. Applies highlighting, implodes arrays and 
+ * Prepares Solr results before rendering. Applies highlighting, implodes arrays and
  * links to objects to Solr result fields.
  *
  * @param $array $solr_results
@@ -200,7 +200,7 @@ function islandora_solr_prepare_solr_doc($object_results) {
  *   Returns the same array but with prepared Solr field values.
  */
 function islandora_solr_prepare_solr_results($solr_results) {
-  $object_results = $solr_results['response']['objects']; 
+  $object_results = $solr_results['response']['objects'];
   $highlighting = $solr_results['highlighting'];
   $fields_all = islandora_solr_get_fields('result_fields', FALSE);
   $link_to_object = islandora_solr_get_link_to_object_fields();
