@@ -145,6 +145,7 @@ class IslandoraSolrResults {
    * @see IslandoraSolrResults::displayResults()
    */
   function printResults($solr_results) {
+    $solr_results = islandora_solr_prepare_solr_results($solr_results);
     $object_results = $solr_results['response']['objects'];
     $object_results = islandora_solr_prepare_solr_doc($object_results);
     $elements = array();

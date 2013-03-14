@@ -1269,6 +1269,7 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
       case 'result_fields':
         return array(
           'label' => $solr_field_settings['label'],
+          'link_to_object' => $solr_field_settings['link_to_object'],
           'snippet' => $solr_field_settings['snippet'],
           'permissions' => $solr_field_settings['permissions'],
         );
@@ -1380,6 +1381,12 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
     '#description' => t('A human readable name.'),
   );
   
+  $form['options']['link_to_object'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Link to object'),
+    '#default_value' => $values['link_to_object'],
+    '#description' => t('Link this field to the object page.'),
+  );
   $form['options']['snippet'] = array(
     '#type' => 'checkbox',
     '#title' => t('Highlight'),

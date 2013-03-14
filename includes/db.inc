@@ -139,6 +139,20 @@ function islandora_solr_get_snippet_fields() {
 }
 
 /**
+ * Return display fields with 'link to object' enabled.
+ */
+function islandora_solr_get_link_to_object_fields() {
+  $records = islandora_solr_get_fields('result_fields', TRUE, FALSE);
+  $link_to_object_fields = array();
+  foreach ($records as $key => $value) {
+    if (isset($value['solr_field_settings']['link_to_object']) && $value['solr_field_settings']['link_to_object'] == 1) {
+      $link_to_object_fields[] = $value['solr_field'];
+    }
+  }
+  return $link_to_object_fields;
+}
+
+/**
  * Return facet fields with range enabled.
  */
 function islandora_solr_get_range_facets() {
