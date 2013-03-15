@@ -203,9 +203,6 @@ class IslandoraSolrQueryProcessor {
       if (!empty($base_filters)) {
         $this->solrParams['fq'] = array_merge($this->internalSolrParams['f'], $base_filters);
       }
-      if (!empty($base_filters)) {
-        $this->solrParams['fq'] = array_merge($this->internalSolrParams['f'], $base_filters);
-      }
     }
     elseif (!empty($base_filters)) {
       $this->solrParams['fq'] = $base_filters;
