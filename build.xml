@@ -76,7 +76,6 @@
         <include name="**/*.test" />
         <modified />
       </fileset>
-      </fileset>
     </apply>
   </target>
 
