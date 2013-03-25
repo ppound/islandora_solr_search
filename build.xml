@@ -32,43 +32,7 @@
         <modified />
       </fileset>
 
-      <fileset dir="${basedir}/includes">
-        <include name="**/*.php" />
-        <include name="**/*.inc" />
-        <include name="**/*.module" />
-        <include name="**/*.install" />
-        <include name="**/*.test" />
-        <modified />
-      </fileset>
-
-      <fileset dir="${basedir}/theme">
-        <include name="**/*.php" />
-        <include name="**/*.inc" />
-        <include name="**/*.module" />
-        <include name="**/*.install" />
-        <include name="**/*.test" />
-        <modified />
-      </fileset>
-
       <fileset dir="${basedir}/islandora_solr_config">
-        <include name="**/*.php" />
-        <include name="**/*.inc" />
-        <include name="**/*.module" />
-        <include name="**/*.install" />
-        <include name="**/*.test" />
-        <modified />
-      </fileset>
-
-      <fileset dir="${basedir}/islandora_solr_config/includes">
-        <include name="**/*.php" />
-        <include name="**/*.inc" />
-        <include name="**/*.module" />
-        <include name="**/*.install" />
-        <include name="**/*.test" />
-        <modified />
-      </fileset>
-
-      <fileset dir="${basedir}/islandora_solr_config/theme">
         <include name="**/*.php" />
         <include name="**/*.inc" />
         <include name="**/*.module" />
