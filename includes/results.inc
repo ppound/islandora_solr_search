@@ -241,25 +241,49 @@ class IslandoraSolrResults {
           $symbol = '=';
         }
 
-        // split the filter into field and value
-        $filter_split = explode(':', $filter, 2);
-        // trim brackets
-        $filter_split[1] = trim($filter_split[1], "\"");
-
-        // if value is date
-        if (isset($islandoraSolrQuery->solrParams['facet.date']) && in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
-          // check date format setting
-          foreach ($range_facets as $value) {
-            if ($value['solr_field'] == $filter_split[0] && isset($value['solr_field_settings']['date_facet_format']) && !empty($value['solr_field_settings']['date_facet_format'])) {
-              $format = $value['solr_field_settings']['date_facet_format'];
+        // Check if there are operators in the filter.
+        // @TODO: See how this interacts with multiple date filters.
+        $fq_split = preg_split('/ (OR|AND) /', $filter);
+        if (count($fq_split) > 1) {
+          $operator_split = explode(' ', $filter);
+          $operator_split = array_diff($operator_split, $fq_split);
+          $out_array = array();
+          foreach ($fq_split as $fil) {
+            $fil_split = explode(':', $fil, 2);
+            $out_str = str_replace(array('"', 'info:fedora/'), '', $fil_split[1]);
+            $out_array[] = $out_str;
+          }
+          $filter_string = '';
+          foreach ($out_array as $out) {
+            $filter_string .= $out;
+            if (count($operator_split)) {
+              $filter_string .= ' ' . array_shift($operator_split) . ' ';
             }
           }
-          // split range filter string to return formatted date values
-          $filter_str = $filter_split[1];
-          $filter_str = trim($filter_str, '[');
-          $filter_str = trim($filter_str, ']');
-          $filter_array = explode(' TO ', $filter_str);
-          $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])) + (60 * 60 * 24), 'custom', $format);
+          $filter_string = trim($filter_string);
+        }
+        else {
+          // split the filter into field and value
+          $filter_split = explode(':', $filter, 2);
+          // trim brackets
+          $filter_split[1] = trim($filter_split[1], "\"");
+
+          // if value is date
+          if (isset($islandoraSolrQuery->solrParams['facet.date']) && in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
+            // check date format setting
+            foreach ($range_facets as $value) {
+              if ($value['solr_field'] == $filter_split[0] && isset($value['solr_field_settings']['date_facet_format']) && !empty($value['solr_field_settings']['date_facet_format'])) {
+                $format = $value['solr_field_settings']['date_facet_format'];
+              }
+            }
+            // split range filter string to return formatted date values
+            $filter_str = $filter_split[1];
+            $filter_str = trim($filter_str, '[');
+            $filter_str = trim($filter_str, ']');
+            $filter_array = explode(' TO ', $filter_str);
+            $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])) + (60 * 60 * 24), 'custom', $format);
+          }
+          $filter_string = $filter_split[1];
         }
 
         // pull out filter (for exclude link)
@@ -288,7 +312,7 @@ class IslandoraSolrResults {
 
         // create link
         // we're not using l() because of active classes: http://drupal.org/node/41595
-        $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . check_plain($filter_split[1]);
+        $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . check_plain($filter_string);
       }
       // return filter list
       $output .= '<div class="islandora-solr-filter-wrap">';
@@ -342,27 +366,51 @@ class IslandoraSolrResults {
           $exclude = TRUE;
         }
 
-        // split the filter into field and value
-        $filter_split = explode(':', $filter, 2);
-        // trim brackets
-        $filter_split[1] = trim($filter_split[1], "\"");
-
-        // if value is date
-        if (isset($islandoraSolrQuery->solrParams['facet.date']) && in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
-          // check date format setting
-          foreach ($range_facets as $value) {
-            if ($value['solr_field'] == $filter_split[0] && isset($value['solr_field_settings']['date_facet_format']) && !empty($value['solr_field_settings']['date_facet_format'])) {
-              $format = $value['solr_field_settings']['date_facet_format'];
+        // Check if there are operators in the filter.
+        // @TODO: See how this interacts with multiple date filters.
+        $fq_split = preg_split('/ (OR|AND) /', $filter);
+        if (count($fq_split) > 1) {
+          $operator_split = explode(' ', $filter);
+          $operator_split = array_diff($operator_split, $fq_split);
+          $out_array = array();
+          foreach ($fq_split as $fil) {
+            $fil_split = explode(':', $fil, 2);
+            $out_str = str_replace(array('"', 'info:fedora/'), '', $fil_split[1]);
+            $out_array[] = $out_str;
+          }
+          $filter_string = '';
+          foreach ($out_array as $out) {
+            $filter_string .= $out;
+            if (count($operator_split)) {
+              $filter_string .= ' ' . array_shift($operator_split) . ' ';
             }
           }
-          // split range filter string to return formatted date values
-          $filter_str = $filter_split[1];
-          $filter_str = trim($filter_str, '[');
-          $filter_str = trim($filter_str, ']');
-          $filter_array = explode(' TO ', $filter_str);
-          $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])) + (60 * 60 * 24), 'custom', $format);
+          $filter_string = trim($filter_string);
         }
+        else {
+          // split the filter into field and value
+          $filter_split = explode(':', $filter, 2);
 
+          // trim brackets
+          $filter_split[1] = trim($filter_split[1], "\"");
+
+          // if value is date
+          if (isset($islandoraSolrQuery->solrParams['facet.date']) && in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
+            // check date format setting
+            foreach ($range_facets as $value) {
+              if ($value['solr_field'] == $filter_split[0] && isset($value['solr_field_settings']['date_facet_format']) && !empty($value['solr_field_settings']['date_facet_format'])) {
+                $format = $value['solr_field_settings']['date_facet_format'];
+              }
+            }
+            // split range filter string to return formatted date values
+            $filter_str = $filter_split[1];
+            $filter_str = trim($filter_str, '[');
+            $filter_str = trim($filter_str, ']');
+            $filter_array = explode(' TO ', $filter_str);
+            $filter_split[1] = format_date(strtotime(trim($filter_array[0])) + (60 * 60 * 24), 'custom', $format) . ' - ' . format_date(strtotime(trim($filter_array[1])) + (60 * 60 * 24), 'custom', $format);
+          }
+          $filter_string = $filter_split[1];
+        }
         // increment filter array with current filter (for breadcrumb link)
         $query = array();
         $query_diff = array_diff($params, array('f' => array()));
@@ -403,10 +451,9 @@ class IslandoraSolrResults {
         $attr_x['rel'] = 'nofollow';
         // set url
         $attr_x['href'] = url($path, array('query' => $query_x));
-
         // create links
         // we're not using l() because of active classes: http://drupal.org/node/41595
-        $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . check_plain($filter_split[1]) . '</a>'
+        $breadcrumb[] = '<a' . drupal_attributes($attr) . '>' . check_plain($filter_string) . '</a>'
               . '<span class="islandora-solr-breadcrumb-super"> <a' . drupal_attributes($attr_x) . '>(' . t('x') . ')</a></span>';
 
       }
