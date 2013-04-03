@@ -1618,8 +1618,8 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
   $form['options']['range_facet']['wrapper']['range_slider']['range_facet_slider_color'] = array(
     '#type' => 'textfield',
     '#title' => t('Slider color'),
-    '#description' => t('The range slider\'s color, formatted as a hex value. Defaults to <font color="!color">#EDC240</font>', array('!color' => '#EDC240')),
-    '#default_value' => $values['range_facet_slider_color'] ? $values['range_facet_slider_color'] : '#EDC240',
+    '#description' => t('The range slider\'s color, formatted as a hex value. Defaults to <span style="color: !color">#edc240</span>', array('!color' => '#edc240')),
+    '#default_value' => $values['range_facet_slider_color'] ? $values['range_facet_slider_color'] : '#edc240',
     '#states' => array(
       'visible' => array(
         ':input[name="range_facet_slider_enabled"]' => array('checked' => TRUE)
