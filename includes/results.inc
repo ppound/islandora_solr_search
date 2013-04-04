@@ -16,12 +16,14 @@ class IslandoraSolrResults {
   public $resultFieldArray = array();
   public $allSubsArray = array();
   public $islandoraSolrQueryProcessor;
+  public $rangeFacets = array();
 
   /**
    * Constructor
    */
   function IslandoraSolrResults() {
     $this->prepFieldSubstitutions();
+    $this->rangeFacets = islandora_solr_get_range_facets();
   }
 
   /**
@@ -170,7 +172,6 @@ class IslandoraSolrResults {
    *   Rendered lists of the currently active query and/or filters.
    */
   function currentQuery($islandoraSolrQuery) {
-
     // set path
     $path = SOLR_SEARCH_PATH . '/' . replace_slashes($islandoraSolrQuery->solrQuery);
     // get date format
@@ -181,18 +182,12 @@ class IslandoraSolrResults {
     $fq = isset($islandoraSolrQuery->internalSolrParams['f']) ? $islandoraSolrQuery->internalSolrParams['f'] : array();
     // parameters set in url
     $params = $islandoraSolrQuery->internalSolrParams;
-    // get range facets
-    $range_facets = islandora_solr_get_range_facets();
-
-
     // Get Query values
     if (!in_array($islandoraSolrQuery->solrQuery, $islandoraSolrQuery->different_kinds_of_nothing)) {
       // get query value
       $query_value = $islandoraSolrQuery->solrQuery;
-
       // set list variables
       $query_list = array();
-
       // remove link keeps all parameters (query gets removed instead)
       $query_minus = array();
       $query_minus = $params;
@@ -222,13 +217,10 @@ class IslandoraSolrResults {
 
     }
 
-
     // Get Filter values
     if (!empty($fq)) {
-
       // set list variables
       $filter_list = array();
-
       // loop over filters
       foreach ($fq as $key => $filter) {
 
@@ -240,9 +232,7 @@ class IslandoraSolrResults {
         else {
           $symbol = '=';
         }
-
-        $filter_string = $this->formatFilter($filter);
-
+        $filter_string = $this->formatFilter($filter, $islandoraSolrQuery);
         // pull out filter (for exclude link)
         $query_minus = array();
         $f_x['f'] = array_diff($params['f'], array($filter));
@@ -255,7 +245,6 @@ class IslandoraSolrResults {
         if (empty($query_minus['f'])) {
           unset($query_minus['f']);
         }
-
         // set attributes variable for remove link
         $attr_minus = array();
         // set title
@@ -266,7 +255,6 @@ class IslandoraSolrResults {
         $attr_minus['rel'] = 'nofollow';
         // set url
         $attr_minus['href'] = url($path, array('query' => $query_minus));
-
         // create link
         // we're not using l() because of active classes: http://drupal.org/node/41595
         $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . check_plain($filter_string);
@@ -294,8 +282,6 @@ class IslandoraSolrResults {
     $format = variable_get('islandora_solr_facet_date_format', 'Y');
     // set breadcrumb variable
     $breadcrumb = array();
-    // get range facets
-    $range_facets = islandora_solr_get_range_facets();
     // get user provided filter parameters
     if (isset($islandoraSolrQuery->internalSolrParams['f'])) {
       $fq = $islandoraSolrQuery->internalSolrParams['f'];
@@ -316,15 +302,12 @@ class IslandoraSolrResults {
       // set var
       $f['f'] = array();
       foreach ($fq as $key => $filter) {
-
         // check for exclude filter
         $exclude = FALSE;
         if ($filter[0] == '-') {
           $exclude = TRUE;
         }
-
-        $filter_string = $this->formatFilter($filter);
-
+        $filter_string = $this->formatFilter($filter, $islandoraSolrQuery);
         // increment filter array with current filter (for breadcrumb link)
         $query = array();
         $query_diff = array_diff($params, array('f' => array()));
@@ -371,7 +354,6 @@ class IslandoraSolrResults {
               . '<span class="islandora-solr-breadcrumb-super"> <a' . drupal_attributes($attr_x) . '>(' . t('x') . ')</a></span>';
 
       }
-
       // at this point reverse the breadcrumbs array (only contains filters)
       $breadcrumb = array_reverse($breadcrumb);
     }
@@ -380,21 +362,17 @@ class IslandoraSolrResults {
     if (!in_array($islandoraSolrQuery->solrQuery, $islandoraSolrQuery->different_kinds_of_nothing)) {
       // get query value
       $query_value = $islandoraSolrQuery->solrQuery;
-
       // remove all filters for this breadcrumb
       $query = array();
       $query = array_diff($params, array('f' => array()));
-
       // remove button keeps all parameters (query gets removed instead)
       $query_x = array();
       $query_x = $params;
       if (empty($params['f'])) {
         unset($query_x['f']);
       }
-
       // remove query from path
       $path_x = implode('/', explode('/', $path, -1)) . '/ ';
-
       // set attributes variable
       $attr = array();
       // set title
@@ -454,10 +432,12 @@ class IslandoraSolrResults {
    *
    * @param string $filter
    *   The passed in filter.
+   * @param object $islandoraSolrQuery
+   *   The current Solr Query
    * @return string
    *   The formatted filter string for breadcrumbs and active query.
    */
-  function formatFilter($filter) {
+  function formatFilter($filter, $islandoraSolrQuery) {
     // Check if there are operators in the filter.
     // @TODO: See how this interacts with multiple date filters.
     $fq_split = preg_split('/ (OR|AND) /', $filter);
@@ -484,11 +464,10 @@ class IslandoraSolrResults {
       $filter_split = explode(':', $filter, 2);
       // trim brackets
       $filter_split[1] = trim($filter_split[1], "\"");
-
       // if value is date
       if (isset($islandoraSolrQuery->solrParams['facet.date']) && in_array(ltrim($filter_split[0], '-'), $islandoraSolrQuery->solrParams['facet.date'])) {
         // check date format setting
-        foreach ($range_facets as $value) {
+        foreach ($this->rangeFacets as $value) {
           if ($value['solr_field'] == $filter_split[0] && isset($value['solr_field_settings']['date_facet_format']) && !empty($value['solr_field_settings']['date_facet_format'])) {
             $format = $value['solr_field_settings']['date_facet_format'];
           }
