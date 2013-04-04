@@ -1274,21 +1274,22 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
     switch ($field_type) {
       case 'result_fields':
         return array(
-          'label' => $solr_field_settings['label'],
+          'label' => trim($solr_field_settings['label']),
           'link_to_object' => $solr_field_settings['link_to_object'],
           'snippet' => $solr_field_settings['snippet'],
+          'date_format' => trim($solr_field_settings['date_format']),
           'permissions' => $solr_field_settings['permissions'],
         );
         break;
       case 'sort_fields':
         return array(
-          'label' => $solr_field_settings['label'],
+          'label' => trim($solr_field_settings['label']),
           'permissions' => $solr_field_settings['permissions'],
         );
         break;
       case 'facet_fields':
         return array(
-          'label' => $solr_field_settings['label'],
+          'label' => trim($solr_field_settings['label']),
           'range_facet_select' => $solr_field_settings['range_facet_select'],
           'range_facet_variable_gap' => $solr_field_settings['range_facet_variable_gap'],
           'range_facet_start' => $solr_field_settings['range_facet_start'],
@@ -1304,7 +1305,7 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
         break;
       case 'search_fields':
         return array(
-          'label' => $solr_field_settings['label'],
+          'label' => trim($solr_field_settings['label']),
           'permissions' => $solr_field_settings['permissions'],
         );
         break;
@@ -1403,6 +1404,16 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
   if ($highlighting_allowed == FALSE) {
     $form['options']['snippet']['#default_value'] = 0;
     $form['options']['snippet']['#disabled'] = TRUE;
+  }
+
+  $luke_result = islandora_solr_get_luke(NULL, $solr_field);
+  if(isset($luke_result['fields'][$solr_field]['type']) && $luke_result['fields'][$solr_field]['type'] == 'date') {
+    $form['options']['date_format'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Date format'),
+      '#default_value' => $values['date_format'] ? $values['date_format'] : '',
+      '#description' => t('The format of the date, as it will be displayed in the search results. Use <a href="!url" target="_blank">PHP date()</a> formatting.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+    );
   }
 
   $form['options']['permissions_fieldset'] = array(
