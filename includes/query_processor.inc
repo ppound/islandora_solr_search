@@ -184,6 +184,10 @@ class IslandoraSolrQueryProcessor {
         if ($gap) {
           $params_date_facets["f.{$field}.facet.date.gap"] = $gap;
         }
+        // When the range slider is enabled we always want to return empty values.
+        if ($value['solr_field_settings']['range_facet_slider_enabled'] == 1) {
+          $params_date_facets["f.{$field}.facet.mincount"] = 0;
+        }
         // remove range/date field from facet.field array
         $pos = array_search($field, $params_array['facet.field']);
         unset($params_array['facet.field'][$pos]);

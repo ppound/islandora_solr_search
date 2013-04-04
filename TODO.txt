@@ -52,10 +52,11 @@ http://drupal.stackexchange.com/questions/50216/how-to-trigger-a-form-and-pass-v
 -- look for details (permissions, string handling, css, etc..)
 -- rss feed + config
 
+- update README.txt
+
 Normal Priority
 ---------------
 
-- Try to fix popup resizing.
 - rename 'solr_field_settings' to 'settings'
 - really need to clean IslandoraSolrResults. All of it, but especially facets.
 - use libraries module for flot
@@ -80,7 +81,6 @@ http://wiki.apache.org/solr/CommonQueryParameters#sort
 Low Priority
 ------------
 
-- update README.txt
 - tabledrag should update the table with ajax.
 - hook_alter instead of module invoke all for object manipulation
 - provide integration with display suite

@@ -633,9 +633,9 @@ class IslandoraSolrFacets {
    */
   public static function init($islandoraSolrQuery) {
     self::$islandoraSolrQuery = $islandoraSolrQuery;
-    self::$facet_fields = self::getFacetFields();
-    self::$facet_dates = self::getFacetDates();
-    self::$facet_ranges = self::getFacetRanges(); // not in place yet.
+    self::$facet_fields = $islandoraSolrQuery->islandoraSolrResult['facet_counts']['facet_fields'];
+    self::$facet_dates = $islandoraSolrQuery->islandoraSolrResult['facet_counts']['facet_dates'];
+    self::$facet_ranges = $islandoraSolrQuery->islandoraSolrResult['facet_counts']['facet_ranges']; // not in place yet.
 
     self::$facet_fields_settings = islandora_solr_get_fields('facet_fields', TRUE, FALSE, TRUE); // filtered, not simplified and fields as keys
     self::$facet_fields_settings_simple = _islandora_solr_simplify_fields(self::$facet_fields_settings);
@@ -646,33 +646,6 @@ class IslandoraSolrFacets {
     // Calculate variable date gap.
     // @XXX move elsewhere?
     self::variableDateGap();
-  }
-
-  /**
-   * Returns an array with the facet results.
-   */
-  public static function getFacetFields() {
-    $facet_fields = isset(self::$islandoraSolrQuery->islandoraSolrResult['facet_counts']['facet_fields']) ? self::$islandoraSolrQuery->islandoraSolrResult['facet_counts']['facet_fields'] : array();
-    $facet_fields_json  = json_encode($facet_fields);
-    return json_decode($facet_fields_json, TRUE);
-  }
-
-  /**
-   * Returns an array with the date facet results.
-   */
-  public static function getFacetDates() {
-    $facet_dates = isset(self::$islandoraSolrQuery->islandoraSolrResult['facet_counts']['facet_dates']) ? self::$islandoraSolrQuery->islandoraSolrResult['facet_counts']['facet_dates'] : array();
-    $facet_dates_json  = json_encode($facet_dates);
-    return json_decode($facet_dates_json, TRUE);
-  }
-
-  /**
-   * Returns an array with the range facet results.
-   */
-  public static function getFacetRanges() {
-    $facet_ranges = isset(self::$islandoraSolrQuery->islandoraSolrResult['facet_counts']['facet_ranges']) ? self::$islandoraSolrQuery->islandoraSolrResult['facet_counts']['facet_ranges'] : array();
-    $facet_ranges_json  = json_encode($facet_ranges);
-    return json_decode($facet_ranges_json, TRUE);
   }
 
   /**
@@ -1056,11 +1029,11 @@ class IslandoraSolrFacets {
     // @TODO: date_format configurable.
     $gap = NULL;
     $date_format = 'Y';
-    if ($calc_total_days == 1) {
+    if ($calc_total_days < 7) {
       $gap = t('days');
       $date_format = 'M j, Y';
     }
-    elseif ($calc_total_days == 7) {
+    elseif ($calc_total_days >= 7 && $calc_total_days <= 28) {
       $gap = t('weeks');
       $date_format = 'M j, Y';
     }
@@ -1211,7 +1184,6 @@ class IslandoraSolrFacets {
     $facet_dates = self::$facet_dates;
     // populate with terms that needed a second solr call to update facets
     $needs_solr_call = array();
-
     // loop over all date facets
     foreach ($facet_dates as $solr_field => $buckets) {
       $values = array();
