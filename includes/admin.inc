@@ -1539,6 +1539,7 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
 
   $form_state['dialog'] = $variables;
   // get solr field values
+  $solr_field = $variables['solr_field'];
   $values = $variables['values'];
   $permissions = $values['permissions'];
   $permissions_disable = _islandora_solr_permissions_disable();
@@ -1557,114 +1558,117 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
     '#description' => t('A human-readable name.'),
   );
 
-  $form['options']['range_facet'] = array(
-    '#type' => 'fieldset',
-    '#id' => 'range-facet-wrapper',
-    '#collapsible' => FALSE,
-    '#collapsed' => TRUE,
-  );
-
-  $form['options']['range_facet']['range_facet_select'] = array(// @TODO: grey out if LUKE says it's not possible to use as a range field? Add AJAX callback to show more options?
-    '#type' => 'checkbox',
-    '#title' => t('Range facet'),
-    '#default_value' => $values['range_facet_select'],
-    '#description' => t('Toggles whether this facet field should be configured as a Solr range facet.'),
-  );
-
-  // @TODO: check for non-ajax values
-  $form['options']['range_facet']['wrapper'] = array(
-    '#type' => 'container',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="range_facet_select"]' => array('checked' => TRUE)
+  $luke_result = islandora_solr_get_luke(NULL, $solr_field);
+  if(isset($luke_result['fields'][$solr_field]['type']) && $luke_result['fields'][$solr_field]['type'] == 'date') {
+    $form['options']['range_facet'] = array(
+      '#type' => 'fieldset',
+      '#id' => 'range-facet-wrapper',
+      '#collapsible' => FALSE,
+      '#collapsed' => TRUE,
+    );
+  
+    $form['options']['range_facet']['range_facet_select'] = array(// @TODO: grey out if LUKE says it's not possible to use as a range field? Add AJAX callback to show more options?
+      '#type' => 'checkbox',
+      '#title' => t('Range facet'),
+      '#default_value' => $values['range_facet_select'],
+      '#description' => t('Toggles whether this facet field should be configured as a Solr range facet.'),
+    );
+  
+    // @TODO: check for non-ajax values
+    $form['options']['range_facet']['wrapper'] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="range_facet_select"]' => array('checked' => TRUE)
+        ),
       ),
-    ),
-  );
-  $form['options']['range_facet']['wrapper']['range_facet_variable_gap'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Variable range gap'),
-    '#return_value' => 1,
-    '#default_value' => $values['range_facet_variable_gap'] ? $values['range_facet_variable_gap'] : 0,
-    '#description' => t('When checked, the following date range settings will be used by default, but if a date range is filtered down, a new range gap will be calculated and applied. When left unchecked, the following settings provide fixed range gaps.'),
-  );
-  $form['options']['range_facet']['wrapper']['range_facet_start'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Start'),
-    '#default_value' => $values['range_facet_start'] ? $values['range_facet_start'] : 'NOW/YEAR-20YEARS',
-    '#description' => t('The lower bound of the first date range for all date faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-  );
-  $form['options']['range_facet']['wrapper']['range_facet_end'] = array(
-    '#type' => 'textfield',
-    '#title' => t('End'),
-    '#default_value' => $values['range_facet_end'] ? $values['range_facet_end'] : 'NOW',
-    '#description' => t('The minimum upper bound of the last date range for all Date Faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-  );
-  $form['options']['range_facet']['wrapper']['range_facet_gap'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Gap'),
-    '#default_value' => $values['range_facet_gap'] ? $values['range_facet_gap'] : '+1YEAR',
-    '#description' => t('The size of each date range, expressed as an interval to be added to the lower bound using the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-  );
-  $form['options']['range_facet']['wrapper']['date_facet_format'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Date format'),
-    '#default_value' => $values['date_facet_format'] ? $values['date_facet_format'] : 'Y',
-    '#description' => t('The format of the date, as it will be displayed in the facet block. Use <a href="!url">PHP date()</a> formatting.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-  );
-
-  // Range slider.
-  $form['options']['range_facet']['wrapper']['range_slider'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Range slider'),
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
-  );
-  $form['options']['range_facet']['wrapper']['range_slider']['range_facet_slider_enabled'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable range slider'),
-    '#return_value' => 1,
-    '#default_value' => $values['range_facet_slider_enabled'] ? $values['range_facet_slider_enabled'] : 0,
-    '#description' => t('When checked, the normal range facet will be replaced by a range slider widget.'),
-  );
-  $form['options']['range_facet']['wrapper']['range_slider']['range_facet_slider_color'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Slider color'),
-    '#description' => t('The range slider\'s color, formatted as a hex value. Defaults to <span style="color: #edc240">#edc240</span>'),
-    '#default_value' => $values['range_facet_slider_color'] ? $values['range_facet_slider_color'] : '#edc240',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="range_facet_slider_enabled"]' => array('checked' => TRUE)
+    );
+    $form['options']['range_facet']['wrapper']['range_facet_variable_gap'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Variable range gap'),
+      '#return_value' => 1,
+      '#default_value' => $values['range_facet_variable_gap'] ? $values['range_facet_variable_gap'] : 0,
+      '#description' => t('When checked, the following date range settings will be used by default, but if a date range is filtered down, a new range gap will be calculated and applied. When left unchecked, the following settings provide fixed range gaps.'),
+    );
+    $form['options']['range_facet']['wrapper']['range_facet_start'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Start'),
+      '#default_value' => $values['range_facet_start'] ? $values['range_facet_start'] : 'NOW/YEAR-20YEARS',
+      '#description' => t('The lower bound of the first date range for all date faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+    );
+    $form['options']['range_facet']['wrapper']['range_facet_end'] = array(
+      '#type' => 'textfield',
+      '#title' => t('End'),
+      '#default_value' => $values['range_facet_end'] ? $values['range_facet_end'] : 'NOW',
+      '#description' => t('The minimum upper bound of the last date range for all Date Faceting on this field. This should be a single date expression which may use the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+    );
+    $form['options']['range_facet']['wrapper']['range_facet_gap'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Gap'),
+      '#default_value' => $values['range_facet_gap'] ? $values['range_facet_gap'] : '+1YEAR',
+      '#description' => t('The size of each date range, expressed as an interval to be added to the lower bound using the <a href="!url">DateMathParser</a> syntax.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+    );
+    $form['options']['range_facet']['wrapper']['date_facet_format'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Date format'),
+      '#default_value' => $values['date_facet_format'] ? $values['date_facet_format'] : 'Y',
+      '#description' => t('The format of the date, as it will be displayed in the facet block. Use <a href="!url">PHP date()</a> formatting.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+    );
+  
+    // Range slider.
+    $form['options']['range_facet']['wrapper']['range_slider'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Range slider'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    );
+    $form['options']['range_facet']['wrapper']['range_slider']['range_facet_slider_enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable range slider'),
+      '#return_value' => 1,
+      '#default_value' => $values['range_facet_slider_enabled'] ? $values['range_facet_slider_enabled'] : 0,
+      '#description' => t('When checked, the normal range facet will be replaced by a range slider widget.'),
+    );
+    $form['options']['range_facet']['wrapper']['range_slider']['range_facet_slider_color'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Slider color'),
+      '#description' => t('The range slider\'s color, formatted as a hex value. Defaults to <span style="color: #edc240">#edc240</span>'),
+      '#default_value' => $values['range_facet_slider_color'] ? $values['range_facet_slider_color'] : '#edc240',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="range_facet_slider_enabled"]' => array('checked' => TRUE)
+        ),
       ),
-    ),
-  );
-
-  // Date filter
-  $form['options']['range_facet']['wrapper']['date_filter'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Date range filter'),
-    '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
-  );
-  $form['options']['range_facet']['wrapper']['date_filter']['date_filter_datepicker_enabled'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable date range filter'),
-    '#return_value' => 1,
-    '#default_value' => $values['date_filter_datepicker_enabled'] ? $values['date_filter_datepicker_enabled'] : 0,
-    '#description' => t('When checked, a date range filter will become available underneath the date range facet. The date range filter includes <em>from date</em> and a <em>to date</em> text fields. It also comes with a calendar popup widget.'),
-  );
-  $form['options']['range_facet']['wrapper']['date_filter']['date_filter_datepicker_range'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Years back and forward'),
-    '#default_value' => $values['date_filter_datepicker_range'] ? $values['date_filter_datepicker_range'] : '-100:+3',
-    '#size' => 10,
-    '#maxsize' => 10,
-    '#description' => t('The range of years displayed in the year drop-down menu. These are either relative to today\'s year ("-nn:+nn"), to the currently selected year ("c-nn:c+nn"), an absolute ("nnnn:nnnn"), or combinations of these formats ("nnnn:-nn"). For more info, check the jQuery UI <a href="!url" target="_blank">datepicker documentation</a>.', array('!url' => 'http://api.jqueryui.com/datepicker/#option-yearRange')),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="date_filter_datepicker_enabled"]' => array('checked' => TRUE)
+    );
+  
+    // Date filter
+    $form['options']['range_facet']['wrapper']['date_filter'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Date range filter'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    );
+    $form['options']['range_facet']['wrapper']['date_filter']['date_filter_datepicker_enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable date range filter'),
+      '#return_value' => 1,
+      '#default_value' => $values['date_filter_datepicker_enabled'] ? $values['date_filter_datepicker_enabled'] : 0,
+      '#description' => t('When checked, a date range filter will become available underneath the date range facet. The date range filter includes <em>from date</em> and a <em>to date</em> text fields. It also comes with a calendar popup widget.'),
+    );
+    $form['options']['range_facet']['wrapper']['date_filter']['date_filter_datepicker_range'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Years back and forward'),
+      '#default_value' => $values['date_filter_datepicker_range'] ? $values['date_filter_datepicker_range'] : '-100:+3',
+      '#size' => 10,
+      '#maxsize' => 10,
+      '#description' => t('The range of years displayed in the year drop-down menu. These are either relative to today\'s year ("-nn:+nn"), to the currently selected year ("c-nn:c+nn"), an absolute ("nnnn:nnnn"), or combinations of these formats ("nnnn:-nn"). For more info, check the jQuery UI <a href="!url" target="_blank">datepicker documentation</a>.', array('!url' => 'http://api.jqueryui.com/datepicker/#option-yearRange')),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="date_filter_datepicker_enabled"]' => array('checked' => TRUE)
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   // Permissions.
   $form['options']['permissions_fieldset'] = array(
