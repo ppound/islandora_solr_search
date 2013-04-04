@@ -201,7 +201,7 @@ function islandora_solr_prepare_solr_doc($object_results) {
  */
 function islandora_solr_prepare_solr_results($solr_results) {
   $object_results = $solr_results['response']['objects'];
-  $highlighting = $solr_results['highlighting'];
+  $highlighting = isset($solr_results['highlighting']) ? $solr_results['highlighting'] : array();
   $fields_all = islandora_solr_get_fields('result_fields', FALSE);
   $link_to_object = islandora_solr_get_link_to_object_fields();
   $date_format = islandora_solr_get_date_format_fields();
