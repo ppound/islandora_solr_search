@@ -6,21 +6,12 @@
  */
 
 /**
- * Function to return administration setting form
- *
- * @param array $form
- *   The form deffinition.
- * @param array $form_state
- *   The form state.
- *
- * @return array
- *   The form array.
+ * Islandora Solr index admin form.
  */
-function islandora_solr_admin_settings($form, &$form_state) {
+function islandora_solr_admin_index_settings($form, &$form_state) {
   // Add admin form css.
   drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
-  drupal_add_library('system', 'ui.dialog');
-  drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
+
   $solr_url = !empty($form_state['values']['islandora_solr_url']) ? $form_state['values']['islandora_solr_url'] : variable_get('islandora_solr_url', 'localhost:8080/solr');
 
   // Solr connect triggering handler is dismax or not set on page load.
@@ -61,10 +52,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
   }
   // Create form.
   $form = array();
-  $form['islandora_solr_tabs'] = array(
-    '#type' => 'vertical_tabs',
-    '#weight' => 5,
-  );
   // ajax wrapper for url checking
   $form['solr_ajax_wrapper'] = array(
     '#prefix' => '<div id="solr-url">',
@@ -123,8 +110,93 @@ function islandora_solr_admin_settings($form, &$form_state) {
       ),
     );
   }
+  $form['solr_ajax_wrapper']['islandora_solr_available'] = array(
+    '#type' => 'hidden',
+    '#value' => $solr_avail ? 1 : 0,
+  );
 
+  // Actions.
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save Solr configuration'),
+    '#weight' => 0,
+    '#submit' => array('_islandora_solr_admin_index_settings_submit'),
+    '#validate' => array('_islandora_solr_admin_index_settings_validate'),
+  );
+  $form['actions']['reset'] = array(
+    '#type' => 'submit',
+    '#value' => t('Reset to defaults'),
+    '#weight' => 1,
+    '#submit' => array('_islandora_solr_admin_index_settings_submit'),
+  );
+  return $form;
+}
 
+/**
+ * Islandora Solr index admin validate callback.
+ */
+function _islandora_solr_admin_index_settings_validate($form, &$form_state) {
+  if ($form_state['values']['islandora_solr_available'] == 0) {
+    form_set_error('islandora_solr_url', t('Please enter a valid Solr URL.'));
+    $form_state['rebuild'] = TRUE;
+  }
+}
+
+/**
+ * Islandora Solr index admin submit callback.
+ */
+function _islandora_solr_admin_index_settings_submit($form, &$form_state) {
+  // if this function is called not using submit or reset buttons
+  if ($form_state['triggering_element']['#id'] != 'edit-submit' && $form_state['triggering_element']['#id'] != 'edit-reset') {
+    $form_state['rebuild'] = TRUE;
+    return;
+  }
+  // get operation
+  $op = isset($form_state['triggering_element']['#id']) ? $form_state['triggering_element']['#id'] : '';
+
+  switch ($op) {
+    case 'edit-submit':
+      variable_set('islandora_solr_url', $form_state['values']['islandora_solr_url']);
+      variable_set('islandora_solr_request_handler', $form_state['values']['islandora_solr_request_handler']);
+      variable_set('islandora_solr_dismax_allowed', $form_state['values']['islandora_solr_dismax_allowed']);
+      drupal_set_message(t('The Solr configuration options have been saved.'));
+      break;
+    case 'edit-reset':
+      variable_del('islandora_solr_url');
+      variable_del('islandora_solr_request_handler');
+      variable_del('islandora_solr_dismax_allowed');
+      drupal_set_message(t('The configuration options have been reset to their default values.'));
+      break;
+  }
+}
+
+/**
+ * Function to return administration setting form
+ *
+ * @param array $form
+ *   The form deffinition.
+ * @param array $form_state
+ *   The form state.
+ *
+ * @return array
+ *   The form array.
+ */
+function islandora_solr_admin_settings($form, &$form_state) {
+  // Add admin form css.
+  drupal_set_title(t('Solr settings'));
+  drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
+  drupal_add_library('system', 'ui.dialog');
+  drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
+
+  // Create form.
+  $form = array();
+  $form['islandora_solr_tabs'] = array(
+    '#type' => 'vertical_tabs',
+    '#weight' => 5,
+  );
   // display profiles
   $form['display_profiles'] = array(
     '#type' => 'fieldset',
@@ -1025,7 +1097,7 @@ function _islandora_solr_admin_settings_submit($form, &$form_state) {
       }
 
       // set save message
-      drupal_set_message(t('The solr configuration options have been saved.'));
+      drupal_set_message(t('The Solr configuration options have been saved.'));
       break;
     case t('Reset to defaults'):
       // loop over all submitted values
@@ -1042,11 +1114,12 @@ function _islandora_solr_admin_settings_submit($form, &$form_state) {
       db_delete('islandora_solr_fields')->execute();
 
       // set reset message
-      drupal_set_message(t('The configuration options have been reset to their default values.')); // @TODO: these don't seem to work anymore
+      drupal_set_message(t('The configuration options have been reset to their default values.'));
       break;
   }
 
   // clear caches
+  // @TODO: is this still necessary?
   cache_clear_all();
   drupal_theme_rebuild();
 }
@@ -1566,14 +1639,14 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
       '#collapsible' => FALSE,
       '#collapsed' => TRUE,
     );
-  
+
     $form['options']['range_facet']['range_facet_select'] = array(// @TODO: grey out if LUKE says it's not possible to use as a range field? Add AJAX callback to show more options?
       '#type' => 'checkbox',
       '#title' => t('Range facet'),
       '#default_value' => $values['range_facet_select'],
       '#description' => t('Toggles whether this facet field should be configured as a Solr range facet.'),
     );
-  
+
     // @TODO: check for non-ajax values
     $form['options']['range_facet']['wrapper'] = array(
       '#type' => 'container',
@@ -1614,7 +1687,7 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
       '#default_value' => $values['date_facet_format'] ? $values['date_facet_format'] : 'Y',
       '#description' => t('The format of the date, as it will be displayed in the facet block. Use <a href="!url">PHP date()</a> formatting.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
     );
-  
+
     // Range slider.
     $form['options']['range_facet']['wrapper']['range_slider'] = array(
       '#type' => 'fieldset',
@@ -1640,7 +1713,7 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
         ),
       ),
     );
-  
+
     // Date filter
     $form['options']['range_facet']['wrapper']['date_filter'] = array(
       '#type' => 'fieldset',
