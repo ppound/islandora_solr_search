@@ -1139,10 +1139,15 @@ function _islandora_solr_get_handlers($solr_url) {
   $handlers = array(
     FALSE => t('Let Solr decide'),
   );
-  $xpath = '//requestHandler[@class="solr.SearchHandler" and not(starts-with(@name, "/")) and not(@name="dismax") and not(@name="partitioned")]';
-  foreach ($xml->xpath($xpath) as $handler) {
-    $handler_name = (string)$handler['name'];
-    $handlers[$handler_name] = $handler_name;
+  if ($xml) {
+    $xpath = '//requestHandler[@class="solr.SearchHandler" and not(starts-with(@name, "/")) and not(@name="dismax") and not(@name="partitioned")]';
+    foreach ($xml->xpath($xpath) as $handler) {
+      $handler_name = (string)$handler['name'];
+      $handlers[$handler_name] = $handler_name;
+    }
+  }
+  else {
+    drupal_set_message(t('Error retrieving @file from Solr.', array('@file' => 'solrconfig.xml')), 'warning');
   }
   return $handlers;
 }
@@ -1195,18 +1200,23 @@ function _islandora_solr_check_dismax($solr_url, $selected_handler) {
   $xml = islandora_solr_get_solrconfig_xml($solr_url);
 
   $handlers = array();
-  if ($selected_handler) {
-    $handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @name='$selected_handler']");
+  if ($xml) {
+    if ($selected_handler) {
+      $handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @name='$selected_handler']");
+    }
+    elseif ($handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @default='true']")) {
+      // We don't have a handler name, but we do have a the default handler.
+    }
+    elseif ($handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @name='/select']")) {
+      // We don't have a name or a declared, so look at the implied default.
+      // Solr 3.6 seems to be able to store settings here which get applied to
+      // all request handlers...
+      // XXX: Might have to make this always get checked for completeness, if it
+      // can really provide general defaults.
+    }
   }
-  elseif ($handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @default='true']")) {
-    // We don't have a handler name, but we do have a the default handler.
-  }
-  elseif ($handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @name='/select']")) {
-    // We don't have a name or a declared, so look at the implied default.
-    // Solr 3.6 seems to be able to store settings here which get applied to
-    // all request handlers...
-    // XXX: Might have to make this always get checked for completeness, if it
-    // can really provide general defaults.
+  else {
+    drupal_set_message(t('Error retrieving @file from Solr.', array('@file' => 'solrconfig.xml')), 'warning');
   }
 
   // An empty array evaluates to false... Let's coerce into a boolean.
@@ -1899,15 +1909,25 @@ function _islandora_solr_permissions_default() {
  *   The Solr URL from which to try to grab the solrconfig.xml.
  *
  * @return SimpleXMLElement
- *   A SimpleXMLElement representing the contents of the solrconfig.xml.
+ *   A SimpleXMLElement representing the contents of the solrconfig.xml, or
+ *   NULL if it could not be retrieved.
  */
 function islandora_solr_get_solrconfig_xml($solr_url) {
   $xml = &drupal_static(__FUNCTION__, array());
 
   if (!array_key_exists($solr_url, $xml)) {
     $url = $solr_url . '/admin/file/?file=solrconfig.xml';
+
+    // XXX: The Solr URL should be made to contain the URI scheme in the actual
+    // configuration.
+    if (strpos($solr_url, 'http') !== 0) {
+      $url = "http://$url";
+    }
+
     $req = drupal_http_request($url);
-    $xml[$solr_url] = simplexml_load_string($req->data);
+    if ($req->code % 100 === 2) {
+      $xml[$solr_url] = simplexml_load_string($req->data);
+    }
   }
 
   return $xml[$solr_url];
