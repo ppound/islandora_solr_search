@@ -1915,7 +1915,7 @@ function _islandora_solr_permissions_default() {
 function islandora_solr_get_solrconfig_xml($solr_url) {
   $xml = &drupal_static(__FUNCTION__, array());
 
-  if (!array_key_exists($solr_url, $xml)) {
+  if (!array_key_exists($solr_url, $xml) || $xml[$solr_url] === NULL) {
     $url = $solr_url . '/admin/file/?file=solrconfig.xml';
 
     // XXX: The Solr URL should be made to contain the URI scheme in the actual
@@ -1925,8 +1925,11 @@ function islandora_solr_get_solrconfig_xml($solr_url) {
     }
 
     $req = drupal_http_request($url);
-    if ($req->code % 100 === 2) {
+    if ($req->code / 100 === 2) {
       $xml[$solr_url] = simplexml_load_string($req->data);
+    }
+    else {
+      $xml[$solr_url] = NULL;
     }
   }
 
