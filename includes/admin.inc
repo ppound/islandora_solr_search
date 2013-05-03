@@ -1204,15 +1204,23 @@ function _islandora_solr_check_dismax($solr_url, $selected_handler) {
     if ($selected_handler) {
       $handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @name='$selected_handler']");
     }
-    elseif ($handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @default='true']")) {
-      // We don't have a handler name, but we do have a the default handler.
-    }
-    elseif ($handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @name='/select']")) {
-      // We don't have a name or a declared, so look at the implied default.
-      // Solr 3.6 seems to be able to store settings here which get applied to
-      // all request handlers...
-      // XXX: Might have to make this always get checked for completeness, if it
-      // can really provide general defaults.
+    else {
+      $potential_handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @default='true']");
+      if ($potential_handlers) {
+        // We don't have a handler name, but we do have a the default handler.
+        $handlers = $potential_handlers;
+      }
+      else {
+        $potential_handlers = $xml->xpath("//requestHandler[@class='solr.SearchHandler' and @name='/select']");
+        if ($potential_handlers) {
+          // We don't have a name or a declared, so look at the implied default.
+          // Solr 3.6 seems to be able to store settings here which get applied to
+          // all request handlers...
+          // XXX: Might have to make this always get checked for completeness, if it
+          // can really provide general defaults.
+          $handlers = $potential_handlers;
+        }
+      }
     }
   }
   else {
