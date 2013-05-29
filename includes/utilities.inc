@@ -45,7 +45,7 @@ function islandora_solr_pager_init($total, $limit = 10, $element = 0) {
  * @param type $str
  * @return type
  */
-function restore_slashes($str) {
+function islandora_solr_restore_slashes($str) {
   $replacements = array("~slsh~", "~plus~");
   $values = array("/", "+");
   return str_replace($replacements, $values, $str); //can't have a slash in the url breaks drupal clean urls
@@ -57,7 +57,7 @@ function restore_slashes($str) {
  * @param type $str
  * @return type
  */
-function replace_slashes($str) {
+function islandora_solr_replace_slashes($str) {
   $replacements = array("~slsh~", "~plus~");
   $values = array("/", "+");
   return str_replace($values, $replacements, $str); // reverse of above
@@ -73,7 +73,7 @@ function replace_slashes($str) {
  * @param type $preserve
  * @return type
  */
-function csv_explode($delim = ',', $str, $enclose = '"', $preserve = FALSE) {
+function islandora_solr_csv_explode($delim = ',', $str, $enclose = '"', $preserve = FALSE) {
   $res_arr = array();
   $n = 0;
   $exp_enc_arr = explode($enclose, $str);
@@ -95,10 +95,10 @@ function csv_explode($delim = ',', $str, $enclose = '"', $preserve = FALSE) {
  * using this to escape the field being searched not the text being searched for
  * so we need both.
  *
- * @param type $value
- * @return type
+ * @param string $value
+ * @return string
  */
-function lesser_escape($value) {
+function islandora_solr_lesser_escape($value) {
   //list taken from http://lucene.apache.org/java/docs/queryparsersyntax.html#Escaping%20Special%20Characters
   // Zac removed the quotation mark and whitespace from this list.
   // a) Spaces in our search strings don't need escaping
@@ -113,7 +113,7 @@ function lesser_escape($value) {
 /**
  * Escape characters in field names of facets.
  */
-function solr_escape($facets) {
+function islandora_solr_escape($facets) {
   $return_facets = array();
   foreach ($facets as $facet) {
     $tmp = drupal_substr($facet, 0, strpos($facet, ':"'));
@@ -131,7 +131,7 @@ function solr_escape($facets) {
  * @param type $raw_field_list
  * @return type
  */
-function islandora_build_substitution_list($raw_field_list) {
+function islandora_solr_build_substitution_list($raw_field_list) {
   $facet_array = array();
   $facet_fields = '';
   $lines = preg_split('/[,|\n|\r]/', $raw_field_list);
@@ -250,3 +250,103 @@ function islandora_solr_prepare_solr_results($solr_results) {
   }
   return $solr_results;
 }
+
+/**
+ * @defgroup islandora_solr_deprecated Deprecated function signatures.
+ * @{
+ * A number of function signatures which are not prefixed with our module name.
+ *
+ * Supporting them with a warning for now, just in case.
+ */
+
+// @codingStandardsIgnoreStart
+
+/**
+ * Old function signature.
+ *
+ * @deprecated
+ *   Use islandora_solr_build_substitution_list().
+ * @see islandora_solr_build_substitution_list()
+ */
+function islandora_build_substitution_list($value) {
+  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_build_substitution_list().'));
+  trigger_error(filter_xss($message), E_USER_DEPRECATED);
+
+  return islandora_solr_build_substitution_list($value);
+}
+
+/**
+ * Old function signature.
+ *
+ * @deprecated
+ *   Use islandora_solr_escape().
+ * @see islandora_solr_escape()
+ */
+function solr_escape($facets) {
+  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_escape().'));
+  trigger_error(filter_xss($message), E_USER_DEPRECATED);
+
+  return islandora_solr_escape($facets);
+}
+
+/**
+ * Old function signature.
+ *
+ * @deprecated
+ *   Use islandora_solr_lesser_escape().
+ * @see islandora_solr_lesser_escape()
+ */
+function lesser_escape($value) {
+  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_lesser_escape().'));
+  trigger_error(filter_xss($message), E_USER_DEPRECATED);
+
+  return islandora_solr_lesser_escape($value);
+}
+
+/**
+ * Old function signature.
+ *
+ * @deprecated
+ *   Use islandora_solr_csv_explode().
+ * @see islandora_solr_csv_explode()
+ */
+function csv_explode($value) {
+  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_csv_explode().'));
+  trigger_error(filter_xss($message), E_USER_DEPRECATED);
+
+  return islandora_solr_csv_explode($value);
+}
+
+/**
+ * Old function signature.
+ *
+ * @deprecated
+ *   Use islandora_solr_restore_slashes().
+ * @see islandora_solr_restore_slashes()
+ */
+function restore_slashes($value) {
+  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_restore_slashes().'));
+  trigger_error(filter_xss($message), E_USER_DEPRECATED);
+
+  return islandora_solr_restore_slashes($value);
+}
+
+/**
+ * Old function signature.
+ *
+ * @deprecated
+ *   Use islandora_solr_replace_slashes().
+ * @see islandora_solr_replace_slashes()
+ */
+function replace_slashes($value) {
+  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_replace_slashes().'));
+  trigger_error(filter_xss($message), E_USER_DEPRECATED);
+
+  return islandora_solr_replace_slashes($value);
+}
+
+// @codingStandardsIgnoreEnd
+
+/**
+ * @}
+ */
