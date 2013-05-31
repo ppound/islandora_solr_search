@@ -85,11 +85,11 @@ function hook_islandora_solr_secondary_display() {
  * when creating a query processor object programatically without manually
  * including IslandoraSolrQueryProcessor::buildQuery().
  *
- * @param type $islandora_solr_query
+ * @param IslandoraSolrQueryProcessor $islandora_solr_query
  *   The IslandoraSolrQueryProcessor object which includes the current query
  *   settings but at the end of IslandoraSolrQuery::buildQuery().
  *
- * @see IslandoraSolrQueryProcessor::buildQuery().
+ * @see IslandoraSolrQueryProcessor::buildQuery()
  */
 function hook_islandora_solr_query($islandora_solr_query) {
   // example: on example_display, always sort descending on fgs.createdDate
@@ -104,7 +104,7 @@ function hook_islandora_solr_query($islandora_solr_query) {
  * Note: it is valid to specify *either* a class and method *or* a form. The
  * latter implies no class needs to be instantiated.
  *
- * @return
+ * @return array
  *   Returns an array with all the data required to build blocks. These include
  *   references to specific modules/methods/classes/functions to call in
  *   hook_block_view().
