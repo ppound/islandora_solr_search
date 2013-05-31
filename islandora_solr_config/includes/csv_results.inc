@@ -111,7 +111,9 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
     // For fields where at least one multiple value was found across
     // the resultset, the field is iterated the maximum number of times.
     foreach ($field_counts as $field => $count) {
-      $label = $result_fields[$field];
+      $label = isset($result_fields[$field]) ?
+        $result_fields[$field] :
+        $field;
       if ($count == 1) {
         $header[] = $wrap . str_replace('"', $replace_value, $label) . $wrap;
       }
