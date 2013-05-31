@@ -354,7 +354,9 @@ function islandora_solr_i18n_string_info() {
  * Implements hook_forms().
  */
 function islandora_solr_forms($form_id, $args) {
-  if (strpos('islandora_solr_admin', $form_id) === 0) {
+  $forms = array();
+
+  if (strpos($form_id, 'islandora_solr_admin') === 0) {
     module_load_include('inc', 'islandora_solr', 'includes/admin');
 
     // Handle two form using the same building function, but allowing each to
@@ -363,11 +365,30 @@ function islandora_solr_forms($form_id, $args) {
       'islandora_solr_admin_settings_search_fields',
       'islandora_solr_admin_settings_sort_fields',
     ))) {
-      return array(
-        $form_id => array(
-          'callback' => 'islandora_solr_admin_settings_search_or_sort_fields',
-        ),
+      $forms[$form_id] = array(
+        'callback' => 'islandora_solr_admin_settings_search_or_sort_fields',
       );
     }
   }
+  // Check if the form_id passed to drupal_get_form() contains the string
+  // 'islandora_solr_search_date_filter_form'.
+  if (strpos($form_id, 'islandora_solr_date_filter_form') !== FALSE) {
+    module_load_include('inc', 'islandora_solr', 'includes/facets');
+    $forms[$form_id] = array(
+      'callback' => 'islandora_solr_date_filter_form',
+      'callback arguments' => array($args[0]),
+    );
+  }
+
+  // Check if the form_id passed to drupal_get_form() contains the string
+  // 'islandora_solr_range_slider_form'.
+  if (strpos($form_id, 'islandora_solr_range_slider_form') !== FALSE) {
+    module_load_include('inc', 'islandora_solr', 'includes/facets');
+    $forms[$form_id] = array(
+      'callback' => 'islandora_solr_range_slider_form',
+      'callback arguments' => array($args[0]),
+    );
+  }
+
+  return $forms;
 }

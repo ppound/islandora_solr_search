@@ -6,32 +6,6 @@
  */
 
 /**
- * Implements hook_forms().
- */
-function islandora_solr_forms($form_id, $args) {
-
-  // Check if the form_id passed to drupal_get_form() contains the string
-  // 'islandora_solr_search_date_filter_form'.
-  if (strpos($form_id, 'islandora_solr_date_filter_form') !== FALSE) {
-    $forms[$form_id] = array(
-      'callback' => 'islandora_solr_date_filter_form',
-      'callback arguments' => array($args[0]),
-    );
-    return $forms;
-  }
-
-  // Check if the form_id passed to drupal_get_form() contains the string
-  // 'islandora_solr_range_slider_form'.
-  if (strpos($form_id, 'islandora_solr_range_slider_form') !== FALSE) {
-    $forms[$form_id] = array(
-      'callback' => 'islandora_solr_range_slider_form',
-      'callback arguments' => array($args[0]),
-    );
-    return $forms;
-  }
-}
-
-/**
  * Date filter form.
  */
 function islandora_solr_date_filter_form($form, &$form_state, $elements) {
