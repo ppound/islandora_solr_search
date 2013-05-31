@@ -378,7 +378,7 @@ class IslandoraSolrResults {
     }
 
     // Create query breadcrumb.
-    if (!in_array($islandora_solr_query->solrQuery, $islandora_solr_query->different_kinds_of_nothing)) {
+    if (!in_array($islandora_solr_query->solrQuery, $islandora_solr_query->differentKindsOfNothing)) {
       // Get query value.
       $query_value = $islandora_solr_query->solrQuery;
       // Remove all filters for this breadcrumb.
