@@ -1561,6 +1561,21 @@ function _islandora_solr_admin_get_form_function($field_type = NULL) {
  * Form functions for the modal dialogs.
  */
 
+/**
+ * Genereate the element definition for the permission fieldset.
+ *
+ * @param array $permissions
+ *   The selected permissions (from the $form_state).
+ * @param array $permissions_default
+ *   The permissions to select by default.
+ * @param array $permissions_disable
+ *   Some permissions which we will not allow to be changed (set as disabled in
+ *   the form).
+ *
+ * @return array
+ *   An associative array containing the definition for the permissions
+ *   fieldset.
+ */
 function islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable) {
   $permissions_fieldset = array(
     '#type' => 'fieldset',
