@@ -1561,6 +1561,29 @@ function _islandora_solr_admin_get_form_function($field_type = NULL) {
  * Form functions for the modal dialogs.
  */
 
+function islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable) {
+  $permissions_fieldset = array(
+    '#type' => 'fieldset',
+    '#title' => t('Permissions'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    'permissions' => array(
+      '#type' => 'checkboxes',
+      '#title' => t('Permissions'),
+      '#options' => user_roles(),
+      '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
+      '#description' => t('Select which roles can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles which do not have permission to search the Solr index.'),
+    ),
+  );
+  foreach ($permissions_disable as $rid) {
+    $permissions_fieldset['permissions'][$rid] = array(
+      '#disabled' => TRUE,
+    );
+  }
+
+  return $permissions_fieldset;
+}
+
 /**
  * Form for result field settings.
  *
@@ -1620,24 +1643,8 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
     );
   }
 
-  $form['options']['permissions_fieldset'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Permissions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['options']['permissions_fieldset']['permissions'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Permissions'),
-    '#options' => user_roles(),
-    '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
-    '#description' => t('Select which roles can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles which do not have permission to search the Solr index.'),
-  );
-  foreach ($permissions_disable as $rid) {
-    $form['options']['permissions_fieldset']['permissions'][$rid] = array(
-      '#disabled' => TRUE,
-    );
-  }
+  $form['options']['permissions_fieldset'] = islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable);
+
   $form['actions'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('form-buttons')),
@@ -1667,7 +1674,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
  * @params array $variables
  *   This parameter contains default values to be passed from the main form.
  */
-function islandora_solr_admin_settings_sort_fields($form, &$form_state, $variables) {
+function islandora_solr_admin_settings_search_or_sort_fields($form, &$form_state, $variables) {
   form_load_include($form_state, 'inc', 'islandora_solr', 'includes/admin');
 
   $form_state['dialog'] = $variables;
@@ -1874,92 +1881,7 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
   }
 
   // Permissions.
-  $form['options']['permissions_fieldset'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Permissions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['options']['permissions_fieldset']['permissions'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Permissions'),
-    '#options' => user_roles(),
-    '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
-    '#description' => t('Select which roles can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles which do not have permission to search the Solr index.'),
-  );
-  foreach ($permissions_disable as $rid) {
-    $form['options']['permissions_fieldset']['permissions'][$rid] = array(
-      '#disabled' => TRUE,
-    );
-  }
-  $form['actions'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('form-buttons')),
-  );
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Apply'),
-    '#weight' => 5,
-    '#field' => 'dialog_submit',
-    '#field_type' => 'result_fields',
-    '#name' => 'result-fields-dialog-submit',
-    '#submit' => array('_islandora_solr_update_fields_submit'),
-    '#ajax' => array(
-      'callback' => '_islandora_solr_admin_settings_dialog',
-      'wrapper' => 'islandora-solr-admin-dialog-form',
-      'effect' => 'none',
-      'event' => 'click',
-      'progress' => array('message' => '', 'type' => 'throbber'),
-    ),
-  );
-  return $form;
-}
-
-/**
- * Form for search field settings.
- *
- * @params array $variables
- *   This parameter contains default values to be passed from the main form.
- */
-function islandora_solr_admin_settings_search_fields($form, &$form_state, $variables) {
-  form_load_include($form_state, 'inc', 'islandora_solr', 'includes/admin');
-
-  $form_state['dialog'] = $variables;
-
-  $values = $variables['values'];
-  $permissions = $values['permissions'];
-  $permissions_disable = _islandora_solr_permissions_disable();
-  $permissions_default = _islandora_solr_permissions_default();
-
-  $form['options'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('scroll')),
-    '#id' => 'islandora-solr-admin-dialog-form',
-  );
-  $form['options']['label'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Label'),
-    '#default_value' => $values['label'],
-    '#description' => t('A human-readable name.'),
-  );
-  $form['options']['permissions_fieldset'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Permissions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['options']['permissions_fieldset']['permissions'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Permissions'),
-    '#options' => user_roles(),
-    '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
-    '#description' => t('Select which roles can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles which do not have permission to search the Solr index.'),
-  );
-  foreach ($permissions_disable as $rid) {
-    $form['options']['permissions_fieldset']['permissions'][$rid] = array(
-      '#disabled' => TRUE,
-    );
-  }
+  $form['options']['permissions_fieldset'] = islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable);
   $form['actions'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('form-buttons')),

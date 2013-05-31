@@ -349,3 +349,25 @@ function islandora_solr_i18n_string_info() {
     ),
   );
 }
+
+/**
+ * Implements hook_forms().
+ */
+function islandora_solr_forms($form_id, $args) {
+  if (strpos('islandora_solr_admin', $form_id) === 0) {
+    module_load_include('inc', 'islandora_solr', 'includes/admin');
+
+    // Handle two form using the same building function, but allowing each to
+    // be altered separately.
+    if (in_array($form_id, array(
+      'islandora_solr_admin_settings_search_fields',
+      'islandora_solr_admin_settings_sort_fields',
+    ))) {
+      return array(
+        $form_id => array(
+          'callback' => 'islandora_solr_admin_settings_search_or_sort_fields',
+        ),
+      );
+    }
+  }
+}
