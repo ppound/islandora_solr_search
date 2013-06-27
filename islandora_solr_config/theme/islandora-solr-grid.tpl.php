@@ -23,7 +23,7 @@
             print l($image, $result['object_url'], array(
               'html' => TRUE,
               'query' => $result['object_url_params'],
-              'fragment' => isset($result['object_url_fragment']) ? $result['object_url_fragment'] : ''
+              'fragment' => isset($result['object_url_fragment']) ? $result['object_url_fragment'] : '',
             ));
           ?>
         </dt>
@@ -32,7 +32,7 @@
             $object_label = isset($result['object_label']) ? $result['object_label'] : '';
             print l($object_label, $result['object_url'], array(
               'query' => $result['object_url_params'],
-              'fragment' => isset($result['object_url_fragment']) ? $result['object_url_fragment'] : ''
+              'fragment' => isset($result['object_url_fragment']) ? $result['object_url_fragment'] : '',
             ));
           ?>
         </dd>
