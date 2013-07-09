@@ -45,6 +45,15 @@ function islandora_solr_config_islandora_solr_secondary_display() {
       'description' => 'Download complete resultset as a CSV Spreadsheet',
       'logo' => '<img src="' . $path . '/images/csv.png" class="secondary-display-csv">',
     ),
+    'rss' => array(
+      'name' => t('RSS'),
+      'module' => 'islandora_solr_config',
+      'file' => 'includes/rss_results.inc',
+      'class' => 'IslandoraSolrResultsRSS',
+      'function' => 'printRSS',
+      'description' => 'Show search results as RSS feed',
+      'logo' => '<img src="' . $path . '/images/rss.png" class="secondary-display-csv">',
+    ),
   );
 }
 
