@@ -2,67 +2,70 @@
 
 /**
  * @file
- * Contains methods to search solr and display results.  depends on Apache_Solr_Php client.
+ * Contains methods to search solr and display results.  depends on 
+ * Apache_Solr_Php client.
  */
 
 /**
  * Extention of IslandoraSolrResults for templating purposes.
- * This overrides the displayResults function to provide an alternate display type.
+ * This overrides the displayResults function to provide an alternate display 
+ * type.
  */
 
 class IslandoraSolrResultsRSS extends IslandoraSolrResults {
 
   /**
-   * Outputs results basically in the normal way, but with thumbnails pulled
-   * from the Fedora repository.
+   * Outputs results basically in the normal way.
+   * 
+   * Thumbnails pulled from the Fedora repository.
    *
-   * @param $results
-   *   A solr resultset object.
+   * @param object $islandora_solr_query
+   *   A solr query object.
    *
-   * @return
+   * @return string
    *   html output for the resultset. Note: we currently create this
    *   output manually, should refactor to use drupal forms api.
    */
-  function printRSS($islandoraSolrQuery, $title = "Search Results") {
+  public function printRSS($islandora_solr_query, $title = "Search Results") {
 
     global $base_url;
-    // get raw results
-    $solr_result = $islandoraSolrQuery->islandoraSolrResult;
-    
-    // all results
+    // Get raw results.
+    $solr_result = $islandora_solr_query->islandoraSolrResult;
+
+    // All results.
     $docs = $solr_result['response']['objects'];
 
-    // loop over results
+    // Loop over results.
     $items = NULL;
     foreach ($docs as $doc) {
-      // turn arrays into strings
+      // Turn arrays into strings.
       foreach ($doc['solr_doc'] as $key => $value) {
         if (is_array($value)) {
-          // turn array into comma separated string and trim
+          // Turn array into comma separated string and trim.
           $doc[$key] = trim(implode(', ', $value));
         }
         else {
-          // give it a trim
+          // Give it a trim.
           $doc[$key] = trim($value);
         }
       }
-      // get the variables for the <item> element
+      // Get the variables for the <item> element.
       $item = $this->rssItem($doc);
 
-      //hook alter to change the rssItem before formatting.
+      // Hook alter to change the rssItem before formatting.
       drupal_alter('islandora_solr_search_rss_item', $item, $doc);
 
-      // render rss item and add to items string
+      // Render rss item and add to items string.
       $items .= format_rss_item($item['title'], $item['link'], $item['description'], $item['items']);
     }
 
-    // query search terms:
-    $query = $islandoraSolrQuery->solrQuery;
+    // Query search terms:
+    $query = $islandora_solr_query->solrQuery;
 
-    // get the variables for the <channel> element
+    // Get the variables for the <channel> element.
     $channel = $this->rssChannel($query);
 
-    // give the results clean variable names.
+    // Give the results clean variable names.
     $title = $channel['title'];
     $url = $channel['url'];
     $description = $channel['description'];
@@ -80,64 +83,89 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
 
 
   /**
-   * Function for setting the values of the <item> elements for the RSS secondary display.
+   * Function for setting the values of the <item> elements for the RSS display.
    *
    * @tutorial http://feed2.w3.org/docs/rss2.html#hrelementsOfLtitemgt
-   * @return variable that holds all values to be rendered into <item> elements
+   * 
+   * @return array
+   *   variable that holds all values to be rendered into <item> elements
    */
-
-  function rssItem($doc) {
-    // set variables
+  public function rssItem($doc) {
+    // Set variables.
     global $base_url;
 
     $rss_item = variable_get('islandora_solr_config_rss_item', array());
 
-    // object url
+    // Object url.
     $object_url = $base_url . '/fedora/repository/' . htmlspecialchars($doc['PID'], ENT_QUOTES, 'utf-8');
 
-    // enclosure file url (thumbnail by default)
+    // Enclosure file url (thumbnail by default).
     $dsid = $rss_item['enclosure_dsid'] ? $rss_item['enclosure_dsid'] : 'TN';
     $enclosure_url = $object_url . '/' . $dsid;
 
-    // set the variables to be rendered as elements in the <item> element
+    // Set the variables to be rendered as elements in the <item> element.
     $result = array();
     $result['title'] = $rss_item['title'] ? $doc[$rss_item['title']] : '';
     $result['link'] = $object_url;
     $result['description'] = $rss_item['description'] ? $doc[$rss_item['description']] : '';
     $result['items'] = array(
-      array('key' => 'author', 'value' => $rss_item['author'] ? $doc[$rss_item['author']] : ''),
-      array('key' => 'guid', 'value' => $doc['PID'], 'attributes' => array('isPermaLink' => 'false')),
-      array('key' => 'pubDate', 'value' => $rss_item['pubDate'] ? $doc[$rss_item['pubDate']] : ''),
-      array('key' => 'category', 'value' => $rss_item['category'] ? $doc[$rss_item['category']] : ''),
-      array('key' => 'enclosure', 'value' => '', 'attributes' => array('url' => $enclosure_url, 'length' => '', 'type' => '')),
-      array('key' => 'comments', 'value' => ''),
-      array('key' => 'source', 'value' => ''),
+      array(
+        'key' => 'author',
+        'value' => $rss_item['author'] ? $doc[$rss_item['author']] : ''),
+      array(
+        'key' => 'guid',
+        'value' => $doc['PID'],
+        'attributes' => array('isPermaLink' => 'false')),
+      array(
+        'key' => 'pubDate',
+        'value' => $rss_item['pubDate'] ? $doc[$rss_item['pubDate']] : ''),
+      array(
+        'key' => 'category',
+        'value' => $rss_item['category'] ? $doc[$rss_item['category']] : ''),
+      array(
+        'key' => 'enclosure',
+        'value' => '', 'attributes' => array(
+          'url' => $enclosure_url, 'length' => '',
+          'type' => '')),
+      array(
+        'key' => 'comments',
+        'value' => ''),
+      array(
+        'key' => 'source',
+        'value' => ''),
     );
     return $result;
   }
 
   /**
-   * Function for setting the values of the <channel> elements for the RSS secondary display.
+   * Function to set values of the <channel> elements for the RSS display.
    *
    * @tutorial http://feed2.w3.org/docs/rss2.html#requiredChannelElements
-   * @return variable that holds all values to be rendered into <channel> elements
+   * 
+   * @return array
+   *   variable that holds all values to be rendered into <channel> elements
    */
-
-  function rssChannel($query) {
-    // set variables
+  public function rssChannel($query) {
+    // Set variables.
     global $base_url;
     $rss_channel = variable_get('islandora_solr_config_rss_channel', array());
 
-    // set the variables to be rendered as elements in the <channel> element
+    // Set the variables to be rendered as elements in the <channel> element.
     $result = array();
     $result['title'] = t('@site_name aggregator', array('@site_name' => variable_get('site_name', 'Drupal')));
     $result['url'] = $base_url;
     $result['description'] = t('Aggregated search results of: @query', array('@query' => $query));
     $result['langcode'] = NULL;
     $result['args'] = array(
-        array('key' => 'copyright', 'value' => $rss_channel['copyright'] ? $doc[$rss_channel['copyright']] : ''),
-        array('key' => 'managingEditor', 'value' => $rss_channel['managingEditor'] ? $doc[$rss_channel['managingEditor']] : ''),
-        array('key' => 'webMaster', 'value' => $rss_channel['webMaster'] ? $doc[$rss_channel['webMaster']] : ''),
+      array(
+        'key' => 'copyright',
+        'value' => $rss_channel['copyright'] ? $doc[$rss_channel['copyright']] : ''),
+      array(
+        'key' => 'managingEditor',
+        'value' => $rss_channel['managingEditor'] ? $doc[$rss_channel['managingEditor']] : ''),
+      array(
+        'key' => 'webMaster',
+        'value' => $rss_channel['webMaster'] ? $doc[$rss_channel['webMaster']] : ''),
     );
     return $result;
   }
