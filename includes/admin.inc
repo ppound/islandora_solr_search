@@ -2098,13 +2098,6 @@ function islandora_solr_admin_rss_settings($form, &$form_state) {
 }
 
 /**
- * Function to validate admin setting form.
- */
-function islandora_solr_admin_rss_settings_validate($form, &$form_state) {
-
-}
-
-/**
  * Function to submit the admin setting form.
  */
 function islandora_solr_admin_rss_settings_submit($form, &$form_state) {
