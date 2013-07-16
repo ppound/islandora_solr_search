@@ -109,27 +109,27 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
 
     // Enclosure file url (thumbnail by default).
     $dsid = $rss_item['enclosure_dsid'] ? $rss_item['enclosure_dsid'] : 'TN';
-    $enclosure_url = $object_url . '/' . $dsid;
+    $enclosure_url = $object_url . '/datastream/' . $dsid;
 
     // Set the variables to be rendered as elements in the <item> element.
     $result = array();
-    $result['title'] = $rss_item['title'] ? $doc[$rss_item['title']] : '';
+    $result['title'] = ($rss_item['title'] && isset($doc[$rss_item['title']])) ? $doc[$rss_item['title']] : '';
     $result['link'] = $object_url;
-    $result['description'] = $rss_item['description'] ? $doc[$rss_item['description']] : '';
+    $result['description'] = ($rss_item['description'] && isset($doc[$rss_item['description']])) ? $doc[$rss_item['description']] : '';
     $result['items'] = array(
       array(
         'key' => 'author',
-        'value' => $rss_item['author'] ? $doc[$rss_item['author']] : ''),
+        'value' => ($rss_item['author'] && isset($doc[$rss_item['author']])) ? $doc[$rss_item['author']] : ''),
       array(
         'key' => 'guid',
         'value' => $doc['PID'],
         'attributes' => array('isPermaLink' => 'false')),
       array(
         'key' => 'pubDate',
-        'value' => $rss_item['pubDate'] ? $doc[$rss_item['pubDate']] : ''),
+        'value' => ($rss_item['pubDate'] && isset($doc[$rss_item['pubDate']])) ? $doc[$rss_item['pubDate']] : ''),
       array(
         'key' => 'category',
-        'value' => $rss_item['category'] ? $doc[$rss_item['category']] : ''),
+        'value' => ($rss_item['category'] && isset($doc[$rss_item['category']])) ? $doc[$rss_item['category']] : ''),
       array(
         'key' => 'enclosure',
         'value' => '', 'attributes' => array(
@@ -171,13 +171,13 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
     $result['args'] = array(
       array(
         'key' => 'copyright',
-        'value' => $rss_channel['copyright'] ? $doc[$rss_channel['copyright']] : ''),
+        'value' => $rss_channel['copyright']),
       array(
         'key' => 'managingEditor',
-        'value' => $rss_channel['managingEditor'] ? $doc[$rss_channel['managingEditor']] : ''),
+        'value' => $rss_channel['managingEditor']),
       array(
         'key' => 'webMaster',
-        'value' => $rss_channel['webMaster'] ? $doc[$rss_channel['webMaster']] : ''),
+        'value' => $rss_channel['webMaster']),
     );
     return $result;
   }
