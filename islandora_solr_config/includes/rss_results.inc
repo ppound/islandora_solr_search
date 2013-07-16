@@ -94,7 +94,15 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
     // Set variables.
     global $base_url;
 
-    $rss_item = variable_get('islandora_solr_config_rss_item', array());
+    // Get variables.
+    $rss_item = variable_get('islandora_solr_config_rss_item', array(
+      'title' => 'fgs_label_s',
+      'description' => '',
+      'author' => '',
+      'category' => '',
+      'pubDate' => 'fgs_createdDate_s',
+      'enclosure_dsid' => 'TN',
+    ));
 
     // Object url.
     $object_url = $base_url . '/fedora/repository/' . htmlspecialchars($doc['PID'], ENT_QUOTES, 'utf-8');
@@ -148,7 +156,11 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
   public function rssChannel($query) {
     // Set variables.
     global $base_url;
-    $rss_channel = variable_get('islandora_solr_config_rss_channel', array());
+    $rss_channel = variable_get('islandora_solr_config_rss_channel', array(
+      'copyright' => '',
+      'managingEditor' => '',
+      'webMaster' => '',
+    ));
 
     // Set the variables to be rendered as elements in the <channel> element.
     $result = array();
