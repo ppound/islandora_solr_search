@@ -105,7 +105,7 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
     ));
 
     // Object url.
-    $object_url = $base_url . '/fedora/repository/' . htmlspecialchars($doc['PID'], ENT_QUOTES, 'utf-8');
+    $object_url = $base_url . '/islandora/object/' . htmlspecialchars($doc['PID'], ENT_QUOTES, 'utf-8');
 
     // Enclosure file url (thumbnail by default).
     $dsid = $rss_item['enclosure_dsid'] ? $rss_item['enclosure_dsid'] : 'TN';
