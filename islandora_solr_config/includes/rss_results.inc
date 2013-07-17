@@ -105,15 +105,15 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
     ));
 
     // Object url.
-    $object_url = url('islandora/object/' . htmlspecialchars($doc['PID'], ENT_QUOTES, 'utf-8'),array('absolute' => TRUE));
+    $object_url = url('islandora/object/' . htmlspecialchars($doc['PID'], ENT_QUOTES, 'utf-8'), array('absolute' => TRUE));
     // Enclosure file url (thumbnail by default).
-    $dsid = ($rss_item['enclosure_dsid'] && isset($rss_item['enclosure_dsid']))? $rss_item['enclosure_dsid'] : 'TN';
+    $dsid = ($rss_item['enclosure_dsid'] && isset($rss_item['enclosure_dsid'])) ? $rss_item['enclosure_dsid'] : 'TN';
     $is_datastream = in_array($dsid, $doc['datastreams']);
-    dsm($is_datastream);
+
     if ($is_datastream) {
       $enclosure_url = $object_url . '/datastream/' . $dsid;
     }
-dsm($doc);
+
     // Set the variables to be rendered as elements in the <item> element.
     $result = array();
     $result['title'] = ($rss_item['title'] && isset($doc[$rss_item['title']])) ? $doc[$rss_item['title']] : '';
@@ -133,7 +133,6 @@ dsm($doc);
       array(
         'key' => 'category',
         'value' => ($rss_item['category'] && isset($doc[$rss_item['category']])) ? $doc[$rss_item['category']] : ''),
-      
       array(
         'key' => 'comments',
         'value' => ''),
@@ -141,7 +140,7 @@ dsm($doc);
         'key' => 'source',
         'value' => ''),
     );
-    
+
     if ($is_datastream) {
       $result['items'][] = array(
         'key' => 'enclosure',
@@ -149,10 +148,7 @@ dsm($doc);
           'url' => $enclosure_url, 'length' => '',
           'type' => ''));
     }
-    
-    
-    
-    
+
     return $result;
   }
 
