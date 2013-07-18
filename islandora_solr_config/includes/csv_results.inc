@@ -27,7 +27,6 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
    */
   public function printCSV($islandora_solr_query) {
     global $base_url;
-    dd($islandora_solr_query);
     $redirect = drupal_parse_url(request_uri());
     // We want to unset the display profile of CSV, but keep everything else.
     $params = $redirect['query'];
