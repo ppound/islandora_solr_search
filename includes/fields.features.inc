@@ -80,7 +80,7 @@ function islandora_solr_fields_features_rebuild($module_name) {
     $values = array_map('islandora_solr_serialize_solr_field_settings', $values);
 
     // Add in the new values.
-    $i = db_insert('islandora_solr_fields')
+    $insert_query = db_insert('islandora_solr_fields')
       ->fields(array(
         'solr_field',
         'field_type',
@@ -90,8 +90,8 @@ function islandora_solr_fields_features_rebuild($module_name) {
 
     // Write to our database table.
     foreach ($values as $field) {
-      $i->values($field);
+      $insert_query->values($field);
     }
-    $i->execute();
+    $insert_query->execute();
   }
 }
