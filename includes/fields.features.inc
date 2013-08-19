@@ -40,6 +40,9 @@ function islandora_solr_fields_features_export_render($module_name, $data, $expo
   return array('islandora_solr_fields_features_default_fields' => $code);
 }
 
+/**
+ * Implements hook_features_revert().
+ */
 function islandora_solr_fields_features_revert($module_name) {
   islandora_solr_fields_features_rebuild($module_name);
 }
@@ -74,7 +77,7 @@ function islandora_solr_fields_features_rebuild($module_name) {
       ->execute();
 
     // Serialize the "solr_field_settings" bit.
-	$values = array_map('islandora_solr_serialize_solr_field_settings', $values);
+    $values = array_map('islandora_solr_serialize_solr_field_settings', $values);
 
     // Add in the new values.
     $i = db_insert('islandora_solr_fields')
@@ -85,10 +88,9 @@ function islandora_solr_fields_features_rebuild($module_name) {
         'solr_field_settings',
     ));
 
-
-    // Write to our database table
+    // Write to our database table.
     foreach ($values as $field) {
-      $i->values($field); 
+      $i->values($field);
     }
     $i->execute();
   }
