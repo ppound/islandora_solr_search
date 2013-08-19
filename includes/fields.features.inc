@@ -22,19 +22,21 @@ function islandora_solr_fields_features_export_options() {
 function islandora_solr_fields_features_export($data, &$export, $module_name = '') {
   $export['dependencies']['islandora_solr'] = 'islandora_solr';
 
-  return $export;
+  foreach ($data as $component) {
+    $export['features']['islandora_solr_fields'][$component] = TRUE;
+  }
 }
 
 /**
  * Implements hook_features_export_render().
  */
-function islandora_solr_fields_features_export_render($module, $data, $export) {
+function islandora_solr_fields_features_export_render($module_name, $data, $export = NULL) {
   $code = array();
   if (in_array('all_solr_fields', $data)) {
     $code = islandora_solr_get_fields(NULL, FALSE, FALSE);
   }
 
-  $code = "  return " . features_var_export($code, '  ') . ";";
+  $code = "  return " . features_var_export($code) . ";";
   return array('islandora_solr_fields_features_default_fields' => $code);
 }
 
