@@ -439,7 +439,8 @@ class IslandoraSolrResults {
     if (!empty($breadcrumb)) {
       $breadcrumb = array_reverse($breadcrumb);
     }
-    drupal_alter('islandora_breadcrumbs', $breadcrumb);
+    $context = 'solr';
+    drupal_alter('islandora_breadcrumbs', $breadcrumb, $context);
     drupal_set_breadcrumb($breadcrumb);
 
   }
