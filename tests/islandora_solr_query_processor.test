@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * @file
+ * Ingests an object and uses the query processor to check Solr's index for it.
+ */
+
+class IslandoraSolrQueryProcessorTestCase extends IslandoraWebTestCase {
+
+  /**
+   * Get test information.
+   *
+   * @see IslandoraWebTestCase::getInfo()
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Islandora Solr Query Processor',
+      'description' => 'Indexes an object and searches for its DC title via the Islandora Query Processor.',
+      'group' => 'Islandora Solr Search',
+    );
+  }
+
+  /**
+   * Set up the test environment.
+   *
+   * @see IslandoraWebTestCase::setUp()
+   */
+  public function setUp() {
+    parent::setUp(array(
+      'islandora_solr',
+    ));
+  }
+
+  /**
+   * Ingests an object and checks the Solr index for it via the query processor.
+   */
+  public function testSolrQueryProcessor() {
+    $user = $this->drupalCreateUser(array_keys(module_invoke_all('permission')));
+    $this->drupalLogin($user);
+
+    // Defines, constructs, then ingests the test object with our new MODS.
+    $object_label = $this->randomName(16);
+    $object_pid = 'islandora:' . $this->randomName(16);
+    $object_properties = array(
+      'label' => $object_label,
+      'pid' => $object_pid,
+    );
+    $this->ingestConstructedObject($object_properties);
+    $ingest_time = microtime(TRUE);
+
+    // Let's get a query processor going and test it! We're going to execute our
+    // query up to 500 times because we're CRAAAZY! Also because Solr sometimes
+    // is a big ball of suck.
+    module_load_include('inc', 'islandora_solr', 'query_processor');
+    $query_processor = new IslandoraSolrQueryProcessor();
+    $query_processor->internalSolrParams['type'] = 'dismax';
+    $query_processor->buildQuery("dc.title:{$object_label}");
+
+    $i = 0;
+    while ($i <= 500) {
+      $query_processor->executeQuery();
+      $i++;
+      if (isset($query_processor->islandoraSolrResult['response']['objects'][0]['solr_doc'])) {
+        $completion_time = microtime(TRUE);
+        $indexing_time = round($completion_time - $ingest_time, 3);
+        $this->pass(t("Solr doc for object {$object_label} (PID: {$object_pid}) found in the index after {$i} pass(es) and {$indexing_time} seconds."), 'Islandora');
+        $i = 501;
+      }
+      elseif ($i == 500) {
+        $this->fail(t("Solr doc for object {$object_label} (PID: {$object_pid}) not found in the index despite making 500 passes."), 'Islandora');
+      }
+    }
+
+  // And is it gone?
+  $this->deleteObject($object_pid);
+  $query_processor->executeQuery();
+  $this->assertFalse(isset($query_processor->islandoraSolrResult['response']['objects'][0]['solr_doc']), t("After removing object {$object_pid}, its entry was no longer found in the Solr index."), 'Islandora');
+  }
+}
