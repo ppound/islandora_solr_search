@@ -71,9 +71,9 @@ class IslandoraSolrQueryProcessorTestCase extends IslandoraWebTestCase {
       }
     }
 
-  // And is it gone?
-  $this->deleteObject($object_pid);
-  $query_processor->executeQuery();
-  $this->assertFalse(isset($query_processor->islandoraSolrResult['response']['objects'][0]['solr_doc']), t("After removing object {$object_pid}, its entry was no longer found in the Solr index."), 'Islandora');
+    // And is it gone?
+    $this->deleteObject($object_pid);
+    $query_processor->executeQuery();
+    $this->assertFalse(isset($query_processor->islandoraSolrResult['response']['objects'][0]['solr_doc']), t("After removing object {$object_pid}, its entry was no longer found in the Solr index."), 'Islandora');
   }
 }

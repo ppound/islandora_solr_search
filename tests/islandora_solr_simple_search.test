@@ -86,8 +86,8 @@ class IslandoraSolrSimpleSearchTestCase extends IslandoraWebTestCase {
     }
 
     // And is it gone?
-    //$this->deleteObject($object_pid);
-    //$this->drupalGet("islandora/search/" . $new_text, array('query' => $query));
-    //$this->assertText("Sorry, but your search returned no results.", t("After removing object {$object_pid}, its entry was no longer found in the Solr index."), 'Islandora');
+    $this->deleteObject($object_pid);
+    $this->drupalGet("islandora/search/" . $new_text, array('query' => $query));
+    $this->assertText("Sorry, but your search returned no results.", t("After removing object {$object_pid}, its entry was no longer found in the Solr index."), 'Islandora');
   }
 }
