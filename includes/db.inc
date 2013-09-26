@@ -9,11 +9,14 @@
  * Performs a select query to get fields for any field type.
  *
  * @params string $field_type
- *   The type of field to query for. If not passed, the query returns all fields.
+ *   The type of field to query for. If not passed, the query returns all
+ *   fields.
  * @params bool $filter
- *   If set to TRUE, it will filter the array agains user roles. If set to FALSE, it will return all results.
+ *   If set to TRUE, it will filter the array agains user roles. If set to
+ *   FALSE, it will return all results.
  * @params bool $simplify
  *   Whether to return the fields array as a simple term => label array.
+ *
  * @return array
  *   The query results as an array.
  *
@@ -21,9 +24,10 @@
  */
 function islandora_solr_get_fields($field_type = NULL, $filter = TRUE, $simplified = TRUE, $keys = FALSE) {
   global $base_path;
-  // fields query
+
+  // Fields query.
   $query = db_select('islandora_solr_fields', 'isf');
-  $query->fields('isf'); // all fields
+  $query->fields('isf');
   if ($field_type !== NULL) {
     $query->condition('isf.field_type', $field_type, '=');
   }
@@ -41,33 +45,40 @@ function islandora_solr_get_fields($field_type = NULL, $filter = TRUE, $simplifi
     }
     $records = array();
   }
-  // unserialize solr field settings blob
-  foreach ($records as $key => $value) {
-    $records[$key]['solr_field_settings'] = unserialize($records[$key]['solr_field_settings']);
+  // Unserialize Solr field settings blob.
+  foreach ($records as &$value) {
+    $value['solr_field_settings'] = unserialize($value['solr_field_settings']);
   }
-  // filter
+  // Filter.
   if ($filter == TRUE) {
     $records = _islandora_solr_filter_fields($records);
   }
-  // simplify
+
+  if (module_exists('i18n_string')) {
+    islandora_solr_translate_field_labels($records);
+  }
+
+  // Simplify.
   if ($simplified == TRUE) {
     $records = _islandora_solr_simplify_fields($records);
   }
-  // fields as keys
+  // Fields as keys.
   if ($keys == TRUE && $simplified == FALSE) {
-    foreach ($records as $key => $value) {
-      $records[$value['solr_field']] = $value;
-      unset($records[$key]);
+    $original = $records;
+    $records = array();
+    foreach ($original as $field) {
+      $records[$field['solr_field']] = $field;
     }
   }
   return $records;
 }
 
 /**
- * Checks an array of fields DB records against user roles
+ * Checks an array of fields DB records against user roles.
  *
  * @param array $records
  *   An array of fields.
+ *
  * @return array
  *   The array of fields, filtered by user roles.
  *
@@ -75,23 +86,25 @@ function islandora_solr_get_fields($field_type = NULL, $filter = TRUE, $simplifi
  */
 function _islandora_solr_filter_fields($records = array()) {
   global $user;
-  // no checks for user 1
+
+  // No checks for user 1.
   if ($user->uid == 1) {
     return $records;
   }
   $filtered_records = array();
   foreach ($records as $key => $record) {
-    // if field settings are set, check permissions.
+    // If field settings are set, check permissions.
     if (isset($record['solr_field_settings']) && !empty($record['solr_field_settings'])) {
-      // get field permissions
+      // Get field permissions.
       $field_roles = $record['solr_field_settings']['permissions'];
-      // check field permissions agains user roles
+      // Check field permissions agains user roles.
       $check = array_intersect($field_roles, array_keys($user->roles));
       if (!empty($check)) {
         $filtered_records[] = $record;
       }
     }
-    else { // if permissions are never explicitly set, include by default
+    else {
+      // If permissions are never explicitly set, include by default.
       $filtered_records[] = $record;
     }
   }
@@ -103,13 +116,14 @@ function _islandora_solr_filter_fields($records = array()) {
  *
  * @param array $fields
  *   Raw array from the DB with fields data.
+ *
  * @return array
  *   Returns a cleaned up array as term => label
  *
  * @see islandora_solr_get_fields()
  */
 function _islandora_solr_simplify_fields($fields = array()) {
-  // render as term => label
+  // Render as term => label.
   $records = array();
   foreach ($fields as $key => $value) {
     $term = $value['solr_field'];
@@ -153,6 +167,20 @@ function islandora_solr_get_link_to_object_fields() {
 }
 
 /**
+ * Return display fields with 'date format' enabled.
+ */
+function islandora_solr_get_date_format_fields() {
+  $records = islandora_solr_get_fields('result_fields', TRUE, FALSE);
+  $date_format = array();
+  foreach ($records as $key => $value) {
+    if (isset($value['solr_field_settings']['date_format']) && !empty($value['solr_field_settings']['date_format'])) {
+      $date_format[$value['solr_field']] = $value['solr_field_settings']['date_format'];
+    }
+  }
+  return $date_format;
+}
+
+/**
  * Return facet fields with range enabled.
  */
 function islandora_solr_get_range_facets() {
@@ -164,4 +192,20 @@ function islandora_solr_get_range_facets() {
     }
   }
   return $range_facets;
+}
+
+/**
+ * Function used with optional i18n_string integration.
+ */
+function islandora_solr_translate_field_labels(array &$records) {
+  foreach ($records as &$record) {
+    $settings = &$record['solr_field_settings'];
+    if (isset($settings['label'])) {
+      $string_id = format_string("islandora_solr:field_settings:@type:label:@field", array(
+        '@type' => $record['field_type'],
+        '@field' => $record['solr_field'],
+      ));
+      $settings['label'] = i18n_string_translate($string_id, $settings['label']);
+    }
+  }
 }

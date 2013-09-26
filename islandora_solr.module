@@ -5,43 +5,24 @@
  * Implementation of Solr search for the Islandora fedora_search module.
  */
 
-DEFINE('SOLR_SEARCH_PATH', 'islandora/search');
+define('ISLANDORA_SOLR_SEARCH_PATH', 'islandora/search');
+// @codingStandardsIgnoreStart
+/**
+ * @deprecated
+ */
+define('SOLR_SEARCH_PATH', ISLANDORA_SOLR_SEARCH_PATH);
+// @codingStandardsIgnoreEnd
 
 // Includes functions for common db queries.
 require_once dirname(__FILE__) . '/includes/db.inc';
 // Includes functions for common tasks.
-require_once dirname(__FILE__) . '/includes/common.inc';
+require_once dirname(__FILE__) . '/includes/utilities.inc';
 // Includes functions to create Islandora Solr blocks.
 require_once dirname(__FILE__) . '/includes/blocks.inc';
 // Includes functions for advanced facet functionality.
 require_once dirname(__FILE__) . '/includes/facets.inc';
 // Includes functions for connecting to Solr and Luke.
 require_once dirname(__FILE__) . '/includes/luke.inc';
-
-
-/**
- * Implements hook_boot().
- * @global type $conf
- */
-function islandora_solr_boot() {
-  global $conf;
-
-  // Allow i18n, by using multilingual variables.
-  if (module_exists('i18n')) {
-    $vars = array(
-      'islandora_solr_facets',
-      'islandora_solr_result_fields',
-      'islandora_solr_searchterms'
-    );
-
-    if (isset($conf['i18n_variables']) && is_array($conf['i18n_variables'])) {
-      $conf['i18n_variables'] = array_merge($vars, $conf['i18n_variables']);
-    }
-    else {
-      $conf['i18n_variables'] = $vars;
-    }
-  }
-}
 
 /**
  * Implements hook_menu().
@@ -54,14 +35,33 @@ function islandora_solr_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['admin/islandora/search/islandora_solr'] = array(
-    'title' => 'Solr Client',
+    'title' => 'Solr index',
+    'description' => 'Configure Solr index.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_solr_admin_index_settings'),
+    'access arguments' => array('administer islandora solr'),
+    'file' => 'includes/admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/islandora/search/islandora_solr/index'] = array(
+    'title' => 'Solr index',
+    'description' => 'Configure Solr index.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_solr_admin_index_settings'),
+    'access arguments' => array('administer islandora solr'),
+    'file' => 'includes/admin.inc',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/islandora/search/islandora_solr/settings'] = array(
+    'title' => 'Solr settings',
     'description' => 'Configure Solr search settings.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('islandora_solr_admin_settings'),
     'access arguments' => array('administer islandora solr'),
     'file' => 'includes/admin.inc',
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_LOCAL_TASK,
   );
+
   $items['islandora_solr/field'] = array(
     'title' => 'Result field',
     'description' => 'Configuration for Solr result field',
@@ -112,62 +112,74 @@ function islandora_solr_permission() {
  * Implements hook_theme().
  */
 function islandora_solr_theme() {
-  // set path
   $path = drupal_get_path('module', 'islandora_solr');
   $file = 'theme.inc';
 
   return array(
-    // advanced solr search form/block
+    // Advanced solr search form/block.
     'islandora_solr_advanced_search_form' => array(
       'variables' => array(
         'form' => NULL,
       ),
     ),
-    // theme admin form
+    // Theme admin form.
     'islandora_solr_admin_primary_display' => array(
       'path' => $path,
       'file' => 'includes/admin.inc',
       'render element' => 'form',
     ),
-    // theme admin form fields
+    // Theme admin form fields.
     'islandora_solr_admin_fields' => array(
       'path' => $path,
       'file' => 'includes/admin.inc',
       'render element' => 'form',
     ),
-    // results page
+    // Results page.
     'islandora_solr_wrapper' => array(
       'path' => $path . '/theme',
       'file' => $file,
       'template' => 'islandora-solr-wrapper',
-      'variables' => array('results' => NULL, 'secondary_profiles' => NULL,  'elements' => array()),
+      'variables' => array(
+        'results' => NULL,
+        'secondary_profiles' => NULL,
+        'elements' => array(),
+      ),
     ),
-    // default results display
+    // Default results display.
     'islandora_solr' => array(
       'path' => $path . '/theme',
       'file' => $file,
       'template' => 'islandora-solr',
-      'variables' => array('results' => NULL, 'elements' => array(), 'pids' => array()),
+      'variables' => array(
+        'results' => NULL,
+        'elements' => array(),
+        'pids' => array(),
+      ),
     ),
-     // default facet
+     // Default facet.
     'islandora_solr_facet' => array(
       'path' => $path . '/theme',
       'file' => $file,
       'template' => 'islandora-solr-facet',
       'variables' => array('buckets' => NULL, 'hidden' => FALSE, 'pid' => NULL),
     ),
-     // facet wrapper
+     // Facet wrapper.
     'islandora_solr_facet_wrapper' => array(
       'path' => $path . '/theme',
       'file' => $file,
       'variables' => array('title' => NULL, 'content' => NULL, 'pid' => NULL),
     ),
-     // range slider
+     // Range slider.
     'islandora_solr_range_slider' => array(
       'path' => $path . '/theme',
       'file' => $file,
       'template' => 'islandora-solr-range-slider',
-      'variables' => array('form_key' => NULL, 'gap' => NULL, 'range_from' => NULL, 'range_to' => NULL),
+      'variables' => array(
+        'form_key' => NULL,
+        'gap' => NULL,
+        'range_from' => NULL,
+        'range_to' => NULL,
+      ),
     ),
   );
 }
@@ -177,7 +189,6 @@ function islandora_solr_theme() {
  */
 function islandora_solr_islandora_solr_primary_display() {
   return array(
-    // Note: this class should either be, or extend, the class IslandoraSolrResults.
     'default' => array(
       'name' => t('List (default)'),
       'module' => 'islandora_solr',
@@ -198,11 +209,13 @@ function islandora_solr_islandora_solr_primary_display() {
  * display, which it returns to the page.
  *
  * @global IslandoraSolrQueryProcessor $_islandora_solr_queryclass
- *   the IslandoraSolrQueryProcessor object which includes the current query
+ *   The IslandoraSolrQueryProcessor object which includes the current query
  *   settings and the raw Solr results.
- * @param $query
- *   The query string
- * @return
+ *
+ * @param string $query
+ *   The query string.
+ *
+ * @return string
  *   A rendered Solr display
  *
  * @see hook_menu()
@@ -214,18 +227,19 @@ function islandora_solr($query = NULL) {
   // Url parameters.
   $params = $_GET;
 
-  // get profiles
+  // Get profiles.
   $primary_profiles = module_invoke_all('islandora_solr_primary_display');
   $secondary_profiles = module_invoke_all('islandora_solr_secondary_display');
 
-  // Get the preferred display profile
-  // Order: First choice is what's in the ?profile query var
-  //        Second choice is the primary display profile
-  //        Third choice is the default IslandoraSolrResults
+  // Get the preferred display profile.
+  // Order:
+  // - $_GET['display'].
+  // - The default primary display profile.
+  // - Third choice is the base IslandoraSolrResults.
   $enabled_profiles = array();
-  // get enabled displays
+  // Get enabled displays.
   $primary_display_array = variable_get('islandora_solr_primary_display_table', array());
-  // if it's set, we take these values
+  // If it's set, we take these values.
   if (isset($primary_display_array['enabled'])) {
     foreach ($primary_display_array['enabled'] as $key => $value) {
       if ($key === $value) {
@@ -234,29 +248,31 @@ function islandora_solr($query = NULL) {
     }
   }
 
-  // Set primary display
-  // check if display param is an valid, enabled profile. Else show default.
+  // Set primary display.
+  // Check if display param is an valid, enabled profile; otherwise, show
+  // default.
   if (isset($params['display']) && in_array($params['display'], $enabled_profiles)) {
     $islandora_solr_primary_display = $params['display'];
   }
   else {
     $islandora_solr_primary_display = variable_get('islandora_solr_primary_display', 'default');
-    // unset invalid parameter
+    // Unset invalid parameter.
     unset($params['display']);
   }
 
+  // !!! Set the global variable. !!!
+  $_islandora_solr_queryclass = new IslandoraSolrQueryProcessor();
 
   // Build and execute Apache Solr query.
-  // this populates the GLOBAL!!!!!!!
-  $_islandora_solr_queryclass = new IslandoraSolrQueryProcessor();
   $_islandora_solr_queryclass->buildAndExecuteQuery($query, $params);
 
   if (empty($_islandora_solr_queryclass->islandoraSolrResult)) {
     return t('Error searching Solr index.');
   }
 
-  // TODO: Also filter secondary displays against those checked in the configuration options.
-  if (isset($_GET['solr_profile']) && isset($secondary_profiles[$_GET['solr_profile']])) {
+  // TODO: Also filter secondary displays against those checked in the
+  // configuration options.
+  if (isset($params['solr_profile']) && isset($secondary_profiles[$params['solr_profile']])) {
     $profile = $secondary_profiles[$_GET['solr_profile']];
   }
   elseif (isset($primary_profiles[$islandora_solr_primary_display])) {
@@ -266,33 +282,35 @@ function islandora_solr($query = NULL) {
     drupal_set_message(check_plain(t('There is an error in the Solr search configuration: the display profile is not found.')), 'error');
     $profile = $primary_profiles['default'];
   }
-  // Include the file for the display profile
-  require_once(drupal_get_path('module', $profile['module']) . '/' . $profile['file']);
 
-  // Get display class and function from current display
+  if (isset($profile['file'])) {
+    // Include the file for the display profile.
+    require_once drupal_get_path('module', $profile['module']) . '/' . $profile['file'];
+  }
+
+  // Get display class and function from current display.
   $solr_class = $profile['class'];
   $solr_function = $profile['function'];
 
-
-  // check if the display's class exists
+  // Check if the display's class exists.
   $use_default_display = TRUE;
   if (class_exists($solr_class)) {
     $implementation = new $solr_class();
-    // check if the display's method exists
+    // Check if the display's method exists.
     if (method_exists($implementation, $solr_function)) {
-      // implement results
+      // Implement results.
       $output = $implementation->$solr_function($_islandora_solr_queryclass);
       $use_default_display = FALSE;
     }
   }
 
-  // Class and method are not found: use default
+  // Class and method could not be found, so use default.
   if ($use_default_display) {
     $results_class = new IslandoraSolrResults();
     $output = $results_class->displayResults($_islandora_solr_queryclass);
   }
 
-  // debug dump
+  // Debug dump.
   if (variable_get('islandora_solr_debug_mode', 0)) {
     $message = t('Parameters: <br /><pre>!debug</pre>', array('!debug' => print_r($_islandora_solr_queryclass->solrParams, TRUE)));
     drupal_set_message(filter_xss($message, array('pre', 'br')), 'status');
@@ -304,13 +322,15 @@ function islandora_solr($query = NULL) {
 /**
  * Check if the current context is the search results page.
  *
- * @TODO: checking for display might not be the best way to do this. Need to
- * review the way blocks are created.
+ * @todo Checking for display might not be the best way to do this. Need to
+ *   review the way blocks are created.
  *
  * @param object $islandora_solr_query
  *   The IslandoraSolrQueryProcessor object which includes the current query
- *   settings but at the beginning of IslandoraSolrQueryProcessor::executeQuery().
- * @return boolean
+ *   settings but at the beginning of
+ *   IslandoraSolrQueryProcessor::executeQuery().
+ *
+ * @return bool
  *   Returns TRUE if the context is the search results page. FALSE if not.
  */
 function islandora_solr_results_page($islandora_solr_query) {
@@ -320,5 +340,109 @@ function islandora_solr_results_page($islandora_solr_query) {
   }
   else {
     return FALSE;
+  }
+}
+
+/**
+ * Implements hook_i18n_string_info().
+ */
+function islandora_solr_i18n_string_info() {
+  return array(
+    'islandora_solr' => array(
+      'title' => t('Islandora Solr'),
+      'description' => t('Translatable result and facet field labels.'),
+      'format' => FALSE,
+      'list' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_forms().
+ */
+function islandora_solr_forms($form_id, $args) {
+  $forms = array();
+
+  if (strpos($form_id, 'islandora_solr_admin') === 0) {
+    module_load_include('inc', 'islandora_solr', 'includes/admin');
+
+    // Handle two form using the same building function, but allowing each to
+    // be altered separately.
+    if (in_array($form_id, array(
+      'islandora_solr_admin_settings_search_fields',
+      'islandora_solr_admin_settings_sort_fields',
+    ))) {
+      $forms[$form_id] = array(
+        'callback' => 'islandora_solr_admin_settings_search_or_sort_fields',
+      );
+    }
+  }
+  // Check if the form_id passed to drupal_get_form() contains the string
+  // 'islandora_solr_search_date_filter_form'.
+  if (strpos($form_id, 'islandora_solr_date_filter_form') !== FALSE) {
+    module_load_include('inc', 'islandora_solr', 'includes/facets');
+    $forms[$form_id] = array(
+      'callback' => 'islandora_solr_date_filter_form',
+      'callback arguments' => array($args[0]),
+    );
+  }
+
+  // Check if the form_id passed to drupal_get_form() contains the string
+  // 'islandora_solr_range_slider_form'.
+  if (strpos($form_id, 'islandora_solr_range_slider_form') !== FALSE) {
+    module_load_include('inc', 'islandora_solr', 'includes/facets');
+    $forms[$form_id] = array(
+      'callback' => 'islandora_solr_range_slider_form',
+      'callback arguments' => array($args[0]),
+    );
+  }
+
+  return $forms;
+}
+
+/**
+ * Implements hook_features_api().
+ */
+function islandora_solr_features_api() {
+  $mod_path = drupal_get_path('module', 'islandora_solr');
+  return array(
+    'islandora_solr_fields' => array(
+      'name' => t('Islandora Solr Fields Configuration'),
+      'file' => "$mod_path/includes/fields.features.inc",
+      'default_hook' => 'islandora_solr_fields_features_default_fields',
+      'feature_source' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Check if dismax is configured for the currently selected request handler.
+ *
+ * Results are cached, to reduce chatter between Drupal and Solr.
+ *
+ * @param bool $reset
+ *   Force cache revalidation.
+ *
+ * @return bool
+ *   TRUE if the current request handler supports dismax, FALSE if it does not.
+ */
+function islandora_solr_check_dismax($reset = FALSE) {
+  $cache_id = 'islandora_solr_dismax';
+  $cache = $reset ? FALSE : cache_get($cache_id);
+
+  if (!$cache) {
+    module_load_include('inc', 'islandora_solr', 'includes/admin');
+    $solr_url = variable_get('islandora_solr_url', 'localhost:8080/solr');
+    $handler = variable_get('islandora_solr_request_handler', FALSE);
+    $dismax = _islandora_solr_check_dismax($solr_url, $handler);
+    cache_set($cache_id, $dismax, 'cache', CACHE_TEMPORARY);
+
+    // XXX: This Drupal variable should be deprecated.
+    variable_set('islandora_solr_dismax_allowed', $dismax);
+
+    return $dismax;
+  }
+  else {
+    return $cache->data;
   }
 }
