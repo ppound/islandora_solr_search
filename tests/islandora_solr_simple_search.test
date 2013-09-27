@@ -77,17 +77,17 @@ class IslandoraSolrSimpleSearchTestCase extends IslandoraWebTestCase {
       $this->plainTextContent = filter_xss($this->drupalGetContent(), array());
       $i++;
       if (!strpos($this->plainTextContent, "Sorry, but your search returned no results.")) {
-        $this->pass(t("Randomly generated MODS document title of {$new_text} returned a result within Islandora search after {$i} pass(es)."), 'Islandora');
+        $this->pass(t("Randomly generated MODS document title of %new_text returned a result within Islandora search after %i pass(es).", array('%new_text' => $new_text, '%i' => $i)), 'Islandora');
         $i = 11;
       }
       elseif ($i == 10) {
-        $this->fail(t("Randomly generated MODS document title of {$new_text} returned no results despite making 10 passes in Islandora search."), 'Islandora');
+        $this->fail(t("Randomly generated MODS document title of %new_text returned no results despite making 10 passes in Islandora search.", array('%new_text' => $new_text)), 'Islandora');
       }
     }
 
     // And is it gone?
     $this->deleteObject($object_pid);
     $this->drupalGet("islandora/search/" . $new_text, array('query' => $query));
-    $this->assertText("Sorry, but your search returned no results.", t("After removing object {$object_pid}, its entry was no longer found in the Solr index."), 'Islandora');
+    $this->assertText("Sorry, but your search returned no results.", t("After removing object %object_pid, its entry was no longer found in the Solr index.", array('%object_pid' => $object_pid)), 'Islandora');
   }
 }
