@@ -557,7 +557,24 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('islandora_solr_object_label_field', 'fgs_label_s'),
     '#required' => TRUE,
   );
-
+  // The isMemberOf Solr field.
+  $form['islandora_solr_tabs']['required_solr_fields']['islandora_solr_member_of_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('The isMemberOf Solr field'),
+    '#size' => 30,
+    '#description' => t("The Solr field containing an object's isMemberOf relationship"),
+    '#default_value' => variable_get('islandora_solr_member_of_field', 'RELS_EXT_isMemberOf_uri_ms'),
+    '#required' => TRUE,
+  );
+  // The isMemberOfCollection Solr field.
+  $form['islandora_solr_tabs']['required_solr_fields']['islandora_solr_member_of_collection_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('The isMemberOfCollection Solr field'),
+    '#size' => 30,
+    '#description' => t("The Solr field containing an object's isMemberOfCollection relationship"),
+    '#default_value' => variable_get('islandora_solr_member_of_collection_field', 'RELS_EXT_isMemberOfCollection_uri_ms'),
+    '#required' => TRUE,
+  );
   // Miscellaneous.
   $form['islandora_solr_tabs']['other'] = array(
     '#type' => 'fieldset',
