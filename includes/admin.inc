@@ -688,7 +688,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   if (isset($form_state['triggering_element']) &&
       $form_state['triggering_element']['#field_type'] == $field_type) {
     // Unset terms from input array.
-    $form_state['values']['islandora_solr_' . $field_type]['terms'] = $form_state['input']['islandora_solr_' . $field_type]['terms'];
+    $form_state['values']['islandora_solr_' . $field_type]['terms'] = isset($form_state['input']['islandora_solr_' . $field_type]['terms']) ? $form_state['input']['islandora_solr_' . $field_type]['terms'] : array();
     unset($form_state['input']['islandora_solr_' . $field_type]);
 
     // 2.a add field.
@@ -704,7 +704,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
       $check_terms = $form_state['values']['islandora_solr_' . $field_type]['terms'];
 
       foreach ($check_terms as $key => $term) {
-        if ($term['solr_field'] == $add_solr_field) {
+        if (isset($term['solr_field']) && $term['solr_field'] == $add_solr_field) {
           $solr_field_error = t('Solr term can only be added once.');
         }
       }
