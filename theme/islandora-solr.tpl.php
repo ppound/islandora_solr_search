@@ -5,7 +5,9 @@
  *
  * Variables available:
  * - $results: Primary profile results array
- *
+ *    <?php if (module_exists('islandora_solr_geo')):?>
+      <a href="<?php print url($map_path, array('query'=>drupal_get_query_parameters())); ?>"><?php print t('Display results on map'); ?></a>
+    <?php endif;?>
  * @see template_preprocess_islandora_solr()
  */
 
@@ -15,9 +17,6 @@
   <p class="no-results"><?php print t('Sorry, but your search returned no results.'); ?></p>
 <?php else: ?>
   <div class="islandora islandora-solr-search-results">
-    <?php if (module_exists('islandora_solr_geo')):?>
-      <a href="<?php print url($map_path, array('query'=>drupal_get_query_parameters())); ?>"><?php print t('Display results on map'); ?></a>
-    <?php endif;?>
     <?php $row_result = 0; ?>
     <?php foreach($results as $key => $result): ?>
       <!-- Search result -->
