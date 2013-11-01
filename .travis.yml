@@ -17,7 +17,6 @@ before_install:
   - cd $HOME/drupal-*
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/islandora_solr_search
   - drush en --yes islandora_solr
-  - cat $HOME/islandora_tomcat/logs/catalina.out
 script:
   - ant -buildfile sites/all/modules/islandora_solr_search/build.xml lint
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/islandora_solr_search
