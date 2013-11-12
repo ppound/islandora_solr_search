@@ -9,13 +9,15 @@
  * Implements hook_menu().
  */
 function islandora_solr_geo_menu() {
-  $items['islandora_search_map'] = array(
-    'title' => 'Results on Map',
-    'description' => 'Display search results on map (filtered)',
-    'page callback' => 'islandora_solr_geo_refine_search',
-    'page arguments' => array(1),
-    'access arguments' => array('search islandora solr'),
+  $items = array();
+  $items['admin/islandora/search/islandora_solr_geo'] = array(
+    'title' => 'Islandora Solr Geo Administration',
     'type' => MENU_CALLBACK,
+    'weight' => 5,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_solr_geo_admin_form'),
+    'access arguments' => array('administer islandora solr'),
+    'file' => 'includes/admin.inc',
   );
   return $items;
 }
@@ -24,21 +26,19 @@ function islandora_solr_geo_menu() {
  * Implements hook_islandora_solr_primary_display().
  */
 function islandora_solr_geo_islandora_solr_primary_display() {
-  return array('geo' => array(
+  return array(
+    'geo' => array(
       'name' => t('Map'),
       'module' => 'islandora_solr_geo',
       'file' => 'includes/geo_results.inc',
       'class' => "IslandoraSolrResultsGeo",
       'function' => "displayResults",
       'description' => t("Display search results on a map"),
+      'configuration' => 'admin/islandora/search/islandora_solr_geo'
     ),
   );
 }
 
-function islandora_solr_geo_refine_search($query) {
-  $_GET['display'] = 'geo';
-  return islandora_solr($query);
-}
 /**
  * Implements hook_islandora_solr_query().
  *
@@ -50,61 +50,11 @@ function islandora_solr_geo_refine_search($query) {
 function islandora_solr_geo_islandora_solr_query($islandora_solr_query) {
   // We're dealing with the geo display.
   if ($islandora_solr_query->display == 'geo') {
-    $islandora_solr_query->solrParams['fq'][] = 'mods_subject_cartographics_coordinates_mt:*';
+    // More changes here could be made such as modifying the solrLimit as well
+    // as modifying the query etc.
+    $coordinate_field = variable_get('islandora_solr_geo_coordinates_field', 'mods_subject_cartographics_coordinates_ms');
+    $islandora_solr_query->solrParams['fq'][] = "$coordinate_field:*";
   }
-}
-
-/**
- * Implements hook_preprocess().
- */
-function islandora_solr_geo_preprocess_islandora_solr_geo(&$variables) {
-    global $base_url;
-    $mod_path = drupal_get_path('module', 'islandora_solr_config');
-    $geo_mod_path = drupal_get_path('module', 'islandora_solr_geo');
-
-    drupal_add_css("$mod_path/css/islandora_solr_config.theme.css");
-    drupal_add_js($geo_mod_path . "/js/islandora_solr_geo_gmap_utils.js");
-    drupal_add_js($geo_mod_path . "/js/markerclusterer.js");
-
-    $object_results = $variables['response']['objects'];
-
-    $elements = array();
-    $locations = array();
-    $map_variables = array();
-    // For use with extents in Google Maps api, javascript side.
-    $latLng = array();
-    $elements['solr_total'] = $variables['response']['numFound'];
-    $elements['solr_start'] = $variables['response']['start'];
-    foreach ($variables['response']['objects'] as $result) {
-      $obj_url = '/islandora/object/' . $result['PID'];
-      // This object has lat lon, show on map.
-      if (isset($result['solr_doc']['mods_subject_cartographics_coordinates_mt'][0])) {
-        // Split this on ','.
-        $coords = explode(",",$result['solr_doc']['mods_subject_cartographics_coordinates_mt'][0]);
-        array_push($latLng,array($coords[0], $coords[1]));
-        // Construct the balloon's label.
-        $ballon_text = $result['object_label'] . '<br/>';
-        // Add the objects thumbnail.
-        $ballon_text .= "<img src='" . $base_url . '/' . $result['thumbnail_url'] . "' alt='" . $result['PID'] . "'>".'<br/>';
-        $ballon_text .= "<a href='" . '/' . $result['object_url'] . "'>" . $result['PID'] . "</a><br/>";
-        $ballon_text .= "Description: </br>" . substr($result['solr_doc']['dc.description'][0], 0, 50) . '...';
-        $location = new IslandoraMapObjectLocation(null, $coords[0], $coords[1], $ballon_text);
-        array_push($locations,$location);
-      }
-    }
-    drupal_add_js($geo_mod_path . "/js/islandora_solr_geo_gmap_utils.js");
-    drupal_add_js(array(
-      'islandora_solr_geo' => array(
-      'locations' => $latLng)), 'setting');
-    $map_variables['locations'] = $locations;
-    $map_variables['map_options']='{"mapTypeId":"roadmap", "zoom":50}';
-    $map_variables['map_style'] =  "height: 550px; width:100%;";
-    
-    $variables['results'] = theme(
-      'islandora_mapping_map_multi_item',
-      $map_variables
-    );
-    $variables['refine_results'] = TRUE;
 }
 
 /**
@@ -113,32 +63,41 @@ function islandora_solr_geo_preprocess_islandora_solr_geo(&$variables) {
 function islandora_solr_geo_theme() {
   $path = drupal_get_path('module', 'islandora_solr_geo');
   return array(
-    'islandora_solr_geo' => array(
-      'path' => $path . '/theme',
-      'template' => 'islandora-solr-geo',
+    'islandora_solr_geo_display_results' => array(
+      'path' => "$path/theme",
+      'file' => 'theme.inc',
+      'template' => 'islandora-solr-geo-display-results',
       'variables' => array(
         'results' => NULL,
-        'refine_results' => FALSE,
+      ),
+    ),
+    'islandora_solr_geo_balloon' => array(
+      'path' => "$path/theme",
+      'file' => 'theme.inc',
+      'template' => 'islandora-solr-geo-balloon',
+      'variables' => array(
+        'solr_result' => NULL,
       ),
     ),
   );
 }
-
 /**
  * Helper class to work with ip_geoloc module.
- * @author discoverygarden
- *
  */
 class IslandoraMapObjectLocation{
   /**
    * Constructor for the helper map object.
    *
-   * @param string $marker_color
-   * @param string $lat
-   * @param string $long
-   * @param string $balloon_text
+   * @param NULL|string $marker_color
+   *   The color of the marker or NULL if we are not specifying one.
+   * @param NULL|string $lat
+   *   The latitude of the co-ordinate we are rendering or NULL.
+   * @param NULL|string $long
+   *   The longitude of the co-ordinate we are rendering or NULL.
+   * @param NULL|string $balloon_text
+   *   The markup for the balloon or NULL.
    */
-  function IslandoraMapObjectLocation($marker_color = null, $lat = null, $long = null, $balloon_text = ''){
+  public function __construct($marker_color = NULL, $lat = NULL, $long = NULL, $balloon_text = '') {
     $this->marker_color = $marker_color;
     $this->latitude = $lat;
     $this->longitude = $long;

@@ -4,9 +4,9 @@
  * Islandora solr map template.
  *
  * Variables available:
- * - $header: Header results
+ * - $results: The rendered Solr results.
  *
- * @see template_preprocess_islandora_solr_geo().
+ * @see template_preprocess_islandora_solr_geo_display_results().
  */
 ?>
 <?php print $results; ?>
