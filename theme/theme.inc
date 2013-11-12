@@ -62,7 +62,6 @@ function islandora_solr_preprocess_islandora_solr_wrapper(&$variables) {
  * Default template: theme/islandora-solr.tpl.php.
  */
 function islandora_solr_preprocess_islandora_solr(&$variables) {
-  global $_islandora_solr_queryclass;
   $results = $variables['results'];
   foreach ($results as $key => $result) {
     // Thumbnail.
@@ -81,7 +80,6 @@ function islandora_solr_preprocess_islandora_solr(&$variables) {
     }
     // Thumbnail link.
     $variables['results'][$key]['thumbnail'] = l($image, $result['object_url'], $options);
-    $variables['map_path'] = 'islandora_search_map' . trim($_islandora_solr_queryclass->solrQuery);
   }
 }
 

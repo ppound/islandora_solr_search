@@ -5,14 +5,11 @@
  *
  * Variables available:
  * - $results: Primary profile results array
- *    <?php if (module_exists('islandora_solr_geo')):?>
-      <a href="<?php print url($map_path, array('query'=>drupal_get_query_parameters())); ?>"><?php print t('Display results on map'); ?></a>
-    <?php endif;?>
+ *
  * @see template_preprocess_islandora_solr()
  */
 
 ?>
-
 <?php if (empty($results)): ?>
   <p class="no-results"><?php print t('Sorry, but your search returned no results.'); ?></p>
 <?php else: ?>
