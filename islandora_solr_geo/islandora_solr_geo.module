@@ -34,7 +34,7 @@ function islandora_solr_geo_islandora_solr_primary_display() {
       'class' => "IslandoraSolrResultsGeo",
       'function' => "displayResults",
       'description' => t("Display search results on a map"),
-      'configuration' => 'admin/islandora/search/islandora_solr_geo'
+      'configuration' => 'admin/islandora/search/islandora_solr_geo',
     ),
   );
 }
@@ -84,7 +84,7 @@ function islandora_solr_geo_theme() {
 /**
  * Helper class to work with ip_geoloc module.
  */
-class IslandoraMapObjectLocation{
+class IslandoraMapObjectLocation {
   /**
    * Constructor for the helper map object.
    *

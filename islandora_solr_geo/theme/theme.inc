@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Theme functions for the islandora_solr_geo module.
+ */
 
 /**
  * Implements hook_preprocess().
