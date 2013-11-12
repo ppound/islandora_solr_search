@@ -2,16 +2,11 @@ window.onload = function() {
   var locs = Drupal.settings.islandora_solr_geo.locations;
   var latlngbounds = new google.maps.LatLngBounds();
   var marker_locations = new Array();
-  
+
   if(locs.length > 1) {
     for(var i = 0; i < locs.length; i++) {
       marker_locations.push(new google.maps.LatLng(locs[i][0], locs[i][1]));
       latlngbounds.extend(marker_locations[i]);
-//      var latLng = new google.maps.LatLng(data.photos[i].latitude,
-//          data.photos[i].longitude);
-//
-//      var marker = new google.maps.Marker({'position': latLng});
-//      markers.push(marker);
 
       // Map is made available via ip_geoloc_gmap_multi_loc.js
       // in the ip_geoloc module.

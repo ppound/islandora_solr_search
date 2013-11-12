@@ -26,6 +26,6 @@ class IslandoraSolrResultsGeo extends IslandoraSolrResults {
    *   Rendered Solr results.
    */
   public function printResults($solr_results) {
-    return theme('islandora_solr_geo', $solr_results);
+    return theme('islandora_solr_geo_display_results', $solr_results);
   }
 }
