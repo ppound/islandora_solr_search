@@ -94,8 +94,8 @@
   </target>
 
   <target name="test">
-    <exec executable="bash">
-        <arg line='-c "php ../../../../scripts/run-tests.sh --xml ${basedir}/build/test Islandora\ Solr\ Search"' />
+    <exec executable="drush">
+        <arg line="test-run --uri=http://localhost --xml=${basedir}/build/test 'Islandora Solr Search'" />
     </exec>
   </target>
   
