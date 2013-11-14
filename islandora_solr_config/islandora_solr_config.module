@@ -108,10 +108,8 @@ function islandora_solr_config_islandora_solr_query($islandora_solr_query) {
 
   // We're dealing with the grid display.
   if ($islandora_solr_query->display == 'grid') {
-
     // Set results limit.
     $limit = $islandora_solr_query->solrLimit;
-
     // Not dividable yet.
     $dividable = FALSE;
     while ($dividable == FALSE) {
