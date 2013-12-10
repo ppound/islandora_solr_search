@@ -497,7 +497,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
       Setting a useful default query allows the use of Solr to browse without having to enter a query.
       This may be used in conjunction with a background filter below.<br />
       Consider using <strong>timestamp:[* TO NOW]</strong> or <strong>*:*</strong><br />'),
-    '#default_value' => variable_get('islandora_solr_base_query', 'timestamp:[* TO NOW]'),
+    '#default_value' => variable_get('islandora_solr_base_query', '*:*'),
   );
   $form['islandora_solr_tabs']['query_defaults']['islandora_solr_base_sort'] = array(
     '#type' => 'textfield',

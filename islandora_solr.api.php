@@ -99,6 +99,20 @@ function hook_islandora_solr_query($islandora_solr_query) {
 }
 
 /**
+ * Alter which is called directly after hook_islandora_solr_query().
+ *
+ * @param IslandoraSolrQueryProcessor $islandora_solr_query
+ *   The IslandoraSolrQueryProcessor object which includes the current query
+ *   settings but at the end of IslandoraSolrQuery::buildQuery().
+ *
+ * @see hook_islandora_solr_query()
+ * @see IslandoraSolrQueryProcessor::buildQuery()
+ */
+function hook_islandora_solr_query_alter($islandora_solr_query) {
+
+}
+
+/**
  * Hook to collect data to populate block Islandora Solr blocks.
  *
  * Note: it is valid to specify *either* a class and method *or* a form. The
