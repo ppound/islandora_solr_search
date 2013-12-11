@@ -283,6 +283,10 @@ class IslandoraSolrQueryProcessor {
     // The hook implementation needs to specify that it takes a reference.
     module_invoke_all('islandora_solr_query', $this);
     drupal_alter('islandora_solr_query', $this);
+
+    // Reset solrStart incase the number of results (ie. $this->solrLimit) is
+    // modified.
+    $this->solrStart = max(0, $start_page) * $this->solrLimit;
   }
 
   /**
