@@ -342,11 +342,7 @@ class IslandoraSolrQueryProcessor {
           if (isset($object_result[$datastream_field])) {
             $object_results[$object_index]['datastreams'] = $object_result[$datastream_field];
           }
-          else {
-            watchdog('islandora_solr', 'The datastream Solr field is missing for @pid.', array(
-              '@pid' => $pid,
-            ));
-          }
+
           if (isset($object_result[$object_label])) {
             $object_label_value = $object_result[$object_label];
             $object_results[$object_index]['object_label'] = is_array($object_label_value) ? implode(", ", $object_label_value) : $object_label_value;
@@ -368,12 +364,7 @@ class IslandoraSolrQueryProcessor {
           // Hook to alter based on content model.
           module_load_include('inc', 'islandora', 'includes/utilities');
           foreach ($object_results as $object_index => $object_result) {
-            if (!isset($object_result['content_models'])) {
-              watchdog('islandora_solr', 'The content model Solr field is missing for @pid.', array(
-                '@pid' => $pid,
-              ));
-            }
-            else {
+            if (isset($object_result['content_models'])) {
               foreach ($object_result['content_models'] as $content_model_uri) {
                 // Regex out the info:fedora/ from the content model.
                 $cmodel_name = preg_replace('/info\:fedora\//', '', $content_model_uri, 1);
