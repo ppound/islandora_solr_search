@@ -144,22 +144,22 @@ function hook_islandora_solr_query_blocks() {
 /**
  * Implements hook_CMODEL_PID_islandora_solr_object_result_alter().
  */
-function hook_islandora_pageCModel_islandora_solr_object_result_alter(&$search_results, $query_processor) {
-  $search_results['object_url_params']['terms'] = $query_processor->solrQuery;
+function hook_islandora_pageCModel_islandora_solr_object_result_alter(&$search_result, $query_processor) {
+  $search_result['object_url_params']['terms'] = $query_processor->solrQuery;
 }
 
 /**
  * Implements hook_islandora_solr_results_alter().
  */
 function hook_islandora_solr_results_alter(&$search_results, $query_processor) {
-  $search_results['object_url_params']['terms'] = $query_processor->solrQuery;
+  $search_results[0]['object_url_params']['terms'] = $query_processor->solrQuery;
 }
 
 /**
  * Implements hook_islandora_solr_object_result_alter().
  */
-function hook_islandora_solr_object_result_alter(&$search_results, $query_processor) {
-  $search_results[0]['object_url_params']['terms'] = $query_processor->solrQuery;
+function hook_islandora_solr_object_result_alter(&$search_result, $query_processor) {
+  $search_result['object_url_params']['terms'] = $query_processor->solrQuery;
 }
 
 /**
