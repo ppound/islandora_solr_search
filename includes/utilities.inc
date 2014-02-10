@@ -292,22 +292,26 @@ function islandora_solr_prepare_solr_results($solr_results) {
           $value = $solr_doc[$field];
         }
       }
+
+      // Add link to search.
+      if (in_array($field, $link_to_search)) {
+        $link_values = (array) $value;
+        foreach ($link_values as &$link) {
+          $solr_query = format_string('!field:"!value"', array(
+            '!field' => $field,
+            '!value' => islandora_solr_lesser_escape($link),
+          ));
+          $link = l($link, "islandora/search/$solr_query");
+        }
+        $value = $link_values;
+      }
+
       // Implode.
       $value = is_array($value) ? implode(", ", $value) : $value;
       // Add link to object.
       if (in_array($field, $link_to_object)) {
         $value = l($value, $object_result['object_url'], $options);
       }
-
-      // Add link to search.
-      if (in_array($field, $link_to_search)) {
-        $solr_query = format_string('!field:"!value"', array(
-          '!field' => $field,
-          '!value' => islandora_solr_lesser_escape($value),
-        ));
-        $value = l($value, "islandora/search/$solr_query");
-      }
-
       $solr_doc[$field] = $value;
     }
     // Replace Solr doc rows.
