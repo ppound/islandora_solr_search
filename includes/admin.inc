@@ -1128,6 +1128,21 @@ function _islandora_solr_admin_settings_submit($form, &$form_state) {
             $solr_field_settings = array();
             if (isset($form_state['solr_field_settings']['islandora_solr_' . $field_type][$solr_field])) {
               $solr_field_settings = $form_state['solr_field_settings']['islandora_solr_' . $field_type][$solr_field];
+              // Handle linking to objects to not break existing features while
+              // adding new functionality.
+              if ($field_type == 'result_fields') {
+                $link_choice = $solr_field_settings['link_to_object'];
+                $solr_field_settings['link_to_object'] = FALSE;
+                $solr_field_settings['link_to_search'] = FALSE;
+
+                if ($link_choice === 'object') {
+                  $solr_field_settings['link_to_object'] = TRUE;
+                }
+
+                if ($link_choice === 'search') {
+                  $solr_field_settings['link_to_search'] = TRUE;
+                }
+              }
             }
             if (module_exists('i18n_string')) {
               if (isset($solr_field_settings['label'])) {
@@ -1635,12 +1650,25 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
     '#default_value' => $values['label'],
     '#description' => t('A human-readable name.'),
   );
+  $link_options = array(
+    'none' => t('None'),
+    'object' => t("Link this field to the object's page."),
+    'search' => t("Link the value to a Solr search result."),
+  );
+  $default_link = 'none';
 
+  if (isset($values['link_to_object']) && $values['link_to_object'] != FALSE) {
+    $default_link = 'object';
+  }
+
+  if (isset($values['link_to_search']) && $values['link_to_search'] != FALSE) {
+    $default_link = 'search';
+  }
   $form['options']['link_to_object'] = array(
-    '#type' => 'checkbox',
+    '#type' => 'radios',
     '#title' => t('Link to object'),
-    '#default_value' => $values['link_to_object'],
-    '#description' => t("Link this field to the object\'s page."),
+    '#options' => $link_options,
+    '#default_value' => $default_link,
   );
   $form['options']['snippet'] = array(
     '#type' => 'checkbox',

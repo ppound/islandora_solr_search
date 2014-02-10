@@ -258,6 +258,7 @@ function islandora_solr_prepare_solr_results($solr_results) {
   $highlighting = isset($solr_results['highlighting']) ? $solr_results['highlighting'] : array();
   $fields_all = islandora_solr_get_fields('result_fields', FALSE);
   $link_to_object = islandora_solr_get_link_to_object_fields();
+  $link_to_search = islandora_solr_get_link_to_search_fields();
   $date_format = islandora_solr_get_date_format_fields();
 
   // Loop over object results.
@@ -293,10 +294,20 @@ function islandora_solr_prepare_solr_results($solr_results) {
       }
       // Implode.
       $value = is_array($value) ? implode(", ", $value) : $value;
-      // Add link.
+      // Add link to object.
       if (in_array($field, $link_to_object)) {
         $value = l($value, $object_result['object_url'], $options);
       }
+
+      // Add link to search.
+      if (in_array($field, $link_to_search)) {
+        $solr_query = format_string('!field:"!value"', array(
+          '!field' => $field,
+          '!value' => islandora_solr_lesser_escape($value),
+        ));
+        $value = l($value, "islandora/search/$solr_query");
+      }
+
       $solr_doc[$field] = $value;
     }
     // Replace Solr doc rows.
