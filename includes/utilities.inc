@@ -277,33 +277,32 @@ function islandora_solr_prepare_solr_results($solr_results) {
       $options['fragment'] = $object_result['object_url_fragment'];
     }
 
-    foreach ($solr_doc as $field => $value) {
+    foreach ($solr_doc as $field => $original_value) {
+      $value = (array) $original_value;
       // Date formatting.
       if (isset($date_format[$field])) {
-        $value = format_date(strtotime($value), 'custom', $date_format[$field], 'UTC');
+        $map_date_format = function ($value) use ($date_format, $field) {
+          return format_date(strtotime($value), 'custom', $date_format[$field], 'UTC');
+        };
+        $value = array_map($map_date_format, $value);
       }
       // Only apply highlighting when the date isn't formatted.
-      else {
-        // Check highlighting.
-        if (isset($highlighting[$pid][$field])) {
-          $value = $highlighting[$pid][$field];
-        }
-        else {
-          $value = $solr_doc[$field];
-        }
+      elseif (isset($highlighting[$pid][$field])) {
+        $value = $highlighting[$pid][$field];
       }
 
       // Add link to search.
       if (in_array($field, $link_to_search)) {
-        $link_values = (array) $value;
-        foreach ($link_values as &$link) {
+        $map_to_link = function ($original_value, $formatted_value) use ($field) {
           $solr_query = format_string('!field:"!value"', array(
             '!field' => $field,
-            '!value' => islandora_solr_lesser_escape($link),
+            '!value' => islandora_solr_lesser_escape($original_value),
           ));
-          $link = l($link, "islandora/search/$solr_query");
-        }
-        $value = $link_values;
+          return l($formatted_value, "islandora/search/$solr_query", array(
+            'html' => TRUE,
+          ));
+        };
+        $value = array_map($map_to_link, (array) $original_value, (array) $value);
       }
 
       // Implode.
