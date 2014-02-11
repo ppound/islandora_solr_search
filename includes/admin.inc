@@ -1655,7 +1655,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
   $link_options = array(
     'none' => t('None'),
     'object' => t("Link this field to the object's page."),
-    'search' => t("Link the value to a Solr search result."),
+    'search' => t("Link the value to a Solr search result. (NOTE: Will likely break with very large values.)"),
   );
   $default_link = 'none';
 
@@ -1692,7 +1692,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
       '#type' => 'textfield',
       '#title' => t('Date format'),
       '#default_value' => $values['date_format'] ? $values['date_format'] : '',
-      '#description' => t('The format of the date, as it will be displayed in the search results. Use <a href="!url" target="_blank">PHP date()</a> formatting.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
+      '#description' => t('The format of the date, as it will be displayed in the search results. Use <a href="!url" target="_blank">PHP date()</a> formatting.', array('!url' => 'http://php.net/manual/function.date.php')),
     );
   }
   islandora_solr_append_permissions_and_actions($values, $form);
