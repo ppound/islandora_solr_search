@@ -54,7 +54,7 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
       ),
       'title' => t('Exporting search results as CSV...'),
       'init_message' => t('Preparing to construct CSV.'),
-      'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaning @estimate.'),
+      'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaining @estimate.'),
       'error_message' => t('An error has occurred.'),
       'file' => drupal_get_path('module', 'islandora_solr_config') . '/includes/csv_results.inc',
       'finished' => 'islandora_solr_config_csv_download_csv',
