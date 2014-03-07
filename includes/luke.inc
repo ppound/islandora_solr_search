@@ -92,6 +92,12 @@ function islandora_solr_get_luke($solr_url = NULL, $field = NULL, $num_terms = 0
     );
     if ($field) {
       $luke_query['fl'] = $field;
+
+      // XXX: Solr 4 breaks when specifying numTerms=0 (and a field), see
+      // https://issues.apache.org/jira/browse/SOLR-5107
+      if ($luke_query['numTerms'] == 0) {
+        $luke_query['numTerms'] = 1;
+      }
     }
     // Generate nice URL.
     $luke_url = url($luke_url, array('absolute' => TRUE, 'query' => $luke_query));
