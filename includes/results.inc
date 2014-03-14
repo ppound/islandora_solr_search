@@ -68,11 +68,10 @@ class IslandoraSolrResults {
     // Pager.
     islandora_solr_pager_init($elements['solr_total'], $islandora_solr_query->solrLimit);
     $elements['solr_pager'] = theme('pager', array(
-      NULL,
-      $islandora_solr_query->solrLimit,
-      0,
-      NULL,
-      5,
+      'tags' => NULL,
+      'element' => 0,
+      'parameters' => NULL,
+      'quantity' => 5,
     ));
 
     // Debug (will be removed).
