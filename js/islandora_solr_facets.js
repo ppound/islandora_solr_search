@@ -146,9 +146,8 @@
             }
           }
     
-          // set canvas width equal to slider width
-          var canvasWidth = $(sliderId).width();
-          $(canvasId).width(canvasWidth - 0).height('120px');
+          // set canvas width to auto for responsiveness
+          $(canvasId).width('auto').height('120px');
     
           // set color for the slider.
           $(sliderId + ' .ui-slider-range').css({'background': rangeSliderColor});
