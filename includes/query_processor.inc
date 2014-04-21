@@ -134,14 +134,21 @@ class IslandoraSolrQueryProcessor {
 
     // Set sort.
     if (isset($this->internalSolrParams['sort'])) {
-      $sort_explode = explode(' ', $this->internalSolrParams['sort']);
-      // Check if an order is given and if the order value is 'asc' or 'desc'.
-      if (isset($sort_explode[1]) && ($sort_explode[1] == 'asc' || $sort_explode[1] == 'desc')) {
+      // If multiple sorts are being passed they are expected to already be
+      // an array with the values containing "thefield thesortorder".
+      if (is_array($this->internalSolrParams['sort'])) {
         $this->solrParams['sort'] = $this->internalSolrParams['sort'];
       }
       else {
-        // Use ascending.
-        $this->solrParams['sort'] = $sort_explode[0] . ' asc';
+        $sort_explode = explode(' ', $this->internalSolrParams['sort']);
+        // Check if an order is given and if the order value is 'asc' or 'desc'.
+        if (isset($sort_explode[1]) && ($sort_explode[1] == 'asc' || $sort_explode[1] == 'desc')) {
+          $this->solrParams['sort'] = $this->internalSolrParams['sort'];
+        }
+        else {
+          // Use ascending.
+          $this->solrParams['sort'] = $sort_explode[0] . ' asc';
+        }
       }
     }
     else {
