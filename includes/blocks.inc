@@ -405,7 +405,7 @@ function _islandora_solr_advanced_search_terms($form, &$form_state) {
  * @see islandora_solr_advanced_search_form()
  */
 function islandora_solr_advanced_search_form_submit($form, &$form_state) {
-
+  module_load_include('inc', 'islandora_solr', 'includes/utilities');
   // Collect query values.
   $query_array = array();
   foreach ($form_state['values']['terms'] as $term) {
@@ -414,7 +414,7 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
     // XXX: Should probably use islandora_solr_replace_slashes().
     $search = str_replace('/', '~slsh~', $search);
     $boolean = (isset($term['boolean'])) ? $term['boolean'] : variable_get('islandora_solr_search_boolean', 'user');
-
+    $field = islandora_solr_lesser_escape($field);
     // Add query.
     if (!empty($search)) {
       $query_array[] = array(

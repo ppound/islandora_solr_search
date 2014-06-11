@@ -449,7 +449,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $search_terms = array(
     '#type' => 'item',
     '#title' => t('Search terms'),
-    '#description' => t('Indicates what fields should appear in the dropdown menu of terms for the <strong>Advanced Search Block</strong>.<br /><strong>Note:</strong> it is recommended to use tokenized fields.'),
+    '#description' => t(
+      'Indicates what fields should appear in the dropdown menu of terms for
+      the <strong>Advanced Search Block</strong>.<br /><strong>Note:</strong>
+      it is recommended to use tokenized fields and non-tokenized string fields
+      will not match correctly.'
+    ),
     '#tree' => TRUE,
     '#prefix' => '<div id="islandora-solr-search-fields-wrapper">',
     '#suffix' => '</div>',
