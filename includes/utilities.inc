@@ -120,13 +120,15 @@ function islandora_solr_csv_explode($delim = ',', $str = '', $enclose = '"', $pr
 /**
  * Escape a string for inclusion in a query field or value.
  *
- * Copied from Apache_Solr_Service and added space as a value to escape.
+ * Copied from Apache_Solr_Service.
  *
  * Divergences from Apache_Solr_Service::escape():
- * - remove '?' and whitespace:
+ * - removed '?':
  *   - '?' is useful.
- * - remove '*':
+ * - removed '*':
  *   - Allows wildcard searches.
+ * - added space:
+ *   - Needed for spaces in fields.
  *
  * @param string $value
  *   A string to escape.
