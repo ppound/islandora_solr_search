@@ -140,7 +140,10 @@ class IslandoraSolrQueryProcessor {
         $this->solrParams['sort'] = $this->internalSolrParams['sort'];
       }
       else {
-        $sort_explode = explode(' ', $this->internalSolrParams['sort']);
+        $sort_explode = preg_split(
+          ISLANDORA_SOLR_QUERY_SPLIT_REGEX,
+          $this->internalSolrParams['sort']
+        );
         // Check if an order is given and if the order value is 'asc' or 'desc'.
         if (isset($sort_explode[1]) && ($sort_explode[1] == 'asc' || $sort_explode[1] == 'desc')) {
           $this->solrParams['sort'] = $this->internalSolrParams['sort'];

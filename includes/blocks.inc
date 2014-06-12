@@ -235,7 +235,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
 
     $values['terms'] = array();
 
-    $query_explode = preg_split('/[^\\\] /', $query);
+    $query_explode = preg_split(ISLANDORA_SOLR_QUERY_SPLIT_REGEX, $query);
 
     // Break up the solr query to populate the advanced search form.
     $i = 0;
@@ -558,7 +558,10 @@ function islandora_solr_sort() {
     // Get current sort (check in the actual parameters used for the query,
     // because modules might have altered it).
     if (isset($_islandora_solr_queryclass->solrParams['sort'])) {
-      $sort_explode = explode(' ', $_islandora_solr_queryclass->solrParams['sort']);
+      $sort_explode = preg_split(
+        ISLANDORA_SOLR_QUERY_SPLIT_REGEX,
+        $_islandora_solr_queryclass->solrParams['sort']
+      );
       $current_sort_term = $sort_explode[0];
       $current_sort_order = isset($sort_explode[1]) ? $sort_explode[1] : NULL;
     }

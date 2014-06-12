@@ -6,6 +6,7 @@
  */
 
 define('ISLANDORA_SOLR_SEARCH_PATH', 'islandora/search');
+define('ISLANDORA_SOLR_QUERY_SPLIT_REGEX', 'islandora/search');
 // @codingStandardsIgnoreStart
 /**
  * @deprecated
