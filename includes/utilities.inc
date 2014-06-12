@@ -122,10 +122,10 @@ function islandora_solr_csv_explode($delim = ',', $str = '', $enclose = '"', $pr
  *
  * Copied from Apache_Solr_Service and added space as a value to escape.
  *
- * Divergences from Apache_Solr_Service::remove
- * - remove '?' and whitespace (Zac):
+ * Divergences from Apache_Solr_Service::escape():
+ * - remove '?' and whitespace:
  *   - '?' is useful.
- * - remove '*' (Alan):
+ * - remove '*':
  *   - Allows wildcard searches.
  *
  * @param string $value
