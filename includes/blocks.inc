@@ -235,7 +235,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
 
     $values['terms'] = array();
 
-    $query_explode = explode(' ', $query);
+    $query_explode = preg_split('/[^\\\] /', $query);
 
     // Break up the solr query to populate the advanced search form.
     $i = 0;
@@ -247,7 +247,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
         // Split the filter into field and value.
         $value_split = explode(':', $value, 2);
 
-        $values['terms'][$i]['field'] = $value_split[0];
+        $values['terms'][$i]['field'] = stripslashes($value_split[0]);
 
         // Second part of the split is the query value (or first part of it).
         $value_split[1] = str_replace(array('(', ')'), '', $value_split[1]);
