@@ -118,19 +118,17 @@ function islandora_solr_csv_explode($delim = ',', $str = '', $enclose = '"', $pr
 }
 
 /**
- * Escape a string for inclusion in a query.
+ * Escape a string for inclusion in a query field or value.
  *
- * Copied from Apache_Solr_Service and added space as a value to escape.
+ * Copied from Apache_Solr_Service.
  *
- * List of characters taken from
- * @link http://lucene.apache.org/java/docs/queryparsersyntax.html#Escaping%20Special%20Characters Lucene documentation. @endlink
- *
- * Divergences from Apache_Solr_Service:
- * - remove '?' and whitespace (Zac):
+ * Divergences from Apache_Solr_Service::escape():
+ * - removed '?':
  *   - '?' is useful.
- *   - Escaping whitespace is unnecessary.
- * - remove '*' (Alan):
+ * - removed '*':
  *   - Allows wildcard searches.
+ * - added space:
+ *   - Needed for spaces in fields.
  *
  * @param string $value
  *   A string to escape.
@@ -139,7 +137,7 @@ function islandora_solr_csv_explode($delim = ',', $str = '', $enclose = '"', $pr
  *   The escaped string.
  */
 function islandora_solr_lesser_escape($value) {
-  $pattern = '/(\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^|~|\?|:|\\\)/';
+  $pattern = '/(\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^| |~|\?|:|\\\)/';
   $replace = '\\\$1';
 
   return preg_replace($pattern, $replace, $value);

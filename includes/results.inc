@@ -410,7 +410,7 @@ class IslandoraSolrResults {
       $attr_x['href'] = url($path_x, array('query' => $query_x));
 
       // Remove solr fields from breadcrumb value.
-      $query_explode = explode(' ', $query_value);
+      $query_explode = preg_split(ISLANDORA_SOLR_QUERY_SPLIT_REGEX, $query_value);
       $query_implode = array();
       foreach ($query_explode as $value) {
         // Check for first colon to split the string.
@@ -465,7 +465,7 @@ class IslandoraSolrResults {
     // Check if there are operators in the filter.
     $fq_split = preg_split('/ (OR|AND) /', $filter);
     if (count($fq_split) > 1) {
-      $operator_split = explode(' ', $filter);
+      $operator_split = preg_split(ISLANDORA_SOLR_QUERY_SPLIT_REGEX, $filter);
       $operator_split = array_diff($operator_split, $fq_split);
       $out_array = array();
       foreach ($fq_split as $fil) {
