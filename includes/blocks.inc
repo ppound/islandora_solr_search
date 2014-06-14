@@ -245,7 +245,7 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
       // Check for first colon to split the string.
       if (strpos($value, ':') != FALSE) {
         // Split the filter into field and value.
-        $value_split = explode(':', $value, 2);
+        $value_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, $value, 2);
 
         $values['terms'][$i]['field'] = stripslashes($value_split[0]);
 
