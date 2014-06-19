@@ -843,10 +843,12 @@ class IslandoraSolrFacets {
     $results = $this->results;
     $facet_field = $this->facet_field;
     $facet_results = array();
+    module_load_include('inc', 'islandora_solr', 'includes/utilities');
     foreach ($results as $bucket => $count) {
       $facet_results[] = array(
         'count' => $count,
-        'filter' => $facet_field . ':"' . $bucket . '"',
+        'filter' => islandora_solr_lesser_escape($facet_field) . ':"' .
+          islandora_solr_lesser_escape($bucket) . '"',
         'bucket' => $bucket,
       );
     }
