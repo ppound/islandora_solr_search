@@ -416,7 +416,7 @@ class IslandoraSolrResults {
         // Check for first colon to split the string.
         if (strpos($value, ':') != FALSE) {
           // Split the filter into field and value.
-          $value_split = explode(':', $value, 2);
+          $value_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, $value, 2);
           // Trim whitespace.
           $value_split[1] = trim($value_split[1]);
           // Trim brackets.
@@ -469,7 +469,7 @@ class IslandoraSolrResults {
       $operator_split = array_diff($operator_split, $fq_split);
       $out_array = array();
       foreach ($fq_split as $fil) {
-        $fil_split = explode(':', $fil, 2);
+        $fil_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, $fil, 2);
         $out_str = str_replace(array('"', 'info:fedora/'), '', $fil_split[1]);
         $out_array[] = $out_str;
       }
@@ -484,7 +484,7 @@ class IslandoraSolrResults {
     }
     else {
       // Split the filter into field and value.
-      $filter_split = explode(':', $filter, 2);
+      $filter_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, $filter, 2);
       // Trim brackets.
       $filter_split[1] = trim($filter_split[1], "\"");
       // If value is date.
@@ -1243,7 +1243,7 @@ class IslandoraSolrFacets {
           continue;
         }
         // Split the filter into field and value.
-        $filter_split = explode(':', $filter, 2);
+        $filter_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, $filter, 2);
         // Trim brackets.
         $filter_split[1] = trim($filter_split[1], "\"");
         // Split range filter string to return formatted date values.
