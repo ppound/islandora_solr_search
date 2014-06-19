@@ -34,7 +34,7 @@ function islandora_solr_date_filter_form($form, &$form_state, $elements) {
       if (strpos($filter, $facet_field) === 0) {
         $filter_count++;
         // Split the filter into field and value.
-        $filter_split = explode(':', $filter, 2);
+        $filter_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, ':', $filter, 2);
         // Trim brackets.
         $filter_split[1] = trim($filter_split[1], "\"");
         // Split range filter string to return formatted date values.
