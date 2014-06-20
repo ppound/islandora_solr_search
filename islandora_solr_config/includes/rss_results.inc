@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Contains methods to search solr and display results.  depends on 
+ * Contains methods to search solr and display results.  depends on
  * Apache_Solr_Php client.
  */
 
 /**
  * Extention of IslandoraSolrResults for templating purposes.
- * This overrides the displayResults function to provide an alternate display 
+ * This overrides the displayResults function to provide an alternate display
  * type.
  */
 
@@ -16,7 +16,7 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
 
   /**
    * Outputs results basically in the normal way.
-   * 
+   *
    * Thumbnails pulled from the Fedora repository.
    *
    * @param object $islandora_solr_query
@@ -89,7 +89,7 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
    * Function for setting the values of the <item> elements for the RSS display.
    *
    * @tutorial http://feed2.w3.org/docs/rss2.html#hrelementsOfLtitemgt
-   * 
+   *
    * @return array
    *   variable that holds all values to be rendered into <item> elements
    */
@@ -162,7 +162,7 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
    * Function to set values of the <channel> elements for the RSS display.
    *
    * @tutorial http://feed2.w3.org/docs/rss2.html#requiredChannelElements
-   * 
+   *
    * @return array
    *   variable that holds all values to be rendered into <channel> elements
    */
