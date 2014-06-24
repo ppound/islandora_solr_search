@@ -2050,7 +2050,7 @@ function islandora_solr_get_solrconfig_xml($solr_url) {
  */
 function islandora_solr_resolve_xincludes(SimpleXMLElement $doc_element, $solr_url) {
   $dom_element = dom_import_simplexml($doc_element);
-  $doc =  $dom_element->ownerDocument;
+  $doc = $dom_element->ownerDocument;
   $xpath = new DOMXPath($doc);
   $xpath->registerNamespace('xi', 'http://www.w3.org/2001/XInclude');
   $xincludes = $xpath->query('//xi:*[@href and not(contains(@href, "/"))]');
