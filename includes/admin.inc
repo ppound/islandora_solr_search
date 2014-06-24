@@ -2025,6 +2025,7 @@ function islandora_solr_get_solrconfig_xml($solr_url) {
     $req = drupal_http_request($url);
     if ($req->code / 100 === 2) {
       $xml[$solr_url] = simplexml_load_string($req->data);
+      islandora_solr_resolve_xincludes($xml[$solr_url], (strpos($solr_url, 'http') === 0 ? '' : 'http://') . $solr_url);
     }
     else {
       $xml[$solr_url] = NULL;
@@ -2032,6 +2033,31 @@ function islandora_solr_get_solrconfig_xml($solr_url) {
   }
 
   return $xml[$solr_url];
+}
+
+/**
+ * Resolve XIncludes which include files local to the Solr config directory.
+ *
+ * Relies upon some internal libxml behaviour... When one imports a
+ * SimpleXMLElement into DOM and acts upon it, the original SimpleXMLElement is
+ * also changed.
+ *
+ * @param SimpleXMLElement $doc_element
+ *   An SimpleXMLElement under which to resolve XInclude statements. NOTE: This
+ *   object will be modified in place.
+ * @param string $solr_url
+ *   A string representing the path to Solr.
+ */
+function islandora_solr_resolve_xincludes(SimpleXMLElement $doc_element, $solr_url) {
+  $dom_element = dom_import_simplexml($doc_element);
+  $doc = $dom_element->ownerDocument;
+  $xpath = new DOMXPath($doc);
+  $xpath->registerNamespace('xi', 'http://www.w3.org/2001/XInclude');
+  $xincludes = $xpath->query('//xi:*[@href and not(contains(@href, "/"))]');
+  foreach ($xincludes as $element) {
+    $element->setAttribute('href', "$solr_url/admin/file?file=" . $element->getAttribute('href'));
+  }
+  $doc->xinclude();
 }
 
 /**
