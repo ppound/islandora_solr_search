@@ -2038,13 +2038,13 @@ function islandora_solr_get_solrconfig_xml($solr_url) {
 /**
  * Resolve XIncludes which include files local to the Solr config directory.
  *
- * Relies upon some internal libxml behaviour... When import a SimpleXMLElement
- * into DOM and act upon it, the original SimpleXMLElement will also be
- * changed.
+ * Relies upon some internal libxml behaviour... When one imports a
+ * SimpleXMLElement into DOM and acts upon it, the original SimpleXMLElement is
+ * also changed.
  *
  * @param SimpleXMLElement $doc_element
  *   An SimpleXMLElement under which to resolve XInclude statements. NOTE: This
- *   object will be modified!
+ *   object will be modified in place.
  * @param string $solr_url
  *   A string representing the path to Solr.
  */
