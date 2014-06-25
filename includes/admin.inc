@@ -2057,7 +2057,10 @@ function islandora_solr_resolve_xincludes(SimpleXMLElement $doc_element, $solr_u
   foreach ($xincludes as $element) {
     $element->setAttribute('href', "$solr_url/admin/file?file=" . $element->getAttribute('href'));
   }
-  $doc->xinclude();
+
+  // XXX: Suppress errors, as trying to access a file which doesn't exist
+  // will throw an HTTP 400 instead of a 404... Solr is silly.
+  @$doc->xinclude();
 }
 
 /**
