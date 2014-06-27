@@ -118,7 +118,7 @@ class IslandoraSolrQueryProcessor {
 
     // XXX: Fix the query as some characters will break the search : and / are
     // examples.
-    $this->solrQuery = urldecode(islandora_solr_restore_slashes($query));
+    $this->solrQuery = islandora_solr_restore_slashes(urldecode($query));
 
     // If the query is empty.
     if (empty($this->solrQuery) || in_array($this->solrQuery, $this->differentKindsOfNothing)) {

@@ -31,7 +31,7 @@ class IslandoraSolrResultsCSV extends IslandoraSolrResults {
     // We want to unset the display profile of CSV, but keep everything else.
     $params = $redirect['query'];
     unset($params['solr_profile']);
-    $redirect_url = "islandora/search/$islandora_solr_query->solrQuery";
+    $redirect_url = current_path();
     batch_set($this->batchSolrResults($islandora_solr_query));
     batch_process(array(
       $redirect_url,
