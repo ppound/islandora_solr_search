@@ -1509,14 +1509,14 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
           'link_rendering' => $solr_field_settings['link_rendering'],
           'snippet' => isset($solr_field_settings['snippet']) ? $solr_field_settings['snippet'] : NULL,
           'date_format' => isset($solr_field_settings['date_format']) ? trim($solr_field_settings['date_format']) : '',
-          'permissions' => $solr_field_settings['permissions'],
+          'permissions' => empty($solr_field_settings['enable_permissions']) ? FALSE : $solr_field_settings['permissions'],
         );
         break;
 
       case 'sort_fields':
         $to_return = array(
           'label' => trim($solr_field_settings['label']),
-          'permissions' => $solr_field_settings['permissions'],
+          'permissions' => empty($solr_field_settings['enable_permissions']) ? FALSE : $solr_field_settings['permissions'],
         );
         break;
 
@@ -1533,20 +1533,19 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
           'range_facet_slider_color',
           'date_filter_datepicker_enabled',
           'date_filter_datepicker_range',
-          'permissions',
         ));
         $relevant_values = array_intersect_key($solr_field_settings, $fields);
         $relevant_values['label'] = isset($relevant_values['label']) ?
           trim($relevant_values['label']) :
           '';
-
+        $relevant_values['permissions'] = empty($solr_field_settings['enable_permissions']) ? FALSE : $solr_field_settings['permissions'];
         $to_return = $relevant_values;
         break;
 
       case 'search_fields':
         $to_return = array(
           'label' => trim($solr_field_settings['label']),
-          'permissions' => $solr_field_settings['permissions'],
+          'permissions' => empty($solr_field_settings['enable_permissions']) ? FALSE : $solr_field_settings['permissions'],
         );
         break;
     }
@@ -1601,30 +1600,50 @@ function _islandora_solr_admin_get_form_function($field_type = NULL) {
 /**
  * Genereate the element definition for the permission fieldset.
  *
- * @param array $permissions
- *   The selected permissions (from the $form_state).
+ * @param bool|array $permissions
+ *   The selected permissions (from the $form_state) either an array containing
+ *   key values, or FALSE if it is not enabled.
  * @param array $permissions_default
  *   The permissions to select by default.
  * @param array $permissions_disable
  *   Some permissions which we will not allow to be changed (set as disabled in
  *   the form).
+ * @param bool $default_value
+ *   Whether the checkbox is to be checked by default.
  *
  * @return array
  *   An associative array containing the definition for the permissions
  *   fieldset.
  */
-function islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable) {
+function islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable, $default_value) {
+  if (is_array($permissions)) {
+    $default_enable = !empty($permissions) ? TRUE : $default_value;
+  }
+  else {
+    $default_enable = $permissions;
+  }
+
   $permissions_fieldset = array(
     '#type' => 'fieldset',
     '#title' => t('Permissions'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
+    'enable_permissions' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable permissions'),
+      '#default_value' => $default_enable,
+    ),
     'permissions' => array(
       '#type' => 'checkboxes',
       '#title' => t('Permissions'),
       '#options' => user_roles(),
       '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
       '#description' => t('Select which roles can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles which do not have permission to search the Solr index.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="enable_permissions"]' => array('checked' => TRUE),
+        ),
+      ),
     ),
   );
   foreach ($permissions_disable as $rid) {
@@ -1716,12 +1735,14 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
  *   An array of values.
  * @param array $form
  *   An array representing the Drupal form, passed by reference.
+ * @param bool $default_value
+ *   Whether the default enabled checkbox is to be TRUE or FALSE. *
  */
-function islandora_solr_append_permissions_and_actions($values, &$form) {
+function islandora_solr_append_permissions_and_actions($values, &$form, $default_value = TRUE) {
   $permissions = isset($values['permissions']) ? $values['permissions'] : array();
   $permissions_disable = _islandora_solr_permissions_disable();
   $permissions_default = _islandora_solr_permissions_default();
-  $form['options']['permissions_fieldset'] = islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable);
+  $form['options']['permissions_fieldset'] = islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable, $default_value);
 
   $form['actions'] = array(
     '#type' => 'container',
