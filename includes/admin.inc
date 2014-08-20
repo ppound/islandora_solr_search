@@ -10,7 +10,12 @@
  */
 function islandora_solr_admin_index_settings($form, &$form_state) {
   // Add admin form CSS.
-  drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
+
+  $form['#attached'] = array(
+    'css' => array(
+       drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css',
+    ),
+  );
 
   $solr_url = !empty($form_state['values']['islandora_solr_url']) ?
     $form_state['values']['islandora_solr_url'] :
@@ -69,8 +74,6 @@ function islandora_solr_admin_index_settings($form, &$form_state) {
       ));
     }
   }
-  // Create form.
-  $form = array();
   // AJAX wrapper for URL checking.
   $form['solr_ajax_wrapper'] = array(
     '#prefix' => '<div id="solr-url">',
@@ -205,12 +208,18 @@ function _islandora_solr_admin_index_settings_submit($form, &$form_state) {
 function islandora_solr_admin_settings($form, &$form_state) {
   // Add admin form css.
   drupal_set_title(t('Solr settings'));
-  drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
-  drupal_add_library('system', 'ui.dialog');
-  drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
 
-  // Create form.
-  $form = array();
+  $form['#attached'] = array(
+    'css' => array(
+      drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css',
+    ),
+    'library' => array(
+      array('system', 'ui.dialog'),
+    ),
+    'js' => array(
+      drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js',
+    ),
+  );
   $form['islandora_solr_tabs'] = array(
     '#type' => 'vertical_tabs',
     '#weight' => 5,
