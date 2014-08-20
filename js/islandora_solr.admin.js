@@ -36,6 +36,8 @@
     }
   };
 
+  var oldupdate = null;
+
   // function for the  dialog box
   Drupal.behaviors.islandoraSolrDialog = {
     attach: function(context, settings) {
@@ -51,9 +53,22 @@
         'height': 500,
         'draggable': false
       });
+
+      if (oldupdate == null && typeof Drupal.states != 'undefined') {
+        oldupdate = Drupal.states.Dependent.prototype.update;
+        Drupal.states.Dependent.prototype.update = function (selector, state, value) {
+          oldupdate.call(this, selector, state, value);
+          var modal_id = '#islandora-solr-admin-dialog';
+          var dependent = this.element.closest(modal_id);
+          var dependee = dialog_area.find(selector);
+          if ((dependent.length + dependee.length) > 0) {
+            Drupal.islandoraSolr.resizeModal();
+          }
+        }
+      }
     }
   };
-  
+
   // resize dialog box
   // @TODO: some small bugs in here.
   Drupal.islandoraSolr = {};
@@ -81,11 +96,11 @@
       if (scrollHeight > maxHeight - 98) {
         scrollHeight = maxHeight - 98;
       }
-      
+
       $scroll.css({
         'height': scrollHeight + 'px', // 1) 494 2) 465
         'max-height': scrollHeight + 'px'
-      });          
+      });
     }
 
     // set dialogHeight
@@ -98,10 +113,10 @@
     // apply dimensions
     $modal.dialog('option', 'width', maxWidth);
     $modal.dialog('option', 'height', dialogHeight);
-    $modal.dialog('option', 'position', 'center');        
+    $modal.dialog('option', 'position', 'center');
 
   }
-  
+
   // function for the dialog box window resize event
   Drupal.behaviors.islandoraSolrDialogResize = {
     attach: function(context, settings) {
@@ -142,11 +157,11 @@
           }
         };
       }
-      
-      
+
+
     }
   };
-  
+
   // Add dialog form values to the drupal ajax settings
   // @see http://drupal.org/node/1028410#comment-4301262
   // @TODO: check if this might be a better approach: http://drupal.stackexchange.com/questions/9920/how-to-extend-or-hook-drupal-form-ajax/10191#10191
@@ -157,7 +172,7 @@
     Drupal.ajax[dialogAjaxId].options.data._dialog_values = JSON.stringify(data.values);
 	};
 
-  // attach behaviors to make sure all javascript is added to the form in the dialog	
+  // attach behaviors to make sure all javascript is added to the form in the dialog
 	$.fn.islandoraSolrAttachBehaviors = function() {
     Drupal.attachBehaviors();
 	};
@@ -166,5 +181,4 @@
 	$.fn.islandoraSolrResizeModal = function() {
     Drupal.islandoraSolr.resizeModal();
 	};
-  
 })(jQuery);
