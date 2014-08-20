@@ -13,7 +13,7 @@ function islandora_solr_admin_index_settings($form, &$form_state) {
 
   $form['#attached'] = array(
     'css' => array(
-       drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css',
+      drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css',
     ),
   );
 
