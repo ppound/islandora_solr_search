@@ -787,7 +787,7 @@ function islandora_solr_admin_settings_fields(&$form_state, &$terms, $field_type
   else {
     $term = array();
     $count = count($fields);
-
+    $fields = array_values($fields);
     foreach ($fields as $key => $value) {
       $solr_field = $value['solr_field'];
 
