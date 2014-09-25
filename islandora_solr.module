@@ -8,12 +8,6 @@
 define('ISLANDORA_SOLR_SEARCH_PATH', 'islandora/search');
 define('ISLANDORA_SOLR_QUERY_SPLIT_REGEX', '/(?<!\\\\) /');
 define('ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX', '/(?<!\\\\):/');
-// @codingStandardsIgnoreStart
-/**
- * @deprecated
- */
-define('SOLR_SEARCH_PATH', ISLANDORA_SOLR_SEARCH_PATH);
-// @codingStandardsIgnoreEnd
 
 // Includes functions for common db queries.
 require_once dirname(__FILE__) . '/includes/db.inc';
