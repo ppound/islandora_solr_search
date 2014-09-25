@@ -1399,8 +1399,6 @@ class IslandoraSolrFacets {
     $min_max_query->executeQuery();
     // Solr results.
     $results = $min_max_query->islandoraSolrResult;
-    $response_arrayonse = $results['response'];
-
-    return $response_array['response']['objects'][0]['solr_doc'][$field];
+    return $results['response']['objects'][0]['solr_doc'][$field];
   }
 }
