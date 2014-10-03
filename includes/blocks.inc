@@ -61,6 +61,14 @@ function islandora_solr_islandora_solr_query_blocks() {
       'function' => 'islandora_solr_sort',
       'form' => NULL,
     ),
+    'explore' => array(
+      'name' => t('Islandora explore'),
+      'module' => 'islandora_solr',
+      'file' => 'includes/explore.inc',
+      'class' => NULL,
+      'function' => 'islandora_solr_explore_generate_links',
+      'form' => NULL,
+    ),
   );
 }
 
@@ -81,6 +89,233 @@ function islandora_solr_block_info() {
   return $blocks;
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Currently checks for delta of explore and modifies the form to add custom
+ * configuration options to setup facet display filters to be rendered.
+ */
+function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
+  if ($form['module']['#value'] == 'islandora_solr' && $form['delta']['#value'] == 'explore') {
+    // Get the variables for the form display facets.
+    $expore_config = (isset($form_state['islandora_solr_facet_filters']) ? $form_state['islandora_solr_facet_filters'] : variable_get('islandora_solr_explore_config', array()));
+
+    // Check if remove was clicked and removed the label and filter from the
+    // values and the table.
+    if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#value'] == t('Remove selected')) {
+      foreach ($form_state['values']['table'] as $row) {
+        if (!empty($row)) {
+          // Get selected row index.
+          $row_index = str_replace("facet-row-", "", $row);
+          // Unset the index to keep the other keys the same.
+          unset($expore_config[$row_index]);
+        }
+      }
+      // Reindex array to remove empty unused indexes and keep the array clean.
+      $expore_config = array_values($expore_config);
+      $form_state['islandora_solr_facet_filters'] = $expore_config;
+    }
+
+    // Check if weights are being updated.
+    if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#value'] == t('Update weights') && !empty($expore_config)) {
+      // Note: select_weight is only in the $form_state['input'] and doesn't
+      // exist in $form_state['values'].
+      $selected_weights = $form_state['input']['select_weight'];
+      foreach ($selected_weights as $index => $weight) {
+        $expore_config[$index]['weight'] = $weight;
+      }
+      // Sort config array by weight and update drupal variable.
+      uasort($expore_config, 'drupal_sort_weight');
+      $form_state['islandora_solr_facet_filters'] = $expore_config;
+    }
+
+    // Check if new display facet is being added to the table.
+    if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#id'] == 'facet-filter-add-more') {
+      $facet_label = $form_state['values']['label'];
+      $facet_filter = $form_state['values']['filter'];
+      $facet_weight = $form_state['values']['facet_weight'];
+
+      if (empty($facet_filter)) {
+        form_set_error('Filter', t('Facet Filter is required to add a display facet.'));
+      }
+
+      if (empty($facet_label)) {
+        form_set_error('Label', t('Display Label is required to add a display facet.'));
+      }
+
+      if (!empty($facet_label) && !empty($facet_filter)) {
+        // Before it's added try to run the facet query and see if it's valid.
+        $facet_is_valid = TRUE;
+
+        if (!empty($facet_filter)) {
+          module_load_include('inc', 'islandora_solr', 'includes/explore');
+
+          // Store current messages.
+          $old_msg = drupal_get_messages();
+
+          // Clear current error messages.
+          drupal_get_messages('error', TRUE);
+
+          // Run a facet query on the supplied filter.
+          islandora_solr_explore_test_facet_query($facet_filter);
+
+          // Clear error messages run facet query and check if there are any
+          // error messages.  If there are error messages assume that the query
+          // failed and set facet to invalid.
+          $error_msgs = drupal_get_messages('error');
+          if (isset($error_msgs['error'])) {
+            $facet_is_valid = FALSE;
+          }
+          // Restore the original messages.
+          $_SESSION['messages'] = $old_msg;
+          if (!$facet_is_valid) {
+            form_set_error('Filter', t('Invalid Facet Query Filter.'));
+          }
+        }
+
+        if ($facet_is_valid) {
+          // Put values into config array.
+          $expore_config[$facet_filter] = array(
+            'label' => $facet_label,
+            'filter' => $facet_filter,
+            'weight' => $facet_weight,
+          );
+
+          // Sort config array by weight and update drupal variable.
+          uasort($expore_config, 'drupal_sort_weight');
+
+          // Reset input values on successful add.
+          $form_state['input']['label'] = '';
+          $form_state['input']['filter'] = '';
+          $form_state['input']['facet_weight'] = 0;
+          $form_state['islandora_solr_facet_filters'] = $expore_config;
+        }
+      }
+    }
+
+    // Set table row data to be rendered.
+    $rows = array();
+    if (!empty($expore_config)) {
+      foreach ($expore_config as $row_index => $row) {
+        $rows["facet-row-$row_index"] = array(
+          'display_label' => htmlentities($row['label']),
+          'facet_filter' => htmlentities($row['filter']),
+          'facet_weight' => array(
+            'data' => array(
+              '#type' => 'select',
+              '#title' => t('Weight'),
+              '#options' => drupal_map_assoc(range(-50, 50)),
+              '#value' => (isset($row['weight']) ? $row['weight'] : 0),
+              '#title_display' => 'invisible',
+              '#attributes' => array(
+                'name' => "select_weight[{$row['filter']}]",
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    $form['facet'] = array(
+      '#type' => 'fieldset',
+      '#prefix' => '<div id="islandora-solr-facet-filter-wrapper">',
+      '#suffix' => '</div>',
+      '#title' => t('Setup Display Facets'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    );
+    $form['facet']['table'] = array(
+      '#type' => 'tableselect',
+      '#header' => array(
+        'display_label' => t('Display Label'),
+        'facet_filter' => t('Facet Query Filter'),
+        'facet_weight' => t('Weight'),
+      ),
+      '#options' => $rows,
+      '#empty' => t('No display facets'),
+      '#attributes' => array('class' => array('main-facet-table')),
+    );
+    $form['facet']['actions'] = array(
+      '#type' => 'actions',
+      '#weight' => 5,
+    );
+    $form['facet']['actions']['remove'] = array(
+      '#type' => 'button',
+      '#value' => t('Remove selected'),
+      '#weight' => 0,
+      '#ajax' => array(
+        'callback' => '_islandora_solr_update_filter_table',
+        'wrapper' => 'islandora-solr-facet-filter-wrapper',
+      ),
+    );
+    $form['facet']['actions']['update_weight'] = array(
+      '#type' => 'button',
+      '#value' => t('Update weights'),
+      '#weight' => 1,
+      '#ajax' => array(
+        'callback' => '_islandora_solr_update_filter_table',
+        'wrapper' => 'islandora-solr-facet-filter-wrapper',
+      ),
+    );
+    $form['facet']['fieldset'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Add New Display Facet Details'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+      '#weight' => 13,
+    );
+    $form['facet']['fieldset']['label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Display Label'),
+      '#size' => 60,
+      '#description' => t('The text displayed for the generated link.'),
+      '#attributes' => array('class' => array('new-facet-label')),
+    );
+    $form['facet']['fieldset']['filter'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Facet Query Filter'),
+      '#size' => 60,
+      '#description' => t("Write a custom facet query, for information on available tags see:") . l(t('Solr Luke Schema.'), "{$GLOBALS['base_url']}:8080/solr/admin/luke"),
+      '#attributes' => array('class' => array('new-facet-filter')),
+    );
+    $form['facet']['fieldset']['facet_weight'] = array(
+      '#type' => 'select',
+      '#title' => t('Facet weight'),
+      '#description' => t('Display weight'),
+      '#options' => drupal_map_assoc(range(-50, 50)),
+      '#default_value' => 0,
+      '#attributes' => array('class' => array('new-facet-weight')),
+    );
+    $form['facet']['fieldset']['add'] = array(
+      '#type' => 'button',
+      '#value' => t('Add'),
+      '#attributes' => array('class' => array('islandora-solr-add-more-submit')),
+      '#id' => 'facet-filter-add-more',
+      '#ajax' => array(
+        'callback' => '_islandora_solr_update_filter_table',
+        'wrapper' => 'islandora-solr-facet-filter-wrapper',
+      ),
+    );
+    // Process submit and variable set the new config on submit.
+    $form['#submit'][] = 'islandora_solr_update_filters_on_submit';
+  }
+}
+
+/**
+ * On submit of the explore block config save the facet filters in form state.
+ */
+function islandora_solr_update_filters_on_submit($form, &$form_state) {
+  if (isset($form_state['islandora_solr_facet_filters'])) {
+    variable_set('islandora_solr_explore_config', $form_state['islandora_solr_facet_filters']);
+  }
+}
+
+/**
+ * Ajax Callback to reload the facet form when adding rows to the table.
+ */
+function _islandora_solr_update_filter_table($form, &$form_state) {
+  return $form['facet'];
+}
 
 /**
  * Implements hook_block_view().
