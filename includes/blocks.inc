@@ -136,11 +136,11 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
       $facet_weight = $form_state['values']['facet_weight'];
 
       if (empty($facet_filter)) {
-        form_set_error('Filter', 'Facet Filter is required to add a display facet.');
+        form_set_error('Filter', t('Facet Filter is required to add a display facet.'));
       }
 
       if (empty($facet_label)) {
-        form_set_error('Label', 'Display Label is required to add a display facet.');
+        form_set_error('Label', t('Display Label is required to add a display facet.'));
       }
 
       if (!empty($facet_label) && !empty($facet_filter)) {
@@ -168,7 +168,7 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
           // Restore the original messages.
           $_SESSION['messages'] = $old_msg;
           if (!$facet_is_valid) {
-            form_set_error('Filter', 'Invalid Facet Query Filter.');
+            form_set_error('Filter', t('Invalid Facet Query Filter.'));
           }
         }
 
