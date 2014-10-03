@@ -292,7 +292,7 @@ function islandora_solr_prepare_solr_results($solr_results) {
 
       // Truncate value lengths before linking, avoids destroying link tags.
       if (array_key_exists($field, $truncate_length)) {
-        array_walk($value, function(&$val_val, $val_key) use ($field, $truncate_length) {
+        array_walk($value, function (&$val_val, $val_key) use ($field, $truncate_length) {
           $val_val = strlen($val_val) > intval($truncate_length[$field]['maximum_length']) ?
             substr($val_val, 0, intval($truncate_length[$field]['maximum_length'])) .
             $truncate_length[$field]['truncation_suffix'] :
