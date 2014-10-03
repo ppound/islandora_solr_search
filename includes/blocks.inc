@@ -96,7 +96,7 @@ function islandora_solr_block_info() {
  * configuration options to setup facet display filters to be rendered.
  */
 function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
-  if ($form['delta']['#value'] == 'explore') {
+  if ($form['module']['#value'] == 'islandora_solr' && $form['delta']['#value'] == 'explore') {
     // Get the variables for the form display facets.
     $expore_config = (isset($form_state['islandora_solr_facet_filters']) ? $form_state['islandora_solr_facet_filters'] : variable_get('islandora_solr_explore_config', array()));
 
@@ -117,7 +117,7 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
     }
 
     // Check if weights are being updated.
-    if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#value'] == t('Update weights')) {
+    if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#value'] == t('Update weights') && !empty($expore_config)) {
       // Note: select_weight is only in the $form_state['input'] and doesn't
       // exist in $form_state['values'].
       $selected_weights = $form_state['input']['select_weight'];
@@ -274,13 +274,13 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
       '#type' => 'textarea',
       '#title' => t('Facet Query Filter'),
       '#size' => 60,
-      '#description' => t('Facet Query Filter'),
+      '#description' => t("Write a custom facet query, for information on available tags see:") . l(t('Solr Luke Schema.'), "{$GLOBALS['base_url']}:8080/solr/admin/luke"),
       '#attributes' => array('class' => array('new-facet-filter')),
     );
     $form['facet']['fieldset']['facet_weight'] = array(
       '#type' => 'select',
       '#title' => t('Facet weight'),
-      '#description' => t('Facet Query Filter'),
+      '#description' => t('Display weight'),
       '#options' => drupal_map_assoc(range(-50, 50)),
       '#default_value' => 0,
       '#attributes' => array('class' => array('new-facet-weight')),
