@@ -148,22 +148,23 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
         $facet_is_valid = TRUE;
 
         if (!empty($facet_filter)) {
+          module_load_include('inc', 'islandora_solr', 'includes/explore');
+
           // Store current messages.
           $old_msg = drupal_get_messages();
 
+          // Clear current error messages.
+          drupal_get_messages('error', TRUE);
+
           // Run a facet query on the supplied filter.
-          module_load_include('inc', 'islandora_solr', 'includes/explore');
           islandora_solr_explore_test_facet_query($facet_filter);
 
-          // Check the get messages for solr index errors to see if the filter
-          // is invalid, if so do not add it and trigger form error.
+          // Clear error messages run facet query and check if there are any
+          // error messages.  If there are error messages assume that the query
+          // failed and set facet to invalid.
           $error_msgs = drupal_get_messages('error');
           if (isset($error_msgs['error'])) {
-            foreach ($error_msgs['error'] as $error_msg) {
-              if (preg_match('/Error searching Solr index/', $error_msg)) {
-                $facet_is_valid = FALSE;
-              }
-            }
+            $facet_is_valid = FALSE;
           }
           // Restore the original messages.
           $_SESSION['messages'] = $old_msg;
@@ -202,7 +203,7 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
           'facet_weight' => array(
             'data' => array(
               '#type' => 'select',
-              '#title' => 'Weight',
+              '#title' => t('Weight'),
               '#options' => drupal_map_assoc(range(-50, 50)),
               '#value' => (isset($row['weight']) ? $row['weight'] : 0),
               '#title_display' => 'invisible',
