@@ -130,6 +130,8 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
     // Check if new display facet is being added to the table.
     if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#id'] == 'facet-filter-add-more') {
       $duplicate_label = FALSE;
+      $duplicate_filter = FALSE;
+      $duplicate = FALSE;
       $facet_label = $form_state['values']['label'];
       $facet_filter = $form_state['values']['filter'];
       $facet_weight = $form_state['values']['facet_weight'];
@@ -149,12 +151,22 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
             $duplicate_label = TRUE;
             break;
           }
+          elseif ($row['filter'] == $facet_filter) {
+            // Facet filter exists return form error.
+            $duplicate_filter = TRUE;
+            break;
+          }
         }
         if ($duplicate_label) {
           form_set_error('Label', t('Display Label must be unique.'));
+          $duplicate = TRUE;
+        }
+        elseif ($duplicate_filter) {
+          form_set_error('Filter', t('Facet Filter must be unique.'));
+          $duplicate = TRUE;
         }
       }
-      if (!empty($facet_label) && !empty($facet_filter) && !$duplicate_label) {
+      if (!empty($facet_label) && !empty($facet_filter) && !$duplicate) {
         // Before it's added try to run the facet query and see if it's valid.
         $facet_is_valid = TRUE;
 
