@@ -103,16 +103,14 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
     // Check if remove was clicked and removed the label and filter from the
     // values and the table.
     if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#value'] == t('Remove selected')) {
-      foreach ($form_state['values']['table'] as $row) {
+      foreach ($form_state['values']['table'] as $key => $row) {
         if (!empty($row)) {
           // Get selected row index.
-          $row_index = str_replace("facet-row-", "", $row);
+          $row_index = str_replace("facet-row-", "", $key);
           // Unset the index to keep the other keys the same.
           unset($expore_config[$row_index]);
         }
       }
-      // Reindex array to remove empty unused indexes and keep the array clean.
-      $expore_config = array_values($expore_config);
       $form_state['islandora_solr_facet_filters'] = $expore_config;
     }
 
@@ -131,6 +129,7 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
 
     // Check if new display facet is being added to the table.
     if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#id'] == 'facet-filter-add-more') {
+      $duplicate_label = FALSE;
       $facet_label = $form_state['values']['label'];
       $facet_filter = $form_state['values']['filter'];
       $facet_weight = $form_state['values']['facet_weight'];
@@ -143,7 +142,19 @@ function islandora_solr_form_BLOCK_ADMIN_CONFIGURE_alter(&$form, &$form_state) {
         form_set_error('Label', t('Display Label is required to add a display facet.'));
       }
 
-      if (!empty($facet_label) && !empty($facet_filter)) {
+      if (!empty($facet_label) && !empty($expore_config)) {
+        foreach ($expore_config as $row) {
+          if ($row['label'] == $facet_label) {
+            // Label exists return form error.
+            $duplicate_label = TRUE;
+            break;
+          }
+        }
+        if ($duplicate_label) {
+          form_set_error('Label', t('Display Label must be unique.'));
+        }
+      }
+      if (!empty($facet_label) && !empty($facet_filter) && !$duplicate_label) {
         // Before it's added try to run the facet query and see if it's valid.
         $facet_is_valid = TRUE;
 
