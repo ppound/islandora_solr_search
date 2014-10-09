@@ -31,10 +31,10 @@ function islandora_solr_explore_generate_links() {
     foreach ($expore_config as $index => $option) {
       $url = htmlspecialchars(urlencode($option['filter']));
       $links[] = l(
-        htmlentities($option['label'] . ' (' . $qp->islandoraSolrResult['facet_counts']['facet_queries'][$option['filter']] . ')'),
+        htmlentities($option['label']),
         "islandora/search/$url",
         array()
-      );
+      ) . '<span>(' . htmlentities($qp->islandoraSolrResult['facet_counts']['facet_queries'][$option['filter']]) . ')</span>';
     }
   }
 
