@@ -118,14 +118,14 @@ class IslandoraSolrQueryProcessor {
 
     // XXX: Fix the query as some characters will break the search : and / are
     // examples.
-    $this->solrQuery = urldecode(islandora_solr_restore_slashes($query));
+    $this->solrQuery = islandora_solr_restore_slashes(urldecode($query));
 
     // If the query is empty.
     if (empty($this->solrQuery) || in_array($this->solrQuery, $this->differentKindsOfNothing)) {
       // So we can allow empty queries to dismax.
       $this->solrQuery = ' ';
       // Set base query.
-      $this->internalSolrQuery = variable_get('islandora_solr_base_query', 'timestamp:[* TO NOW]');
+      $this->internalSolrQuery = variable_get('islandora_solr_base_query', '*:*');
 
       // We must also undo dismax if it has been set.
       $this->solrDefType = NULL;
@@ -134,14 +134,24 @@ class IslandoraSolrQueryProcessor {
 
     // Set sort.
     if (isset($this->internalSolrParams['sort'])) {
-      $sort_explode = explode(' ', $this->internalSolrParams['sort']);
-      // Check if an order is given and if the order value is 'asc' or 'desc'.
-      if (isset($sort_explode[1]) && ($sort_explode[1] == 'asc' || $sort_explode[1] == 'desc')) {
+      // If multiple sorts are being passed they are expected to already be
+      // an array with the values containing "thefield thesortorder".
+      if (is_array($this->internalSolrParams['sort'])) {
         $this->solrParams['sort'] = $this->internalSolrParams['sort'];
       }
       else {
-        // Use ascending.
-        $this->solrParams['sort'] = $sort_explode[0] . ' asc';
+        $sort_explode = preg_split(
+          ISLANDORA_SOLR_QUERY_SPLIT_REGEX,
+          $this->internalSolrParams['sort']
+        );
+        // Check if an order is given and if the order value is 'asc' or 'desc'.
+        if (isset($sort_explode[1]) && ($sort_explode[1] == 'asc' || $sort_explode[1] == 'desc')) {
+          $this->solrParams['sort'] = $this->internalSolrParams['sort'];
+        }
+        else {
+          // Use ascending.
+          $this->solrParams['sort'] = $sort_explode[0] . ' asc';
+        }
       }
     }
     else {
@@ -282,6 +292,11 @@ class IslandoraSolrQueryProcessor {
     // Invoke a hook for third-party modules to alter the parameters.
     // The hook implementation needs to specify that it takes a reference.
     module_invoke_all('islandora_solr_query', $this);
+    drupal_alter('islandora_solr_query', $this);
+
+    // Reset solrStart incase the number of results (ie. $this->solrLimit) is
+    // modified.
+    $this->solrStart = max(0, $start_page) * $this->solrLimit;
   }
 
   /**
@@ -337,11 +352,7 @@ class IslandoraSolrQueryProcessor {
           if (isset($object_result[$datastream_field])) {
             $object_results[$object_index]['datastreams'] = $object_result[$datastream_field];
           }
-          else {
-            watchdog('islandora_solr', 'The datastream Solr field is missing for @pid.', array(
-              '@pid' => $pid,
-            ));
-          }
+
           if (isset($object_result[$object_label])) {
             $object_label_value = $object_result[$object_label];
             $object_results[$object_index]['object_label'] = is_array($object_label_value) ? implode(", ", $object_label_value) : $object_label_value;
@@ -363,12 +374,7 @@ class IslandoraSolrQueryProcessor {
           // Hook to alter based on content model.
           module_load_include('inc', 'islandora', 'includes/utilities');
           foreach ($object_results as $object_index => $object_result) {
-            if (!isset($object_result['content_models'])) {
-              watchdog('islandora_solr', 'The content model Solr field is missing for @pid.', array(
-                '@pid' => $pid,
-              ));
-            }
-            else {
+            if (isset($object_result['content_models'])) {
               foreach ($object_result['content_models'] as $content_model_uri) {
                 // Regex out the info:fedora/ from the content model.
                 $cmodel_name = preg_replace('/info\:fedora\//', '', $content_model_uri, 1);

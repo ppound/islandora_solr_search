@@ -99,6 +99,20 @@ function hook_islandora_solr_query($islandora_solr_query) {
 }
 
 /**
+ * Alter which is called directly after hook_islandora_solr_query().
+ *
+ * @param IslandoraSolrQueryProcessor $islandora_solr_query
+ *   The IslandoraSolrQueryProcessor object which includes the current query
+ *   settings but at the end of IslandoraSolrQuery::buildQuery().
+ *
+ * @see hook_islandora_solr_query()
+ * @see IslandoraSolrQueryProcessor::buildQuery()
+ */
+function hook_islandora_solr_query_alter($islandora_solr_query) {
+
+}
+
+/**
  * Hook to collect data to populate block Islandora Solr blocks.
  *
  * Note: it is valid to specify *either* a class and method *or* a form. The
@@ -130,22 +144,22 @@ function hook_islandora_solr_query_blocks() {
 /**
  * Implements hook_CMODEL_PID_islandora_solr_object_result_alter().
  */
-function hook_islandora_pageCModel_islandora_solr_object_result_alter(&$search_results, $query_processor) {
-  $search_results['object_url_params']['terms'] = $query_processor->solrQuery;
+function hook_islandora_pageCModel_islandora_solr_object_result_alter(&$search_result, $query_processor) {
+  $search_result['object_url_params']['terms'] = $query_processor->solrQuery;
 }
 
 /**
  * Implements hook_islandora_solr_results_alter().
  */
 function hook_islandora_solr_results_alter(&$search_results, $query_processor) {
-  $search_results['object_url_params']['terms'] = $query_processor->solrQuery;
+  $search_results[0]['object_url_params']['terms'] = $query_processor->solrQuery;
 }
 
 /**
  * Implements hook_islandora_solr_object_result_alter().
  */
-function hook_islandora_solr_object_result_alter(&$search_results, $query_processor) {
-  $search_results[0]['object_url_params']['terms'] = $query_processor->solrQuery;
+function hook_islandora_solr_object_result_alter(&$search_result, $query_processor) {
+  $search_result['object_url_params']['terms'] = $query_processor->solrQuery;
 }
 
 /**

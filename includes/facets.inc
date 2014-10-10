@@ -34,7 +34,7 @@ function islandora_solr_date_filter_form($form, &$form_state, $elements) {
       if (strpos($filter, $facet_field) === 0) {
         $filter_count++;
         // Split the filter into field and value.
-        $filter_split = explode(':', $filter, 2);
+        $filter_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, $filter, 2);
         // Trim brackets.
         $filter_split[1] = trim($filter_split[1], "\"");
         // Split range filter string to return formatted date values.
@@ -184,7 +184,7 @@ function islandora_solr_date_filter_form_submit($form, &$form_state) {
 
   $form_state['rebuild'] = TRUE;
   $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
-  $path = ISLANDORA_SOLR_SEARCH_PATH . '/' . islandora_solr_replace_slashes($_islandora_solr_queryclass->solrQuery);
+  $path = current_path();
   $facet_field = $form_state['values']['date_filter_facet_field'];
   $form_key = $form_state['triggering_element']['#form_key'];
 
@@ -330,7 +330,7 @@ function islandora_solr_range_slider_form_submit($form, &$form_state) {
   // Set variables.
   global $_islandora_solr_queryclass;
   $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
-  $path = ISLANDORA_SOLR_SEARCH_PATH . '/' . islandora_solr_replace_slashes($_islandora_solr_queryclass->solrQuery);
+  $path = current_path();
   $form_key = $form_state['triggering_element']['#form_key'];
 
   $term = $form_state['values']['range_slider_term'];

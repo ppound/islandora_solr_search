@@ -68,11 +68,10 @@ class IslandoraSolrResults {
     // Pager.
     islandora_solr_pager_init($elements['solr_total'], $islandora_solr_query->solrLimit);
     $elements['solr_pager'] = theme('pager', array(
-      NULL,
-      $islandora_solr_query->solrLimit,
-      0,
-      NULL,
-      5,
+      'tags' => NULL,
+      'element' => 0,
+      'parameters' => NULL,
+      'quantity' => 5,
     ));
 
     // Debug (will be removed).
@@ -112,7 +111,7 @@ class IslandoraSolrResults {
     $secondary_display_profiles = module_invoke_all('islandora_solr_secondary_display');
 
     // $_GET['q'] didn't seem to work here.
-    $path = ISLANDORA_SOLR_SEARCH_PATH . '/' . islandora_solr_replace_slashes($islandora_solr_query->solrQuery);
+    $path = current_path();
 
     // Parameters set in URL.
     $params = $islandora_solr_query->internalSolrParams;
@@ -192,7 +191,7 @@ class IslandoraSolrResults {
    */
   public function currentQuery($islandora_solr_query) {
     $output = '';
-    $path = ISLANDORA_SOLR_SEARCH_PATH . '/' . islandora_solr_replace_slashes($islandora_solr_query->solrQuery);
+    $path = current_path();
 
     $format = variable_get('islandora_solr_facet_date_format', 'Y');
 
@@ -301,7 +300,7 @@ class IslandoraSolrResults {
    */
   public function setBreadcrumbs($islandora_solr_query) {
     // $_GET['q'] didn't seem to work here.
-    $path = ISLANDORA_SOLR_SEARCH_PATH . '/' . islandora_solr_replace_slashes($islandora_solr_query->solrQuery);
+    $path = current_path();
     // Get date format.
     $format = variable_get('islandora_solr_facet_date_format', 'Y');
 
@@ -411,13 +410,13 @@ class IslandoraSolrResults {
       $attr_x['href'] = url($path_x, array('query' => $query_x));
 
       // Remove solr fields from breadcrumb value.
-      $query_explode = explode(' ', $query_value);
+      $query_explode = preg_split(ISLANDORA_SOLR_QUERY_SPLIT_REGEX, $query_value);
       $query_implode = array();
       foreach ($query_explode as $value) {
         // Check for first colon to split the string.
         if (strpos($value, ':') != FALSE) {
           // Split the filter into field and value.
-          $value_split = explode(':', $value, 2);
+          $value_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, $value, 2);
           // Trim whitespace.
           $value_split[1] = trim($value_split[1]);
           // Trim brackets.
@@ -466,11 +465,11 @@ class IslandoraSolrResults {
     // Check if there are operators in the filter.
     $fq_split = preg_split('/ (OR|AND) /', $filter);
     if (count($fq_split) > 1) {
-      $operator_split = explode(' ', $filter);
+      $operator_split = preg_split(ISLANDORA_SOLR_QUERY_SPLIT_REGEX, $filter);
       $operator_split = array_diff($operator_split, $fq_split);
       $out_array = array();
       foreach ($fq_split as $fil) {
-        $fil_split = explode(':', $fil, 2);
+        $fil_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, $fil, 2);
         $out_str = str_replace(array('"', 'info:fedora/'), '', $fil_split[1]);
         $out_array[] = $out_str;
       }
@@ -485,7 +484,7 @@ class IslandoraSolrResults {
     }
     else {
       // Split the filter into field and value.
-      $filter_split = explode(':', $filter, 2);
+      $filter_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, $filter, 2);
       // Trim brackets.
       $filter_split[1] = trim($filter_split[1], "\"");
       // If value is date.
@@ -649,8 +648,8 @@ class IslandoraSolrFacets {
    */
   public static function init($islandora_solr_query) {
     self::$islandoraSolrQuery = $islandora_solr_query;
-    self::$facet_fields = $islandora_solr_query->islandoraSolrResult['facet_counts']['facet_fields'];
-    self::$facet_dates = $islandora_solr_query->islandoraSolrResult['facet_counts']['facet_dates'];
+    self::$facet_fields = isset($islandora_solr_query->islandoraSolrResult) ? $islandora_solr_query->islandoraSolrResult['facet_counts']['facet_fields'] : array();
+    self::$facet_dates = isset($islandora_solr_query->islandoraSolrResult) ? $islandora_solr_query->islandoraSolrResult['facet_counts']['facet_dates'] : array();
     // Not in place yet.
     // XXX: isset() checking, as older Solrs (before 3.1) won't return a value.
     self::$facet_ranges = isset($islandora_solr_query->islandoraSolrResult['facet_counts']['facet_ranges']) ?
@@ -844,10 +843,12 @@ class IslandoraSolrFacets {
     $results = $this->results;
     $facet_field = $this->facet_field;
     $facet_results = array();
+    module_load_include('inc', 'islandora_solr', 'includes/utilities');
     foreach ($results as $bucket => $count) {
       $facet_results[] = array(
         'count' => $count,
-        'filter' => $facet_field . ':"' . $bucket . '"',
+        'filter' => islandora_solr_lesser_escape($facet_field) . ':"' .
+        islandora_solr_lesser_escape($bucket) . '"',
         'bucket' => $bucket,
       );
     }
@@ -914,7 +915,7 @@ class IslandoraSolrFacets {
       }
       // Current path including query, for example islandora/solr/query.
       // $_GET['q'] didn't seem to work here.
-      $path = ISLANDORA_SOLR_SEARCH_PATH . '/' . islandora_solr_replace_slashes($islandora_solr_query->solrQuery);
+      $path = current_path();
       // Parameters set in URL.
       $params = $islandora_solr_query->internalSolrParams;
       // Set filter key if there are no filters included.
@@ -1244,7 +1245,7 @@ class IslandoraSolrFacets {
           continue;
         }
         // Split the filter into field and value.
-        $filter_split = explode(':', $filter, 2);
+        $filter_split = preg_split(ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX, $filter, 2);
         // Trim brackets.
         $filter_split[1] = trim($filter_split[1], "\"");
         // Split range filter string to return formatted date values.
@@ -1398,8 +1399,6 @@ class IslandoraSolrFacets {
     $min_max_query->executeQuery();
     // Solr results.
     $results = $min_max_query->islandoraSolrResult;
-    $response_arrayonse = $results['response'];
-
-    return $response_array['response']['objects'][0]['solr_doc'][$field];
+    return $results['response']['objects'][0]['solr_doc'][$field];
   }
 }

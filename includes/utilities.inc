@@ -118,19 +118,17 @@ function islandora_solr_csv_explode($delim = ',', $str = '', $enclose = '"', $pr
 }
 
 /**
- * Escape a string for inclusion in a query.
+ * Escape a string for inclusion in a query field or value.
  *
- * Copied from Apache_Solr_Service and added space as a value to escape.
+ * Copied from Apache_Solr_Service.
  *
- * List of characters taken from
- * @link http://lucene.apache.org/java/docs/queryparsersyntax.html#Escaping%20Special%20Characters Lucene documentation. @endlink
- *
- * Divergences from Apache_Solr_Service:
- * - remove '?' and whitespace (Zac):
+ * Divergences from Apache_Solr_Service::escape():
+ * - removed '?':
  *   - '?' is useful.
- *   - Escaping whitespace is unnecessary.
- * - remove '*' (Alan):
+ * - removed '*':
  *   - Allows wildcard searches.
+ * - added space:
+ *   - Needed for spaces in fields.
  *
  * @param string $value
  *   A string to escape.
@@ -139,7 +137,7 @@ function islandora_solr_csv_explode($delim = ',', $str = '', $enclose = '"', $pr
  *   The escaped string.
  */
 function islandora_solr_lesser_escape($value) {
-  $pattern = '/(\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^|~|\?|:|\\\)/';
+  $pattern = '/(\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^| |~|\?|:|\\\)/';
   $replace = '\\\$1';
 
   return preg_replace($pattern, $replace, $value);
@@ -258,6 +256,7 @@ function islandora_solr_prepare_solr_results($solr_results) {
   $highlighting = isset($solr_results['highlighting']) ? $solr_results['highlighting'] : array();
   $fields_all = islandora_solr_get_fields('result_fields', FALSE);
   $link_to_object = islandora_solr_get_link_to_object_fields();
+  $link_to_search = islandora_solr_get_link_to_search_fields();
   $date_format = islandora_solr_get_date_format_fields();
 
   // Loop over object results.
@@ -276,24 +275,37 @@ function islandora_solr_prepare_solr_results($solr_results) {
       $options['fragment'] = $object_result['object_url_fragment'];
     }
 
-    foreach ($solr_doc as $field => $value) {
+    foreach ($solr_doc as $field => $original_value) {
+      $value = (array) $original_value;
       // Date formatting.
       if (isset($date_format[$field])) {
-        $value = format_date(strtotime($value), 'custom', $date_format[$field], 'UTC');
+        $map_date_format = function ($value) use ($date_format, $field) {
+          return format_date(strtotime($value), 'custom', $date_format[$field], 'UTC');
+        };
+        $value = array_map($map_date_format, $value);
       }
       // Only apply highlighting when the date isn't formatted.
-      else {
-        // Check highlighting.
-        if (isset($highlighting[$pid][$field])) {
-          $value = $highlighting[$pid][$field];
-        }
-        else {
-          $value = $solr_doc[$field];
-        }
+      elseif (isset($highlighting[$pid][$field])) {
+        $value = $highlighting[$pid][$field];
       }
+
+      // Add link to search.
+      if (in_array($field, $link_to_search)) {
+        $map_to_link = function ($original_value, $formatted_value) use ($field) {
+          $solr_query = format_string('!field:"!value"', array(
+            '!field' => $field,
+            '!value' => islandora_solr_lesser_escape($original_value),
+          ));
+          return l($formatted_value, "islandora/search/$solr_query", array(
+            'html' => TRUE,
+          ));
+        };
+        $value = array_map($map_to_link, (array) $original_value, (array) $value);
+      }
+
       // Implode.
       $value = is_array($value) ? implode(", ", $value) : $value;
-      // Add link.
+      // Add link to object.
       if (in_array($field, $link_to_object)) {
         $value = l($value, $object_result['object_url'], $options);
       }
@@ -304,109 +316,3 @@ function islandora_solr_prepare_solr_results($solr_results) {
   }
   return $solr_results;
 }
-
-/**
- * @defgroup islandora_solr_deprecated Deprecated function signatures.
- * @{
- * A number of function signatures which are not prefixed with our module name.
- *
- * Supporting them with a warning for now, just in case.
- */
-
-// @codingStandardsIgnoreStart
-
-/**
- * Old function signature.
- *
- * @deprecated
- *   Use islandora_solr_build_substitution_list().
- * @see islandora_solr_build_substitution_list()
- */
-function islandora_build_substitution_list($value) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_build_substitution_list().'));
-  trigger_error(filter_xss($message), E_USER_DEPRECATED);
-
-  return islandora_solr_build_substitution_list($value);
-}
-
-/**
- * Old function signature.
- *
- * @deprecated
- *   Use islandora_solr_escape().
- * @see islandora_solr_escape()
- */
-function solr_escape($facets) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_escape().'));
-  trigger_error(filter_xss($message), E_USER_DEPRECATED);
-
-  return islandora_solr_escape($facets);
-}
-
-/**
- * Old function signature.
- *
- * @deprecated
- *   Use islandora_solr_lesser_escape().
- * @see islandora_solr_lesser_escape()
- */
-function lesser_escape($value) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_lesser_escape().'));
-  trigger_error(filter_xss($message), E_USER_DEPRECATED);
-
-  return islandora_solr_lesser_escape($value);
-}
-
-/**
- * Old function signature.
- *
- * @deprecated
- *   Use islandora_solr_csv_explode().
- * @see islandora_solr_csv_explode()
- */
-function csv_explode($value) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_csv_explode().'));
-  trigger_error(filter_xss($message), E_USER_DEPRECATED);
-
-  return islandora_solr_csv_explode($value);
-}
-
-/**
- * Old function signature.
- *
- * @deprecated
- *   Use islandora_solr_restore_slashes().
- * @see islandora_solr_restore_slashes()
- */
-function restore_slashes($value) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_restore_slashes().'));
-  trigger_error(filter_xss($message), E_USER_DEPRECATED);
-
-  return islandora_solr_restore_slashes($value);
-}
-
-/**
- * Old function signature.
- *
- * @deprecated
- *   Use islandora_solr_replace_slashes().
- * @see islandora_solr_replace_slashes()
- */
-function replace_slashes($value) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  $message = islandora_deprecated('7.x-1.2', t('Refactor to use islandora_solr_replace_slashes().'));
-  trigger_error(filter_xss($message), E_USER_DEPRECATED);
-
-  return islandora_solr_replace_slashes($value);
-}
-
-// @codingStandardsIgnoreEnd
-
-/**
- * @} End of "defgroup islandora_solr_deprecated".
- */

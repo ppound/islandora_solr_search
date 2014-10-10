@@ -94,7 +94,7 @@ function _islandora_solr_filter_fields($records = array()) {
   $filtered_records = array();
   foreach ($records as $key => $record) {
     // If field settings are set, check permissions.
-    if (isset($record['solr_field_settings']) && !empty($record['solr_field_settings'])) {
+    if (isset($record['solr_field_settings']) && !empty($record['solr_field_settings']) && $record['solr_field_settings']['permissions']) {
       // Get field permissions.
       $field_roles = $record['solr_field_settings']['permissions'];
       // Check field permissions agains user roles.
@@ -164,6 +164,20 @@ function islandora_solr_get_link_to_object_fields() {
     }
   }
   return $link_to_object_fields;
+}
+
+/**
+ * Return display fields with 'link to search' enabled.
+ */
+function islandora_solr_get_link_to_search_fields() {
+  $records = islandora_solr_get_fields('result_fields', TRUE, FALSE);
+  $link_to_search_fields = array();
+  foreach ($records as $key => $value) {
+    if (isset($value['solr_field_settings']['link_to_search']) && $value['solr_field_settings']['link_to_search'] == 1) {
+      $link_to_search_fields[] = $value['solr_field'];
+    }
+  }
+  return $link_to_search_fields;
 }
 
 /**
