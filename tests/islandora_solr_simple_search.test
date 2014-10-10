@@ -38,14 +38,7 @@ class IslandoraSolrSimpleSearchTestCase extends IslandoraWebTestCase {
   public function testSolrSimpleSearch() {
 
     // Is Solr even available?
-    if (!islandora_solr_ping($this->solr_url)) {
-      $this->fail(t("Unable to connect to Solr server at %solr_url", array('%solr_url' => $this->solr_url)), 'Islandora');
-      return;
-    }
-    else {
-      $this->pass(t('Connected to Solr at %solr_url successfully.', array('%solr_url' => $this->solr_url)), 'Islandora');
-    }
-
+    $this->assertTrue(islandora_solr_ping($this->solr_url), t('Connected to Solr at %solr_url successfully.', array('%solr_url' => $this->solr_url)), 'Islandora');
     $user = $this->drupalCreateUser(array_keys(module_invoke_all('permission')));
     $this->drupalLogin($user);
 
