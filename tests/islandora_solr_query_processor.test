@@ -58,12 +58,13 @@ class IslandoraSolrQueryProcessorTestCase extends IslandoraWebTestCase {
     );
     $this->ingestConstructedObject($object_properties);
     $ingest_time = microtime(TRUE);
+    sleep(5);
 
     // And now to hammer Solr with the query processor until we find something!
     // If it takes more than 10000 passes, well ... I've seen it take up to 600
     // before it gets indexed. I mean, Solr is bad sometimes, but not THAT bad.
     $i = 0;
-    while ($i <= 10000) {
+    while ($i <= 10) {
       $query_processor->executeQuery();
       $i++;
       if (isset($query_processor->islandoraSolrResult['response']['objects'][0]['solr_doc'])) {
@@ -75,31 +76,43 @@ class IslandoraSolrQueryProcessorTestCase extends IslandoraWebTestCase {
           '%i' => $i,
           '%indexing_time' => $indexing_time,
         )), 'Islandora');
-        $i = 10001;
+        break;
       }
-      elseif ($i == 10000) {
+      elseif ($i == 10) {
         $completion_time = microtime(TRUE);
         $indexing_time = round($completion_time - $ingest_time, 3);
-        $this->fail(t("Solr doc for object %object_label (PID: %object_pid) not found in the index despite making 10000 passes (total query time: %indexing_time seconds).", array(
+        $this->fail(t("Solr doc for object %object_label (PID: %object_pid) not found in the index despite making %i passes (total query time: %indexing_time seconds).", array(
           '%object_label' => $object_label,
           '%object_pid' => $object_pid,
+          '%i' => $i,
           '%indexing_time' => $indexing_time,
         )), 'Islandora');
+        break;
       }
+      sleep(1);
     }
 
     // And is it gone?
     $this->deleteObject($object_pid);
-    while ($i <= 10000) {
+    $i = 0;
+    while ($i <= 10) {
       $query_processor->executeQuery();
       $i++;
       if (!isset($query_processor->islandoraSolrResult['response']['objects'][0]['solr_doc'])) {
-        $this->pass(t("After removing object %object_pid, its entry was no longer found in the Solr index after 10,000 passes.", array('%object_pid' => $object_pid)), 'Islandora');
-        $i = 10001;
+        $this->pass(t("After removing object %object_pid, its entry was no longer found in the Solr index after %i passes.", array(
+          '%object_pid' => $object_pid,
+          '%i' => $i,
+        )), 'Islandora');
+        break;
       }
-      elseif ($i == 10000) {
-        $this->fail("Object %object_pid persists in the Solr index despite 10,000 passes.", array('%object_pid' => $object_pid), 'Islandora');
+      elseif ($i == 10) {
+        $this->fail(t("Object %object_pid persists in the Solr index despite %i passes.", array(
+          '%object_pid' => $object_pid,
+          '%i' => $i,
+        )), 'Islandora');
+        break;
       }
+      sleep(1);
     }
   }
 }

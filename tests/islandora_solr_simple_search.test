@@ -72,6 +72,7 @@ class IslandoraSolrSimpleSearchTestCase extends IslandoraWebTestCase {
       ),
     );
     $this->ingestConstructedObject($object_properties, $datastreams);
+    sleep(5);
 
     // Alrightey, now let's hammer the interface looking for $new_text!
     $i = 0;
@@ -82,17 +83,40 @@ class IslandoraSolrSimpleSearchTestCase extends IslandoraWebTestCase {
       $i++;
       if (!strpos($this->plainTextContent, "Sorry, but your search returned no results.")) {
         $this->pass(t("Randomly generated MODS document title of %new_text returned a result within Islandora search after %i pass(es).", array('%new_text' => $new_text, '%i' => $i)), 'Islandora');
-        $i = 11;
+        break;
       }
       elseif ($i == 10) {
-        $this->fail(t("Randomly generated MODS document title of %new_text returned no results despite making 10 passes in Islandora search.", array('%new_text' => $new_text)), 'Islandora');
+        $this->fail(t("Randomly generated MODS document title of %new_text returned no results despite making %i passes in Islandora search.", array(
+          '%new_text' => $new_text,
+          '%i' => $i,
+        )), 'Islandora');
+        break;
       }
+      sleep(1);
     }
 
     // And is it gone?
     $this->deleteObject($object_pid);
-    sleep(10);
-    $this->drupalGet("islandora/search/" . $new_text, array('query' => $query));
-    $this->assertText("Sorry, but your search returned no results.", t("After removing object %object_pid, its entry was no longer found in the Solr index.", array('%object_pid' => $object_pid)), 'Islandora');
+    $i = 0;
+    while ($i <= 10) {
+      $this->drupalGet("islandora/search/" . $new_text, array('query' => $query));
+      $this->plainTextContent = filter_xss($this->drupalGetContent(), array());
+      $i++;
+      if (strpos($this->plainTextContent, "Sorry, but your search returned no results.")) {
+        $this->pass(t("After removing object %object_pid, its entry was no longer found in the Solr index after %i passes.", array(
+          '%object_pid' => $object_pid,
+          '%i' => $i,
+        )), 'Islandora');
+        break;
+      }
+      elseif ($i == 10) {
+        $this->fail(t("Despite removing object %object_pid, its entry was still found in the Solr index after %i passes.", array(
+          '%object_pid' => $object_pid,
+          '%i' => $i,
+        )), 'Islandora');
+        break;
+      }
+      sleep(1);
+    }
   }
 }
