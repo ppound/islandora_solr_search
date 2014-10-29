@@ -443,7 +443,7 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
   }
 
   // Navigate to results page.
-  $form_state['redirect'] = ISLANDORA_SOLR_SEARCH_PATH . "/$query";
+  $form_state['redirect'] = array(ISLANDORA_SOLR_SEARCH_PATH . "/$query", array());
 }
 
 /**
