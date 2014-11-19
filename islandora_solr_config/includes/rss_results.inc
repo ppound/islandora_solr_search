@@ -58,8 +58,14 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
       // Hook alter to change the rssItem before formatting.
       drupal_alter('islandora_solr_search_rss_item', $item, $doc);
 
-      // Render rss item and add to items string.
-      $items .= format_rss_item($item['title'], $item['link'], $item['description'], $item['items']);
+      // Render rss item.
+      $rendered_item = format_rss_item($item['title'], $item['link'], $item['description'], $item['items']);
+
+      // ... allow it to be altered...
+      drupal_alter('islandora_solr_config_rss_item_post_render', $rendered_item, $doc);
+
+      // ... and add to items string.
+      $items .= "$rendered_item\n";
     }
 
     // Query search terms:
@@ -67,6 +73,8 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
 
     // Get the variables for the <channel> element.
     $channel = $this->rssChannel($query);
+    $rss_attributes = array('version' => '2.0');
+    drupal_alter('islandora_solr_config_rss_root_element_attributes', $rss_attributes, $channel, $items);
 
     // Give the results clean variable names.
     $title = $channel['title'];
@@ -76,7 +84,7 @@ class IslandoraSolrResultsRSS extends IslandoraSolrResults {
     $args = $channel['args'];
 
     $output = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    $output .= "<rss version=\"2.0\">\n";
+    $output .= '<rss' . drupal_attributes($rss_attributes) . ">\n";
     $output .= format_rss_channel($title, $url, $description, $items, $langcode, $args);
     $output .= "</rss>\n";
 
