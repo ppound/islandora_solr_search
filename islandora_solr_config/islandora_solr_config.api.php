@@ -41,6 +41,6 @@ function hook_islandora_solr_config_rss_item_post_render_alter(&$rendered_item, 
 function hook_islandora_solr_config_rss_root_element_attributes_alter(&$root_attributes, &$channel_info, &$items) {
   // Could add namespaces to the root element or mess with the values to output
   // for the channel or all the items... If trying to parse $items, one would
-  // have to treat it as a DocumentFragment, I believe (it's not valid XML on
-  // its own.
+  // have to treat it as a document fragment (its not valid XML on
+  // its own).
 }
