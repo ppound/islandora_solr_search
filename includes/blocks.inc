@@ -905,8 +905,7 @@ function islandora_solr_sort() {
  * according to the current object.
  *
  * @return string
- * The rendered html for the block content.
- *
+ *   The rendered html for the block content.
  */
 function islandora_solr_search_navigation() {
   $return = NULL;
