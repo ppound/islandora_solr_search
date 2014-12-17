@@ -897,7 +897,7 @@ function islandora_solr_sort() {
   return $output;
 }
 
-/*
+/**
  * Search results navigation block.
  *
  * Pull params out of the URL to determine the link to return
@@ -939,7 +939,8 @@ function islandora_solr_search_navigation() {
           $prev_pid = (isset($objects[$current_pid_key - 1]['PID']) ? $objects[$current_pid_key - 1]['PID'] : NULL);
           $next_pid = (isset($objects[$current_pid_key + 1]['PID']) ? $objects[$current_pid_key + 1]['PID'] : NULL);
 
-          // If the previous / next PIDS aren't on the current page, determine the previous/next PID on the previous/next page.
+          // If the previous / next PIDS aren't on the current page,
+          // determine the previous/next PID on the previous/next page.
           $prev_params = $params;
           $next_params = $params;
           if (!$prev_pid && $num_found > $limit && $num_found > 1 && $page) {
@@ -983,7 +984,11 @@ function islandora_solr_search_navigation() {
     if ($next_pid) {
       $next_link = l(t('Next Object'), url("islandora/object/$next_pid", array('query' => array('islandora_solr_search_nav_params' => $next_params), 'absolute' => TRUE)));
     }
-    $return = theme('islandora_solr_search_navigation_block', array('return_link' => $return_link, 'prev_link' => $prev_link, 'next_link' => $next_link));
+    $return = theme('islandora_solr_search_navigation_block', array(
+      'return_link' => $return_link,
+      'prev_link' => $prev_link,
+      'next_link' => $next_link,
+    ));
   }
   return $return;
 }
