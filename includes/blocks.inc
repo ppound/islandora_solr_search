@@ -897,10 +897,19 @@ function islandora_solr_sort() {
   return $output;
 }
 
+/*
+ * Pull params out of the URL to determine the link to return
+ * the original search, and the previous and next object in the search
+ * according to the current object.
+ *
+ * @return html
+ * The rendered html for the block content.
+ *
+ */
 function islandora_solr_search_navigation() {
   $return = NULL;
   $params = drupal_get_query_parameters();
-  if (isset($params['islandora_solr_search_nav_params'])) {
+  if (variable_get('islandora_solr_search_navigation', FALSE) && isset($params['islandora_solr_search_nav_params'])) {
     $prev_pid = NULL;
     $next_pid = NULL;
     $current_pid = (islandora_is_valid_pid(arg(2)) ? arg(2) : NULL);
@@ -921,7 +930,6 @@ function islandora_solr_search_navigation() {
         foreach ($objects as $key => $object) {
           if ($object['PID'] == $current_pid) {
             $current_pid_key = $key;
-            dsm('gg');
             break;
           }
         }
@@ -929,7 +937,7 @@ function islandora_solr_search_navigation() {
           $prev_pid = (isset($objects[$current_pid_key - 1]['PID']) ? $objects[$current_pid_key - 1]['PID'] : NULL);
           $next_pid = (isset($objects[$current_pid_key + 1]['PID']) ? $objects[$current_pid_key + 1]['PID'] : NULL);
 
-          //if the previous and next PIDS aren't on the current page, determine the previous/next PID on the previous/next page.
+          //If the previous / next PIDS aren't on the current page, determine the previous/next PID on the previous/next page.
           $prev_params = $params;
           $next_params = $params;
           if (!$prev_pid && $num_found > $limit && $num_found > 1 && $page) {
@@ -964,7 +972,7 @@ function islandora_solr_search_navigation() {
     $prev_link = NULL;
     $next_link = NULL;
     if (isset($params['solr_path'])) {
-      $return_query = array_merge((isset($params['solr_internal_params']) ? $params['solr_internal_params'] : array())  , array('page' => $params['solr_page']));
+      $return_query = array_merge((isset($params['solr_internal_params']) ? $params['solr_internal_params'] : array()), array('page' => $params['solr_page']));
       $return_link = l(t('Return to search'), url($params['solr_path'], array('query' => $return_query, 'absolute' => TRUE)));
     }
     if ($prev_pid) {
