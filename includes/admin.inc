@@ -373,6 +373,13 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#description' => t('The number of results to show per page.'),
     '#default_value' => variable_get('islandora_solr_num_of_results', '20'),
   );
+  $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_search_navigation'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable search navigation block'),
+    '#size' => 5,
+    '#description' => t('Add navigation params to object links.'),
+    '#default_value' => variable_get('islandora_solr_search_navigation', FALSE),
+  );
 
   // Sort settings.
   $form['islandora_solr_tabs']['sort'] = array(

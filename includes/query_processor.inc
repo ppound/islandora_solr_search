@@ -366,7 +366,26 @@ class IslandoraSolrQueryProcessor {
           else {
             $object_results[$object_index]['thumbnail_url'] = drupal_get_path('module', 'islandora_solr') . '/images/defaultimg.png';
           }
-          $object_results[$object_index]['thumbnail_url_params'] = array();
+
+          if (variable_get('islandora_solr_search_navigation', FALSE)) {
+            $path = current_path();
+
+            $page_params = drupal_get_query_parameters();
+            $url_params = array(
+              'islandora_solr_search_nav_params' => array(
+                'solr_path' => $path,
+                'solr_page' => (isset($page_params['page']) ? $page_params['page'] : 0),
+                'solr_internal_params' => $this->internalSolrParams,
+                'solr_query' => $this->solrQuery,
+
+              ),
+            );
+            $object_results[$object_index]['object_url_params'] = $url_params;
+            $object_results[$object_index]['thumbnail_url_params'] = $url_params;
+          }
+          else {
+            $object_results[$object_index]['thumbnail_url_params'] = array();
+          }
         }
 
         // Allow other parts of code to modify the tailored results.
