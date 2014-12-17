@@ -898,11 +898,13 @@ function islandora_solr_sort() {
 }
 
 /*
+ * Search results navigation block.
+ *
  * Pull params out of the URL to determine the link to return
  * the original search, and the previous and next object in the search
  * according to the current object.
  *
- * @return html
+ * @return string
  * The rendered html for the block content.
  *
  */
@@ -937,7 +939,7 @@ function islandora_solr_search_navigation() {
           $prev_pid = (isset($objects[$current_pid_key - 1]['PID']) ? $objects[$current_pid_key - 1]['PID'] : NULL);
           $next_pid = (isset($objects[$current_pid_key + 1]['PID']) ? $objects[$current_pid_key + 1]['PID'] : NULL);
 
-          //If the previous / next PIDS aren't on the current page, determine the previous/next PID on the previous/next page.
+          // If the previous / next PIDS aren't on the current page, determine the previous/next PID on the previous/next page.
           $prev_params = $params;
           $next_params = $params;
           if (!$prev_pid && $num_found > $limit && $num_found > 1 && $page) {
