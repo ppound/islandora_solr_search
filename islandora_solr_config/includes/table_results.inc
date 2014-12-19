@@ -41,7 +41,9 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
     foreach ($object_results as $key => $object_result) {
       $row = array();
       $doc = $object_result['solr_doc'];
-      $row['#'] = l(($key + 1), $object_result['object_url'], array('query' => $object_result['object_url_params']));
+      if (variable_get('islandora_solr_table_profile_display_row_no', 1) == 1) {
+        $row['#'] = l(($key + 1), $object_result['object_url'], array('query' => $object_result['object_url_params']));
+      }
       foreach ($fields as $field => $field_label) {
         if (isset($doc[$field]['value'])) {
           $value = $doc[$field]['value'];
@@ -58,7 +60,10 @@ class IslandoraSolrResultsTable extends IslandoraSolrResults {
       }
       $rows[] = $row;
     }
-    $header = array('#' => '#');
+    $header = array();
+    if (variable_get('islandora_solr_table_profile_display_row_no', 1) == 1) {
+      $header['#'] = '#';
+    }
     $header += $fields;
 
     // Filter empty columns.
