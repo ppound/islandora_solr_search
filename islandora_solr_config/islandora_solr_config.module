@@ -25,6 +25,7 @@ function islandora_solr_config_islandora_solr_primary_display() {
       'class' => "IslandoraSolrResultsTable",
       'function' => "displayResults",
       'description' => t("Display search results as tabular output"),
+      'configuration' => 'admin/islandora/search/islandora_solr/table_profile',
     ),
   );
 }
@@ -69,6 +70,14 @@ function islandora_solr_config_menu() {
     'access arguments' => array('administer islandora solr'),
     'file' => 'includes/admin.inc',
     'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/islandora/search/islandora_solr/table_profile'] = array(
+    'title' => 'Table Profile Settings',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_solr_config_admin_table_profile_settings'),
+    'access arguments' => array('administer islandora solr'),
+    'file' => 'includes/admin.inc',
   );
   return $items;
 }

@@ -137,3 +137,43 @@ function islandora_solr_config_admin_rss_settings_submit($form, &$form_state) {
     variable_del('islandora_solr_config_rss_channel');
   }
 }
+
+/**
+ * Function to return the table profile admin settings form.
+ */
+function islandora_solr_config_admin_table_profile_settings($form, &$form_state) {
+
+  $form['options']['islandora_solr_table_profile_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('General Table Settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    'islandora_solr_table_profile_display_row_no' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Display Row Numbers?'),
+      '#default_value' => variable_get('islandora_solr_table_profile_display_row_no', 1),
+      '#description' => t('Should row numbers be rendered as a column in the results table?'),
+    ),
+    'islandora_solr_table_profile_table_class' => array(
+      '#type' => 'textfield',
+      '#title' => t('Table Class'),
+      '#default_value' => variable_get('islandora_solr_table_profile_table_class', ''),
+      '#description' => t('A class string to set for the table element, if any.'),
+    ),
+  );
+  $form['buttons']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+/**
+ * Function to submit the admin setting form.
+ */
+function islandora_solr_config_admin_table_profile_settings_submit($form, &$form_state) {
+  variable_set('islandora_solr_table_profile_display_row_no', $form_state['values']['islandora_solr_table_profile_display_row_no']);
+  variable_set('islandora_solr_table_profile_table_class', $form_state['values']['islandora_solr_table_profile_table_class']);
+  drupal_set_message(t('The Solr table profile configuration options have been saved.'));
+}
