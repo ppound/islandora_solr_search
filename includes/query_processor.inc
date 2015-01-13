@@ -339,6 +339,27 @@ class IslandoraSolrQueryProcessor {
       $datastream_field = variable_get('islandora_solr_datastream_id_field', 'fedora_datastreams_ms');
       $object_label = variable_get('islandora_solr_object_label_field', 'fgs_label_s');
       if (!empty($object_results)) {
+        if (variable_get('islandora_solr_search_navigation', FALSE)) {
+          $id = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10);
+          dsm($id, 'id from qp');
+          //$id = sha1(microtime());
+          $page_params = drupal_get_query_parameters();
+          $_SESSION['islandora_solr_search_nav_params'][$id] = array(
+            'path' => current_path(),
+            'query_processor' => $this,
+            //'page' => (isset($page_params['page']) ? $page_params['page'] : 0),
+          );
+
+          $url_params = array(
+            'solr_nav' => array(
+              'id' => $id,
+              'page' => (isset($page_params['page']) ? $page_params['page'] : 0),
+          ));
+        }
+        else {
+          $url_params = array();
+        }
+
         foreach ($object_results as $object_index => $object_result) {
           unset($object_results[$object_index]);
           $object_results[$object_index]['solr_doc'] = $object_result;
@@ -366,26 +387,11 @@ class IslandoraSolrQueryProcessor {
           else {
             $object_results[$object_index]['thumbnail_url'] = drupal_get_path('module', 'islandora_solr') . '/images/defaultimg.png';
           }
-
           if (variable_get('islandora_solr_search_navigation', FALSE)) {
-            $path = current_path();
-
-            $page_params = drupal_get_query_parameters();
-            $url_params = array(
-              'islandora_solr_search_nav_params' => array(
-                'solr_path' => $path,
-                'solr_page' => (isset($page_params['page']) ? $page_params['page'] : 0),
-                'solr_internal_params' => $this->internalSolrParams,
-                'solr_query' => $this->solrQuery,
-
-              ),
-            );
-            $object_results[$object_index]['object_url_params'] = $url_params;
-            $object_results[$object_index]['thumbnail_url_params'] = $url_params;
+            $url_params['solr_nav']['offset'] = $object_index;
           }
-          else {
-            $object_results[$object_index]['thumbnail_url_params'] = array();
-          }
+          $object_results[$object_index]['object_url_params'] = $url_params;
+          $object_results[$object_index]['thumbnail_url_params'] = $url_params;
         }
 
         // Allow other parts of code to modify the tailored results.
