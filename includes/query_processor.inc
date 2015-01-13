@@ -341,13 +341,10 @@ class IslandoraSolrQueryProcessor {
       if (!empty($object_results)) {
         if (variable_get('islandora_solr_search_navigation', FALSE)) {
           $id = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10);
-          dsm($id, 'id from qp');
-          //$id = sha1(microtime());
           $page_params = drupal_get_query_parameters();
           $_SESSION['islandora_solr_search_nav_params'][$id] = array(
             'path' => current_path(),
             'query_processor' => $this,
-            //'page' => (isset($page_params['page']) ? $page_params['page'] : 0),
           );
 
           $url_params = array(
