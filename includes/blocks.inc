@@ -926,7 +926,6 @@ function islandora_solr_search_navigation() {
     $offset = $params['solr_nav']['offset'];
     $page = $params['solr_nav']['page'];
 
-
     $query_processor = $nav_params['query_processor'];
     $limit = $query_processor->solrLimit;
     $query_processor->solrStart = $page * $limit;
@@ -939,7 +938,6 @@ function islandora_solr_search_navigation() {
       $objects = array();
     }
 
-    //prev object
     if ($offset != 0) {
       if (isset($objects[$offset - 1])) {
         $prev_solr_object = $objects[$offset - 1];
@@ -961,7 +959,6 @@ function islandora_solr_search_navigation() {
       }
     }
 
-    //next object
     if (isset($objects[$offset + 1])) {
       $next_solr_object = $objects[$offset + 1];
       $next_offset = $offset + 1;
@@ -985,7 +982,7 @@ function islandora_solr_search_navigation() {
     $prev_link = NULL;
     $next_link = NULL;
     if (isset($nav_params['path'])) {
-      $return_query = array_merge($nav_params['query_processor']->internalSolrParams, array('page' => $page,));
+      $return_query = array_merge($nav_params['query_processor']->internalSolrParams, array('page' => $page));
       $return_link = l(t('Return to search'), url($nav_params['path'], array('query' => $return_query, 'absolute' => TRUE)));
     }
     if ($prev_solr_object) {
@@ -996,7 +993,8 @@ function islandora_solr_search_navigation() {
       $prev_link = l(t('Previous Object'), url($prev_solr_object['object_url'], array(
         'query' => $prev_params,
         'fragment' => (isset($prev_solr_object['object_url_fragment']) ? $prev_solr_object['object_url_fragment'] : ''),
-        'absolute' => TRUE)));
+        'absolute' => TRUE,
+      )));
     }
 
     if ($next_solr_object) {
