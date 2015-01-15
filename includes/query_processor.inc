@@ -351,7 +351,7 @@ class IslandoraSolrQueryProcessor {
             'solr_nav' => array(
               'id' => $id,
               'page' => (isset($page_params['page']) ? $page_params['page'] : 0),
-          ));
+            ));
         }
         else {
           $url_params = array();
