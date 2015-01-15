@@ -1,12 +1,13 @@
 <?php
 /**
  * @file
- * Islandora solr search return url for use on object pages
+ * Islandora solr search navigation block.
  *
  * Variables available:
- * - $islandora_solr_search_return_link: Link to return solr search.
+ * - $return_link: link to reutrn to original search.
+ * - $prev_link: Link to previous object in search result.
+ * - $next_link: link to next object in the search result.
  *
- * @see template_preprocess_islandora_solr_search_return_link()
  */
 ?>
 

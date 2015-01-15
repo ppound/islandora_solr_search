@@ -900,9 +900,11 @@ function islandora_solr_sort() {
 /**
  * Search results navigation block.
  *
- * Pull params out of the URL to determine the link to return
- * the original search, and the previous and next object in the search
- * according to the current object.
+ * Pull params out of the URL to determine search id
+ * and object offset.
+ *
+ * We use offset because the pid of a search result can be altered.
+ * eg: Book pages
  *
  * @return string
  *   The rendered html for the block content.
@@ -929,6 +931,7 @@ function islandora_solr_search_navigation() {
     $query_processor = $nav_params['query_processor'];
     $limit = $query_processor->solrLimit;
     $query_processor->solrStart = $page * $limit;
+    // Get solr objects for current page
     $query_processor->executeQuery();
 
     if (!empty($query_processor->islandoraSolrResult)) {
@@ -938,6 +941,7 @@ function islandora_solr_search_navigation() {
       $objects = array();
     }
 
+    // Try get previous object on the current page.
     if ($offset != 0) {
       if (isset($objects[$offset - 1])) {
         $prev_solr_object = $objects[$offset - 1];
@@ -946,6 +950,8 @@ function islandora_solr_search_navigation() {
       }
     }
 
+    // If previous object can't be found on current page,
+    // go to the previous page and select the last object.
     if (!$prev_solr_object && $page != 0) {
       $query_processor = $nav_params['query_processor'];
       $limit = $query_processor->solrLimit;
@@ -959,12 +965,15 @@ function islandora_solr_search_navigation() {
       }
     }
 
+    // Try get next object on the current page.
     if (isset($objects[$offset + 1])) {
       $next_solr_object = $objects[$offset + 1];
       $next_offset = $offset + 1;
       $next_page = $page;
     }
 
+    // If next object can't be found on current page,
+    // go to the next page and select the first object.
     if (!$next_solr_object) {
       $query_processor = $nav_params['query_processor'];
       $limit = $query_processor->solrLimit;
@@ -981,6 +990,8 @@ function islandora_solr_search_navigation() {
     $return_link = NULL;
     $prev_link = NULL;
     $next_link = NULL;
+    // Get URL details from the prev and next objects
+    // to populate navigation links.
     if (isset($nav_params['path'])) {
       $return_query = array_merge($nav_params['query_processor']->internalSolrParams, array('page' => $page));
       $return_link = l(t('Return to search'), url($nav_params['path'], array('query' => $return_query, 'absolute' => TRUE)));

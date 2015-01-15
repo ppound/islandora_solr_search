@@ -376,7 +376,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
   $form['islandora_solr_tabs']['default_display_settings']['islandora_solr_search_navigation'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable search navigation block'),
-    '#size' => 5,
     '#description' => t('Add navigation params to object links.'),
     '#default_value' => variable_get('islandora_solr_search_navigation', FALSE),
   );

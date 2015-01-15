@@ -340,7 +340,7 @@ class IslandoraSolrQueryProcessor {
       $object_label = variable_get('islandora_solr_object_label_field', 'fgs_label_s');
       if (!empty($object_results)) {
         if (variable_get('islandora_solr_search_navigation', FALSE)) {
-          $id = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 10);
+          $id = drupal_random_bytes(10);
           $page_params = drupal_get_query_parameters();
           $_SESSION['islandora_solr_search_nav_params'][$id] = array(
             'path' => current_path(),
@@ -363,7 +363,6 @@ class IslandoraSolrQueryProcessor {
           $pid = $object_results[$object_index]['solr_doc']['PID'];
           $object_results[$object_index]['PID'] = $pid;
           $object_results[$object_index]['object_url'] = 'islandora/object/' . $object_results[$object_index]['solr_doc']['PID'];
-          $object_results[$object_index]['object_url_params'] = array();
           if (isset($object_result[$content_model_solr_field])) {
             $object_results[$object_index]['content_models'] = $object_result[$content_model_solr_field];
           }
