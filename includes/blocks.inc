@@ -931,7 +931,7 @@ function islandora_solr_search_navigation() {
     $query_processor = $nav_params['query_processor'];
     $limit = $query_processor->solrLimit;
     $query_processor->solrStart = $page * $limit;
-    // Get solr objects for current page
+    // Get solr objects for current page.
     $query_processor->executeQuery();
 
     if (!empty($query_processor->islandoraSolrResult)) {
