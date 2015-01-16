@@ -927,7 +927,6 @@ function islandora_solr_search_navigation() {
     $next_page = NULL;
     $offset = $params['solr_nav']['offset'];
     $page = $params['solr_nav']['page'];
-
     $query_processor = $nav_params['query_processor'];
     $limit = $query_processor->solrLimit;
     $query_processor->solrStart = $page * $limit;
@@ -959,6 +958,7 @@ function islandora_solr_search_navigation() {
       $query_processor->executeQuery();
       if (!empty($query_processor->islandoraSolrResult) && !empty($query_processor->islandoraSolrResult['response']['objects'])) {
         $prev_objects = $query_processor->islandoraSolrResult['response']['objects'];
+        end($prev_objects);
         $prev_offset = key($prev_objects);
         $prev_page = $page - 1;
         $prev_solr_object = $prev_objects[$prev_offset];
