@@ -69,6 +69,14 @@ function islandora_solr_islandora_solr_query_blocks() {
       'function' => 'islandora_solr_explore_generate_links',
       'form' => NULL,
     ),
+    'search_navigation' => array(
+      'name' => t('Islandora search navigation'),
+      'module' => 'islandora_solr',
+      'file' => 'includes/blocks.inc',
+      'class' => NULL,
+      'function' => 'islandora_solr_search_navigation',
+      'form' => NULL,
+    ),
   );
 }
 
@@ -887,4 +895,136 @@ function islandora_solr_sort() {
   }
 
   return $output;
+}
+
+/**
+ * Search results navigation block.
+ *
+ * Pull params out of the URL to determine search id
+ * and object offset.
+ *
+ * We use offset because the pid of a search result can be altered.
+ * eg: Book pages
+ *
+ * @return string
+ *   The rendered html for the block content.
+ */
+function islandora_solr_search_navigation() {
+  $return = NULL;
+  $params = drupal_get_query_parameters();
+  if (variable_get('islandora_solr_search_navigation', FALSE) &&
+    isset($params['solr_nav']['id']) &&
+    isset($params['solr_nav']['page']) &&
+    isset($params['solr_nav']['offset']) &&
+    isset($_SESSION['islandora_solr_search_nav_params'][$params['solr_nav']['id']])) {
+    $nav_params = $_SESSION['islandora_solr_search_nav_params'][$params['solr_nav']['id']];
+
+    $prev_solr_object = NULL;
+    $prev_offset = NULL;
+    $prev_page = NULL;
+    $next_solr_object = NULL;
+    $next_offset = NULL;
+    $next_page = NULL;
+    $offset = $params['solr_nav']['offset'];
+    $page = $params['solr_nav']['page'];
+    $query_processor = $nav_params['query_processor'];
+    $limit = $query_processor->solrLimit;
+    $query_processor->solrStart = $page * $limit;
+    // Get solr objects for current page.
+    $query_processor->executeQuery();
+
+    if (!empty($query_processor->islandoraSolrResult)) {
+      $objects = $query_processor->islandoraSolrResult['response']['objects'];
+    }
+    else {
+      $objects = array();
+    }
+
+    // Try get previous object on the current page.
+    if ($offset != 0) {
+      if (isset($objects[$offset - 1])) {
+        $prev_solr_object = $objects[$offset - 1];
+        $prev_offset = $offset - 1;
+        $prev_page = $page;
+      }
+    }
+
+    // If previous object can't be found on current page,
+    // go to the previous page and select the last object.
+    if (!$prev_solr_object && $page != 0) {
+      $query_processor = $nav_params['query_processor'];
+      $limit = $query_processor->solrLimit;
+      $query_processor->solrStart = ($page - 1) * $limit;
+      $query_processor->executeQuery();
+      if (!empty($query_processor->islandoraSolrResult) && !empty($query_processor->islandoraSolrResult['response']['objects'])) {
+        $prev_objects = $query_processor->islandoraSolrResult['response']['objects'];
+        end($prev_objects);
+        $prev_offset = key($prev_objects);
+        $prev_page = $page - 1;
+        $prev_solr_object = $prev_objects[$prev_offset];
+      }
+    }
+
+    // Try get next object on the current page.
+    if (isset($objects[$offset + 1])) {
+      $next_solr_object = $objects[$offset + 1];
+      $next_offset = $offset + 1;
+      $next_page = $page;
+    }
+
+    // If next object can't be found on current page,
+    // go to the next page and select the first object.
+    if (!$next_solr_object) {
+      $query_processor = $nav_params['query_processor'];
+      $limit = $query_processor->solrLimit;
+      $query_processor->solrStart = ($page + 1) * $limit;
+      $query_processor->executeQuery();
+      if (!empty($query_processor->islandoraSolrResult) && !empty($query_processor->islandoraSolrResult['response']['objects'])) {
+        $next_objects = $query_processor->islandoraSolrResult['response']['objects'];
+        $next_offset = 0;
+        $next_page = $page + 1;
+        $next_solr_object = $next_objects[$next_offset];
+      }
+    }
+
+    $return_link = NULL;
+    $prev_link = NULL;
+    $next_link = NULL;
+    // Get URL details from the prev and next objects
+    // to populate navigation links.
+    if (isset($nav_params['path'])) {
+      $return_query = array_merge($nav_params['query_processor']->internalSolrParams, array('page' => $page));
+      $return_link = l(t('Return to search'), url($nav_params['path'], array('query' => $return_query, 'absolute' => TRUE)));
+    }
+    if ($prev_solr_object) {
+      $prev_params = $prev_solr_object['object_url_params'];
+      $prev_params['solr_nav']['offset'] = $prev_offset;
+      $prev_params['solr_nav']['page'] = $prev_page;
+      $prev_params['solr_nav']['id'] = $params['solr_nav']['id'];
+      $prev_link = l(t('Previous Object'), url($prev_solr_object['object_url'], array(
+        'query' => $prev_params,
+        'fragment' => (isset($prev_solr_object['object_url_fragment']) ? $prev_solr_object['object_url_fragment'] : ''),
+        'absolute' => TRUE,
+      )));
+    }
+
+    if ($next_solr_object) {
+      $next_params = $next_solr_object['object_url_params'];
+      $next_params['solr_nav']['offset'] = $next_offset;
+      $next_params['solr_nav']['page'] = $next_page;
+      $next_params['solr_nav']['id'] = $params['solr_nav']['id'];
+      $next_link = l(t('Next Object'), url($next_solr_object['object_url'], array(
+        'query' => $next_params,
+        'fragment' => (isset($next_solr_object['object_url_fragment']) ? $next_solr_object['object_url_fragment'] : ''),
+        'absolute' => TRUE,
+      )));
+    }
+
+    $return = theme('islandora_solr_search_navigation_block', array(
+      'return_link' => $return_link,
+      'prev_link' => $prev_link,
+      'next_link' => $next_link,
+    ));
+  }
+  return $return;
 }

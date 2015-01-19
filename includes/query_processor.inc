@@ -339,13 +339,30 @@ class IslandoraSolrQueryProcessor {
       $datastream_field = variable_get('islandora_solr_datastream_id_field', 'fedora_datastreams_ms');
       $object_label = variable_get('islandora_solr_object_label_field', 'fgs_label_s');
       if (!empty($object_results)) {
+        if (variable_get('islandora_solr_search_navigation', FALSE)) {
+          $id = drupal_random_bytes(10);
+          $page_params = drupal_get_query_parameters();
+          $_SESSION['islandora_solr_search_nav_params'][$id] = array(
+            'path' => current_path(),
+            'query_processor' => $this,
+          );
+
+          $url_params = array(
+            'solr_nav' => array(
+              'id' => $id,
+              'page' => (isset($page_params['page']) ? $page_params['page'] : 0),
+            ));
+        }
+        else {
+          $url_params = array();
+        }
+
         foreach ($object_results as $object_index => $object_result) {
           unset($object_results[$object_index]);
           $object_results[$object_index]['solr_doc'] = $object_result;
           $pid = $object_results[$object_index]['solr_doc']['PID'];
           $object_results[$object_index]['PID'] = $pid;
           $object_results[$object_index]['object_url'] = 'islandora/object/' . $object_results[$object_index]['solr_doc']['PID'];
-          $object_results[$object_index]['object_url_params'] = array();
           if (isset($object_result[$content_model_solr_field])) {
             $object_results[$object_index]['content_models'] = $object_result[$content_model_solr_field];
           }
@@ -366,7 +383,11 @@ class IslandoraSolrQueryProcessor {
           else {
             $object_results[$object_index]['thumbnail_url'] = drupal_get_path('module', 'islandora_solr') . '/images/defaultimg.png';
           }
-          $object_results[$object_index]['thumbnail_url_params'] = array();
+          if (variable_get('islandora_solr_search_navigation', FALSE)) {
+            $url_params['solr_nav']['offset'] = $object_index;
+          }
+          $object_results[$object_index]['object_url_params'] = $url_params;
+          $object_results[$object_index]['thumbnail_url_params'] = $url_params;
         }
 
         // Allow other parts of code to modify the tailored results.
