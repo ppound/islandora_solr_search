@@ -844,7 +844,6 @@ class IslandoraSolrFacets {
     $facet_field = $this->facet_field;
     $facet_results = array();
     module_load_include('inc', 'islandora_solr', 'includes/utilities');
-    $replace_bucket = (isset($this->settings['pid_object_label']) && $this->settings['pid_object_label'] ? TRUE : FALSE);
     foreach ($results as $bucket => $count) {
       $facet_results[] = array(
         'count' => $count,
