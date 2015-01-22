@@ -922,7 +922,8 @@ class IslandoraSolrFacets {
               $label = (!empty($query_processor->islandoraSolrResult['response']['objects'][0]['object_label']) ?
               $query_processor->islandoraSolrResult['response']['objects'][0]['object_label'] : NULL);
             }
-            // Fall back to islandora object if PID is not in solr. eg: content models.
+            // Fall back to islandora object if PID is not in solr.
+            // eg: content models.
             else {
               if ($object = islandora_object_load($pid)) {
                 if (islandora_object_access(ISLANDORA_VIEW_OBJECTS, $object)) {
@@ -930,7 +931,8 @@ class IslandoraSolrFacets {
                 }
               }
             }
-          } catch (Exception $ex) {
+          }
+          catch (Exception $ex) {
 
           }
         }
