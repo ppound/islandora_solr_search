@@ -34,7 +34,7 @@ function islandora_solr_explore_generate_links() {
         htmlentities($option['label']),
         "islandora/search/$url",
         array()
-      ) . '<span>(' . htmlentities($qp->islandoraSolrResult['facet_counts']['facet_queries'][$option['filter']]) . ')</span>';
+      ) . '&nbsp;<span>(' . htmlentities($qp->islandoraSolrResult['facet_counts']['facet_queries'][$option['filter']]) . ')</span>';
     }
   }
 
