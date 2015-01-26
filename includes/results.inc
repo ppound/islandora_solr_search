@@ -916,24 +916,19 @@ class IslandoraSolrFacets {
         $label = NULL;
         $pid = str_replace('info:fedora/', '', $bucket);
         if (islandora_is_valid_pid($pid)) {
-          try {
-            $query_processor->buildAndExecuteQuery("PID:\"$pid\"");
-            if (!empty($query_processor->islandoraSolrResult) && !empty($query_processor->islandoraSolrResult['response']['objects'])) {
-              $label = (!empty($query_processor->islandoraSolrResult['response']['objects'][0]['object_label']) ?
-              $query_processor->islandoraSolrResult['response']['objects'][0]['object_label'] : NULL);
-            }
-            // Fall back to islandora object if PID is not in solr.
-            // eg: content models.
-            else {
-              if ($object = islandora_object_load($pid)) {
-                if (islandora_object_access(ISLANDORA_VIEW_OBJECTS, $object)) {
-                  $label = $object->label;
-                }
-              }
-            }
+          $query_processor->buildQuery("PID:\"$pid\"");
+          $query_processor->solrParams['fl'] = 'PID, ' . variable_get('islandora_solr_object_label_field', 'fgs_label_s');
+          $query_processor->executeQuery();
+          if (!empty($query_processor->islandoraSolrResult) && !empty($query_processor->islandoraSolrResult['response']['objects'])) {
+            $label = (!empty($query_processor->islandoraSolrResult['response']['objects'][0]['object_label']) ?
+            $query_processor->islandoraSolrResult['response']['objects'][0]['object_label'] : NULL);
           }
-          catch (Exception $ex) {
-
+          // Fall back to islandora object if PID is not in solr.
+          // eg: content models.
+          else {
+            if ($object = islandora_object_load($pid)) {
+              $label = $object->label;
+            }
           }
         }
         $bucket = ($label ? $label : $bucket);
