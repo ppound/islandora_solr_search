@@ -179,8 +179,14 @@ function islandora_solr_get_trunctate_length_fields() {
     if (isset($value['solr_field_settings']['maximum_length']) && intval($value['solr_field_settings']['maximum_length']) > 0) {
       $truncate_length_fields[$value['solr_field']] = array(
         'maximum_length' => $value['solr_field_settings']['maximum_length'],
-        'truncation_suffix' => isset($value['solr_field_settings']['truncation_suffix']) ? $value['solr_field_settings']['truncation_suffix'] : '',
       );
+      if (isset($value['solr_field_settings']['add_ellipsis'])) {
+        $truncate_length_fields[$value['solr_field']]['add_ellipsis'] = $value['solr_field_settings']['add_ellipsis'];
+      }
+      if (isset($value['solr_field_settings']['wordsafe'])) {
+        $truncate_length_fields[$value['solr_field']['wordsafe']] = $value['solr_field_settings']['wordsafe'];
+        $truncate_length_fields[$value['solr_field']['wordsafe_length']] = $value['solr_field_settings']['wordsafe_length'];
+      }
     }
   }
   return $truncate_length_fields;

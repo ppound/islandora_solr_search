@@ -1527,7 +1527,9 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
           'snippet' => isset($solr_field_settings['snippet']) ? $solr_field_settings['snippet'] : NULL,
           'date_format' => isset($solr_field_settings['date_format']) ? trim($solr_field_settings['date_format']) : '',
           'maximum_length' => isset($solr_field_settings['maximum_length']) ? trim($solr_field_settings['maximum_length']) : '',
-          'truncation_suffix' => isset($solr_field_settings['truncation_suffix']) ? rtrim($solr_field_settings['truncation_suffix']) : '',
+          'add_ellipsis' => isset($solr_field_settings['add_ellipsis']) ? $solr_field_settings['add_ellipsis'] : FALSE,
+          'wordsafe' => isset($solr_field_settings['wordsafe']) ? $solr_field_settings['wordsafe'] : FALSE,
+          'wordsafe_length' => isset($solr_field_settings['wordsafe_length']) ? $solr_field_settings['wordsafe_length'] : 1,
           'permissions' => empty($solr_field_settings['enable_permissions']) ? FALSE : $solr_field_settings['permissions'],
         );
         break;
@@ -1755,11 +1757,39 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
       '#element_validate' => array('element_validate_integer'),
       '#description' => t('Maximum field length to render for display. A setting of 0 (default) renders the entire value.'),
     ),
-    'truncation_suffix' => array(
+    'add_ellipsis' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Add Ellipsis'),
+      '#description' => t('Add ... to the end of the truncated string.'),
+      '#default_value' => isset($values['add_ellipsis']) ? $values['add_ellipsis'] : FALSE,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="maximum_length"]' => array('value' => '0'),
+        ),
+      ),
+    ),
+    'wordsafe' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Wordsafe'),
+      '#description' => t('If selected attempt to truncate on a word boundary. See <a href="!url" target="_blank".>documentation</a> for more information.', array('!url' => 'https://api.drupal.org/api/drupal/includes!unicode.inc/function/truncate_utf8/7')),
+      '#default_value' => isset($values['wordsafe']) ? $values['wordsafe'] : FALSE,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="maximum_length"]' => array('value' => '0'),
+        ),
+      ),
+    ),
+    'wordsafe_length' => array(
       '#type' => 'textfield',
-      '#title' => t('Truncation Suffix'),
-      '#default_value' => isset($values['truncation_suffix']) ? $values['truncation_suffix'] : '...',
-      '#description' => t('If a value is truncated, this will be added to the end of the string.'),
+      '#title' => t('Minimum Wordsafe Length'),
+      '#description' => t('The minimum acceptable length for truncation.'),
+      '#states' => array(
+        'invisible' => array(
+          array(':input[name="maximum_length"]' => array('value' => '0')),
+          array(':input[name="wordsafe"]' => array('checked' => FALSE)),
+        ),
+      ),
+      '#default_value' => isset($values['wordsafe_length']) ? $values['wordsafe_length'] : 1,
     ),
   );
 

@@ -291,13 +291,19 @@ function islandora_solr_prepare_solr_results($solr_results) {
       }
 
       // Truncate value lengths before linking, avoids destroying link tags.
-      if (array_key_exists($field, $truncate_length)) {
-        array_walk($value, function (&$val_val, $val_key) use ($field, $truncate_length) {
-          $val_val = strlen($val_val) > intval($truncate_length[$field]['maximum_length']) ?
-            substr($val_val, 0, intval($truncate_length[$field]['maximum_length'])) .
-            $truncate_length[$field]['truncation_suffix'] :
-            $val_val;
-        });
+      if (array_key_exists($field, $truncate_length) && $truncate_length[$field]['maximum_length'] > 0) {
+        // Coder tends to not like inline anonymous functions.
+        $truncate_func = function (&$val_val) use ($field, $truncate_length) {
+          $tf =& $truncate_length[$field];
+          $wordsafe = FALSE;
+          $min_wordsafe_length = 1;
+          if (isset($tf['wordsafe'])) {
+            $wordsafe = $tf['wordsafe'];
+            $min_wordsafe_length = $tf['wordsafe_length'];
+          }
+          $val_val = truncate_utf8($val_val, $tf['maximum_length'], $wordsafe, $tf['add_ellipsis'], $min_wordsafe_length);
+        };
+        array_walk($value, $truncate_func);
       }
 
       // Add link to search.
