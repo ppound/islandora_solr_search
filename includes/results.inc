@@ -902,10 +902,38 @@ class IslandoraSolrFacets {
     $islandora_solr_query = self::$islandoraSolrQuery;
     $soft_limit = self::$soft_limit;
     $buckets = array();
+    $replace_bucket = (isset($this->settings['solr_field_settings']['pid_object_label']) && $this->settings['solr_field_settings']['pid_object_label'] ? TRUE : FALSE);
+    if ($replace_bucket) {
+      $query_processor = new IslandoraSolrQueryProcessor();
+    }
     foreach ($results as $key => $values) {
       $bucket = $values['bucket'];
       $filter = $values['filter'];
       $count = $values['count'];
+
+      // Replace link bucket with object label based on facet field settings.
+      if ($replace_bucket) {
+        $label = NULL;
+        $pid = str_replace('info:fedora/', '', $bucket);
+        if (islandora_is_valid_pid($pid)) {
+          $query_processor->buildQuery("PID:\"$pid\"");
+          $query_processor->solrParams['fl'] = 'PID, ' . variable_get('islandora_solr_object_label_field', 'fgs_label_s');
+          $query_processor->executeQuery();
+          if (!empty($query_processor->islandoraSolrResult) && !empty($query_processor->islandoraSolrResult['response']['objects'])) {
+            $label = (!empty($query_processor->islandoraSolrResult['response']['objects'][0]['object_label']) ?
+            $query_processor->islandoraSolrResult['response']['objects'][0]['object_label'] : NULL);
+          }
+          // Fall back to islandora object if PID is not in solr.
+          // eg: content models.
+          else {
+            if ($object = islandora_object_load($pid)) {
+              $label = $object->label;
+            }
+          }
+        }
+        $bucket = ($label ? $label : $bucket);
+      }
+
       // Current URL query.
       $fq = isset($islandora_solr_query->solrParams['fq']) ? $islandora_solr_query->solrParams['fq'] : array();
       // 1: Check minimum count.

@@ -1550,6 +1550,7 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
           'range_facet_slider_color',
           'date_filter_datepicker_enabled',
           'date_filter_datepicker_range',
+          'pid_object_label',
         ));
         $relevant_values = array_intersect_key($solr_field_settings, $fields);
         $relevant_values['label'] = isset($relevant_values['label']) ?
@@ -2007,6 +2008,15 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
 
   // Permissions.
   islandora_solr_append_permissions_and_actions($values, $form);
+
+  $form['options']['pid_object_label'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Object Label'),
+    '#return_value' => 1,
+    '#default_value' => (isset($values['pid_object_label']) ? $values['pid_object_label'] : 0),
+    '#description' => t('Replace PID with object Label.'),
+  );
+
   return $form;
 }
 
