@@ -256,6 +256,7 @@ function islandora_solr_prepare_solr_results($solr_results) {
   $highlighting = isset($solr_results['highlighting']) ? $solr_results['highlighting'] : array();
   $fields_all = islandora_solr_get_fields('result_fields', FALSE);
   $link_to_object = islandora_solr_get_link_to_object_fields();
+  $truncate_length = islandora_solr_get_truncate_length_fields();
   $link_to_search = islandora_solr_get_link_to_search_fields();
   $date_format = islandora_solr_get_date_format_fields();
 
@@ -287,6 +288,22 @@ function islandora_solr_prepare_solr_results($solr_results) {
       // Only apply highlighting when the date isn't formatted.
       elseif (isset($highlighting[$pid][$field])) {
         $value = $highlighting[$pid][$field];
+      }
+
+      // Truncate value lengths before linking, avoids destroying link tags.
+      if (array_key_exists($field, $truncate_length) && $truncate_length[$field]['maximum_length'] > 0) {
+        // Coder tends to not like inline anonymous functions.
+        $truncate_func = function (&$val_val) use ($field, $truncate_length) {
+          $tf =& $truncate_length[$field];
+          $wordsafe = FALSE;
+          $min_wordsafe_length = 1;
+          if (isset($tf['wordsafe'])) {
+            $wordsafe = $tf['wordsafe'];
+            $min_wordsafe_length = $tf['wordsafe_length'];
+          }
+          $val_val = truncate_utf8($val_val, $tf['maximum_length'], $wordsafe, $tf['add_ellipsis'], $min_wordsafe_length);
+        };
+        array_walk($value, $truncate_func);
       }
 
       // Add link to search.

@@ -1526,6 +1526,10 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
           'link_rendering' => $solr_field_settings['link_rendering'],
           'snippet' => isset($solr_field_settings['snippet']) ? $solr_field_settings['snippet'] : NULL,
           'date_format' => isset($solr_field_settings['date_format']) ? trim($solr_field_settings['date_format']) : '',
+          'maximum_length' => isset($solr_field_settings['maximum_length']) ? trim($solr_field_settings['maximum_length']) : '',
+          'add_ellipsis' => isset($solr_field_settings['add_ellipsis']) ? $solr_field_settings['add_ellipsis'] : FALSE,
+          'wordsafe' => isset($solr_field_settings['wordsafe']) ? $solr_field_settings['wordsafe'] : FALSE,
+          'wordsafe_length' => isset($solr_field_settings['wordsafe_length']) ? $solr_field_settings['wordsafe_length'] : 1,
           'permissions' => empty($solr_field_settings['enable_permissions']) ? FALSE : $solr_field_settings['permissions'],
         );
         break;
@@ -1741,6 +1745,56 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
       '#description' => t('The format of the date, as it will be displayed in the search results. Use <a href="!url" target="_blank">PHP date()</a> formatting.', array('!url' => 'http://php.net/manual/function.date.php')),
     );
   }
+
+  $form['options']['max_length_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Maximum Length'),
+    '#description' => t('<strong>Note:</strong> Truncation can lead to unexpected results when used in secondary display profiles such as CSV and RSS.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    'maximum_length' => array(
+      '#type' => 'textfield',
+      '#title' => t('Maximum Length'),
+      '#default_value' => isset($values['maximum_length']) ? $values['maximum_length'] : '0',
+      '#element_validate' => array('element_validate_integer'),
+      '#description' => t('Maximum field length to render for display. A setting of 0 (default) renders the entire value.'),
+    ),
+    'add_ellipsis' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Add Ellipsis'),
+      '#description' => t('Add ... to the end of the truncated string.'),
+      '#default_value' => isset($values['add_ellipsis']) ? $values['add_ellipsis'] : FALSE,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="maximum_length"]' => array('value' => '0'),
+        ),
+      ),
+    ),
+    'wordsafe' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Wordsafe'),
+      '#description' => t('If selected attempt to truncate on a word boundary. See <a href="!url" target="_blank".>documentation</a> for more information.', array('!url' => 'https://api.drupal.org/api/drupal/includes!unicode.inc/function/truncate_utf8/7')),
+      '#default_value' => isset($values['wordsafe']) ? $values['wordsafe'] : FALSE,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="maximum_length"]' => array('value' => '0'),
+        ),
+      ),
+    ),
+    'wordsafe_length' => array(
+      '#type' => 'textfield',
+      '#title' => t('Minimum Wordsafe Length'),
+      '#description' => t('The minimum acceptable length for truncation.'),
+      '#states' => array(
+        'invisible' => array(
+          array(':input[name="maximum_length"]' => array('value' => '0')),
+          array(':input[name="wordsafe"]' => array('checked' => FALSE)),
+        ),
+      ),
+      '#default_value' => isset($values['wordsafe_length']) ? $values['wordsafe_length'] : 1,
+    ),
+  );
+
   islandora_solr_append_permissions_and_actions($values, $form);
 
   return $form;
