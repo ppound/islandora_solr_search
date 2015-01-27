@@ -172,7 +172,7 @@ function islandora_solr_get_link_to_object_fields() {
  * Returns an associative array with field names as key and truncation
  * character to use (if any) as value.
  */
-function islandora_solr_get_trunctate_length_fields() {
+function islandora_solr_get_truncate_length_fields() {
   $records = islandora_solr_get_fields('result_fields', TRUE, FALSE);
   $truncate_length_fields = array();
   foreach ($records as $value) {
