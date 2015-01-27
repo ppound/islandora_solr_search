@@ -1748,6 +1748,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
   $form['options']['max_length_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Maximum Length'),
+    '#description' => t('<strong>Note:</strong> Truncation can lead to unexpected results when used in secondary display profiles such as CSV and RSS.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     'maximum_length' => array(
