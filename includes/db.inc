@@ -184,8 +184,8 @@ function islandora_solr_get_truncate_length_fields() {
         $truncate_length_fields[$value['solr_field']]['add_ellipsis'] = $value['solr_field_settings']['add_ellipsis'];
       }
       if (isset($value['solr_field_settings']['wordsafe'])) {
-        $truncate_length_fields[$value['solr_field']['wordsafe']] = $value['solr_field_settings']['wordsafe'];
-        $truncate_length_fields[$value['solr_field']['wordsafe_length']] = $value['solr_field_settings']['wordsafe_length'];
+        $truncate_length_fields[$value['solr_field']]['wordsafe'] = $value['solr_field_settings']['wordsafe'];
+        $truncate_length_fields[$value['solr_field']]['wordsafe_length'] = $value['solr_field_settings']['wordsafe_length'];
       }
     }
   }
