@@ -137,7 +137,7 @@ function islandora_solr_csv_explode($delim = ',', $str = '', $enclose = '"', $pr
  *   The escaped string.
  */
 function islandora_solr_lesser_escape($value) {
-  $pattern = '/(\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^| |~|\?|:|\\\)/';
+  $pattern = '/(\"|\/|\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^| |~|\?|:|\\\)/';
   $replace = '\\\$1';
 
   return preg_replace($pattern, $replace, $value);
