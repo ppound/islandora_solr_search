@@ -504,7 +504,7 @@ class IslandoraSolrResults {
       }
       $filter_string = $filter_split[1];
     }
-    return $filter_string;
+    return stripslashes($filter_string);
   }
 
   /**
