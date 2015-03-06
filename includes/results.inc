@@ -848,7 +848,7 @@ class IslandoraSolrFacets {
       $facet_results[] = array(
         'count' => $count,
         'filter' => islandora_solr_lesser_escape($facet_field) . ':"' .
-        islandora_solr_lesser_escape($bucket) . '"',
+        islandora_solr_facet_escape($bucket) . '"',
         'bucket' => $bucket,
       );
     }

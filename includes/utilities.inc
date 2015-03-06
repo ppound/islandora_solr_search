@@ -137,7 +137,33 @@ function islandora_solr_csv_explode($delim = ',', $str = '', $enclose = '"', $pr
  *   The escaped string.
  */
 function islandora_solr_lesser_escape($value) {
-  $pattern = '/(\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^| |~|\?|:|\\\)/';
+  $pattern = '/(\/|\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^| |~|\?|:|\\\)/';
+  $replace = '\\\$1';
+
+  return preg_replace($pattern, $replace, $value);
+}
+
+/**
+ * Escape a string for inclusion in a facet.
+ *
+ * Copied from Apache_Solr_Service.
+ *
+ * Divergences from Apache_Solr_Service::escape():
+ * - removed '?':
+ *   - '?' is useful.
+ * - removed '*':
+ *   - Allows wildcard searches.
+ * - added space:
+ *   - Needed for spaces in fields.
+ *
+ * @param string $value
+ *   A string to escape.
+ *
+ * @return string
+ *   The escaped string.
+ */
+function islandora_solr_facet_escape($value) {
+  $pattern = '/(\"|\/|\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^| |~|\?|:|\\\)/';
   $replace = '\\\$1';
 
   return preg_replace($pattern, $replace, $value);
