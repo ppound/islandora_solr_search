@@ -176,7 +176,7 @@ function islandora_solr_escape($facets) {
   $return_facets = array();
   foreach ($facets as $facet) {
     $tmp = drupal_substr($facet, 0, strpos($facet, ':"'));
-    $tmp = lesser_escape(trim($tmp));
+    $tmp = islandora_solr_lesser_escape(trim($tmp));
 
     $return_facets[] = $tmp . drupal_substr($facet, strpos($facet, ':"'), drupal_strlen($facet));
   }
