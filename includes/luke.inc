@@ -51,7 +51,7 @@ function islandora_solr_ping($solr_url) {
  *   include the url with added 'http://' scheme.
  */
 function islandora_solr_check_http($url) {
-  // Check for 'http://' or 'https://' prefix - if not found, add "http://".
+  // Check for 'http://' prefix - if not found, add "http://".
   if (strpos($url, "http://") === FALSE) {
     $url = 'http://' . $url;
   }
