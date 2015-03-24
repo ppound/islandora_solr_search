@@ -36,42 +36,53 @@ function islandora_solr_admin_index_settings($form, &$form_state) {
 
     // Get request handler.
     $handler = !empty($form_state['values']['islandora_solr_request_handler']) ? $form_state['values']['islandora_solr_request_handler'] : variable_get('islandora_solr_request_handler', FALSE);
-    // Check if Solr is available.
-    $solr_avail = islandora_solr_ping($solr_url);
 
-    $dismax_allowed = FALSE;
-    // If solr is available, get the request handlers.
-    if ($solr_avail) {
-      // Find request handlers (~500ms).
-      $handlers = _islandora_solr_get_handlers($solr_url);
-    }
-    // Get confirmation message.
-    if ($solr_avail) {
-      $confirmation_message = format_string('<img src="@image_url"/>!message', array(
-        // XXX: Use of url() for static image may result in broken images.
-        '@image_url' => url('misc/watchdog-ok.png'),
-        '!message' => t('Successfully connected to Solr server at !link. <sub>(!ms ms)</sub>', array(
-            '!link' => l($solr_url, islandora_solr_check_http($solr_url), array(
-              'attributes' => array(
-                'target' => '_blank',
-              ),
-            )),
-            '!ms' => number_format($solr_avail, 2),
-        )),
-      ));
-    }
-    else {
+    if (strpos($solr_url, 'https://') !== FALSE && strpos($solr_url, 'https://') == 0) {
       $confirmation_message = format_string('<img src="@image_url"/>!message', array(
         // XXX: Use of url() for static image may result in broken images.
         '@image_url' => url('misc/watchdog-error.png'),
-        '!message' => t('Unable to connect to Solr server at !link.', array(
-            '!link' => l($solr_url, islandora_solr_check_http($solr_url), array(
-              'attributes' => array(
-                'target' => '_blank',
-              ),
-            )),
-        )),
+        '!message' => t('Islandora does not support SSL connections to Solr.'),
       ));
+      $solr_avail = FALSE;
+    }
+    else {
+      // Check if Solr is available.
+      $solr_avail = islandora_solr_ping($solr_url);
+
+      $dismax_allowed = FALSE;
+      // If solr is available, get the request handlers.
+      if ($solr_avail) {
+        // Find request handlers (~500ms).
+        $handlers = _islandora_solr_get_handlers($solr_url);
+      }
+      // Get confirmation message.
+      if ($solr_avail) {
+        $confirmation_message = format_string('<img src="@image_url"/>!message', array(
+          // XXX: Use of url() for static image may result in broken images.
+          '@image_url' => url('misc/watchdog-ok.png'),
+          '!message' => t('Successfully connected to Solr server at !link. <sub>(!ms ms)</sub>', array(
+              '!link' => l($solr_url, islandora_solr_check_http($solr_url), array(
+                'attributes' => array(
+                  'target' => '_blank',
+                ),
+              )),
+              '!ms' => number_format($solr_avail, 2),
+          )),
+        ));
+      }
+      else {
+        $confirmation_message = format_string('<img src="@image_url"/>!message', array(
+          // XXX: Use of url() for static image may result in broken images.
+          '@image_url' => url('misc/watchdog-error.png'),
+          '!message' => t('Unable to connect to Solr server at !link.', array(
+              '!link' => l($solr_url, islandora_solr_check_http($solr_url), array(
+                'attributes' => array(
+                  'target' => '_blank',
+                ),
+              )),
+          )),
+        ));
+      }
     }
   }
   // AJAX wrapper for URL checking.

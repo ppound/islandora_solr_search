@@ -47,12 +47,12 @@ function islandora_solr_ping($solr_url) {
  *   A URL to check.
  *
  * @return string
- *   If the url doesn't include a scheme ('http://' or 'https://') then it will
+ *   If the url doesn't include a scheme ('http://') then it will
  *   include the url with added 'http://' scheme.
  */
 function islandora_solr_check_http($url) {
-  // Check for 'http://' or 'https://' prefix - if not found, add "http://".
-  if (strpos($url, "http://") === FALSE && strpos($url, "https://") === FALSE) {
+  // Check for 'http://' prefix - if not found, add "http://".
+  if (strpos($url, "http://") === FALSE) {
     $url = 'http://' . $url;
   }
   return $url;
