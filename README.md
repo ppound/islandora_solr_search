@@ -37,6 +37,10 @@ Q. Why are some dates not rendered correctly?
  
 A. On 32 bit systems, the PHP function `strtotime()` has a limited range. Typically from Fri, 13 Dec 1901 20:45:54 UTC to Tue, 19 Jan 2038 03:14:07 UTC. For more info see [this](http://php.net/manual/en/function.strtotime.php#refsect1-function.strtotime-notes).
 
+Q: Why can't I connect to Solr via https?
+
+A: The Apache Solr PHP Client that we use does not support https connections to Solr. [ISLANDORA-646](https://jira.duraspace.org/browse/ISLANDORA-646) seeks to remedy this.
+
 ## Maintainers/Sponsors
 
 Current maintainers:
