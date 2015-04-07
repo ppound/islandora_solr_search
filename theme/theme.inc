@@ -118,10 +118,19 @@ function theme_islandora_solr_facet_wrapper($variables) {
  */
 function template_process_islandora_solr_search_navigation_block(&$variables) {
   if ($variables['prev_link']) {
-    $variables['prev_link'] = l($variables['prev_text'], $variables['prev_link']);
+    $variables['prev_link'] = format_string('<a href="@link">@text</a>', array(
+      '@link' => $variables['prev_link'],
+      '@text' => $variables['prev_text'],
+    ));
   }
-  $variables['return_link'] = l($variables['return_text'], $variables['return_link']);
+  $variables['return_link'] = format_string('<a href="@link">@text</a>', array(
+    '@link' => $variables['return_link'],
+    '@text' => $variables['return_text'],
+  ));
   if ($variables['next_link']) {
-    $variables['next_link'] = l($variables['next_text'], $variables['next_link']);
+    $variables['next_link'] = format_string('<a href="@link">@text</a>', array(
+      '@link' => $variables['next_link'],
+      '@text' => $variables['next_text'],
+    ));
   }
 }
