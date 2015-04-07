@@ -185,6 +185,9 @@ function islandora_solr_theme() {
         'return_link' => NULL,
         'prev_link' => NULL,
         'next_link' => NULL,
+        'prev_text' => NULL,
+        'return_text' => NULL,
+        'next_text' => NULL,
       ),
     ),
   );

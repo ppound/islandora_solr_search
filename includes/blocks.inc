@@ -994,18 +994,19 @@ function islandora_solr_search_navigation() {
     // to populate navigation links.
     if (isset($nav_params['path'])) {
       $return_query = array_merge($nav_params['query_processor']->internalSolrParams, array('page' => $page));
-      $return_link = l(t('Return to search'), url($nav_params['path'], array('query' => $return_query, 'absolute' => TRUE)));
+      $return_link = url($nav_params['path'], array('query' => $return_query, 'absolute' => TRUE));
     }
     if ($prev_solr_object) {
       $prev_params = $prev_solr_object['object_url_params'];
       $prev_params['solr_nav']['offset'] = $prev_offset;
       $prev_params['solr_nav']['page'] = $prev_page;
       $prev_params['solr_nav']['id'] = $params['solr_nav']['id'];
-      $prev_link = l(t('Previous Object'), url($prev_solr_object['object_url'], array(
+      $prev_link = url($prev_solr_object['object_url'], array(
         'query' => $prev_params,
         'fragment' => (isset($prev_solr_object['object_url_fragment']) ? $prev_solr_object['object_url_fragment'] : ''),
         'absolute' => TRUE,
-      )));
+      ));
+
     }
 
     if ($next_solr_object) {
@@ -1013,17 +1014,19 @@ function islandora_solr_search_navigation() {
       $next_params['solr_nav']['offset'] = $next_offset;
       $next_params['solr_nav']['page'] = $next_page;
       $next_params['solr_nav']['id'] = $params['solr_nav']['id'];
-      $next_link = l(t('Next Object'), url($next_solr_object['object_url'], array(
+      $next_link = url($next_solr_object['object_url'], array(
         'query' => $next_params,
         'fragment' => (isset($next_solr_object['object_url_fragment']) ? $next_solr_object['object_url_fragment'] : ''),
         'absolute' => TRUE,
-      )));
+      ));
     }
-
     $return = theme('islandora_solr_search_navigation_block', array(
       'return_link' => $return_link,
+      'return_text' => t('Return to search'),
       'prev_link' => $prev_link,
+      'prev_text' => t('Previous Object'),
       'next_link' => $next_link,
+      'next_text' => t('Next Object'),
     ));
   }
   return $return;
