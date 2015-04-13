@@ -450,3 +450,39 @@ function islandora_solr_check_dismax($reset = FALSE) {
     return $cache->data;
   }
 }
+
+/**
+ * Implements hook_islandora_basic_collection_query_backends().
+ */
+function islandora_solr_islandora_basic_collection_query_backends() {
+  $callable = function ($collection_object, $page, $limit) {
+    // XXX: We populate the global query class, to allow the sort and facet
+    // blocks and the like to function.
+    global $_islandora_solr_queryclass;
+    $qp = new IslandoraSolrQueryProcessor();
+    $_islandora_solr_queryclass = $qp;
+
+    $qp->buildQuery(format_string('!member_field:("info:fedora/!pid" OR "!pid") OR !collection_member_field:("info:fedora/!pid" OR "!pid")', array(
+      '!member_field' => variable_get('islandora_solr_member_of_field', 'RELS_EXT_isMemberOf_uri_ms'),
+      '!pid' => $collection_object->id,
+      '!collection_member_field' => variable_get('islandora_solr_member_of_collection_field', 'RELS_EXT_isMemberOfCollection_uri_ms'),
+    )), drupal_get_query_parameters());
+    $qp->solrStart = $page * $limit;
+    $qp->solrLimit = $limit;
+    $qp->executeQuery();
+
+    $map_to_pids = function ($result) {
+      return $result['PID'];
+    };
+    return array(
+      $qp->islandoraSolrResult['response']['numFound'],
+      array_map($map_to_pids, $qp->islandoraSolrResult['response']['objects']),
+    );
+  };
+  return array(
+    'islandora_solr_query_backend' => array(
+      'title' => t('Solr'),
+      'callable' => $callable,
+    ),
+  );
+}
