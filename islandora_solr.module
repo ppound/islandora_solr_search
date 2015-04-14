@@ -453,3 +453,17 @@ function islandora_solr_check_dismax($reset = FALSE) {
     return $cache->data;
   }
 }
+
+/**
+ * Implements hook_islandora_basic_collection_query_backends().
+ */
+function islandora_solr_islandora_basic_collection_query_backends() {
+  $module_path = drupal_get_path('module', 'islandora_solr');
+  return array(
+    'islandora_solr_query_backend' => array(
+      'title' => t('Solr'),
+      'callable' => 'islandora_solr_islandora_basic_collection_backend_callable',
+      'file' => "$module_path/includes/utilities.inc",
+    ),
+  );
+}
