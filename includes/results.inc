@@ -903,9 +903,6 @@ class IslandoraSolrFacets {
     $soft_limit = self::$soft_limit;
     $buckets = array();
     $replace_bucket = (isset($this->settings['solr_field_settings']['pid_object_label']) && $this->settings['solr_field_settings']['pid_object_label'] ? TRUE : FALSE);
-    if ($replace_bucket) {
-      $query_processor = new IslandoraSolrQueryProcessor();
-    }
     foreach ($results as $key => $values) {
       $bucket = $values['bucket'];
       $filter = $values['filter'];
@@ -913,6 +910,7 @@ class IslandoraSolrFacets {
 
       // Replace link bucket with object label based on facet field settings.
       if ($replace_bucket) {
+        $query_processor = new IslandoraSolrQueryProcessor();
         $label = NULL;
         $pid = str_replace('info:fedora/', '', $bucket);
         if (islandora_is_valid_pid($pid)) {
