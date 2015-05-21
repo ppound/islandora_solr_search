@@ -340,7 +340,7 @@ class IslandoraSolrQueryProcessor {
       $object_label = variable_get('islandora_solr_object_label_field', 'fgs_label_s');
       if (!empty($object_results)) {
         if (variable_get('islandora_solr_search_navigation', FALSE)) {
-          $id = drupal_random_bytes(10);
+          $id = bin2hex(drupal_random_bytes(10));
           $page_params = drupal_get_query_parameters();
           $_SESSION['islandora_solr_search_nav_params'][$id] = array(
             'path' => current_path(),
