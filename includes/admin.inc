@@ -505,6 +505,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
     ),
     '#description' => t('Select a default boolean operator for the search query. Selecting "User-configurable" exposes a dropdown menu which gives the user a choice between AND, OR and NOT.'),
   );
+  $form['islandora_solr_tabs']['advanced_search_block']['islandora_solr_allow_preserve_filters'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow Preservation of Filters'),
+    '#default_value' => variable_get('islandora_solr_allow_preserve_filters', FALSE),
+    '#description' => t('Allow users to preserve filters when changing their search.'),
+  );
 
   // Query defaults.
   $form['islandora_solr_tabs']['query_defaults'] = array(

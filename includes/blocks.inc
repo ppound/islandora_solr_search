@@ -638,6 +638,14 @@ function islandora_solr_advanced_search_form($form, &$form_state) {
     '#prefix' => '<div class="islandora-solr-advanced-controls">',
     '#suffix' => '</div>',
   );
+  // Filter preservation toggle.
+  if (variable_get('islandora_solr_allow_preserve_filters', FALSE)) {
+    $form['controls']['islandora_solr_allow_preserve_filters'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Preserve Filters'),
+      '#default_value' => FALSE,
+    );
+  }
   $form['controls']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Search'),
@@ -707,9 +715,17 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
   if (empty($query)) {
     $query = '*:*';
   }
+  // Handle filters.
+  $filter = '';
+  if (isset($form_state['values']['islandora_solr_allow_preserve_filters']) && $form_state['values']['islandora_solr_allow_preserve_filters']) {
+    $filter = isset($_GET['f']) ? $_GET['f'] : '';
+  }
 
   // Navigate to results page.
-  $form_state['redirect'] = array(ISLANDORA_SOLR_SEARCH_PATH . "/$query", array());
+  $form_state['redirect'] = array(
+    ISLANDORA_SOLR_SEARCH_PATH . "/$query",
+    $filter ? array('query' => array('f' => $filter)) : array(),
+  );
 }
 
 /**
