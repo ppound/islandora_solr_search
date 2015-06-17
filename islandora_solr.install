@@ -71,6 +71,7 @@ function islandora_solr_uninstall() {
     'islandora_solr_content_model_field',
     'islandora_solr_object_label_field',
     'islandora_solr_datastream_id_field',
+    'islandora_solr_allow_preserve_filters',
   );
   foreach ($variables as $variable) {
     variable_del($variable);
