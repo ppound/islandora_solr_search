@@ -149,7 +149,7 @@ function islandora_solr_admin_index_settings($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Force update of Solr index after an object is deleted'),
     '#weight' => 5,
-    '#description' => t('If checked, anytime an object is deleted it will trigger a force removal from the solr index. <br /><strong>Note:</strong> When active the UI consistency will be inceased which will impact any pages that using solr queries for display. However, it is not appropriate for every installation as it could be possible to have a large volume of solr commits that hit execution limits or the solr index could not be writable from drupal directly.'),
+    '#description' => t('If checked, deleting objects will also force their removal from the Solr index. <br/><strong>Note:</strong> When active, UI consistency will be increased on any pages using Solr queries for display. This setting is not appropriate for every installation (e.g., on sites with a large volume of Solr commits that hit execution limits, or where the Solr index is not directly writable from Drupal).'),
     '#default_value' => variable_get('islandora_solr_force_update_index_after_object_purge', 0),
   );
 
