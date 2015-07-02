@@ -144,6 +144,15 @@ function islandora_solr_admin_index_settings($form, &$form_state) {
     '#value' => $solr_avail ? 1 : 0,
   );
 
+  // Solr force delete from index during object purge.
+  $form['solr_ajax_wrapper']['islandora_solr_force_update_index_after_object_purge'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Force update of Solr index after an object is deleted'),
+    '#weight' => 5,
+    '#description' => t('If checked, anytime an object is deleted it will trigger a force removal from the solr index. <br /><strong>Note:</strong> When active the UI consistency will be inceased which will impact any pages that using solr queries for display. However, it is not appropriate for every installation as it could be possible to have a large volume of solr commits that hit execution limits or the solr index could not be writable from drupal directly.'),
+    '#default_value' => variable_get('islandora_solr_force_update_index_after_object_purge', 0),
+  );
+
   // Actions.
   $form['actions'] = array(
     '#type' => 'actions',
@@ -190,12 +199,14 @@ function _islandora_solr_admin_index_settings_submit($form, &$form_state) {
     case 'edit-submit':
       variable_set('islandora_solr_url', $form_state['values']['islandora_solr_url']);
       variable_set('islandora_solr_request_handler', $form_state['values']['islandora_solr_request_handler']);
+      variable_set('islandora_solr_force_update_index_after_object_purge', $form_state['values']['islandora_solr_force_update_index_after_object_purge']);
       drupal_set_message(t('The Solr configuration options have been saved.'));
       break;
 
     case 'edit-reset':
       variable_del('islandora_solr_url');
       variable_del('islandora_solr_request_handler');
+      variable_del('islandora_solr_force_update_index_after_object_purge');
       drupal_set_message(t('The configuration options have been reset to their default values.'));
       break;
   }

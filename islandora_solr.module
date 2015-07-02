@@ -467,3 +467,21 @@ function islandora_solr_islandora_basic_collection_query_backends() {
     ),
   );
 }
+
+/**
+ * Implements hook_islandora_object_purged().
+ */
+function islandora_solr_islandora_object_purged($pid) {
+  // XXX: Optional ability to have the system remove the object from the solr
+  // index.  Useful for pages that may rely on a solr query for displaying data
+  // and require the index update to be instantaneous so that the object is not
+  // included in any query results immediately after a purge.
+  if (variable_get('islandora_solr_force_update_index_after_object_purge', 0) == 1) {
+    $options = array(
+      'method' => 'POST',
+      'data' => "<update><delete><id>{$pid}</id></delete><commit/></update>",
+      'headers' => array('Content-Type' => 'text/xml; charset=UTF-8'),
+    );
+    $response = drupal_http_request(variable_get('islandora_solr_url', 'localhost:8080/solr') . '/update', $options);
+  }
+}
