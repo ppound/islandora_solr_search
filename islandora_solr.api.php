@@ -210,7 +210,7 @@ function hook_islandora_solr_facet_bucket_classes($vars) {
     // Add the 'use-ajax' bit so Drupal will use AJAX.
     $vars['bucket_attributes'][$key]['attr']['class'] .= " use-ajax";
 
-    // Update the href to point to this another modules menu callback.
+    // Update the href to point to another modules menu callback.
     $vars['bucket_attributes'][$key]['attr']['href'] = url(
       "/mymodules/superduper/callback",
       array(
