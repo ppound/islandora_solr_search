@@ -971,9 +971,18 @@ class IslandoraSolrFacets {
           array(
             'IslandoraSolrFacets' => $this,
             'bucket_attributes' => array(
-              'link' => &$attr,
-              'minus' => &$attr_minus,
-              'plus' => &$attr_plus,
+              'link' => array(
+                'attr' => &$attr,
+                'query' => $query_plus,
+              ),
+              'minus' => array(
+                'attr' => &$attr_minus,
+                'query' => $query_minus,
+              ),
+              'plus' => array(
+                'attr' => &$attr_plus,
+                'query' => $query_plus,
+              ),
             ),
           )
         );

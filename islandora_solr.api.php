@@ -189,12 +189,33 @@ function hook_islandora_solr_search_rss_item_alter($item, $doc) {
  *   array(
  *     'IslandoraSolrFacets' => $object,  <- Current instance of IslandoraSolrFacets.
  *     'bucket_attributes' => array(
- *       'link' => &$attr, <- Current link classes, passed by reference.
- *       'minus' => &$attr_minus, <- Current minus classes, passed by reference.
- *       'plus' => &$attr_plus, <- Current plus classes, passed by reference.
+ *       'link' => array( <- Current 'link' link, its attributes and query
+ *         'attr' => &$attr,
+ *         'query' => $query_plus,
+ *       ),
+ *       'minus' => array( <- Current 'minus' link, its attributes and query
+ *         'attr' => &$attr_minus,
+ *         'query' => $query_minus,
+ *       ),
+ *       'plus' => array( <- Current 'plus' link, its attributes and query
+ *         'attr' => &$attr_plus,
+ *         'query' => $query_plus,
+ *       ),
  *     )
  *   );
  */
 function hook_islandora_solr_facet_bucket_classes($vars) {
-  $vars['bucket_attributes']['plus']['class'] .= " use-ajax";
+  foreach ($vars['bucket_attributes'] as $key => $value) {
+
+    // Add the 'use-ajax' bit so Drupal will use AJAX.
+    $vars['bucket_attributes'][$key]['attr']['class'] .= " use-ajax";
+
+    // Update the href to point to this another modules menu callback.
+    $vars['bucket_attributes'][$key]['attr']['href'] = url(
+      "/mymodules/superduper/callback",
+      array(
+        'query' => $vars['bucket_attributes'][$key]['query'],
+      )
+    );
+  }
 }
