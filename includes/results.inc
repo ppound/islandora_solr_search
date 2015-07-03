@@ -622,6 +622,8 @@ class IslandoraSolrFacets {
   public $results;
   public $title = NULL;
   public $content = NULL;
+
+  private $facet_hook = 'islandora_solr_facet_bucket_classes';
   // @codingStandardsIgnoreEnd
 
   /**
@@ -955,10 +957,27 @@ class IslandoraSolrFacets {
       // Set basic attributes.
       $attr_plus = $attr_minus = $attr = array('rel' => 'nofollow');
       $attr['href'] = $attr_plus['href'] = url($path, array('query' => $query_plus));
+
       $attr_minus['href'] = url($path, array('query' => $query_minus));
       $attr_plus['class'] = 'plus';
       $attr_minus['class'] = 'minus';
 
+      module_load_include('inc', 'islandora', 'includes/utilities');
+
+      $hooks = islandora_build_hook_list($this->facet_hook);
+      foreach ($hooks as $hook) {
+        module_invoke_all(
+          $hook,
+          array(
+            'IslandoraSolrFacets' => $this,
+            'bucket_attributes' => array(
+              'link' => &$attr,
+              'minus' => &$attr_minus,
+              'plus' => &$attr_plus,
+            ),
+          )
+        );
+      }
       // XXX: We are not using l() because of active classes:
       // @see http://drupal.org/node/41595
       // Create link.

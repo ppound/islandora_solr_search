@@ -177,3 +177,24 @@ function hook_islandora_solr_search_rss_item_alter($item, $doc) {
   $item['title'] = $doc['PID'];
   $item['description'] = 'this is the new rss item description';
 }
+
+/**
+ * This hook allows one to add classes to solr facet buckets (links, plus, minus).
+ *
+ * The origional intention of this hook is to allow one to implement AJAX
+ * usage on solr facets.
+ *
+ * @param array $vars
+ *   A key value pair array, containing the following:
+ *   array(
+ *     'IslandoraSolrFacets' => $object,  <- Current instance of IslandoraSolrFacets.
+ *     'bucket_attributes' => array(
+ *       'link' => &$attr, <- Current link classes, passed by reference.
+ *       'minus' => &$attr_minus, <- Current minus classes, passed by reference.
+ *       'plus' => &$attr_plus, <- Current plus classes, passed by reference.
+ *     )
+ *   );
+ */
+function hook_islandora_solr_facet_bucket_classes($vars) {
+  $vars['bucket_attributes']['plus']['class'] .= " use-ajax";
+}
