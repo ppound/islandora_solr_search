@@ -210,7 +210,7 @@ class IslandoraSolrResults {
 
       // Remove query from path.
       $path_minus = implode('/', explode('/', $path, -1)) . '/ ';
-      dsm($path_minus, "pm A::");
+
       // Set attributes variable for remove link.
       $attr_minus = array();
       $attr_minus['title'] = t('Remove') . ' ' . $query_value;
