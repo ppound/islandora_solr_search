@@ -218,7 +218,7 @@ class IslandoraSolrResults {
       $attr_minus['rel'] = 'nofollow';
       $attr_minus['href'] = url($path_minus, array('query' => $query_minus));
 
-      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_hook);
+      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_bucket_classes_hook);
 
       foreach ($hooks as $hook) {
         module_invoke_all(
@@ -286,7 +286,7 @@ class IslandoraSolrResults {
         $attr_minus['rel'] = 'nofollow';
         $attr_minus['href'] = url($path, array('query' => $query_minus));
 
-        $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_hook);
+        $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_bucket_classes_hook);
         foreach ($hooks as $hook) {
           module_invoke_all(
             $hook,
@@ -648,7 +648,7 @@ class IslandoraSolrFacets {
   public static $needed_solr_call;
   public static $range_slider_key = 0;
   public static $date_filter_key = 0;
-  public static $facet_hook = 'islandora_solr_facet_bucket_classes';
+  public static $facet_bucket_classes_hook = 'islandora_solr_facet_bucket_classes';
 
   public $facet_field;
   public $settings;
@@ -998,7 +998,7 @@ class IslandoraSolrFacets {
 
       module_load_include('inc', 'islandora', 'includes/utilities');
 
-      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_hook);
+      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_bucket_classes_hook);
       foreach ($hooks as $hook) {
         module_invoke_all(
           $hook,

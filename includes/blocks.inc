@@ -882,7 +882,7 @@ function islandora_solr_sort() {
       $attr['title'] = $label;
       $attr['href'] = url($path, array('query' => $query));
 
-      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_hook);
+      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_bucket_classes_hook);
 
       foreach ($hooks as $hook) {
         module_invoke_all(
