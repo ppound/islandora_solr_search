@@ -356,13 +356,15 @@ function _islandora_solr_update_filter_table($form, &$form_state) {
  *   settings and the raw Solr results.
  */
 function islandora_solr_block_view($block_name = '') {
+
   global $_islandora_solr_queryclass;
   $block = array();
 
   $solr_blocks = module_invoke_all("islandora_solr_query_blocks");
-
+  //dsm($solr_blocks, "solr blocks::");
   // If the block that is called is defined, and we have permission to view it.
   if (!empty($solr_blocks[$block_name]) && user_access('search islandora solr')) {
+
     // Set block title.
     $block['subject'] = $solr_blocks[$block_name]['name'];
 
@@ -376,20 +378,25 @@ function islandora_solr_block_view($block_name = '') {
     // IslandoraSolrQueryProcessor, containing the Solr search result), is fed
     // as an argument.
     if (!empty($solr_blocks[$block_name]['class']) && !empty($solr_blocks[$block_name]['function'])) {
+
       // Check if we're on a search results page.
       if (islandora_solr_results_page($_islandora_solr_queryclass)) {
+
         $display_class = new $solr_blocks[$block_name]['class']();
         $block_function = $solr_blocks[$block_name]['function'];
         if (method_exists($display_class, $block_function)) {
+
           $block['content'] = $display_class->$block_function($_islandora_solr_queryclass);
         }
       }
     }
     elseif (!empty($solr_blocks[$block_name]['form'])) {
+
       $block['content'] = drupal_get_form($solr_blocks[$block_name]['form']);
     }
     // Else if only a function is given (no class, no form).
     elseif (!empty($solr_blocks[$block_name]['function'])) {
+
       $function = $solr_blocks[$block_name]['function'];
       $block['content'] = $function();
     }
@@ -875,6 +882,22 @@ function islandora_solr_sort() {
       $attr['title'] = $label;
       $attr['href'] = url($path, array('query' => $query));
 
+      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_hook);
+
+      foreach ($hooks as $hook) {
+        module_invoke_all(
+          $hook,
+          array(
+            'IslandoraSolrFacets' => $this,
+            'bucket_attributes' => array(
+              'sort' => array(
+                'attr' => &$attr,
+                'query' => $query,
+              ),
+            ),
+          )
+        );
+      }
       // XXX: We're not using l() because of
       // @link http://drupal.org/node/41595 active classes. @endlink
       $item = '<a' . drupal_attributes($attr) . '>' . $label . ' ' . $indicator . '</a>';

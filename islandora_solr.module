@@ -322,7 +322,6 @@ function islandora_solr($query = NULL) {
     $message = t('Parameters: <br /><pre>!debug</pre>', array('!debug' => print_r($_islandora_solr_queryclass->solrParams, TRUE)));
     drupal_set_message(filter_xss($message, array('pre', 'br')), 'status');
   }
-
   return $output;
 }
 

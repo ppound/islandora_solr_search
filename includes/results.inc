@@ -118,7 +118,6 @@ class IslandoraSolrResults {
 
     // Get list of secondary displays.
     $secondary_array = variable_get('islandora_solr_secondary_display', array());
-
     foreach ($secondary_array as $name => $status) {
       if ($status === $name) {
         // Generate URL.
@@ -190,9 +189,10 @@ class IslandoraSolrResults {
    *   Rendered lists of the currently active query and/or filters.
    */
   public function currentQuery($islandora_solr_query) {
+    module_load_include('inc', 'islandora', 'includes/utilities');
+
     $output = '';
     $path = current_path();
-
     $format = variable_get('islandora_solr_facet_date_format', 'Y');
 
     // Get user provided filter parameters.
@@ -210,13 +210,30 @@ class IslandoraSolrResults {
 
       // Remove query from path.
       $path_minus = implode('/', explode('/', $path, -1)) . '/ ';
-
+      dsm($path_minus, "pm A::");
       // Set attributes variable for remove link.
       $attr_minus = array();
       $attr_minus['title'] = t('Remove') . ' ' . $query_value;
       $attr_minus['class'] = 'remove-query';
       $attr_minus['rel'] = 'nofollow';
       $attr_minus['href'] = url($path_minus, array('query' => $query_minus));
+
+      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_hook);
+
+      foreach ($hooks as $hook) {
+        module_invoke_all(
+          $hook,
+          array(
+            'IslandoraSolrFacets' => $this,
+            'bucket_attributes' => array(
+              'minus' => array(
+                'attr' => &$attr_minus,
+                'query' => $query_minus,
+              ),
+            ),
+          )
+        );
+      }
 
       // XXX: We are not using l() because of active classes:
       // @see http://drupal.org/node/41595
@@ -269,10 +286,28 @@ class IslandoraSolrResults {
         $attr_minus['rel'] = 'nofollow';
         $attr_minus['href'] = url($path, array('query' => $query_minus));
 
+        $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_hook);
+        foreach ($hooks as $hook) {
+          module_invoke_all(
+            $hook,
+            array(
+              'IslandoraSolrFacets' => $this,
+              'bucket_attributes' => array(
+                'minus' => array(
+                  'attr' => &$attr_minus,
+                  'query' => $query_minus,
+                  'tst' => array(""),
+                ),
+              ),
+            )
+          );
+        }
+
         // XXX: We are not using l() because of active classes:
         // @see http://drupal.org/node/41595
         // Create link.
         $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . check_plain($filter_string);
+
       }
 
       // Return filter list.
@@ -523,21 +558,26 @@ class IslandoraSolrResults {
    * @see islandora_solr_islandora_solr_query_blocks()
    * @see islandora_solr_block_view()
    */
-  public function displayFacets($islandora_solr_query) {
+  public function displayFacets($islandora_solr_query, $derp = FALSE) {
     IslandoraSolrFacets::init($islandora_solr_query);
     $output = '';
     $facet_order = $this->facetFieldArray;
-
+    if ($derp == TRUE) {
+    // dsm($facet_order, "facet order");
+    }
     foreach ($facet_order as $facet_key => $facet_label) {
       $facet_obj = new IslandoraSolrFacets($facet_key);
       $output .= $facet_obj->getFacet();
+      if ($derp == TRUE) {
+        $output .= $facet_obj->getFacet();
+       // dsm($output, "output");
+      }
     }
 
     // As we add additional facets, we're repeatedly URL-encoding old facet
     // strings. when we double-encode quotation marks they're incomprehensible
     // to Solr.
     $output = str_replace('%2B', '%252B', $output);
-
     return $output;
   }
 
@@ -615,6 +655,7 @@ class IslandoraSolrFacets {
   public static $needed_solr_call;
   public static $range_slider_key = 0;
   public static $date_filter_key = 0;
+  public static $facet_hook = 'islandora_solr_facet_bucket_classes';
 
   public $facet_field;
   public $settings;
@@ -623,7 +664,7 @@ class IslandoraSolrFacets {
   public $title = NULL;
   public $content = NULL;
 
-  private $facet_hook = 'islandora_solr_facet_bucket_classes';
+
   // @codingStandardsIgnoreEnd
 
   /**
@@ -964,7 +1005,7 @@ class IslandoraSolrFacets {
 
       module_load_include('inc', 'islandora', 'includes/utilities');
 
-      $hooks = islandora_build_hook_list($this->facet_hook);
+      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_hook);
       foreach ($hooks as $hook) {
         module_invoke_all(
           $hook,
