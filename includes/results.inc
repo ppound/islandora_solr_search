@@ -558,20 +558,13 @@ class IslandoraSolrResults {
    * @see islandora_solr_islandora_solr_query_blocks()
    * @see islandora_solr_block_view()
    */
-  public function displayFacets($islandora_solr_query, $derp = FALSE) {
+  public function displayFacets($islandora_solr_query) {
     IslandoraSolrFacets::init($islandora_solr_query);
     $output = '';
     $facet_order = $this->facetFieldArray;
-    if ($derp == TRUE) {
-    // dsm($facet_order, "facet order");
-    }
     foreach ($facet_order as $facet_key => $facet_label) {
       $facet_obj = new IslandoraSolrFacets($facet_key);
       $output .= $facet_obj->getFacet();
-      if ($derp == TRUE) {
-        $output .= $facet_obj->getFacet();
-       // dsm($output, "output");
-      }
     }
 
     // As we add additional facets, we're repeatedly URL-encoding old facet

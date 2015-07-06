@@ -361,7 +361,7 @@ function islandora_solr_block_view($block_name = '') {
   $block = array();
 
   $solr_blocks = module_invoke_all("islandora_solr_query_blocks");
-  //dsm($solr_blocks, "solr blocks::");
+
   // If the block that is called is defined, and we have permission to view it.
   if (!empty($solr_blocks[$block_name]) && user_access('search islandora solr')) {
 
