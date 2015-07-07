@@ -355,5 +355,5 @@ function islandora_solr_range_slider_form_submit($form, &$form_state) {
     $query = array_merge_recursive($params, array('f' => array($filter)));
   }
 
-  drupal_goto($path, array('query' => $query));
+  $form_state['redirect'] = array($path, array('query' => $query));
 }
