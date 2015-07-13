@@ -224,7 +224,7 @@ class IslandoraSolrResults {
         module_invoke_all(
           $hook,
           array(
-            'IslandoraSolrFacets' => $this,
+            'IslandoraSolrQuery' => $islandora_solr_query,
             'bucket_attributes' => array(
               'minus' => array(
                 'attr' => &$attr_minus,
@@ -291,7 +291,7 @@ class IslandoraSolrResults {
           module_invoke_all(
             $hook,
             array(
-              'IslandoraSolrFacets' => $this,
+              'IslandoraSolrQuery' => $islandora_solr_query,
               'bucket_attributes' => array(
                 'minus' => array(
                   'attr' => &$attr_minus,
@@ -1003,7 +1003,7 @@ class IslandoraSolrFacets {
         module_invoke_all(
           $hook,
           array(
-            'IslandoraSolrFacets' => $this,
+            'IslandoraSolrQuery' => $islandora_solr_query,
             'bucket_attributes' => array(
               'link' => array(
                 'attr' => &$attr,

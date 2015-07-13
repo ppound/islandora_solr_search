@@ -888,7 +888,7 @@ function islandora_solr_sort() {
         module_invoke_all(
           $hook,
           array(
-            'IslandoraSolrFacets' => $this,
+            'IslandoraSolrQuery' => $_islandora_solr_queryclass,
             'bucket_attributes' => array(
               'sort' => array(
                 'attr' => &$attr,

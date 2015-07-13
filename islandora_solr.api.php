@@ -187,7 +187,7 @@ function hook_islandora_solr_search_rss_item_alter($item, $doc) {
  * @param array $vars
  *   A key value pair array, containing the following:
  *   array(
- *     'IslandoraSolrFacets' => $object,  <- Current instance of IslandoraSolrFacets.
+ *     'IslandoraSolrQuery' => $object,  <- Current IslandoraSolrQuery.
  *     'bucket_attributes' => array(
  *       'link' => array( <- Current 'link' link, its attributes and query
  *         'attr' => &$attr,
