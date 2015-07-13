@@ -212,33 +212,25 @@ class IslandoraSolrResults {
       $path_minus = implode('/', explode('/', $path, -1)) . '/ ';
 
       // Set attributes variable for remove link.
-      $attr_minus = array();
+      $attributes = array(
+        'minus' => array(
+          'attr' => array(),
+          'query' => $query_minus,
+        ),
+      );
+      $attr_minus =& $attributes['minus']['attr'];
       $attr_minus['title'] = t('Remove') . ' ' . $query_value;
-      $attr_minus['class'] = 'remove-query';
+      $attr_minus['class'] = array('remove-query');
       $attr_minus['rel'] = 'nofollow';
       $attr_minus['href'] = url($path_minus, array('query' => $query_minus));
 
-      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_bucket_classes_hook);
-
-      foreach ($hooks as $hook) {
-        module_invoke_all(
-          $hook,
-          array(
-            'IslandoraSolrQuery' => $islandora_solr_query,
-            'bucket_attributes' => array(
-              'minus' => array(
-                'attr' => &$attr_minus,
-                'query' => $query_minus,
-              ),
-            ),
-          )
-        );
-      }
+      $hooks = islandora_build_hook_list(ISLANDORA_SOLR_FACET_BUCKET_CLASSES_HOOK_BASE);
+      drupal_alter($hooks, $attributes, $islandora_solr_query);
 
       // XXX: We are not using l() because of active classes:
       // @see http://drupal.org/node/41595
       // Create link.
-      $query_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . check_plain($query_value);
+      $query_list[] = '<a' . drupal_attributes($attributes['minus']) . '>(-)</a> ' . check_plain($query_value);
 
       // Add wrap and list.
       $output .= '<div class="islandora-solr-query-wrap">';
@@ -280,33 +272,25 @@ class IslandoraSolrResults {
           unset($query_minus['f']);
         }
         // Set attributes variable for remove link.
-        $attr_minus = array();
+        $attributes = array(
+          'minus' => array(
+            'attr' => array(),
+            'query' => $query_minus,
+          ),
+        );
+        $attr_minus =& $attributes['minus']['attr'];
         $attr_minus['title'] = t('Remove') . ' ' . $filter;
-        $attr_minus['class'] = 'remove-filter';
+        $attr_minus['class'] = array('remove-filter');
         $attr_minus['rel'] = 'nofollow';
         $attr_minus['href'] = url($path, array('query' => $query_minus));
 
-        $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_bucket_classes_hook);
-        foreach ($hooks as $hook) {
-          module_invoke_all(
-            $hook,
-            array(
-              'IslandoraSolrQuery' => $islandora_solr_query,
-              'bucket_attributes' => array(
-                'minus' => array(
-                  'attr' => &$attr_minus,
-                  'query' => $query_minus,
-                  'tst' => array(""),
-                ),
-              ),
-            )
-          );
-        }
+        $hooks = islandora_build_hook_list(ISLANDORA_SOLR_FACET_BUCKET_CLASSES_HOOK_BASE);
+        drupal_alter($hooks, $attributes, $islandora_solr_query);
 
         // XXX: We are not using l() because of active classes:
         // @see http://drupal.org/node/41595
         // Create link.
-        $filter_list[] = '<a' . drupal_attributes($attr_minus) . '>(-)</a> ' . $symbol . ' ' . check_plain($filter_string);
+        $filter_list[] = '<a' . drupal_attributes($attributes['minus']['attr']) . '>(-)</a> ' . $symbol . ' ' . check_plain($filter_string);
 
       }
 
@@ -648,7 +632,6 @@ class IslandoraSolrFacets {
   public static $needed_solr_call;
   public static $range_slider_key = 0;
   public static $date_filter_key = 0;
-  public static $facet_bucket_classes_hook = 'islandora_solr_facet_bucket_classes';
 
   public $facet_field;
   public $settings;
@@ -989,45 +972,33 @@ class IslandoraSolrFacets {
       $query_minus = array_merge_recursive($params, array('f' => array('-' . $filter)));
 
       // Set basic attributes.
-      $attr_plus = $attr_minus = $attr = array('rel' => 'nofollow');
-      $attr['href'] = $attr_plus['href'] = url($path, array('query' => $query_plus));
+      $attributes = array(
+        'link' => array(),
+        'minus' => array(),
+        'plus' => array(),
+      );
+      $attributes['link']['attr'] = $attributes['minus']['attr'] = $attributes['plus']['attr'] = array('rel' => 'nofollow');
 
-      $attr_minus['href'] = url($path, array('query' => $query_minus));
-      $attr_plus['class'] = 'plus';
-      $attr_minus['class'] = 'minus';
+      $attributes['link']['attr']['href'] = $attributes['plus']['attr']['href'] = url($path, array('query' => $query_plus));
+      $attributes['link']['query'] = $attributes['plus']['query'] = $query_plus;
+      $attributes['minus']['attr']['href'] = url($path, array('query' => $query_minus));
+      $attributes['minus']['query'] = $query_minus;
+
+      $attributes['plus']['attr']['class'] = array('plus');
+      $attributes['minus']['attr']['class'] = array('minus');
 
       module_load_include('inc', 'islandora', 'includes/utilities');
 
-      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_bucket_classes_hook);
-      foreach ($hooks as $hook) {
-        module_invoke_all(
-          $hook,
-          array(
-            'IslandoraSolrQuery' => $islandora_solr_query,
-            'bucket_attributes' => array(
-              'link' => array(
-                'attr' => &$attr,
-                'query' => $query_plus,
-              ),
-              'minus' => array(
-                'attr' => &$attr_minus,
-                'query' => $query_minus,
-              ),
-              'plus' => array(
-                'attr' => &$attr_plus,
-                'query' => $query_plus,
-              ),
-            ),
-          )
-        );
-      }
+      $hooks = islandora_build_hook_list(ISLANDORA_SOLR_FACET_BUCKET_CLASSES_HOOK_BASE);
+      drupal_alter($hooks, $attributes, $islandora_solr_query);
+
       // XXX: We are not using l() because of active classes:
       // @see http://drupal.org/node/41595
       // Create link.
-      $link['link'] = '<a' . drupal_attributes($attr) . '>' . $bucket . '</a>';
+      $link['link'] = '<a' . drupal_attributes($attributes['link']['attr']) . '>' . $bucket . '</a>';
       $link['count'] = $count;
-      $link['link_plus'] = '<a' . drupal_attributes($attr_plus) . '>+</a>';
-      $link['link_minus'] = '<a' . drupal_attributes($attr_minus) . '>-</a>';
+      $link['link_plus'] = '<a' . drupal_attributes($attributes['plus']['attr']) . '>+</a>';
+      $link['link_minus'] = '<a' . drupal_attributes($attributes['minus']['attr']) . '>-</a>';
       $buckets[] = $link;
     }
 

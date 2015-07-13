@@ -874,30 +874,23 @@ function islandora_solr_sort() {
 
       $query = array_merge($params, array('sort' => $sort_param));
 
-      $attr = array();
+      $attributes = array(
+        'sort' => array(
+          'attr' => array(),
+          'query' => $query,
+        ),
+      );
+      $attr =& $attributes['sort'];
       if ($term == $current_sort_term) {
-        $attr['class'] = 'active';
+        $attr['class'] = array('active');
       }
       $attr['rel'] = 'nofollow';
       $attr['title'] = $label;
       $attr['href'] = url($path, array('query' => $query));
 
-      $hooks = islandora_build_hook_list(IslandoraSolrFacets::$facet_bucket_classes_hook);
+      $hooks = islandora_build_hook_list(ISLANDORA_SOLR_FACET_BUCKET_CLASSES_HOOK_BASE);
+      drupal_alter($hooks, $attributes, $_islandora_solr_queryclass);
 
-      foreach ($hooks as $hook) {
-        module_invoke_all(
-          $hook,
-          array(
-            'IslandoraSolrQuery' => $_islandora_solr_queryclass,
-            'bucket_attributes' => array(
-              'sort' => array(
-                'attr' => &$attr,
-                'query' => $query,
-              ),
-            ),
-          )
-        );
-      }
       // XXX: We're not using l() because of
       // @link http://drupal.org/node/41595 active classes. @endlink
       $item = '<a' . drupal_attributes($attr) . '>' . $label . ' ' . $indicator . '</a>';

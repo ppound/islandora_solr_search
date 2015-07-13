@@ -179,43 +179,38 @@ function hook_islandora_solr_search_rss_item_alter($item, $doc) {
 }
 
 /**
- * This hook allows one to add classes to solr facet buckets (links, plus, minus).
+ * Allow altering of Solr facet buckets links (link, plus, minus).
  *
- * The origional intention of this hook is to allow one to implement AJAX
- * usage on solr facets.
+ * The original intention of this hook is to allow one to implement AJAX
+ * functionality on Solr facets.
  *
- * @param array $vars
- *   A key value pair array, containing the following:
- *   array(
- *     'IslandoraSolrQuery' => $object,  <- Current IslandoraSolrQuery.
- *     'bucket_attributes' => array(
- *       'link' => array( <- Current 'link' link, its attributes and query
- *         'attr' => &$attr,
- *         'query' => $query_plus,
- *       ),
- *       'minus' => array( <- Current 'minus' link, its attributes and query
- *         'attr' => &$attr_minus,
- *         'query' => $query_minus,
- *       ),
- *       'plus' => array( <- Current 'plus' link, its attributes and query
- *         'attr' => &$attr_plus,
- *         'query' => $query_plus,
- *       ),
- *     )
- *   );
+ * @param array $buckets
+ *   An associative array mapping a limited set of keys to array structures.
+ *   Keys (not all are required to be present):
+ *   - minus: To generate a link excluding a value from a search.
+ *   - link: To generate a link for a search adding a refinement by default.
+ *   - plus: To generate a refined search.
+ *   - sort: To generate links for sorting.
+ *   The structure of each should be:
+ *   - attr: The an associative array of attributes as accepted by
+ *     drupal_attributes() to set on the generated "a" tag.
+ *   - query: An associative array of query parameters.
+ * @param IslandoraSolrQueryProcessor $query_processor
+ *   The query processor for the current query (with results attached).
  */
-function hook_islandora_solr_facet_bucket_classes($vars) {
-  foreach ($vars['bucket_attributes'] as $key => $value) {
+function hook_islandora_solr_facet_bucket_classes_alter(&$buckets, &$query_processor) {
+  foreach ($buckets as $bucket => &$value) {
 
     // Add the 'use-ajax' bit so Drupal will use AJAX.
-    $vars['bucket_attributes'][$key]['attr']['class'] .= " use-ajax";
+    $value['attr']['class'][] = "use-ajax";
 
     // Update the href to point to another modules menu callback.
-    $vars['bucket_attributes'][$key]['attr']['href'] = url(
+    $value['attr']['href'] = url(
       "/mymodules/superduper/callback",
       array(
-        'query' => $vars['bucket_attributes'][$key]['query'],
+        'query' => $value['query'],
       )
     );
   }
+  unset($value);
 }
