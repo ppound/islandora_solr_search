@@ -811,6 +811,7 @@ class IslandoraSolrFacets {
         $this->settings['solr_field_settings']['range_facet_slider_enabled'] == 1) {
       // Prepare and render facet dates as slider.
       $facet_dates_as_slider = $this->prepareFacetDatesSlider();
+      //dsm($facet_dates_as_slider, 'asdf');
       if (!empty($facet_dates_as_slider)) {
         $this->renderSlider($facet_dates_as_slider);
       }
@@ -880,7 +881,7 @@ class IslandoraSolrFacets {
   public function prepareFacetDates() {
     $facet_field = $this->facet_field;
     $results = $this->results;
-    $format = self::getDateFormat();
+    $format = $this->getDateFormat();
     $date_results = array();
     // Render date facet fields.
     foreach ($results as $bucket => $count) {
@@ -1039,6 +1040,8 @@ class IslandoraSolrFacets {
     return $show_more;
   }
 
+  protected $sliderKey = NULL;
+
   /**
    * Prepare facet dates for slider.
    *
@@ -1055,7 +1058,10 @@ class IslandoraSolrFacets {
     $results = $this->results;
     $format = self::getDateFormat();
     $needed_solr_call = self::$needed_solr_call;
-    $range_slider_key = self::$range_slider_key;
+    if (!isset($this->sliderKey)) {
+      $this->sliderKey = self::$range_slider_key++;
+    }
+    $range_slider_key = $this->sliderKey;
 
     $date_results = array();
     // Grab gap and end, and strip all non-buckets in results.
@@ -1193,7 +1199,6 @@ class IslandoraSolrFacets {
       'date_format' => $date_format,
       'form_key' => $range_slider_key,
     );
-    self::$range_slider_key++;
 
     return $elements;
   }
@@ -1206,7 +1211,17 @@ class IslandoraSolrFacets {
    */
   public function renderSlider($facet_dates_as_slider) {
     $elements = $facet_dates_as_slider;
+
+    // XXX: We do not want this to possibly grab from the cache, since
+    // $elements changes... Makes a mess of rebuilding.
+    $old_build_id = isset($_POST['form_build_id']) ? $_POST['form_build_id'] : NULL;
+    if (isset($old_build_id)) {
+      unset($_POST['form_build_id']);
+    }
     $range_slider_form = drupal_get_form('islandora_solr_range_slider_form_' . $elements['form_key'], $elements);
+    if (isset($old_build_id)) {
+      $_POST['form_build_id'] = $old_build_id;
+    }
     $this->content .= drupal_render($range_slider_form);
   }
 

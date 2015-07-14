@@ -231,12 +231,14 @@ function islandora_solr_islandora_solr_primary_display() {
  *
  * @see hook_menu()
  */
-function islandora_solr($query = NULL) {
+function islandora_solr($query = NULL, $params = NULL) {
   global $_islandora_solr_queryclass;
   drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.theme.css');
 
   // Url parameters.
-  $params = $_GET;
+  if ($params === NULL) {
+    $params = $_GET;
+  }
   // Get profiles.
   $primary_profiles = module_invoke_all('islandora_solr_primary_display');
   $secondary_profiles = module_invoke_all('islandora_solr_secondary_display');

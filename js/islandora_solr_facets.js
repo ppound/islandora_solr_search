@@ -82,6 +82,7 @@
   // Range slider
   Drupal.behaviors.islandoraSolrRangeSlider = {
     attach: function(context, settings) {
+
       // get year range variable
       var rangeSliderVals = settings.islandoraSolrRangeSlider;
       if (rangeSliderVals) {

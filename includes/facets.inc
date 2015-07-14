@@ -233,13 +233,14 @@ function islandora_solr_date_filter_form_submit($form, &$form_state) {
     $query = array_merge_recursive($params, array('f' => array($filter)));
   }
 
-  drupal_goto($path, array('query' => $query));
+  $form_state['redirect'] = array($path, array('query' => $query));
 }
 
 /**
  * Range slider form.
  */
 function islandora_solr_range_slider_form($form, &$form_state, $elements) {
+  //dsm($elements, 'els');
   global $_islandora_solr_queryclass;
   extract($elements);
   $from_default = current($data);
@@ -288,12 +289,10 @@ function islandora_solr_range_slider_form($form, &$form_state, $elements) {
   );
   $form['#submit'][] = 'islandora_solr_range_slider_form_submit';
 
-  drupal_add_library('system', 'ui.slider');
   // Include flot.
   // @TODO: use the libraries module for this!
   // @TODO: use the new version of flot. Didn't work out of the box, so needs
   // some extra attention.
-  drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/flot/jquery.flot.min.js');
   // @TODO: find a good way to call this for IE8 and lower
   // @code
   // <!--[if lte IE 8]>
@@ -302,21 +301,32 @@ function islandora_solr_range_slider_form($form, &$form_state, $elements) {
   // <![endif]-->
   // @endcode
 
-  drupal_add_css('misc/ui/jquery.ui.slider.css');
-  // Include slider settings.
-  $js_settings = array(
-    'islandoraSolrRangeSlider' => array(
-      $facet_field => array(
-        'facet_field' => $facet_field,
-        'form_key' => $form_key,
-        'data' => $data,
-        'slider_color' => $slider_color,
+  $mod_path = drupal_get_path('module', 'islandora_solr');
+  $form['#attached'] = array(
+    'library' => array(
+      array('system', 'ui.slider'),
+    ),
+    'css' => array(
+      'misc/ui/jquery.ui.slider.css',
+    ),
+    'js' => array(
+      array(
+        'type' => 'setting',
+        'data' => array(
+          'islandoraSolrRangeSlider' => array(
+            $facet_field => array(
+              'facet_field' => $facet_field,
+              'form_key' => $form_key,
+              'data' => $data,
+              'slider_color' => $slider_color,
+            ),
+          ),
+        ),
       ),
+      "$mod_path/js/flot/jquery.flot.min.js",
+      "$mod_path/js/islandora_solr_facets.js",
     ),
   );
-  drupal_add_js($js_settings, 'setting');
-
-  drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_facets.js');
 
   return $form;
 }
