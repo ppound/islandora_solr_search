@@ -1211,9 +1211,17 @@ class IslandoraSolrFacets {
   public function renderSlider($facet_dates_as_slider) {
     $elements = $facet_dates_as_slider;
 
-    // XXX: We do not want this to possibly grab from the cache, since
-    // $elements changes... Makes a mess of rebuilding.
-    $old_build_id = isset($_POST['form_build_id']) ? $_POST['form_build_id'] : NULL;
+    // XXX: We do not want this to possibly grab from the cache when AJAXing,
+    // since $elements changes... Makes a mess of rebuilding.
+    $old_build_id = (
+      // ... our form...
+      isset($_POST['form_id']) && strpos($_POST['form_id'], ' islandora_solr_range_slider_form_') === 0 &&
+      // ... AJAXing...
+      isset($_POST['ajax_page_state']) &&
+      // ... with the build ID.
+      isset($_POST['form_build_id'])) ?
+      $_POST['form_build_id'] :
+      NULL;
     if (isset($old_build_id)) {
       $_POST['form_build_id'] = NULL;
     }

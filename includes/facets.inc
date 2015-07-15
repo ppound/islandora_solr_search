@@ -121,16 +121,27 @@ function islandora_solr_date_filter_form($form, &$form_state, $elements) {
   $form['#submit'][] = 'islandora_solr_date_filter_form_submit';
   $form['#validate'][] = 'islandora_solr_date_filter_form_validate';
 
-  drupal_add_library('system', 'ui.datepicker');
-  drupal_add_css('misc/ui/jquery.ui.datepicker.css');
-  drupal_add_js(array(
-    'islandoraSolrDatepickerRange' => array(
-      $facet_field => array(
-        'datepickerRange' => trim($datepicker_range),
-        'formKey' => $form_key,
-      ),
+  $form['#attached'] = array(
+    'library' => array(
+      array('system', 'ui.datepicker'),
     ),
-  ), 'setting');
+    'css' => array(
+      'misc/ui/jquery.ui.datepicker.css',
+    ),
+    'js' => array(
+      array(
+        'type' => 'setting',
+        'data' =>array(
+          'islandoraSolrDatepickerRange' => array(
+            $facet_field => array(
+              'datepickerRange' => trim($datepicker_range),
+              'formKey' => $form_key,
+            ),
+          ),
+       ),
+     ),
+    ),
+  );
 
   return $form;
 }
@@ -182,7 +193,6 @@ function islandora_solr_date_filter_form_validate($form, &$form_state) {
 function islandora_solr_date_filter_form_submit($form, &$form_state) {
   global $_islandora_solr_queryclass;
 
-  $form_state['rebuild'] = TRUE;
   $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
   $path = current_path();
   $facet_field = $form_state['values']['date_filter_facet_field'];
@@ -334,8 +344,6 @@ function islandora_solr_range_slider_form($form, &$form_state, $elements) {
  * Range slider form submit.
  */
 function islandora_solr_range_slider_form_submit($form, &$form_state) {
-  $form_state['rebuild'] = TRUE;
-
   // Set variables.
   global $_islandora_solr_queryclass;
   $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
