@@ -811,7 +811,6 @@ class IslandoraSolrFacets {
         $this->settings['solr_field_settings']['range_facet_slider_enabled'] == 1) {
       // Prepare and render facet dates as slider.
       $facet_dates_as_slider = $this->prepareFacetDatesSlider();
-      //dsm($facet_dates_as_slider, 'asdf');
       if (!empty($facet_dates_as_slider)) {
         $this->renderSlider($facet_dates_as_slider);
       }
@@ -1216,10 +1215,11 @@ class IslandoraSolrFacets {
     // $elements changes... Makes a mess of rebuilding.
     $old_build_id = isset($_POST['form_build_id']) ? $_POST['form_build_id'] : NULL;
     if (isset($old_build_id)) {
-      unset($_POST['form_build_id']);
+      $_POST['form_build_id'] = NULL;
     }
     $range_slider_form = drupal_get_form('islandora_solr_range_slider_form_' . $elements['form_key'], $elements);
     if (isset($old_build_id)) {
+      // XXX: Restore the build ID to $_POST, just in case.
       $_POST['form_build_id'] = $old_build_id;
     }
     $this->content .= drupal_render($range_slider_form);

@@ -240,7 +240,6 @@ function islandora_solr_date_filter_form_submit($form, &$form_state) {
  * Range slider form.
  */
 function islandora_solr_range_slider_form($form, &$form_state, $elements) {
-  //dsm($elements, 'els');
   global $_islandora_solr_queryclass;
   extract($elements);
   $from_default = current($data);
