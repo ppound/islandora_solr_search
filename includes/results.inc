@@ -1215,7 +1215,7 @@ class IslandoraSolrFacets {
     // since $elements changes... Makes a mess of rebuilding.
     $old_build_id = (
       // ... our form...
-      isset($_POST['form_id']) && strpos($_POST['form_id'], ' islandora_solr_range_slider_form_') === 0 &&
+      isset($_POST['form_id']) && strpos($_POST['form_id'], 'islandora_solr_range_slider_form_') === 0 &&
       // ... AJAXing...
       isset($_POST['ajax_page_state']) &&
       // ... with the build ID.
