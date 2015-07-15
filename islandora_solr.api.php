@@ -206,7 +206,7 @@ function hook_islandora_solr_facet_bucket_classes_alter(&$buckets, &$query_proce
 
     // Update the href to point to another modules menu callback.
     $value['attr']['href'] = url(
-      "/mymodules/superduper/callback",
+      "mymodules/superduper/callback",
       array(
         'query' => $value['query'],
       )
