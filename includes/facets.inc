@@ -131,15 +131,15 @@ function islandora_solr_date_filter_form($form, &$form_state, $elements) {
     'js' => array(
       array(
         'type' => 'setting',
-        'data' =>array(
+        'data' => array(
           'islandoraSolrDatepickerRange' => array(
             $facet_field => array(
               'datepickerRange' => trim($datepicker_range),
               'formKey' => $form_key,
             ),
           ),
-       ),
-     ),
+        ),
+      ),
     ),
   );
 

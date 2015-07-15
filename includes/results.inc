@@ -1219,9 +1219,7 @@ class IslandoraSolrFacets {
       // ... AJAXing...
       isset($_POST['ajax_page_state']) &&
       // ... with the build ID.
-      isset($_POST['form_build_id'])) ?
-      $_POST['form_build_id'] :
-      NULL;
+      isset($_POST['form_build_id'])) ? $_POST['form_build_id'] : NULL;
     if (isset($old_build_id)) {
       $_POST['form_build_id'] = NULL;
     }
