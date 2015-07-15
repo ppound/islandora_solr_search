@@ -177,3 +177,40 @@ function hook_islandora_solr_search_rss_item_alter($item, $doc) {
   $item['title'] = $doc['PID'];
   $item['description'] = 'this is the new rss item description';
 }
+
+/**
+ * Allow altering of Solr facet buckets links (link, plus, minus).
+ *
+ * The original intention of this hook is to allow one to implement AJAX
+ * functionality on Solr facets.
+ *
+ * @param array $buckets
+ *   An associative array mapping a limited set of keys to array structures.
+ *   Keys (not all are required to be present):
+ *   - minus: To generate a link excluding a value from a search.
+ *   - link: To generate a link for a search adding a refinement by default.
+ *   - plus: To generate a refined search.
+ *   - sort: To generate links for sorting.
+ *   The structure of each should be:
+ *   - attr: The an associative array of attributes as accepted by
+ *     drupal_attributes() to set on the generated "a" tag.
+ *   - query: An associative array of query parameters.
+ * @param IslandoraSolrQueryProcessor $query_processor
+ *   The query processor for the current query (with results attached).
+ */
+function hook_islandora_solr_facet_bucket_classes_alter(&$buckets, &$query_processor) {
+  foreach ($buckets as $bucket => &$value) {
+
+    // Add the 'use-ajax' bit so Drupal will use AJAX.
+    $value['attr']['class'][] = "use-ajax";
+
+    // Update the href to point to another modules menu callback.
+    $value['attr']['href'] = url(
+      "mymodules/superduper/callback",
+      array(
+        'query' => $value['query'],
+      )
+    );
+  }
+  unset($value);
+}

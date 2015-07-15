@@ -9,6 +9,8 @@ define('ISLANDORA_SOLR_SEARCH_PATH', 'islandora/search');
 define('ISLANDORA_SOLR_QUERY_SPLIT_REGEX', '/(?<!\\\\) /');
 define('ISLANDORA_SOLR_QUERY_FIELD_VALUE_SPLIT_REGEX', '/(?<!\\\\):/');
 
+const ISLANDORA_SOLR_FACET_BUCKET_CLASSES_HOOK_BASE = 'islandora_solr_facet_bucket_classes';
+
 // Includes functions for common db queries.
 require_once dirname(__FILE__) . '/includes/db.inc';
 // Includes functions for common tasks.
@@ -229,12 +231,14 @@ function islandora_solr_islandora_solr_primary_display() {
  *
  * @see hook_menu()
  */
-function islandora_solr($query = NULL) {
+function islandora_solr($query = NULL, $params = NULL) {
   global $_islandora_solr_queryclass;
   drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.theme.css');
 
   // Url parameters.
-  $params = $_GET;
+  if ($params === NULL) {
+    $params = $_GET;
+  }
   // Get profiles.
   $primary_profiles = module_invoke_all('islandora_solr_primary_display');
   $secondary_profiles = module_invoke_all('islandora_solr_secondary_display');
@@ -322,7 +326,6 @@ function islandora_solr($query = NULL) {
     $message = t('Parameters: <br /><pre>!debug</pre>', array('!debug' => print_r($_islandora_solr_queryclass->solrParams, TRUE)));
     drupal_set_message(filter_xss($message, array('pre', 'br')), 'status');
   }
-
   return $output;
 }
 

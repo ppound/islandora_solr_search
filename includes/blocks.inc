@@ -381,6 +381,7 @@ function islandora_solr_block_view($block_name = '') {
         $display_class = new $solr_blocks[$block_name]['class']();
         $block_function = $solr_blocks[$block_name]['function'];
         if (method_exists($display_class, $block_function)) {
+
           $block['content'] = $display_class->$block_function($_islandora_solr_queryclass);
         }
       }
@@ -883,13 +884,24 @@ function islandora_solr_sort() {
 
       $query = array_merge($params, array('sort' => $sort_param));
 
-      $attr = array();
+      $attributes = array(
+        'sort' => array(
+          'attr' => array(
+            'class' => array(),
+          ),
+          'query' => $query,
+        ),
+      );
+      $attr =& $attributes['sort']['attr'];
       if ($term == $current_sort_term) {
-        $attr['class'] = 'active';
+        $attr['class'] = array('active');
       }
       $attr['rel'] = 'nofollow';
       $attr['title'] = $label;
       $attr['href'] = url($path, array('query' => $query));
+
+      $hooks = islandora_build_hook_list(ISLANDORA_SOLR_FACET_BUCKET_CLASSES_HOOK_BASE);
+      drupal_alter($hooks, $attributes, $_islandora_solr_queryclass);
 
       // XXX: We're not using l() because of
       // @link http://drupal.org/node/41595 active classes. @endlink

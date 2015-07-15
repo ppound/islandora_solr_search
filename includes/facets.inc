@@ -121,16 +121,27 @@ function islandora_solr_date_filter_form($form, &$form_state, $elements) {
   $form['#submit'][] = 'islandora_solr_date_filter_form_submit';
   $form['#validate'][] = 'islandora_solr_date_filter_form_validate';
 
-  drupal_add_library('system', 'ui.datepicker');
-  drupal_add_css('misc/ui/jquery.ui.datepicker.css');
-  drupal_add_js(array(
-    'islandoraSolrDatepickerRange' => array(
-      $facet_field => array(
-        'datepickerRange' => trim($datepicker_range),
-        'formKey' => $form_key,
+  $form['#attached'] = array(
+    'library' => array(
+      array('system', 'ui.datepicker'),
+    ),
+    'css' => array(
+      'misc/ui/jquery.ui.datepicker.css',
+    ),
+    'js' => array(
+      array(
+        'type' => 'setting',
+        'data' => array(
+          'islandoraSolrDatepickerRange' => array(
+            $facet_field => array(
+              'datepickerRange' => trim($datepicker_range),
+              'formKey' => $form_key,
+            ),
+          ),
+        ),
       ),
     ),
-  ), 'setting');
+  );
 
   return $form;
 }
@@ -182,7 +193,6 @@ function islandora_solr_date_filter_form_validate($form, &$form_state) {
 function islandora_solr_date_filter_form_submit($form, &$form_state) {
   global $_islandora_solr_queryclass;
 
-  $form_state['rebuild'] = TRUE;
   $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
   $path = current_path();
   $facet_field = $form_state['values']['date_filter_facet_field'];
@@ -233,7 +243,7 @@ function islandora_solr_date_filter_form_submit($form, &$form_state) {
     $query = array_merge_recursive($params, array('f' => array($filter)));
   }
 
-  drupal_goto($path, array('query' => $query));
+  $form_state['redirect'] = array($path, array('query' => $query));
 }
 
 /**
@@ -288,12 +298,10 @@ function islandora_solr_range_slider_form($form, &$form_state, $elements) {
   );
   $form['#submit'][] = 'islandora_solr_range_slider_form_submit';
 
-  drupal_add_library('system', 'ui.slider');
   // Include flot.
   // @TODO: use the libraries module for this!
   // @TODO: use the new version of flot. Didn't work out of the box, so needs
   // some extra attention.
-  drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/flot/jquery.flot.min.js');
   // @TODO: find a good way to call this for IE8 and lower
   // @code
   // <!--[if lte IE 8]>
@@ -302,21 +310,32 @@ function islandora_solr_range_slider_form($form, &$form_state, $elements) {
   // <![endif]-->
   // @endcode
 
-  drupal_add_css('misc/ui/jquery.ui.slider.css');
-  // Include slider settings.
-  $js_settings = array(
-    'islandoraSolrRangeSlider' => array(
-      $facet_field => array(
-        'facet_field' => $facet_field,
-        'form_key' => $form_key,
-        'data' => $data,
-        'slider_color' => $slider_color,
+  $mod_path = drupal_get_path('module', 'islandora_solr');
+  $form['#attached'] = array(
+    'library' => array(
+      array('system', 'ui.slider'),
+    ),
+    'css' => array(
+      'misc/ui/jquery.ui.slider.css',
+    ),
+    'js' => array(
+      array(
+        'type' => 'setting',
+        'data' => array(
+          'islandoraSolrRangeSlider' => array(
+            $facet_field => array(
+              'facet_field' => $facet_field,
+              'form_key' => $form_key,
+              'data' => $data,
+              'slider_color' => $slider_color,
+            ),
+          ),
+        ),
       ),
+      "$mod_path/js/flot/jquery.flot.min.js",
+      "$mod_path/js/islandora_solr_facets.js",
     ),
   );
-  drupal_add_js($js_settings, 'setting');
-
-  drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr_facets.js');
 
   return $form;
 }
@@ -325,8 +344,6 @@ function islandora_solr_range_slider_form($form, &$form_state, $elements) {
  * Range slider form submit.
  */
 function islandora_solr_range_slider_form_submit($form, &$form_state) {
-  $form_state['rebuild'] = TRUE;
-
   // Set variables.
   global $_islandora_solr_queryclass;
   $params = isset($_islandora_solr_queryclass->internalSolrParams) ? $_islandora_solr_queryclass->internalSolrParams : array();
@@ -355,5 +372,5 @@ function islandora_solr_range_slider_form_submit($form, &$form_state) {
     $query = array_merge_recursive($params, array('f' => array($filter)));
   }
 
-  drupal_goto($path, array('query' => $query));
+  $form_state['redirect'] = array($path, array('query' => $query));
 }
