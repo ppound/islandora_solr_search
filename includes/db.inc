@@ -176,7 +176,7 @@ function islandora_solr_get_truncate_length_fields() {
   $records = islandora_solr_get_fields('result_fields', TRUE, FALSE);
   $truncate_length_fields = array();
   foreach ($records as $value) {
-    if (isset($value['solr_field_settings']['maximum_length']) && intval($value['solr_field_settings']['maximum_length']) > 0) {
+    if (isset($value['solr_field_settings']['maximum_length']) && intval($value['solr_field_settings']['maximum_length']) > 0 && (!isset($value['solr_field_settings']['truncation_type']) || $value['solr_field_settings']['truncation_type'] == 'separate_value_option')) {
       $truncate_length_fields[$value['solr_field']] = array(
         'maximum_length' => $value['solr_field_settings']['maximum_length'],
       );
@@ -187,6 +187,11 @@ function islandora_solr_get_truncate_length_fields() {
         $truncate_length_fields[$value['solr_field']]['wordsafe'] = $value['solr_field_settings']['wordsafe'];
         $truncate_length_fields[$value['solr_field']]['wordsafe_length'] = $value['solr_field_settings']['wordsafe_length'];
       }
+    }
+    elseif (isset($value['solr_field_settings']['max_values']) && intval($value['solr_field_settings']['max_values']) > 0 && $value['solr_field_settings']['truncation_type'] == 'whole_field_option') {
+      $truncate_length_fields[$value['solr_field']] = array(
+        'max_values' => $value['solr_field_settings']['max_values'],
+      );
     }
   }
   return $truncate_length_fields;

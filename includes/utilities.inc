@@ -317,7 +317,7 @@ function islandora_solr_prepare_solr_results($solr_results) {
       }
 
       // Truncate value lengths before linking, avoids destroying link tags.
-      if (array_key_exists($field, $truncate_length) && $truncate_length[$field]['maximum_length'] > 0) {
+      if (array_key_exists($field, $truncate_length) && isset($truncate_length[$field]['maximum_length']) && $truncate_length[$field]['maximum_length'] > 0) {
         // Coder tends to not like inline anonymous functions.
         $truncate_func = function (&$val_val) use ($field, $truncate_length) {
           $tf =& $truncate_length[$field];
@@ -346,6 +346,31 @@ function islandora_solr_prepare_solr_results($solr_results) {
         $value = array_map($map_to_link, (array) $original_value, (array) $value);
       }
 
+      // Truncate output based on the field rather than by value.
+      if (array_key_exists($field, $truncate_length) && isset($truncate_length[$field]['max_values']) && $truncate_length[$field]['max_values'] > 0) {
+        if (count($value) > 0) {
+          $mod_path = drupal_get_path('module', 'islandora_solr_metadata');
+          drupal_add_js("$mod_path/js/truncation-toggle.js");
+          // Build two arrays for display, one filtered by size (max_values)
+          // and one with all the data.
+          $list_full = $list = array();
+          foreach ($value as $index => $current_value) {
+            $list_full[] = $current_value;
+            if ($index + 1 <= $truncate_length[$field]['max_values']) {
+              $list[] = $current_value;
+            }
+          }
+          $value
+            = '<span class="toggle-wrapper">' .
+            t("<span>!value <br><a href='#' class='toggler'>Show more</a></span>", array(
+              '!value' => implode("<br>", $list),
+            )) .
+            t("<span>!original_value <br><a href='#' class='toggler'>Show less</a></span>", array(
+              '!original_value' => implode("<br>", $list_full),
+            )) .
+            '</span>';
+        }
+      }
       // Implode.
       $value = is_array($value) ? implode(", ", $value) : $value;
       // Add link to object.
