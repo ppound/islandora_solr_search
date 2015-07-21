@@ -209,7 +209,7 @@ class IslandoraSolrResults {
       $query_minus = $params;
 
       // Remove query from path.
-      $path_minus = implode('/', explode('/', $path, -1)) . '/ ';
+      $path_minus = implode('/', explode('/', $path, -1));
 
       // Set attributes variable for remove link.
       $attributes = array(
