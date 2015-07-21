@@ -215,6 +215,7 @@ class IslandoraSolrResults {
       $attributes = array(
         'minus' => array(
           'attr' => array(),
+          'path' => $path_minus,
           'query' => $query_minus,
         ),
       );
@@ -275,6 +276,7 @@ class IslandoraSolrResults {
         $attributes = array(
           'minus' => array(
             'attr' => array(),
+            'path' => $path,
             'query' => $query_minus,
           ),
         );
@@ -973,9 +975,15 @@ class IslandoraSolrFacets {
 
       // Set basic attributes.
       $attributes = array(
-        'link' => array(),
-        'minus' => array(),
-        'plus' => array(),
+        'link' => array(
+          'path' => $path,
+        ),
+        'plus' => array(
+          'path' => $path,
+        ),
+        'minus' => array(
+          'path' => $path,
+        ),
       );
       $attributes['link']['attr'] = $attributes['minus']['attr'] = $attributes['plus']['attr'] = array('rel' => 'nofollow');
 
