@@ -413,7 +413,7 @@ function islandora_solr_islandora_basic_collection_backend_callable($collection_
  */
 function islandora_solr_truncate_field_display($display_values, $max_length, $add_ellipsis, $word_safe, $wordsafe_length, $separator) {
   if (count($display_values) > 0) {
-    $mod_path = drupal_get_path('module', 'islandora_solr_metadata');
+    $mod_path = drupal_get_path('module', 'islandora_solr');
     drupal_add_js("$mod_path/js/truncation-toggle.js");
     // Build two arrays for display, one filtered by size (max_values)
     // and one with all the data.
