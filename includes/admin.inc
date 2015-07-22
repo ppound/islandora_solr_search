@@ -1792,7 +1792,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
       '#title' => t('Maximum Length'),
       '#default_value' => isset($values['maximum_length']) ? $values['maximum_length'] : '0',
       '#element_validate' => array('element_validate_integer'),
-      '#description' => t('Maximum field length to render for display. A setting of 0 (default) renders the entire value.'),
+      '#description' => t('Maximum field length to render for display. A setting of 0 (default) renders the entire value.<br /> When truncating based on the whole field the max length may be exceeded by the length of ellispse string.'),
     ),
     'add_ellipsis' => array(
       '#type' => 'checkbox',
