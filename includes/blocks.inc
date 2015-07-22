@@ -890,6 +890,7 @@ function islandora_solr_sort() {
             'class' => array(),
           ),
           'query' => $query,
+          'path' => $path,
         ),
       );
       $attr =& $attributes['sort']['attr'];
