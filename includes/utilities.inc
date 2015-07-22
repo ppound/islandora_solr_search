@@ -317,7 +317,7 @@ function islandora_solr_prepare_solr_results($solr_results) {
       }
 
       // Truncate value lengths before linking, avoids destroying link tags.
-      if (array_key_exists($field, $truncate_length) && isset($truncate_length[$field]['maximum_length']) && $truncate_length[$field]['maximum_length'] > 0) {
+      if (array_key_exists($field, $truncate_length) && $truncate_length[$field]['maximum_length'] > 0 && (!isset($truncate_length[$field]['truncation_type']) || $truncate_length[$field]['truncation_type'] == 'separate_value_option')) {
         // Coder tends to not like inline anonymous functions.
         $truncate_func = function (&$val_val) use ($field, $truncate_length) {
           $tf =& $truncate_length[$field];
@@ -345,20 +345,32 @@ function islandora_solr_prepare_solr_results($solr_results) {
         };
         $value = array_map($map_to_link, (array) $original_value, (array) $value);
       }
-
       // Truncate output based on the field rather than by value.
-      if (array_key_exists($field, $truncate_length) && isset($truncate_length[$field]['max_values']) && $truncate_length[$field]['max_values'] > 0) {
+      if (array_key_exists($field, $truncate_length) && $truncate_length[$field]['maximum_length'] > 0 && isset($truncate_length[$field]['truncation_type']) && $truncate_length[$field]['truncation_type'] == 'whole_field_option') {
         if (count($value) > 0) {
           $mod_path = drupal_get_path('module', 'islandora_solr_metadata');
           drupal_add_js("$mod_path/js/truncation-toggle.js");
           // Build two arrays for display, one filtered by size (max_values)
           // and one with all the data.
           $list_full = $list = array();
+          $character_output_count = 0;
+          $truncated = FALSE;
           foreach ($value as $index => $current_value) {
             $list_full[] = $current_value;
-            if ($index + 1 <= $truncate_length[$field]['max_values']) {
+            if ($character_output_count + strlen($current_value) <= $truncate_length[$field]['maximum_length']) {
               $list[] = $current_value;
             }
+            elseif ($character_output_count + strlen($current_value) > $truncate_length[$field]['maximum_length'] && !$truncated) {
+              $truncation_length = $truncate_length[$field]['maximum_length'] - $character_output_count;
+              // Force the display of the full ellipsis.
+              if ($truncation_length < strlen(t('...')) && $truncate_length[$field]['add_ellipsis']) {
+                $truncation_length = strlen(t('...'));
+              }
+              $current_value = truncate_utf8($current_value, $truncation_length, $truncate_length[$field]['wordsafe'], $truncate_length[$field]['add_ellipsis'], $truncate_length[$field]['wordsafe_length']);
+              $list[] = $current_value;
+              $truncated = TRUE;
+            }
+            $character_output_count += strlen($current_value);
           }
           $value
             = '<span class="toggle-wrapper">' .

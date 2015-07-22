@@ -1555,7 +1555,6 @@ function _islandora_solr_handle_solr_field_settings($solr_field_settings = NULL,
           'snippet' => isset($solr_field_settings['snippet']) ? $solr_field_settings['snippet'] : NULL,
           'date_format' => isset($solr_field_settings['date_format']) ? trim($solr_field_settings['date_format']) : '',
           'truncation_type' => isset($solr_field_settings['truncation_type']) ? trim($solr_field_settings['truncation_type']) : 'separate_value_option',
-          'max_values' => isset($solr_field_settings['max_values']) ? trim($solr_field_settings['max_values']) : '',
           'maximum_length' => isset($solr_field_settings['maximum_length']) ? trim($solr_field_settings['maximum_length']) : '',
           'add_ellipsis' => isset($solr_field_settings['add_ellipsis']) ? $solr_field_settings['add_ellipsis'] : FALSE,
           'wordsafe' => isset($solr_field_settings['wordsafe']) ? $solr_field_settings['wordsafe'] : FALSE,
@@ -1788,31 +1787,12 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
       '#options' => array('separate_value_option' => t('Limit length of each separate value'), 'whole_field_option' => t('Limit Length of the whole field')),
       '#default_value' => isset($values['truncation_type']) ? $values['truncation_type'] : 'separate_value_option',
     ),
-    'max_values' => array(
-      '#type' => 'textfield',
-      '#title' => t('Max Results Displayed'),
-      '#description' => t('The field contents will be truncated to only display at most this number of results. 0 or less to disable truncation.'),
-      '#default_value' => isset($values['max_values']) ? $values['max_values'] : '0',
-      '#element_validate' => array('element_validate_integer'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="truncation_type"]' => array(
-            'value' => 'whole_field_option',
-          ),
-        ),
-      ),
-    ),
     'maximum_length' => array(
       '#type' => 'textfield',
       '#title' => t('Maximum Length'),
       '#default_value' => isset($values['maximum_length']) ? $values['maximum_length'] : '0',
       '#element_validate' => array('element_validate_integer'),
       '#description' => t('Maximum field length to render for display. A setting of 0 (default) renders the entire value.'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="truncation_type"]' => array('value' => 'separate_value_option'),
-        ),
-      ),
     ),
     'add_ellipsis' => array(
       '#type' => 'checkbox',
@@ -1821,8 +1801,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
       '#default_value' => isset($values['add_ellipsis']) ? $values['add_ellipsis'] : FALSE,
       '#states' => array(
         'invisible' => array(
-          array(':input[name="maximum_length"]' => array('value' => '0')),
-          array(':input[name="truncation_type"]' => array('value' => 'whole_field_option')),
+          ':input[name="maximum_length"]' => array('value' => '0'),
         ),
       ),
     ),
@@ -1833,8 +1812,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
       '#default_value' => isset($values['wordsafe']) ? $values['wordsafe'] : FALSE,
       '#states' => array(
         'invisible' => array(
-          array(':input[name="maximum_length"]' => array('value' => '0')),
-          array(':input[name="truncation_type"]' => array('value' => 'whole_field_option')),
+          ':input[name="maximum_length"]' => array('value' => '0'),
         ),
       ),
     ),
@@ -1846,7 +1824,6 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
         'invisible' => array(
           array(':input[name="maximum_length"]' => array('value' => '0')),
           array(':input[name="wordsafe"]' => array('checked' => FALSE)),
-          array(':input[name="truncation_type"]' => array('value' => 'whole_field_option')),
         ),
       ),
       '#default_value' => isset($values['wordsafe_length']) ? $values['wordsafe_length'] : 1,
