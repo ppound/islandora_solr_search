@@ -412,14 +412,15 @@ function islandora_solr_islandora_basic_collection_backend_callable($collection_
  *   The updated display values.
  */
 function islandora_solr_truncate_field_display($display_values, $max_length, $add_ellipsis, $word_safe, $wordsafe_length, $separator) {
-  if (count($display_values) > 0) {
+  $updated_display_values = $display_values;
+  if (count($updated_display_values) > 0) {
     $mod_path = drupal_get_path('module', 'islandora_solr');
     drupal_add_js("$mod_path/js/truncation-toggle.js");
     // Build two arrays for display, one filtered by size (max_values)
     // and one with all the data.
     $truncated_list = array();
     $character_output_count = 0;
-    foreach ($display_values as $index => $current_value) {
+    foreach ($updated_display_values as $index => $current_value) {
       if ($character_output_count + drupal_strlen($current_value) <= $max_length) {
         $truncated_list[] = $current_value;
         $character_output_count += drupal_strlen($current_value);
@@ -435,7 +436,7 @@ function islandora_solr_truncate_field_display($display_values, $max_length, $ad
         break;
       }
     }
-    $display_values
+    $updated_display_values
       = '<span class="toggle-wrapper">' .
       t("<span>!value !separator<a href='#' class='toggler'>Show more</a></span>", array(
         '!separator' => $separator,
@@ -447,5 +448,5 @@ function islandora_solr_truncate_field_display($display_values, $max_length, $ad
       )) .
       '</span>';
   }
-  return $display_values;
+  return $updated_display_values;
 };
