@@ -317,7 +317,7 @@ function islandora_solr_prepare_solr_results($solr_results) {
       }
 
       // Truncate value lengths before linking, avoids destroying link tags.
-      if (array_key_exists($field, $truncate_length) && $truncate_length[$field]['maximum_length'] > 0) {
+      if (array_key_exists($field, $truncate_length) && $truncate_length[$field]['maximum_length'] > 0 && (!isset($truncate_length[$field]['truncation_type']) || $truncate_length[$field]['truncation_type'] == 'separate_value_option')) {
         // Coder tends to not like inline anonymous functions.
         $truncate_func = function (&$val_val) use ($field, $truncate_length) {
           $tf =& $truncate_length[$field];
@@ -345,7 +345,10 @@ function islandora_solr_prepare_solr_results($solr_results) {
         };
         $value = array_map($map_to_link, (array) $original_value, (array) $value);
       }
-
+      // Truncate output based on the field rather than by value.
+      if (array_key_exists($field, $truncate_length) && $truncate_length[$field]['maximum_length'] > 0 && isset($truncate_length[$field]['truncation_type']) && $truncate_length[$field]['truncation_type'] == 'whole_field_option') {
+        $value = islandora_solr_truncate_field_display($value, $truncate_length[$field]['maximum_length'], $truncate_length[$field]['add_ellipsis'], $truncate_length[$field]['wordsafe'], $truncate_length[$field]['wordsafe_length'], "<br />");
+      }
       // Implode.
       $value = is_array($value) ? implode(", ", $value) : $value;
       // Add link to object.
@@ -386,4 +389,64 @@ function islandora_solr_islandora_basic_collection_backend_callable($collection_
     $qp->islandoraSolrResult['response']['numFound'],
     array_map($map_to_pids, $qp->islandoraSolrResult['response']['objects']),
   );
+};
+
+/**
+ * Truncate the field display based on entire field result(s).
+ *
+ *
+ * @param array $display_values
+ *   An array of the values that are to be processed for truncation.
+ * @param int $max_length
+ *   The maxium length of characters to display before truncating results.
+ * @param bool $add_ellipsis
+ *   Boolean to enable the display of an ellispsis.
+ * @param bool $word_safe
+ *   Boolean to enable word safe in truncate_utf8.
+ * @param int $wordsafe_length
+ *   Min wordsafe length.
+ * @param string $separator
+ *   A separator to use for display output.
+ *
+ * @return string
+ *   The updated display values.
+ */
+function islandora_solr_truncate_field_display($display_values, $max_length, $add_ellipsis, $word_safe, $wordsafe_length, $separator) {
+  $updated_display_values = $display_values;
+  if (count($updated_display_values) > 0) {
+    $mod_path = drupal_get_path('module', 'islandora_solr');
+    drupal_add_js("$mod_path/js/truncation-toggle.js");
+    // Build two arrays for display, one filtered by size (max_values)
+    // and one with all the data.
+    $truncated_list = array();
+    $character_output_count = 0;
+    foreach ($updated_display_values as $index => $current_value) {
+      if ($character_output_count + drupal_strlen($current_value) <= $max_length) {
+        $truncated_list[] = $current_value;
+        $character_output_count += drupal_strlen($current_value);
+      }
+      elseif ($character_output_count + drupal_strlen($current_value) > $max_length) {
+        $truncation_length = $max_length - $character_output_count;
+        // Force the display of the full ellipsis.
+        if ($add_ellipsis) {
+          $truncation_length = max($truncation_length, drupal_strlen(t('...')));
+        }
+        $current_value = truncate_utf8($current_value, $truncation_length, $word_safe, $add_ellipsis, $wordsafe_length);
+        $truncated_list[] = $current_value;
+        break;
+      }
+    }
+    $updated_display_values
+      = '<span class="toggle-wrapper">' .
+      t("<span>!value !separator<a href='#' class='toggler'>Show more</a></span>", array(
+        '!separator' => $separator,
+        '!value' => implode($separator, $truncated_list),
+      )) .
+      t("<span>!original_value !separator<a href='#' class='toggler'>Show less</a></span>", array(
+        '!separator' => $separator,
+        '!original_value' => implode($separator, $display_values),
+      )) .
+      '</span>';
+  }
+  return $updated_display_values;
 };

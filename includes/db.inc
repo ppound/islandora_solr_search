@@ -187,6 +187,9 @@ function islandora_solr_get_truncate_length_fields() {
         $truncate_length_fields[$value['solr_field']]['wordsafe'] = $value['solr_field_settings']['wordsafe'];
         $truncate_length_fields[$value['solr_field']]['wordsafe_length'] = $value['solr_field_settings']['wordsafe_length'];
       }
+      if (isset($value['solr_field_settings']['truncation_type'])) {
+        $truncate_length_fields[$value['solr_field']]['truncation_type'] = $value['solr_field_settings']['truncation_type'];
+      }
     }
   }
   return $truncate_length_fields;
