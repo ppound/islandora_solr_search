@@ -36,7 +36,7 @@ function islandora_solr_config_admin_rss_settings($form, &$form_state) {
     '#title' => t('Item settings'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
-    '#description' => t('To take full control over the RSS item output you can also override the following method: IslandoraSolrResultsRSS::rssItem()'),
+    '#description' => t('If the Solr Search Results Display fields are limited, only those fields which are configured for display can be used here, if an un-configured field is used it will be ignored. To take full control over the RSS item output you can also override the following method: IslandoraSolrResultsRSS::rssItem()'),
   );
   $form['rss_item']['title'] = array(
     '#type' => 'textfield',
