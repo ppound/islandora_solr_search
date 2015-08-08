@@ -137,6 +137,16 @@ function hook_islandora_solr_query_blocks() {
 }
 
 /**
+ * Hook to notify other modules that the query returned 0 results.
+ *
+ * @param IslandoraSolrQueryProcessor $islandora_solr_query
+ *   The IslandoraSolrQueryProcessor object which includes the current query.
+ */
+function hook_islandora_solr_query_no_results(IslandoraSolrQueryProcessor $islandora_solr_query) {
+  $query = $islandora_solr_query->solrQuery;
+}
+
+/**
  * @} End of "addtogroup hooks".
  */
 
