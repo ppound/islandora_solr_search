@@ -342,9 +342,11 @@ class IslandoraSolrQueryProcessor {
         if (variable_get('islandora_solr_search_navigation', FALSE)) {
           $id = bin2hex(drupal_random_bytes(10));
           $page_params = drupal_get_query_parameters();
+          $search_nav_qp = $this;
+          $search_nav_qp->islandoraSolrResult = NULL;
           $_SESSION['islandora_solr_search_nav_params'][$id] = array(
             'path' => current_path(),
-            'query_processor' => $this,
+            'query_processor' => $search_nav_qp,
           );
 
           $url_params = array(
