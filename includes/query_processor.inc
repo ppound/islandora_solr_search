@@ -333,11 +333,8 @@ class IslandoraSolrQueryProcessor {
     $object_results = array();
     if (isset($results)) {
       $solr_results = json_decode($results->getRawResponse(), TRUE);
-      if ($solr_results['response']['numFound'] === 0) {
-        // Invoke a hook for third-party modules to be notified that
-        // no results were found.
-        module_invoke_all('islandora_solr_query_no_results', $this);
-      }
+      // Invoke a hook for third-party modules to be notified of the result.
+      module_invoke_all('islandora_solr_query_result', $solr_results);
       // Create results tailored for Islandora's use.
       $object_results = $solr_results['response']['docs'];
       $content_model_solr_field = variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_ms');

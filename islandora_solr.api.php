@@ -137,13 +137,15 @@ function hook_islandora_solr_query_blocks() {
 }
 
 /**
- * Hook to notify other modules that the query returned 0 results.
+ * Hook to notify other modules of the query result.
  *
- * @param IslandoraSolrQueryProcessor $islandora_solr_query
- *   The IslandoraSolrQueryProcessor object which includes the current query.
+ * @param array $result
+ *   The result of the query.
  */
-function hook_islandora_solr_query_no_results(IslandoraSolrQueryProcessor $islandora_solr_query) {
-  $query = $islandora_solr_query->solrQuery;
+function hook_islandora_solr_query_result(array $result) {
+  if ($result['response']['response']['numFound'] === 0) {
+    $query = $result['responseHeader']['params']['q'];
+  }
 }
 
 /**
