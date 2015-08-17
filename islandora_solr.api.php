@@ -143,7 +143,7 @@ function hook_islandora_solr_query_blocks() {
  *   The result of the query.
  */
 function hook_islandora_solr_query_result(array $result) {
-  if ($result['response']['response']['numFound'] === 0) {
+  if ($result['response']['numFound'] === 0) {
     $query = $result['responseHeader']['params']['q'];
   }
 }
