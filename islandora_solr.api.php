@@ -137,6 +137,18 @@ function hook_islandora_solr_query_blocks() {
 }
 
 /**
+ * Hook to notify other modules of the query result.
+ *
+ * @param array $result
+ *   The result of the query.
+ */
+function hook_islandora_solr_query_result(array $result) {
+  if ($result['response']['numFound'] === 0) {
+    $query = $result['responseHeader']['params']['q'];
+  }
+}
+
+/**
  * @} End of "addtogroup hooks".
  */
 
