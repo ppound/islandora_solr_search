@@ -45,6 +45,10 @@ Q: Why can't I connect to Solr via https?
 
 A: The Apache Solr PHP Client that we use does not support https connections to Solr. [ISLANDORA-646](https://jira.duraspace.org/browse/ISLANDORA-646) seeks to remedy this.
 
+Q: Advanced search on PID worked in 6.x. Why do I get no results for the same search in 7.x?
+
+A: In 7.x the colon in a PID must be escaped (i.e., islandora:34 becomes islandora\:34) or the entire query must be wrapped in quotation marks  (i,e., "islandora:34").
+
 ## Maintainers/Sponsors
 
 Current maintainers:
