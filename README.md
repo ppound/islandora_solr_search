@@ -47,7 +47,7 @@ A: The Apache Solr PHP Client that we use does not support https connections to 
 
 Q: Advanced search on PID worked in 6.x. Why do I get no results for the same search in 7.x?
 
-A: In 7.x the colon in a PID must be escaped (i.e., islandora:34 becomes islandora/:34) or the PID must be put into quotation marks (i,e., "islandora:34")
+A: In 7.x the colon in a PID must be escaped (i.e., islandora:34 becomes islandora\:34) or the PID must be put into quotation marks (i,e., "islandora:34")
 
 ## Maintainers/Sponsors
 
