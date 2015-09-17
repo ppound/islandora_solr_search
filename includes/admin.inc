@@ -1885,11 +1885,6 @@ function islandora_solr_admin_settings_search_or_sort_fields($form, &$form_state
   $form_state['dialog'] = $variables;
 
   $values = $variables['values'];
-  $permissions = isset($values['permissions']) ? $values['permissions'] : array();
-
-  $permissions_disable = _islandora_solr_permissions_disable();
-  $permissions_default = _islandora_solr_permissions_default();
-
   $form['options'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('scroll')),
@@ -1901,44 +1896,7 @@ function islandora_solr_admin_settings_search_or_sort_fields($form, &$form_state
     '#default_value' => isset($values['label']) ? $values['label'] : '',
     '#description' => t('A human-readable name.'),
   );
-  $form['options']['permissions_fieldset'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Permissions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['options']['permissions_fieldset']['permissions'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Permissions'),
-    '#options' => user_roles(),
-    '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
-    '#description' => t('Select which roles can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles which do not have permission to search the Solr index.'),
-  );
-  foreach ($permissions_disable as $rid) {
-    $form['options']['permissions_fieldset']['permissions'][$rid] = array(
-      '#disabled' => TRUE,
-    );
-  }
-  $form['actions'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('form-buttons')),
-  );
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Apply'),
-    '#weight' => 5,
-    '#field' => 'dialog_submit',
-    '#field_type' => 'result_fields',
-    '#name' => 'result-fields-dialog-submit',
-    '#submit' => array('_islandora_solr_update_fields_submit'),
-    '#ajax' => array(
-      'callback' => '_islandora_solr_admin_settings_dialog',
-      'wrapper' => 'islandora-solr-admin-dialog-form',
-      'effect' => 'none',
-      'event' => 'click',
-      'progress' => array('message' => '', 'type' => 'throbber'),
-    ),
-  );
+  islandora_solr_append_permissions_and_actions($values, $form);
   return $form;
 }
 
