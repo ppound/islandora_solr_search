@@ -206,7 +206,7 @@ function islandora_solr_islandora_solr_primary_display() {
       'file' => 'includes/results.inc',
       'class' => "IslandoraSolrResults",
       'function' => "displayResults",
-      'description' => t("A simple output."),
+      'description' => t("Display search results as a list view"),
     ),
   );
 }
