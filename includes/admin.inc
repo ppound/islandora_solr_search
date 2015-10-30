@@ -568,7 +568,17 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'textarea',
     '#title' => t('Query fields'),
     '#default_value' => variable_get('islandora_solr_query_fields', 'dc.title^5 dc.subject^2 dc.description^2 dc.creator^2 dc.contributor^1 dc.type'),
-    '#description' => t('In case there are no <a href="!url" target="_blank" title="Solr query fields documentation">query fields</a> defined in the request handler, this setting will be used as a fallback.', array('!url' => 'http://wiki.apache.org/solr/DisMaxQParserPlugin#qf_.28Query_Fields.29')),
+    '#description' => t('The <a href="@url" target="_blank" title="Solr query fields documentation">query fields</a> to use for DisMax (simple) searches.', array(
+      '@url' => 'http://wiki.apache.org/solr/DisMaxQParserPlugin#qf_.28Query_Fields.29',
+    )),
+  );
+  $form['islandora_solr_tabs']['query_defaults']['islandora_solr_use_ui_qf'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Prefer defined query fields?'),
+    '#default_value' => variable_get('islandora_solr_use_ui_qf', FALSE),
+    '#description' => t('Use the above "@qf" by default; otherwise, they will only be used as a fallback in the case there are none defined in the selected request handler.', array(
+      '@qf' => t('Query fields'),
+    )),
   );
 
   // Required Solr fields.
