@@ -101,7 +101,10 @@ function islandora_solr_get_luke($solr_url = NULL, $field = NULL, $num_terms = 0
     }
     // Generate nice URL.
     $luke_url = url($luke_url, array('absolute' => TRUE, 'query' => $luke_query));
-    $r = drupal_http_request($luke_url);
+    // Need to set a timeout greater than the default 30 seconds as some indexes
+    // could contain a lot of fields and the Luke needs longer to respond in
+    // kind.
+    $r = drupal_http_request($luke_url, array('timeout' => 45));
     if ($r->code / 100 === 2) {
       $luke_json = $r->data;
       // Parse JSON.
