@@ -546,6 +546,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
       Consider using <strong>fgs_createdDate_dt:[* TO NOW]</strong> or <strong>*:*</strong><br />'),
     '#default_value' => variable_get('islandora_solr_base_query', '*:*'),
   );
+  $form['islandora_solr_tabs']['query_defaults']['islandora_solr_base_advanced'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use default query for empty advanced searches too'),
+    '#description' => t('When selected, an empty advanced search will perform the same as an empty simple search. If not selected, empty advanced searches will search *:*'),
+    '#default_value' => variable_get('islandora_solr_base_advanced', FALSE),
+  );
   $form['islandora_solr_tabs']['query_defaults']['islandora_solr_base_sort'] = array(
     '#type' => 'textfield',
     '#title' => t('Sort field for default query'),

@@ -714,7 +714,12 @@ function islandora_solr_advanced_search_form_submit($form, &$form_state) {
 
   // Check if query is empty.
   if (empty($query)) {
-    $query = '*:*';
+    if (variable_get('islandora_solr_base_advanced', FALSE)) {
+      $query = variable_get('islandora_solr_base_query', '*:*');
+    }
+    else {
+      $query = '*:*';
+    }
   }
   // Handle filters.
   $filter = '';
