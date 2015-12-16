@@ -74,6 +74,7 @@ function islandora_solr_uninstall() {
     'islandora_solr_allow_preserve_filters',
     'islandora_solr_force_update_index_after_object_purge',
     'islandora_solr_use_ui_qf',
+    'islandora_solr_human_friendly_query_block',
   );
   foreach ($variables as $variable) {
     variable_del($variable);

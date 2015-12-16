@@ -204,8 +204,10 @@ class IslandoraSolrResults {
       // Get query value.
       $query_value = $islandora_solr_query->solrQuery;
       $query_list = array();
-      foreach ($this->searchFieldArray as $search_field => $search_field_label) {
-        $query_value = str_replace($search_field . ':(', $search_field_label . ':(', $query_value);
+      if (variable_get('islandora_solr_human_friendly_query_block', TRUE)) {
+        foreach ($this->searchFieldArray as $search_field => $search_field_label) {
+          $query_value = str_replace($search_field . ':(', $search_field_label . ':(', $query_value);
+        }
       }
 
       // Remove link keeps all parameters (query gets removed instead).
