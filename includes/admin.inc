@@ -1937,7 +1937,7 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
   );
 
   $luke_result = islandora_solr_get_luke(NULL, $solr_field);
-  if (isset($luke_result['fields'][$solr_field]['type']) && $luke_result['fields'][$solr_field]['type'] == 'date') {
+  if (isset($luke_result['fields'][$solr_field]['type']) && ($luke_result['fields'][$solr_field]['type'] == 'date' || $luke_result['fields'][$solr_field]['type'] == 'tdate')) {
     // Add in defaults, to avoid isset() tests.
     $values += array(
       'range_facet_select' => 0,
