@@ -529,7 +529,6 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#description' => t('Use labels instead of raw field names when displaying an advanced search in the Current Query block.'),
   );
 
-
   // Query defaults.
   $form['islandora_solr_tabs']['query_defaults'] = array(
     '#type' => 'fieldset',
