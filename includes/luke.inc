@@ -70,12 +70,15 @@ function islandora_solr_check_http($url) {
  *   include the number of occurrences in the Solr index. Higher occurrences are
  *   listed first. Defaults to 0 because including this can add a siginificant
  *   performance hit.
+ * @param bool $show_schema
+ *   Get the schema information as part of this request. WARNING: Enabling this
+ *   will override a field display and ONLY display the schema information.
  *
  * @return array|bool
  *   Returns Solr Luke data, or boolean FALSE if there was an error (Solr not
  *   available?).
  */
-function islandora_solr_get_luke($solr_url = NULL, $field = NULL, $num_terms = 0) {
+function islandora_solr_get_luke($solr_url = NULL, $field = NULL, $num_terms = 0, $show_schema = FALSE) {
   if (!$solr_url) {
     // Create URL.
     $solr_url = variable_get('islandora_solr_url', 'localhost:8080/solr');
@@ -98,6 +101,9 @@ function islandora_solr_get_luke($solr_url = NULL, $field = NULL, $num_terms = 0
       if ($luke_query['numTerms'] == 0) {
         $luke_query['numTerms'] = 1;
       }
+    }
+    if ($show_schema) {
+      $luke_query['show'] = 'schema';
     }
     // Generate nice URL.
     $luke_url = url($luke_url, array('absolute' => TRUE, 'query' => $luke_query));
@@ -206,4 +212,24 @@ function islandora_solr_check_highlighting_allowed($solr_field = NULL) {
     }
   }
   return FALSE;
+}
+
+/**
+ * Function to get the actual class for a type.
+ *
+ * @param string $solr_type
+ *   Solr type to get the class for.
+ *
+ * @return string
+ *   The classname of the type.
+ */
+function islandora_solr_get_type_class($solr_type) {
+  // Get the schema information
+  $luke_result = islandora_solr_get_luke(NULL, NULL, 0, TRUE);
+  if (isset($luke_result['schema']['types'][$solr_type])) {
+    return $luke_result['schema']['types'][$solr_type]['className'];
+  }
+  else {
+    return FALSE;
+  }
 }
