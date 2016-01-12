@@ -224,7 +224,7 @@ function islandora_solr_check_highlighting_allowed($solr_field = NULL) {
  *   The classname of the type.
  */
 function islandora_solr_get_type_class($solr_type) {
-  // Get the schema information
+  // Get the schema information.
   $luke_result = islandora_solr_get_luke(NULL, NULL, 0, TRUE);
   if (isset($luke_result['schema']['types'][$solr_type])) {
     return $luke_result['schema']['types'][$solr_type]['className'];

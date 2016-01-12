@@ -452,12 +452,12 @@ function islandora_solr_truncate_field_display($display_values, $max_length, $ad
 };
 
 /**
- * Check the field type against the user-specified list of date field types
+ * Check the field type against the user-specified list of date field types.
  *
  * @param string $solr_field
  *   The Solr field name
  *
- * @return boolean
+ * @return bool
  *   Whether the field matches the date field types.
  */
 function islandora_solr_is_date_field($solr_field) {
