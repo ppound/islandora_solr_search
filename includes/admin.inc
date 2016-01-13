@@ -522,6 +522,12 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('islandora_solr_allow_preserve_filters', FALSE),
     '#description' => t('Allow users to preserve filters when changing their search.'),
   );
+  $form['islandora_solr_tabs']['advanced_search_block']['islandora_solr_human_friendly_query_block'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Human-friendly Current Query'),
+    '#default_value' => variable_get('islandora_solr_human_friendly_query_block', TRUE),
+    '#description' => t('Use labels instead of raw field names when displaying an advanced search in the Current Query block.'),
+  );
 
   // Query defaults.
   $form['islandora_solr_tabs']['query_defaults'] = array(
