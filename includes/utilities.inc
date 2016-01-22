@@ -450,3 +450,26 @@ function islandora_solr_truncate_field_display($display_values, $max_length, $ad
   }
   return $updated_display_values;
 };
+
+/**
+ * Check the field type against the user-specified list of date field types.
+ *
+ * @param string $solr_field
+ *   The Solr field name
+ *
+ * @return bool
+ *   Whether the field matches the date field types.
+ */
+function islandora_solr_is_date_field($solr_field) {
+  $date_types = array(
+    'org.apache.solr.schema.DateField',
+    'org.apache.solr.schema.TrieDateField',
+  );
+  $luke_result = islandora_solr_get_luke(NULL, $solr_field);
+  $type = (isset($luke_result['fields'][$solr_field]['type']) ? $luke_result['fields'][$solr_field]['type'] : FALSE);
+  if ($type) {
+    $class = islandora_solr_get_type_class($type);
+    return in_array($class, $date_types);
+  }
+  return FALSE;
+}

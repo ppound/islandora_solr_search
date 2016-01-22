@@ -1781,8 +1781,7 @@ function islandora_solr_admin_settings_result_fields($form, &$form_state, $varia
     $form['options']['snippet']['#disabled'] = TRUE;
   }
 
-  $luke_result = islandora_solr_get_luke(NULL, $solr_field);
-  if (isset($luke_result['fields'][$solr_field]['type']) && $luke_result['fields'][$solr_field]['type'] == 'date') {
+  if (islandora_solr_is_date_field($solr_field)) {
     $form['options']['date_format'] = array(
       '#type' => 'textfield',
       '#title' => t('Date format'),
@@ -1942,8 +1941,7 @@ function islandora_solr_admin_settings_facet_fields($form, &$form_state, $variab
     '#description' => t('A human-readable name.'),
   );
 
-  $luke_result = islandora_solr_get_luke(NULL, $solr_field);
-  if (isset($luke_result['fields'][$solr_field]['type']) && $luke_result['fields'][$solr_field]['type'] == 'date') {
+  if (islandora_solr_is_date_field($solr_field)) {
     // Add in defaults, to avoid isset() tests.
     $values += array(
       'range_facet_select' => 0,
