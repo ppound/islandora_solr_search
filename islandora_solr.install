@@ -65,6 +65,7 @@ function islandora_solr_uninstall() {
     'islandora_solr_namespace_restriction',
     'islandora_solr_base_query',
     'islandora_solr_base_sort',
+    'islandora_solr_collection_sort',
     'islandora_solr_base_filter',
     'islandora_solr_query_fields',
     'islandora_solr_debug_mode',
@@ -117,6 +118,25 @@ function islandora_solr_schema() {
       ),
     ),
     'primary key' => array('solr_field', 'field_type'),
+  );
+  $schema['islandora_solr_collection_sort_strings'] = array(
+    'description' => 'Table that stores sort strings for collection objects.',
+    'fields' => array(
+      'collection_pid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not_null' => TRUE,
+        'description' => 'The collection PID',
+      ),
+      'sort_string' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not_null' => TRUE,
+        'default' => '',
+        'description' => 'Sort string for the collection',
+      ),
+    ),
+    'primary key' => array('collection_pid'),
   );
   return $schema;
 }
@@ -226,4 +246,12 @@ function islandora_solr_update_7000() {
   foreach ($old_variables_other as $old_variable_other) {
     variable_del($old_variable_other);
   }
+}
+
+/**
+ * Add the table for collection sort strings.
+ */
+function islandora_solr_update_7001() {
+  $schema = islandora_solr_schema();
+  db_create_table('islandora_solr_collection_sort_strings', $schema['islandora_solr_collection_sort_strings']);
 }

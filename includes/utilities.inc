@@ -367,6 +367,7 @@ function islandora_solr_prepare_solr_results($solr_results) {
  * Implements callback_islandora_basic_collection_query_backends().
  */
 function islandora_solr_islandora_basic_collection_backend_callable($collection_object, $page, $limit) {
+  module_load_include('inc', 'islandora_solr', 'includes/db');
   // XXX: We populate the global query class, to allow the sort and facet
   // blocks and the like to function.
   global $_islandora_solr_queryclass;
@@ -380,6 +381,7 @@ function islandora_solr_islandora_basic_collection_backend_callable($collection_
   )), drupal_get_query_parameters());
   $qp->solrStart = $page * $limit;
   $qp->solrLimit = $limit;
+  $qp->solrParams['sort'] = islandora_solr_get_collection_sort_string($collection_object->id, TRUE);
   $qp->executeQuery();
 
   $map_to_pids = function ($result) {
