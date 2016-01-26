@@ -494,14 +494,16 @@ function islandora_solr_islandora_object_purged($pid) {
  * Implements hook_islandora_basic_collection_build_manage_object().
  */
 function islandora_solr_islandora_basic_collection_build_manage_object($form_state, $object) {
-  module_load_include('inc', 'islandora_solr', 'includes/collection_sort.form');
-  $form_state['manage_collection_object']['manage_collection_solr_sort'] = array(
-    '#id' => 'manage-collection-solr-sort',
-    '#group' => 'manage_collection_solr_sort',
-    '#access' => TRUE,
-    '#type' => 'fieldset',
-    '#title' => t('Set Solr Sort String'),
-    'form' => drupal_get_form('islandora_solr_manage_collection_sort_form', $object),
-  );
-  return $form_state;
+  if (variable_get('islandora_solr_individual_collection_sorting', FALSE)) {
+    module_load_include('inc', 'islandora_solr', 'includes/collection_sort.form');
+    $form_state['manage_collection_object']['manage_collection_solr_sort'] = array(
+      '#id' => 'manage-collection-solr-sort',
+      '#group' => 'manage_collection_solr_sort',
+      '#access' => TRUE,
+      '#type' => 'fieldset',
+      '#title' => t('Set Solr Sort String'),
+      'form' => drupal_get_form('islandora_solr_manage_collection_sort_form', $object),
+    );
+    return $form_state;
+  }
 }

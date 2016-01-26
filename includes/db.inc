@@ -265,18 +265,20 @@ function islandora_solr_translate_field_labels(array &$records) {
  *   The sort string for this collection, or NULL if none exist.
  */
 function islandora_solr_get_collection_sort_string($pid, $use_fallbacks = FALSE) {
-  // Try to get the collection sort entry for this collection.
-  $query = db_select('islandora_solr_collection_sort_strings', 'ss')
-    ->fields('ss', array('sort_string'))
-    ->condition('collection_pid', $pid, '=')
-    ->execute()
-    ->fetchField();
+  // Try to get the collection sort entry for this collection, if enabled.
+  if (variable_get('islandora_solr_individual_collection_sorting', FALSE)) {
+    $query = db_select('islandora_solr_collection_sort_strings', 'ss')
+      ->fields('ss', array('sort_string'))
+      ->condition('collection_pid', $pid, '=')
+      ->execute()
+      ->fetchField();
 
-  if (is_string($query)) {
-    return $query;
+    if (is_string($query)) {
+      return $query;
+    }
   }
 
-  // Use fallbacks if that failed and fallbacks are wanted.
+  // Fall back, if wanted.
   if ($use_fallbacks) {
     $sort = variable_get('islandora_solr_collection_sort', '');
     if (!empty($sort)) {
