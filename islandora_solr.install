@@ -134,7 +134,6 @@ function islandora_solr_schema() {
         'size' => 'medium',
         'binary' => TRUE,
         'not_null' => TRUE,
-        'default' => '',
         'description' => 'Sort string for the collection',
       ),
     ),
