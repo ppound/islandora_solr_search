@@ -309,26 +309,16 @@ function islandora_solr_set_collection_sort_string($pid, $string) {
   );
   // If the current sort string is NULL, then the PID wasn't found in the
   // database.
-  if (is_null($current)) {
+  if ($current !== $string) {
     if (!empty($string)) {
-      db_insert('islandora_solr_collection_sort_strings')
+      db_merge('islandora_solr_collection_sort_strings')
+        ->key(array('collection_pid' => $pid))
         ->fields(array(
           'collection_pid' => $pid,
           'sort_string' => $string,
         ))
         ->execute();
-      drupal_set_message(t('Sort string "@sort_string" added for @collection.', $message_args));
-    }
-  }
-  elseif ($current !== $string) {
-    if (!empty($string)) {
-      db_update('islandora_solr_collection_sort_strings')
-        ->fields(array(
-          'sort_string' => $string,
-        ))
-        ->condition('collection_pid', $pid, '=')
-        ->execute();
-      drupal_set_message(t('Sort string for @collection updated to "@sort_string".', $message_args));
+      drupal_set_message(t('Sort string for @collection set to "@sort_string".', $message_args));
     }
     // In the case where the new string is empty, drop this entry so we can fall
     // back to global defaults.

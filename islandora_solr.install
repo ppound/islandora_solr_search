@@ -132,7 +132,6 @@ function islandora_solr_schema() {
       'sort_string' => array(
         'type' => 'text',
         'size' => 'medium',
-        'binary' => TRUE,
         'not_null' => TRUE,
         'description' => 'Sort string for the collection',
       ),
