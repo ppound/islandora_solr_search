@@ -130,8 +130,9 @@ function islandora_solr_schema() {
         'description' => 'The collection PID',
       ),
       'sort_string' => array(
-        'type' => 'varchar',
-        'length' => 255,
+        'type' => 'text',
+        'size' => 'medium',
+        'binary' => TRUE,
         'not_null' => TRUE,
         'default' => '',
         'description' => 'Sort string for the collection',

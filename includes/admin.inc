@@ -566,13 +566,13 @@ function islandora_solr_admin_settings($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Sort field for collection query'),
     '#size' => 30,
-    '#description' => t('Indicates an alternate default method for sorting collection items when using the Solr collection display backend, if the same method for sorting search results is not desireable. Otherwise, the default query sort will be used for collection query sorting.'),
+    '#description' => t('Indicates an alternate default method for sorting collection members when using the Solr collection display backend. If unset, the default query sort above will be used.'),
     '#default_value' => variable_get('islandora_solr_collection_sort', ''),
   );
   $form['islandora_solr_tabs']['query_defaults']['islandora_solr_individual_collection_sorting'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow individual sort strings per-collection'),
-    '#description' => t('Enables per-collection sort string configurations to be stored in and requested from the database. These sort strings can be set on the collection configuration page for individual collection objects.'),
+    '#description' => t('Allows per-collection sort strings to be configured. These sort strings can be set on the collection configuration page for individual collection objects.'),
     '#default_value' => variable_get('islandora_solr_individual_collection_sorting', FALSE),
   );
   $form['islandora_solr_tabs']['query_defaults']['islandora_solr_base_filter'] = array(

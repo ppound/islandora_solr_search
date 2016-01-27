@@ -22,20 +22,18 @@ function islandora_solr_manage_collection_sort_form(array $form, array &$form_st
   module_load_include('inc', 'islandora_solr', 'includes/db');
   $current_default = islandora_solr_get_collection_sort_string($object->id);
   $form_state['collection'] = $object->id;
-  $collection_sort = variable_get('islandora_solr_collection_sort', 'Not set');
-  $base_sort = variable_get('islandora_solr_base_sort', 'Not set');
+  $collection_sort = variable_get('islandora_solr_collection_sort', '');
+  $base_sort = variable_get('islandora_solr_base_sort', '');
   return array(
     '#action' => request_uri() . '#manage-collection-solr-sort',
     'collection_sort_string' => array(
       '#type' => 'textfield',
       '#title' => t('Solr Collection Sort String'),
-      '#description' => t('A string representing a sort parameter to add if using the Solr collection query backend. Can be set to empty to fall back to the global sort setting for collections, or the global base sort setting if there is none. Note that adding multivalued or otherwise unsortable fields here will break the collection view.</br>
-      Global Collection Sort: %collection_sort</br>
-      Global Base Sort: %base_sort</br>', array(
-        '%collection_sort' => empty($collection_sort) ? "Empty" : $collection_sort,
-        '%base_sort' => empty($base_sort) ? "Empty" : $base_sort,
+      '#description' => t('One or more non-multivalued Solr fields to sort by when using the Solr collection query backend. If set to empty, this collection will to fall back to the global sort settings in the order listed below.</br>Global Collection Sort: %collection_sort</br>Global Base Sort: %base_sort</br>', array(
+        '%collection_sort' => empty($collection_sort) ? t("Not set") : $collection_sort,
+        '%base_sort' => empty($base_sort) ? t("Not set") : $base_sort,
       )),
-      '#default_value' => (string) $current_default,
+      '#default_value' => $current_default,
       // These strings can get big haha ...
       '#size' => 100,
     ),
