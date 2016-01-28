@@ -561,7 +561,7 @@ function islandora_solr_admin_settings($form, &$form_state) {
     For more information, check the <a href="!url">Solr documentation</a>.',
       array('!url' => 'http://wiki.apache.org/solr/CommonQueryParameters#sort')),
     '#default_value' => variable_get('islandora_solr_base_sort', ''),
-  ); 
+  );
   $form['islandora_solr_tabs']['query_defaults']['islandora_solr_base_filter'] = array(
     '#type' => 'textarea',
     '#title' => t('Solr base filter'),
