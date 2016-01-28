@@ -489,3 +489,47 @@ function islandora_solr_islandora_object_purged($pid) {
     $response = drupal_http_request(variable_get('islandora_solr_url', 'localhost:8080/solr') . '/update', $options);
   }
 }
+
+/**
+ * Implements hook_islandora_basic_collection_build_manage_object().
+ */
+function islandora_solr_islandora_basic_collection_build_manage_object($form_state, $object) {
+  if (variable_get('islandora_solr_individual_collection_sorting', FALSE)) {
+    module_load_include('inc', 'islandora_solr', 'includes/collection_sort.form');
+    $form_state['manage_collection_object']['manage_collection_solr_sort'] = array(
+      '#id' => 'manage-collection-solr-sort',
+      '#group' => 'manage_collection_solr_sort',
+      '#access' => TRUE,
+      '#type' => 'fieldset',
+      '#title' => t('Set Solr Sort String'),
+      'form' => drupal_get_form('islandora_solr_manage_collection_sort_form', $object),
+    );
+    return $form_state;
+  }
+}
+
+/**
+ * Implements hook_form_islandora_basic_collection_admin_alter().
+ */
+function islandora_solr_form_islandora_basic_collection_admin_alter(&$form, &$form_state, $form_id) {
+  $states = array(
+    'visible' => array(
+      ':input[name="islandora_basic_collection_display_backend"]' => array('value' => 'islandora_solr_query_backend'),
+    ),
+  );
+  $form['display_generation_fieldset']['islandora_collection_display']['islandora_solr_collection_sort'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Sort field for collection query'),
+    '#size' => 100,
+    '#description' => t('Indicates an alternate default method for sorting collection members when using the Solr query backend. If unset, the Solr default query sort will be used.'),
+    '#default_value' => variable_get('islandora_solr_collection_sort', ''),
+    '#states' => $states,
+  );
+  $form['display_generation_fieldset']['islandora_collection_display']['islandora_solr_individual_collection_sorting'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow individual sort strings per-collection'),
+    '#description' => t('Allows per-collection sort strings to be configured. These sort strings can be set on the collection configuration page for individual collection objects.'),
+    '#default_value' => variable_get('islandora_solr_individual_collection_sorting', FALSE),
+    '#states' => $states,
+  );
+}

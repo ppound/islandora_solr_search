@@ -252,3 +252,84 @@ function islandora_solr_translate_field_labels(array &$records) {
     }
   }
 }
+
+/**
+ * Get the sort string for a collection.
+ *
+ * @param string $pid
+ *   The PID of the collection.
+ * @param bool $use_fallbacks
+ *   Whether or not to attempt to use collection sort fallbacks.
+ *
+ * @return string|null
+ *   The sort string for this collection, or NULL if none exist.
+ */
+function islandora_solr_get_collection_sort_string($pid, $use_fallbacks = FALSE) {
+  // Try to get the collection sort entry for this collection, if enabled.
+  if (variable_get('islandora_solr_individual_collection_sorting', FALSE)) {
+    $query = db_select('islandora_solr_collection_sort_strings', 'ss')
+      ->fields('ss', array('sort_string'))
+      ->condition('collection_pid', $pid, '=')
+      ->execute()
+      ->fetchField();
+
+    if (is_string($query)) {
+      return $query;
+    }
+  }
+
+  // Fall back, if wanted.
+  if ($use_fallbacks) {
+    $sort = variable_get('islandora_solr_collection_sort', '');
+    if (!empty($sort)) {
+      return $sort;
+    }
+    $sort = variable_get('islandora_solr_base_sort', '');
+    if (!empty($sort)) {
+      return $sort;
+    }
+  }
+  // If all else fails, just don't set it at all.
+  return NULL;
+}
+
+/**
+ * Sets or updates the Solr sort string for a collection.
+ *
+ * @param string $pid
+ *   The collection PID.
+ * @param string $string
+ *   The string to set it to.
+ */
+function islandora_solr_set_collection_sort_string($pid, $string) {
+  $current = islandora_solr_get_collection_sort_string($pid);
+  $message_args = array(
+    '@collection' => $pid,
+    '@sort_string' => $string,
+  );
+  // If the current sort string is NULL, then the PID wasn't found in the
+  // database.
+  if ($current !== $string) {
+    if (!empty($string)) {
+      db_merge('islandora_solr_collection_sort_strings')
+        ->key(array('collection_pid' => $pid))
+        ->fields(array(
+          'collection_pid' => $pid,
+          'sort_string' => $string,
+        ))
+        ->execute();
+      drupal_set_message(t('Sort string for @collection set to "@sort_string".', $message_args));
+    }
+    // In the case where the new string is empty, drop this entry so we can fall
+    // back to global defaults.
+    else {
+      db_delete('islandora_solr_collection_sort_strings')
+        ->condition('collection_pid', $pid)
+        ->execute();
+      drupal_set_message(t('Removed sort string for collection @collection.', $message_args));
+    }
+  }
+  else {
+    drupal_set_message(t('No change was made to the sort string for collection @collection.', $message_args));
+  }
+}
