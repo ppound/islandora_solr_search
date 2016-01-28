@@ -24,6 +24,8 @@ Set the 'Solr URL' and select a 'Request handler' in Administration » Islandora
 
 Islandora Solr Search offers many more configuration options in Administration » Islandora » Solr Index » Solr settings (admin/islandora/search/islandora_solr/settings).
 
+Islandora Solr Search also implements the Islandora Basic Collection solution pack's query backend to drive the collection display using Solr instead of SPARQL/Fedora. This functionality can be applied on the collection solution pack's configuration page (admin/islandora/solution_pack_config/basic_collection), and that same page provides settings for sorting the Solr collection view globally and per-collection. The query backend relies on the relationship fields in the "Query Defaults" section of the Solr settings; the fields in that section should be confirmed before using Solr to drive the display.
+
 ## Documentation
 
 Further documentation for this module is available at [our wiki](https://wiki.duraspace.org/display/ISLANDORA/Islandora+Solr+Search).
