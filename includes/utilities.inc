@@ -332,29 +332,20 @@ function islandora_solr_prepare_solr_results($solr_results) {
         array_walk($value, $truncate_func);
       }
 
-      // Add link to search.
-      if (in_array($field, $link_to_search)) {
-        $map_to_link = function ($original_value, $formatted_value) use ($field) {
-          $solr_query = format_string('!field:"!value"', array(
-            '!field' => $field,
-            '!value' => islandora_solr_lesser_escape($original_value),
-          ));
-          return l($formatted_value, "islandora/search/$solr_query", array(
-            'html' => TRUE,
-          ));
-        };
-        $value = array_map($map_to_link, (array) $original_value, (array) $value);
-      }
       // Truncate output based on the field rather than by value.
       if (array_key_exists($field, $truncate_length) && $truncate_length[$field]['maximum_length'] > 0 && isset($truncate_length[$field]['truncation_type']) && $truncate_length[$field]['truncation_type'] == 'whole_field_option') {
-        $value = islandora_solr_truncate_field_display($value, $truncate_length[$field]['maximum_length'], $truncate_length[$field]['add_ellipsis'], $truncate_length[$field]['wordsafe'], $truncate_length[$field]['wordsafe_length'], "<br />");
+        $link = in_array($field, $link_to_object);
+        $link_options = array(
+          'link_to_object' => in_array($field, $link_to_object),
+          'link_to_search' => in_array($field, $link_to_search),
+          'field' => $field,
+          'url' => $object_result['object_url'],
+          'options' => $options
+        );
+        $value = islandora_solr_truncate_field_display($value, $truncate_length[$field]['maximum_length'], $truncate_length[$field]['add_ellipsis'], $truncate_length[$field]['wordsafe'], $truncate_length[$field]['wordsafe_length'], "<br />", $link_options);
       }
       // Implode.
       $value = is_array($value) ? implode(", ", $value) : $value;
-      // Add link to object.
-      if (in_array($field, $link_to_object)) {
-        $value = l($value, $object_result['object_url'], $options);
-      }
       $solr_doc[$field] = $value;
     }
     // Replace Solr doc rows.
@@ -394,8 +385,7 @@ function islandora_solr_islandora_basic_collection_backend_callable($collection_
 };
 
 /**
- * Truncate the field display based on entire field result(s).
- *
+ * Truncate and optionally link the field display based on entire field result(s).
  *
  * @param array $display_values
  *   An array of the values that are to be processed for truncation.
@@ -409,11 +399,20 @@ function islandora_solr_islandora_basic_collection_backend_callable($collection_
  *   Min wordsafe length.
  * @param string $separator
  *   A separator to use for display output.
+ * @param array $link_options
+ *   An array of link options including:
+ *     array(
+ *       'link_to_object' => bool,
+ *       'link_to_search' => bool,
+ *       'field' => {SOLR Result Field},
+ *       'url' => {SOLR object results object_url},
+ *       'options' => link to object l() options param
+ *     );
  *
  * @return string
  *   The updated display values.
  */
-function islandora_solr_truncate_field_display($display_values, $max_length, $add_ellipsis, $word_safe, $wordsafe_length, $separator) {
+function islandora_solr_truncate_field_display($display_values, $max_length, $add_ellipsis, $word_safe, $wordsafe_length, $separator, $link_options) {
   $updated_display_values = $display_values;
   if (count($updated_display_values) > 0) {
     $mod_path = drupal_get_path('module', 'islandora_solr');
@@ -438,15 +437,28 @@ function islandora_solr_truncate_field_display($display_values, $max_length, $ad
         break;
       }
     }
+
+    $original_value = implode($separator, $updated_display_values);
+    if (isset($link_options['link_to_object']) && $link_options['link_to_object'] == TRUE) {
+      $original_value = l($original_value, $link_options['url'], $link_options['options']);
+    } else if (isset($link_options['link_to_search']) && $link_options['link_to_search'] == TRUE) {
+      $solr_query = format_string('!field:"!value"', array(
+        '!field' => $link_options['field'],
+        '!value' => islandora_solr_lesser_escape($original_value),
+        ));
+      $original_value = l($original_value, "islandora/search/$solr_query", array(
+        'html' => TRUE,
+      ));
+    }
     $updated_display_values
-      = '<span class="toggle-wrapper">' .
+      = "<span class='toggle-wrapper'>" .
       t("<span>!value !separator<a href='#' class='toggler'>Show more</a></span>", array(
         '!separator' => $separator,
         '!value' => implode($separator, $truncated_list),
       )) .
       t("<span>!original_value !separator<a href='#' class='toggler'>Show less</a></span>", array(
         '!separator' => $separator,
-        '!original_value' => implode($separator, $display_values),
+        '!original_value' => $original_value,
       )) .
       '</span>';
   }
