@@ -340,7 +340,7 @@ function islandora_solr_prepare_solr_results($solr_results) {
           'link_to_search' => in_array($field, $link_to_search),
           'field' => $field,
           'url' => $object_result['object_url'],
-          'options' => $options
+          'options' => $options,
         );
         $value = islandora_solr_truncate_field_display($value, $truncate_length[$field]['maximum_length'], $truncate_length[$field]['add_ellipsis'], $truncate_length[$field]['wordsafe'], $truncate_length[$field]['wordsafe_length'], "<br />", $link_options);
       }
@@ -357,7 +357,8 @@ function islandora_solr_prepare_solr_results($solr_results) {
             ));
           };
           $value = array_map($map_to_link, (array) $original_value, (array) $value);
-        } else if (in_array($field, $link_to_object)) {
+        }
+        elseif (in_array($field, $link_to_object)) {
           $value = l(implode($value), $object_result['object_url'], $options);
         }
       }
@@ -403,7 +404,7 @@ function islandora_solr_islandora_basic_collection_backend_callable($collection_
 };
 
 /**
- * Truncate and optionally link the field display based on entire field result(s).
+ * Truncate and link the field display based on entire field result(s).
  *
  * @param array $display_values
  *   An array of the values that are to be processed for truncation.
@@ -419,13 +420,11 @@ function islandora_solr_islandora_basic_collection_backend_callable($collection_
  *   A separator to use for display output.
  * @param array $link_options
  *   An array of link options including:
- *     array(
- *       'link_to_object' => bool,
- *       'link_to_search' => bool,
- *       'field' => {SOLR Result Field},
- *       'url' => {SOLR object results object_url},
- *       'options' => link to object l() options param
- *     );
+ *   - 'link_to_object' : (bool) Include link to object.
+ *   - 'link_to_search' : (bool) Include link to search results.
+ *   - 'field' : (SOLR Result Field) Result field.
+ *   - 'url' : (SOLR object results object_url) objects result url.
+ *   - 'options' : link to object l() options param.
  *
  * @return string
  *   The updated display values.
@@ -459,14 +458,19 @@ function islandora_solr_truncate_field_display($display_values, $max_length, $ad
     $original_value = implode($separator, $updated_display_values);
     if (isset($link_options['link_to_object']) && $link_options['link_to_object'] == TRUE) {
       $original_value = l($original_value, $link_options['url'], $link_options['options']);
-    } else if (isset($link_options['link_to_search']) && $link_options['link_to_search'] == TRUE) {
+    }
+    elseif (isset($link_options['link_to_search']) && $link_options['link_to_search'] == TRUE) {
       $solr_query = format_string('!field:"!value"', array(
         '!field' => $link_options['field'],
         '!value' => islandora_solr_lesser_escape($original_value),
         ));
-      $original_value = l($original_value, "islandora/search/$solr_query", array(
-        'html' => TRUE,
-      ));
+      $original_value = l(
+        $original_value,
+        "islandora/search/$solr_query",
+        array(
+          'html' => TRUE,
+        )
+      );
     }
     $updated_display_values
       = "<span class='toggle-wrapper'>" .
