@@ -432,6 +432,7 @@ function islandora_solr_islandora_basic_collection_backend_callable($collection_
 function islandora_solr_truncate_field_display($display_values, $max_length, $add_ellipsis, $word_safe, $wordsafe_length, $separator, $link_options = NULL) {
   $updated_display_values = $display_values;
   if (count($updated_display_values) > 0) {
+    $value_is_truncated = FALSE;
     $mod_path = drupal_get_path('module', 'islandora_solr');
     drupal_add_js("$mod_path/js/truncation-toggle.js");
     // Build two arrays for display, one filtered by size (max_values)
@@ -444,6 +445,7 @@ function islandora_solr_truncate_field_display($display_values, $max_length, $ad
         $character_output_count += drupal_strlen($current_value);
       }
       elseif ($character_output_count + drupal_strlen($current_value) > $max_length) {
+        $value_is_truncated = TRUE;
         $truncation_length = $max_length - $character_output_count;
         // Force the display of the full ellipsis.
         if ($add_ellipsis) {
@@ -486,15 +488,19 @@ function islandora_solr_truncate_field_display($display_values, $max_length, $ad
 
     $updated_display_values
       = "<span class='toggle-wrapper'>" .
-      t("<span>!value !separator<a href='#' class='toggler'>Show more</a></span>", array(
+      t("<span>!value !separator !show_more</span>", array(
         '!separator' => $separator,
         '!value' => $truncated_value,
-      )) .
-      t("<span>!original_value !separator<a href='#' class='toggler'>Show less</a></span>", array(
+        '!show_more' => ($value_is_truncated ? "<a href='#' class='toggler'>Show more</a>" : ""),
+      ));
+      if ($value_is_truncated) {
+        $updated_display_values .= t("<span>!original_value !separator<a href='#' class='toggler'>Show less</a></span>", array(
         '!separator' => $separator,
         '!original_value' => $original_value,
-      )) .
-      '</span>';
+      ));
+      }
+      $updated_display_values .= '</span>';
+
   }
   return $updated_display_values;
 };
