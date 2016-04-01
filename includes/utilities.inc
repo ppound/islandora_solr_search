@@ -493,14 +493,13 @@ function islandora_solr_truncate_field_display($display_values, $max_length, $ad
         '!value' => $truncated_value,
         '!show_more' => ($value_is_truncated ? "<a href='#' class='toggler'>Show more</a>" : ""),
       ));
-      if ($value_is_truncated) {
-        $updated_display_values .= t("<span>!original_value !separator<a href='#' class='toggler'>Show less</a></span>", array(
+    if ($value_is_truncated) {
+      $updated_display_values .= t("<span>!original_value !separator<a href='#' class='toggler'>Show less</a></span>", array(
         '!separator' => $separator,
         '!original_value' => $original_value,
       ));
-      }
-      $updated_display_values .= '</span>';
-
+    }
+    $updated_display_values .= '</span>';
   }
   return $updated_display_values;
 };
